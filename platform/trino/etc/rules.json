@@ -1,0 +1,26 @@
+{
+  "catalogs": [
+    {
+      "catalog": "iceberg",
+      "allow": "all"
+    }
+  ],
+  "schemas": [
+    {
+      "schema": ".*",
+      "owner": false
+    }
+  ],
+  "tables": [
+    {
+      "table": ".*",
+      "privileges": ["SELECT", "INSERT", "DELETE", "UPDATE"]
+    }
+  ],
+  "sessions": [
+    {
+      "user": ".*",
+      "groups": [".*"]
+    }
+  ]
+}

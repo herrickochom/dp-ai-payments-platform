@@ -1,0 +1,3 @@
+{
+  "event-listener.name": "io.trino.plugin.eventlistener.httpsender.HttpEventSender"
+}

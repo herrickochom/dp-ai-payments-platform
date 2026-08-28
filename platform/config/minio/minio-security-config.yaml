@@ -1,0 +1,58 @@
+# MinIO Security Configuration
+minio_config:
+  endpoint: "http://minio:9000"
+  access_key: ${MINIO_ACCESS_KEY}
+  secret_key: ${MINIO_SECRET_KEY}
+  secure_transport: true
+  encryption:
+    sse_algo: "SSE-S3"
+    kms_key_id: null  # Use MinIO's built-in encryption
+
+security:
+  zero_trust:
+    enabled: true
+    data_encryption_required: true
+    pii_detection_required: true
+    leakage_prevention_required: true
+  
+  privacy_protection:
+    differential_privacy:
+      epsilon: 0.5
+      enabled: true
+    k_anonymity:
+      min_group_size: 5
+      enabled: true
+    l_diversity:
+      min_diversity: 2
+      enabled: true
+
+  data_retention:
+    max_days: 365
+    enforce_retention: true
+
+  leakage_prevention:
+    pii_patterns:
+      - type: "email"
+        pattern: '\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+      - type: "phone"
+        pattern: '\b(\d{3}[-.]?\d{3}[-.]?\d{4}|\(\d{3}\)\s*\d{3}[-.]?\d{4})\b'
+      - type: "ssn"
+        pattern: '\b\d{3}-\d{2}-\d{4}\b'
+    scan_non_pii_fields: true
+
+dataset_configs:
+  customer_data:
+    security_level: "maximum"
+    non_pii_fields: ["comments", "notes", "description"]
+    quasi_identifiers: ["zip_code", "age_group", "gender"]
+    sensitive_columns: ["medical_condition", "salary_bracket"]
+    differential_privacy_fields: ["purchase_amount", "account_balance"]
+    pii_fields:
+      - field: "email"
+        action: "secure_hash"
+      - field: "phone"
+        action: "deterministic_hash"
+      - field: "ssn"
+        action: "zero_trust_encrypt"
+      - field: "credit_card"
+        action: "format_preserving_encryption"

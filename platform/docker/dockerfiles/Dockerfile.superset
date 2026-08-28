@@ -1,0 +1,21 @@
+FROM apache/superset:latest
+
+# Copy custom configuration
+COPY platform/superset/superset_config.py /app/pythonpath/superset_config.py
+
+# Initialize Superset
+USER root
+RUN superset fab create-admin \
+    --username admin \
+    --firstname Admin \
+    --lastname User \
+    --email admin@superset.com \
+    --password admin || true
+
+RUN superset db upgrade || true
+RUN superset init || true
+
+USER superset
+
+EXPOSE 8088
+CMD ["gunicorn", "--bind", "0.0.0.0:8088", "superset.app:create_app()"]

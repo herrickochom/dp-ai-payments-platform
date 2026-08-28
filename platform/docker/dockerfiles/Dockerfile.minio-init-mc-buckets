@@ -1,0 +1,6 @@
+FROM minio/mc:latest
+
+COPY platform/minio/minio-init-mc-buckets.sh /app/init.sh
+RUN chmod +x /app/init.sh
+
+ENTRYPOINT ["/app/init.sh"]

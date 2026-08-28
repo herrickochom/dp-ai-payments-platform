@@ -1,0 +1,701 @@
+# ==============================================================================
+# DP-AI Payments Platform - Docker Compose
+# ==============================================================================
+# All services organized by processing layers with profiles:
+#   Default (no profile): Core services always start
+#   analytics: BI and analytics tools
+#   dev: Development services
+#   on-demand: Services started only when needed
+# ==============================================================================
+
+networks:
+  data-platform-network:
+    name: ${DOCKER_NETWORK:-data-platform-network}
+    driver: bridge
+
+volumes:
+  # Core
+  pgdata:
+  minio-data:
+  nessie-data:
+  kafka-data:
+  kafka-metadata:
+  redis-data:
+  
+  # Analytics
+  trino-data:
+  trino-logs:
+  metabase-data:
+  dbt-logs:
+  superset-data:
+  
+  # Dev
+  dev-logs:
+  
+  # Data volume for XML generator
+
+services:
+
+  redis:
+    image: redis:7-alpine
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    networks:
+      - data-platform-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # ============================================================================
+  # 1. DATA STORAGE LAYER (ALWAYS START)
+  # ============================================================================
+
+  postgres:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.postgresql
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-postgres
+    environment:
+      QUARKUS_CONFIG_LOCATIONS: /deployments/config/application.properties
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: postgres
+      # Superset is created by 20_create_superset_db.sh; keep this list
+      # disjoint so PostgreSQL initialization cannot abort on a duplicate.
+      POSTGRES_MULTIPLE_DATABASES: metabase
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - data-platform-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  postgres-healthcheck:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.postgres-healthcheck
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-postgres-healthcheck
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+    command: ["bash", "-c", "sleep 10 && /healthcheck.sh"]
+    networks:
+      - data-platform-network
+
+  minio:
+    image: minio/minio:latest
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio-data:/data
+    depends_on:
+      postgres-healthcheck:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    networks:
+      - data-platform-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  minio-init-buckets:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.minio-init-mc-buckets
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-minio-init-buckets
+    environment:
+      MINIO_ENDPOINT: "http://minio:9000"
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET: dp-ai-payment
+      RAW_PREFIX: raw/v2
+      MINIO_ALIAS: "local"
+    depends_on:
+      minio:
+        condition: service_healthy
+      postgres-healthcheck:
+        condition: service_completed_successfully
+    restart: "no"
+    networks:
+      - data-platform-network
+
+  minio-init-databases:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.minio-init-mc-databases
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-minio-init-databases
+    environment:
+      MINIO_ENDPOINT: "http://minio:9000"
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      NESSIE_ENDPOINT: "http://nessie:19120"
+    depends_on:
+      minio:
+        condition: service_healthy
+      nessie:
+        condition: service_healthy
+      postgres-healthcheck:
+        condition: service_completed_successfully
+    restart: "no"
+    networks:
+      - data-platform-network
+
+  # ============================================================================
+  # 2. STREAMING LAYER (ALWAYS START)
+  # ============================================================================
+
+  kafka:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.kafka-broker
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-kafka
+    environment:
+      CLUSTER_ID: "XwjubDNrR0q4Q6FLK0M7Xg"
+      KAFKA_CLUSTER_ID: "XwjubDNrR0q4Q6FLK0M7Xg"
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_NODE_ID: "1"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
+      KAFKA_METADATA_LOG_DIR: "/var/lib/kafka/metadata"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_HEAP_OPTS: "-Xmx512M"
+      # Auto-create topics disabled - we'll create manually or via init
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+      - kafka-metadata:/var/lib/kafka/metadata
+    depends_on:
+      postgres-healthcheck:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    networks:
+      - data-platform-network
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/9092"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  
+  # ---------------------------------------------------------------------------
+  # KAFKA TOPIC INITIALIZATION
+  # ---------------------------------------------------------------------------
+  kafka-init:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.kafka-init
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-kafka-init
+    environment:
+      KAFKA_BOOTSTRAP_SERVER: "kafka:9092"
+      TOPICS_CONFIG: "/app/topics.yaml"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    restart: "no"  # Run once and exit
+    networks:
+      - data-platform-network
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.5.0
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-schema-registry
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
+      SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: PLAINTEXT
+      SCHEMA_REGISTRY_LEADER_ELECTION_TYPE: static
+      SCHEMA_REGISTRY_MASTER_ELIGIBILITY: "true"
+      SCHEMA_REGISTRY_KAFKASTORE_GROUP_ID: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC: _schemas
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 1
+      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: "*"
+      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: "GET,POST,PUT,DELETE,OPTIONS"
+      SCHEMA_REGISTRY_KAFKASTORE_TIMEOUT_MS: 60000
+      SCHEMA_REGISTRY_KAFKASTORE_INIT_TIMEOUT_MS: 120000
+      SCHEMA_REGISTRY_DEBUG: "true"
+    ports:
+      - "8081:8081"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - data-platform-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8081/subjects || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ============================================================================
+  # 3. CATALOG LAYER (ALWAYS START)
+  # ============================================================================
+
+  nessie:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.nessie
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-nessie
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "${NESSIE_PORT:-19120}:19120"
+    volumes:
+      - nessie-data:/var/lib/nessie
+    depends_on:
+      postgres-healthcheck:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:19120/api/v2/trees"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+    networks:
+      - data-platform-network
+
+  # DuckDB currently emits Nessie's composite `main|warehouse` REST prefix
+  # without percent-encoding it. This local proxy performs that URI-safe
+  # translation; it stores no state and forwards to the Nessie catalog.
+  nessie-rest-proxy:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.nessie-rest-proxy
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-nessie-rest-proxy
+    profiles:
+      - analytics
+      - duckdb
+      - dbt
+    environment:
+      NESSIE_UPSTREAM: http://nessie:19120
+      PUBLIC_BASE: http://nessie-rest-proxy:19121
+    depends_on:
+      nessie:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - data-platform-network
+
+  # ============================================================================
+  # 4. DATA PIPELINE LAYER (ALWAYS START)
+  # ============================================================================
+
+  payment-xml-generator:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.payment-xml-generator
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-payment-xml-generator
+    environment:
+      DATA_ROOT: /app/data
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      minio:
+        condition: service_healthy
+      postgres-healthcheck:
+        condition: service_completed_successfully
+    restart: "no"
+    networks:
+      - data-platform-network
+    command: ["--count", "10", "--verbose"]
+
+  payment-producer:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.payment-producer
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-payment-producer
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
+      SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      DATA_ROOT: /app/data
+      PRODUCER_IDEMPOTENCE: "true"
+      PRODUCER_ACKS: "all"
+    volumes:
+      - ./data:/app/data:ro
+    depends_on:
+      kafka:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
+      schema-registry:
+        condition: service_healthy
+      payment-xml-generator:
+        condition: service_completed_successfully
+    restart: "no"
+    networks:
+      - data-platform-network
+
+  payment-consumer-events:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.payment-consumer-events
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-payment-consumer-events
+    environment:
+      S3_ENDPOINT: http://minio:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET: dp-ai-payment
+      RAW_PREFIX: raw/v2
+      KAFKA_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
+      KAFKA_GROUP_ID: payment-events-consumer
+      SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      KAFKA_TOPICS: icmn.vpm.pain001,icmn.vpm.pain002,icmn.pmn.pain001,icmn.pmn.pain002,cpo.psn.pain001,cpo.psn.pain002,cpo.plm.pain001,cpo.plm.pain002,pdm.bronze.pdmis,pdm.bronze.pain001,pdm.bronze.pain002,pdm.bronze.pacs008,pdm.bronze.pacs002,pdm.bronze.camt053,pdm.bronze.camt052,pdm.bronze.camt054,pdm.bronze.wendi,pdm.bronze.agent
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      minio-init-buckets:
+        condition: service_completed_successfully
+      payment-producer:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - data-platform-network
+
+  # ============================================================================
+  # 5. ANALYTICS LAYER (PROFILE: analytics)
+  # ============================================================================
+
+  trino:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.trino-coordinator
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-trino
+    profiles:
+      - analytics
+      - trino
+      - dbt
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xmx2G"
+      TRINO_CONFIG_DIR: /usr/lib/trino/etc
+    ports:
+      - "8089:8080"
+    volumes:
+      # Mount configuration files individually so the catalog directory copied
+      # into the image remains available to Trino.
+      - ./platform/trino/etc/access-control.properties:/usr/lib/trino/etc/access-control.properties:ro
+      - ./platform/trino/etc/config.properties:/usr/lib/trino/etc/config.properties:ro
+      - ./platform/trino/etc/event-listeners.json:/usr/lib/trino/etc/event-listeners.json:ro
+      - ./platform/trino/etc/jvm.config:/usr/lib/trino/etc/jvm.config:ro
+      - ./platform/trino/etc/log.properties:/usr/lib/trino/etc/log.properties:ro
+      - ./platform/trino/etc/node.properties:/usr/lib/trino/etc/node.properties:ro
+      - ./platform/trino/etc/password-auth.properties:/usr/lib/trino/etc/password-auth.properties:ro
+      - ./platform/trino/etc/password-authenticator.properties:/usr/lib/trino/etc/password-authenticator.properties:ro
+      - ./platform/trino/etc/rules.json:/usr/lib/trino/etc/rules.json:ro
+      - trino-data:/var/lib/trino/data
+      - trino-logs:/var/log/trino
+    restart: unless-stopped
+    networks:
+      - data-platform-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/v1/info"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    depends_on:
+      minio:
+        condition: service_healthy
+      nessie:
+        condition: service_healthy
+
+  metabase:
+    image: metabase/metabase:v0.49.10
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-metabase
+    profiles:
+      - analytics
+      - metabase
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: metabase
+      MB_DB_PORT: 5432
+      MB_DB_USER: ${POSTGRES_USER}
+      MB_DB_PASS: ${POSTGRES_PASSWORD}
+      MB_DB_HOST: postgres
+    ports:
+      - "3000:3000"
+    volumes:
+      - metabase-data:/metabase-data
+    restart: unless-stopped
+    networks:
+      - data-platform-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  superset:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.superset
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-superset
+    profiles:
+      - analytics
+      - superset
+    environment:
+      SUPERSET_CONFIG_PATH: /app/pythonpath/superset_config.py
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY:-your-secret-key-change-in-production}
+      SUPERSET_LOAD_EXAMPLES: "no"
+      SUPERSET__SQLALCHEMY_DATABASE_URI: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/superset
+    ports:
+      - "8088:8088"
+    volumes:
+      - superset-data:/app/superset_data
+    restart: unless-stopped
+    networks:
+      - data-platform-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  dbt:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.dbt
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-dbt
+    profiles:
+      - analytics
+      - dbt
+    environment:
+      DBT_PROFILES_DIR: /usr/app/dbt
+      TRINO_HOST: trino
+      TRINO_PORT: 8080
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET: dp-ai-payment
+      RAW_ROOT: raw
+      NESSIE_ENDPOINT: http://nessie-rest-proxy:19121
+    volumes:
+      - ./transform/dbt:/usr/app/dbt
+      - dbt-logs:/usr/app/dbt/logs
+    restart: "no"
+    networks:
+      - data-platform-network
+    depends_on:
+      trino:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      nessie:
+        condition: service_healthy
+      nessie-rest-proxy:
+        condition: service_started
+
+  # DuckDB is the dbt execution engine for Bronze Parquet.  It reads directly
+  # from MinIO and writes managed Iceberg tables through Nessie's REST catalog.
+  duckdb:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.duckdb
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-duckdb
+    profiles:
+      - analytics
+      - duckdb
+      - dbt
+    environment:
+      DBT_PROFILES_DIR: /usr/app/dbt
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_BUCKET: dp-ai-payment
+      RAW_ROOT: raw
+      NESSIE_ENDPOINT: http://nessie-rest-proxy:19121
+    volumes:
+      - ./transform/dbt:/usr/app/dbt
+      - dbt-logs:/usr/app/dbt/logs
+    restart: "no"
+    networks:
+      - data-platform-network
+    depends_on:
+      minio:
+        condition: service_healthy
+      nessie:
+        condition: service_healthy
+      nessie-rest-proxy:
+        condition: service_started
+    command: ["build"]
+
+  dbt-docs:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.dbt-docs
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-dbt-docs
+    profiles:
+      - analytics
+      - dbt
+    ports:
+      - "3001:3000"
+    restart: unless-stopped
+    networks:
+      - data-platform-network
+    depends_on:
+      dbt:
+        condition: service_completed_successfully
+
+  # ============================================================================
+  # 6. DEVELOPMENT SERVICES (PROFILE: dev)
+  # ============================================================================
+
+  s3-landing-kafka-ingestion:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.s3-landing-kafka-ingestion
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-s3-landing-kafka-ingestion
+    profiles:
+      - dev
+      - ingestion
+    environment:
+      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      S3_ENDPOINT: http://minio:9000
+      KAFKA_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
+    restart: unless-stopped
+    networks:
+      - data-platform-network
+    depends_on:
+      minio:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+  python-transform:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.python-transform
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-python-transform
+    profiles:
+      - dev
+      - transform
+    environment:
+      MINIO_ENDPOINT: http://minio:9000
+      NESSIE_ENDPOINT: http://nessie:19120
+      TRINO_HOST: trino
+      TRINO_PORT: 8080
+    volumes:
+      - ./services/agents/modeling:/app/src
+    restart: unless-stopped
+    networks:
+      - data-platform-network
+    depends_on:
+      minio:
+        condition: service_healthy
+      nessie:
+        condition: service_healthy
+
+  python-api:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.python-api
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-python-api
+    profiles:
+      - dev
+      - api
+    environment:
+      API_PORT: 7001
+      MINIO_ENDPOINT: http://minio:9000
+      NESSIE_ENDPOINT: http://nessie:19120
+      TRINO_HOST: trino
+      TRINO_PORT: 8080
+    ports:
+      - "7001:7001"
+    volumes:
+      - ./services/payments-api:/app/src
+    restart: unless-stopped
+    networks:
+      - data-platform-network
+    depends_on:
+      minio:
+        condition: service_healthy
+      nessie:
+        condition: service_healthy
+
+  dq-agent:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.dq-agent
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-dq-agent
+    profiles:
+      - dev
+      - dq
+    environment:
+      MINIO_ENDPOINT: http://minio:9000
+      NESSIE_ENDPOINT: http://nessie:19120
+      TRINO_HOST: trino
+      TRINO_PORT: 8080
+      LOG_DIR: /logs
+    volumes:
+      - dev-logs:/logs
+      - ./services/agents/dq:/app/src
+    restart: unless-stopped
+    networks:
+      - data-platform-network
+    depends_on:
+      minio:
+        condition: service_healthy
+      nessie:
+        condition: service_healthy
+
+  payment-producer-dev:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.payment-producer
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-payment-producer-dev
+    profiles:
+      - dev
+      - producer
+    environment:
+      S3_ENDPOINT: http://minio:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET: dp-ai-payment
+      KAFKA_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
+      SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      KAFKA_TOPIC: payment-events-dev
+    restart: unless-stopped
+    networks:
+      - data-platform-network
+    depends_on:
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy

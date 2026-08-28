@@ -1,0 +1,12 @@
+FROM python:3.11-slim
+
+# Copy producer script
+COPY services/payment-producer/kafka_producer.py /app/producer.py
+COPY services/shared/requirements-runtime.txt /app/requirements.txt
+
+WORKDIR /app
+RUN pip install --no-cache-dir -r requirements.txt
+
+ENV PYTHONUNBUFFERED=1
+
+ENTRYPOINT ["python3", "/app/producer.py"]

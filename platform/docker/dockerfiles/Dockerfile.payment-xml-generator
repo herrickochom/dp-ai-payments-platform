@@ -1,0 +1,11 @@
+FROM python:3.11-slim
+
+# Copy script
+COPY services/payment-xml-generator/payment_xml_generator.py /app/generator.py
+COPY services/shared/requirements-runtime.txt /app/requirements.txt
+
+WORKDIR /app
+RUN pip install --no-cache-dir -r requirements.txt
+
+ENTRYPOINT ["python3", "/app/generator.py"]
+CMD ["--count", "10", "--verbose"]

@@ -1,0 +1,6 @@
+confluent-kafka[avro]>=2.3.0
+avro>=1.11.1
+psycopg2-binary>=2.9.9
+boto3>=1.34.0
+requests>=2.31.0
+python-dotenv>=1.0.0

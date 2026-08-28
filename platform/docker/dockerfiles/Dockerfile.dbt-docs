@@ -1,0 +1,13 @@
+FROM python:3.11-slim
+
+# Install dbt
+RUN pip install --no-cache-dir dbt-core dbt-postgres dbt-trino
+
+WORKDIR /usr/app/dbt
+
+# Copy dbt project
+COPY transform/dbt /usr/app/dbt
+
+EXPOSE 3000
+
+CMD ["dbt", "docs", "serve", "--port", "3000", "--host", "0.0.0.0"]

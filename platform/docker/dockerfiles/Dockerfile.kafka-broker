@@ -1,0 +1,15 @@
+FROM apache/kafka:latest
+
+# Copy custom configuration if needed
+COPY platform/kafka/wait-for-kafka.sh /wait-for-kafka.sh
+RUN chmod +x /wait-for-kafka.sh
+
+# Create data directories
+RUN mkdir -p /var/lib/kafka/data /var/lib/kafka/metadata
+
+# Use environment variables for configuration
+ENV KAFKA_HEAP_OPTS="-Xmx512M"
+
+EXPOSE 9092 9093
+
+# Use the default entrypoint from the image

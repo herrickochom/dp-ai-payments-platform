@@ -1,0 +1,61 @@
+# infrastructure/kafka/topics.yaml
+topics:
+  # ICMM Systems - VPM (Virtual Payment Message)
+  - name: icmn.vpm.pain001
+    partitions: 6
+    replication_factor: 1
+    description: "VPM Payment Initiation (Business) - PAIN.001"
+    retention_ms: 604800000  # 7 days
+    cleanup_policy: delete
+
+  - name: icmn.vpm.pain002
+    partitions: 6
+    replication_factor: 1
+    description: "VPM Payment Status (Business) - PAIN.002"
+    retention_ms: 604800000
+    cleanup_policy: delete
+
+  # ICMM Systems - PMN (Payment Management Notification)
+  - name: icmn.pmn.pain001
+    partitions: 6
+    replication_factor: 1
+    description: "PMN Technical Initiation - PAIN.001 (x-* attributes)"
+    retention_ms: 604800000
+    cleanup_policy: delete
+
+  - name: icmn.pmn.pain002
+    partitions: 6
+    replication_factor: 1
+    description: "PMN Technical Status - PAIN.002 (x-* attributes)"
+    retention_ms: 604800000
+    cleanup_policy: delete
+
+  # CPO Systems - PSN (Payment Service Notification)
+  - name: cpo.psn.pain001
+    partitions: 6
+    replication_factor: 1
+    description: "PSN Business Initiation - PAIN.001"
+    retention_ms: 604800000
+    cleanup_policy: delete
+
+  - name: cpo.psn.pain002
+    partitions: 6
+    replication_factor: 1
+    description: "PSN Business Status - PAIN.002"
+    retention_ms: 604800000
+    cleanup_policy: delete
+
+  # CPO Systems - PLM (Payment Lifecycle Management)
+  - name: cpo.plm.pain001
+    partitions: 6
+    replication_factor: 1
+    description: "PLM Technical Initiation - PAIN.001 (x-* attributes)"
+    retention_ms: 604800000
+    cleanup_policy: delete
+
+  - name: cpo.plm.pain002
+    partitions: 6
+    replication_factor: 1
+    description: "PLM Technical Lifecycle - PAIN.002 (x-* attributes)"
+    retention_ms: 604800000
+    cleanup_policy: delete

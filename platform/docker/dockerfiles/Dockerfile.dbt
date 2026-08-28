@@ -1,0 +1,21 @@
+FROM python:3.11-slim
+
+# Install dbt
+RUN pip install --no-cache-dir \
+    dbt-core \
+    dbt-postgres \
+    dbt-trino
+
+# Install additional dependencies
+COPY services/shared/requirements-runtime.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt || true
+
+# Set working directory
+WORKDIR /usr/app/dbt
+
+# Copy entrypoint
+COPY platform/entrypoints/dbt-docker-entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["build"]

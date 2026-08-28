@@ -1,0 +1,22 @@
+name: dp_ai_payments
+version: '1.0.0'
+config-version: 2
+
+profile: dp_ai_payments
+
+model-paths: [models]
+macro-paths: [macros]
+clean-targets: [target, dbt_packages]
+
+models:
+  dp_ai_payments:
+    +database: lakehouse
+    +materialized: iceberg_table
+    bronze:
+      +schema: bronze
+    staging:
+      +schema: staging
+    silver:
+      +schema: silver
+    gold:
+      +schema: gold

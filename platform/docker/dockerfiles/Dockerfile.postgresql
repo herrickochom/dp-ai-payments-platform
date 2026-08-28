@@ -1,0 +1,24 @@
+FROM postgres:15-alpine
+
+# Install healthcheck dependencies
+RUN apk add --no-cache curl
+
+# Copy initialization scripts
+COPY platform/postgres/initdb/* /docker-entrypoint-initdb.d/
+
+# Copy healthcheck script
+COPY platform/postgres/healthchecks/healthcheck.sh /usr/local/bin/healthcheck.sh
+RUN chmod +x /usr/local/bin/healthcheck.sh
+
+# Create config directory
+RUN mkdir -p /deployments/config
+
+# Copy application.properties if exists
+COPY platform/postgres/config/application.properties /deployments/config/application.properties 2>/dev/null || true
+
+HEALTHCHECK --interval=5s --timeout=5s --retries=20 \
+  CMD pg_isready -U ${POSTGRES_USER} || exit 1
+
+EXPOSE 5432
+
+CMD ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]

@@ -1,0 +1,9 @@
+# Handle line endings automatically (Cross-platform dev: Windows/Linux)
+* text=auto
+
+# Large File Storage (LFS)
+# Use this for files that MUST be in Git but are >10MB
+*.jar filter=lfs diff=lfs merge=lfs -text
+*.tar.gz filter=lfs diff=lfs merge=lfs -text
+*.zip filter=lfs diff=lfs merge=lfs -text
+*.db filter=lfs diff=lfs merge=lfs -text

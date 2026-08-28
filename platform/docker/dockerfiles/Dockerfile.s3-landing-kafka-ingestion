@@ -1,0 +1,12 @@
+FROM python:3.11-slim
+
+# Copy scripts
+COPY platform/entrypoints/s3_landing-kafka_entrypoint.sh /entrypoint.sh
+COPY services/shared/requirements-runtime.txt /app/requirements.txt
+
+WORKDIR /app
+RUN pip install --no-cache-dir -r requirements.txt boto3 kafka-python
+
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]

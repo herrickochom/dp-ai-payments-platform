@@ -1,0 +1,9 @@
+FROM python:3.11-slim
+
+# Copy proxy script
+COPY platform/nessie/iceberg_rest_proxy.py /app/proxy.py
+RUN pip install flask requests
+
+EXPOSE 19121
+
+CMD ["python3", "/app/proxy.py"]

@@ -1,0 +1,35 @@
+version: 2
+
+models:
+  - name: stg_cpo_psn_pain002
+    description: Staging PSN business-status events.
+  - name: stg_cpo_plm_pain002
+    description: Staging PLM technical lifecycle events.
+  - name: stg_icmn_pmn_pain001
+    description: Staging PMN PAIN.001 technical lifecycle events.
+  - name: stg_icmn_vpm_pain001
+    description: Staging VPM PAIN.001 business payment instructions.
+  - name: stg_api_pain001
+    description: API-facing PAIN.001 business payment contract sourced from VPM Bronze.
+    columns:
+      - name: event_id
+        tests: [not_null]
+      - name: message_id
+        tests: [not_null]
+      - name: kafka_topic
+        tests: [not_null]
+  - name: stg_icm_vpm_pain001_remittence
+    description: VPM PAIN.001 remittance and invoice-reference staging records.
+    columns:
+      - name: event_id
+        tests: [not_null]
+      - name: message_id
+        tests: [not_null]
+      - name: kafka_topic
+        tests: [not_null]
+      - name: remittance_type
+        tests:
+          - accepted_values:
+              values: [UNSTRUCTURED, INVOICE]
+      - name: kafka_offset
+        tests: [not_null]

@@ -1,0 +1,85 @@
+# ===================================================================
+# Data Platform Core - Git Ignore
+# ===================================================================
+
+# --- 1. Python & Environments ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+.pytest_cache/
+.tox/
+.coverage
+**/target/
+dbt_packages/
+**/.user.yml
+
+# --- 2. Data & Warehouse (Local Development) ---
+# We ignore the actual data, but keep the folder structure via .gitkeep
+data/**
+warehouse/
+temp/
+tmp/
+minio-data/
+pgdata/
+*.duckdb
+*.db
+*.sqlite
+
+# --- 3. Large Data Formats (Safety Net) ---
+*.csv
+*.parquet
+*.avro
+*.orc
+*.jsonl
+# Note: Keep *.json if you have small config/schema files in JSON
+
+# --- 4. Logs & Observability ---
+*.log
+logs/
+*.logs
+**/logs/*.log
+
+# --- 5. Cloud & S3 Tools (MinIO/AWS) ---
+.aws/
+.s3cfg
+*.s3
+# MinIO Client (mc) config and session files
+.mc/
+mc.session
+s3-check-md5*
+
+# --- 6. Infrastructure & Big Data ---
+derby.log
+# Infrastructure
+checkpoints/
+_state/
+dead_letter_queue/
+
+# --- 7. IDE & OS Junk ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# --- 8. Environment & Secrets ---
+.env
+.env.*
+!.env.example
+
+# --- 9. Local Backups ---
+*.bak
+*_backup
+* copy.yml*
+* copy.yaml*
+* copy.*
+
+# Local volume backups
+backups/
+.continue.backup

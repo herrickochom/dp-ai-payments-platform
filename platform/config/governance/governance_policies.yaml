@@ -1,0 +1,91 @@
+# Governance Policies Configuration
+governance:
+  auto_classification:
+    enabled: true
+    confidence_threshold: 0.7
+    rescan_frequency: "30d"  # Rescan every 30 days
+  
+  sensitivity_labels:
+    PUBLIC:
+      retention_days: 365
+      allowed_users: ["ALL"]
+      encryption_required: false
+      masking_required: false
+    
+    INTERNAL:
+      retention_days: 1095  # 3 years
+      allowed_users: ["INTERNAL"]
+      encryption_required: true
+      masking_required: false
+    
+    CONFIDENTIAL:
+      retention_days: 2555  # 7 years
+      allowed_users: ["RESTRICTED"]
+      encryption_required: true
+      masking_required: true
+      approval_required: true
+    
+    RESTRICTED:
+      retention_days: 3650  # 10 years
+      allowed_users: ["AUTHORIZED"]
+      encryption_required: true
+      masking_required: true
+      approval_required: true
+      audit_trail_required: true
+    
+    HIGHLY_RESTRICTED:
+      retention_days: 7300  # 20 years
+      allowed_users: ["LIMITED"]
+      encryption_required: true
+      masking_required: true
+      approval_required: true
+      audit_trail_required: true
+      aggregation_required: true
+
+  workflow_approval:
+    auto_approval:
+      public: true
+      internal: true
+      confidential: false
+      restricted: false
+      highly_restricted: false
+    
+    approval_roles:
+      DATA_STEWARD: "data-steward@company.com"
+      DOMAIN_OWNER: "domain-owner@company.com"
+      SECURITY_OFFICER: "security@company.com"
+      PRIVACY_OFFICER: "privacy@company.com"
+    
+    escalation_timeout: "24h"  # Escalate after 24 hours
+
+  data_retention:
+    enforcement_enabled: true
+    auto_archival: true
+    archival_path: "s3a://archived-data"
+    deletion_enabled: false  # Manual deletion only
+
+  audit_logging:
+    enabled: true
+    retention_days: 2555  # 7 years
+    log_sensitive_operations: true
+    alert_on_anomalies: true
+
+classification_patterns:
+  pii_detection:
+    email: 
+      pattern: '\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+      confidence: 0.95
+    ssn:
+      pattern: '\b\d{3}-\d{2}-\d{4}\b'
+      confidence: 0.98
+    credit_card:
+      pattern: '\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b'
+      confidence: 0.90
+
+  financial_detection:
+    account_number:
+      pattern: '\b\d{8,18}\b'
+      confidence: 0.70
+    salary:
+      pattern: '\b(salary|income|wage|compensation)\b'
+      confidence: 0.85

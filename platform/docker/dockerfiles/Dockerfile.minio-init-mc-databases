@@ -1,0 +1,6 @@
+FROM minio/mc:latest
+
+COPY platform/minio/init_databases.py /app/init_databases.py
+RUN apk add --no-cache python3 py3-pip && pip install boto3 requests
+
+ENTRYPOINT ["python3", "/app/init_databases.py"]

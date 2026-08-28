@@ -1,0 +1,27 @@
+[project]
+name = "dp-ai-payments-platform"
+version = "0.1.0"
+description = "Enterprise governed ingestion + AI payments platform"
+requires-python = ">=3.10"
+
+# Kept in step with the imports that actually appear in the tree.  Container
+# images install their own pinned requirements.txt; this set is what a local
+# editor and interpreter need to resolve every module in the repo.
+dependencies = [
+    "avro",
+    "boto3",
+    "botocore",
+    "confluent-kafka",
+    "fastapi",
+    "fastavro",
+    "pytz",
+    "trino",
+    "uvicorn",
+]
+
+# The repo is a collection of independently containerised services, not an
+# importable distribution: every service sets its own PYTHONPATH and no module
+# is imported across service boundaries.  Declaring no packages keeps
+# setuptools from trying to auto-discover the flat top-level layout.
+[tool.setuptools]
+packages = []

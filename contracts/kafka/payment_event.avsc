@@ -1,0 +1,22 @@
+{
+  "type": "record",
+  "name": "PaymentEvent",
+  "namespace": "com.payments.platform",
+  "fields": [
+    {"name": "event_id", "type": "string"},
+    {"name": "message_id", "type": "string"},
+    {"name": "creation_date", "type": "string"},
+    {"name": "event_type", "type": "string"},
+    {"name": "source_system", "type": "string"},
+    {"name": "source_key", "type": ["null", "string"], "default": null},
+    {"name": "source_location", "type": ["null", "string"], "default": null},
+    {"name": "instructed_amount", "type": "double"},
+    {"name": "currency", "type": "string"},
+    {"name": "timestamp", "type": "string"},
+    {"name": "version", "type": "string", "default": "1.0.0"},
+    {"name": "event_data", "type": ["null", "string"], "default": null},
+    {"name": "payload", "type": ["null", "string"], "default": null},
+    {"name": "x_attributes", "type": ["null", {"type": "map", "values": "string"}], "default": null},
+    {"name": "parsed_event_data", "type": ["null", "string"], "default": null}
+  ]
+}

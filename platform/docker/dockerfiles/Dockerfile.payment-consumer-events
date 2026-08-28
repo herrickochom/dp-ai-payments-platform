@@ -1,0 +1,12 @@
+FROM python:3.11-slim
+
+# Copy consumer script
+COPY services/kafka-consumer-events/kafka_consumer_events.py /app/consumer.py
+COPY services/shared/requirements-runtime.txt /app/requirements.txt
+
+WORKDIR /app
+RUN pip install --no-cache-dir -r requirements.txt
+
+ENV PYTHONUNBUFFERED=1
+
+ENTRYPOINT ["python3", "/app/consumer.py"]

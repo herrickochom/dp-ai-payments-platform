@@ -1,0 +1,41 @@
+{{ config(materialized='iceberg_table') }}
+
+select
+    event_id,
+    {{ extract_json('parsed_event_data', '$.header.message_id') }} as message_id,
+    try_cast({{ extract_json('parsed_event_data', '$.header.creation_date') }} as timestamp) as creation_at,
+    {{ extract_json('parsed_event_data', '$.header.initiating_party') }} as initiating_party,
+    {{ extract_json('parsed_event_data', '$.header.original_message_id') }} as original_message_id,
+    {{ extract_json('parsed_event_data', '$.header.original_message_type') }} as original_message_type,
+    {{ extract_json('parsed_event_data', '$.header.group_status') }} as group_status,
+    {{ extract_json('parsed_event_data', '$.payload.transaction_status') }} as transaction_status,
+    {{ extract_json('parsed_event_data', '$.payload.reason_code') }} as reason_code,
+    {{ extract_json('parsed_event_data', '$.payload.additional_info') }} as additional_info,
+    {{ extract_json('parsed_event_data', '$.x_attributes.x-processingStatus') }} as processing_status,
+    {{ extract_json('parsed_event_data', '$.x_attributes.x-errorCode') }} as error_code,
+    try_cast({{ extract_json('parsed_event_data', '$.x_attributes.x-retryAttempt') }} as integer) as retry_attempt,
+    {{ extract_json('parsed_event_data', '$.x_attributes.x-systemLatency') }} as system_latency,
+    try_cast({{ extract_json('parsed_event_data', '$.x_attributes.x-priority') }} as integer) as priority,
+    {{ extract_json('parsed_event_data', '$.x_attributes.x-correlationId') }} as correlation_id,
+    {{ extract_json('parsed_event_data', '$.x_attributes.x-traceId') }} as trace_id,
+    {{ extract_json('parsed_event_data', '$.x_attributes.x-spanId') }} as span_id,
+    {{ extract_json('parsed_event_data', '$.x_attributes.x-parentSpanId') }} as parent_span_id,
+    try_cast({{ extract_json('parsed_event_data', '$.x_attributes.x-sampled') }} as integer) as sampled,
+    {{ extract_json('parsed_event_data', '$.x_attributes.x-flags') }} as trace_flags,
+    {{ extract_json('parsed_event_data', '$.x_attributes.x-tenantId') }} as tenant_id,
+    {{ extract_json('parsed_event_data', '$.x_attributes.x-environment') }} as environment,
+    {{ extract_json('parsed_event_data', '$.x_attributes.x-version') }} as source_version,
+    {{ extract_json('parsed_event_data', '$.x_attributes.x-messageType') }} as source_message_type,
+    {{ extract_json('parsed_event_data', '$.x_attributes.x-messageVersion') }} as source_message_version,
+    {{ extract_json('parsed_event_data', '$.x_attributes.x-processingNode') }} as processing_node,
+    {{ extract_json('parsed_event_data', '$.x_attributes.x-requestId') }} as request_id,
+    try_cast({{ extract_json('parsed_event_data', '$.x_attributes.x-timestamp') }} as timestamp) as source_timestamp,
+    event_data,
+    parsed_event_data,
+    _kafka_metadata.topic as kafka_topic,
+    _kafka_metadata.partition as kafka_partition,
+    _kafka_metadata.offset as kafka_offset,
+    _kafka_metadata.timestamp as kafka_timestamp
+from {{ bronze_valid_events() }}
+where _kafka_metadata.topic = 'cpo.plm.pain002'
+  and parsed_event_data is not null
