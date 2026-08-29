@@ -1,35 +1,80 @@
 version: 2
 
 models:
-  - name: stg_cpo_psn_pain002
-    description: Staging PSN business-status events.
-  - name: stg_cpo_plm_pain002
-    description: Staging PLM technical lifecycle events.
-  - name: stg_icmn_pmn_pain001
-    description: Staging PMN PAIN.001 technical lifecycle events.
-  - name: stg_icmn_vpm_pain001
-    description: Staging VPM PAIN.001 business payment instructions.
-  - name: stg_api_pain001
-    description: API-facing PAIN.001 business payment contract sourced from VPM Bronze.
+  - name: stg_pdm_icmn_vpm_pain001
+    description: >
+      ICMN VPM pain.001 business payment instructions, extracted from the raw Avro
+      archive (parsed_event_data JSON) on topic icmn.vpm.pain001.
     columns:
       - name: event_id
-        tests: [not_null]
+        tests: [not_null, unique]
       - name: message_id
+        tests: [not_null]
+      - name: end_to_end_id
+        description: "Critical link: EndToEndId = loan_id."
         tests: [not_null]
       - name: kafka_topic
         tests: [not_null]
-  - name: stg_icm_vpm_pain001_remittence
-    description: VPM PAIN.001 remittance and invoice-reference staging records.
-    columns:
-      - name: event_id
-        tests: [not_null]
-      - name: message_id
-        tests: [not_null]
-      - name: kafka_topic
-        tests: [not_null]
-      - name: remittance_type
+      - name: record_source
         tests:
           - accepted_values:
-              values: [UNSTRUCTURED, INVOICE]
-      - name: kafka_offset
+              values: ['ICMN_VPM_PAIN001']
+
+  - name: stg_pdm_icmn_pmn_pain001
+    description: >
+      ICMN PMN pain.001 technical lifecycle initiation with x-* attributes, from
+      topics icmn.pmn.pain001 (topic-stamped) and pdm.bronze.pain001 ('PMN').
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+      - name: message_id
         tests: [not_null]
+      - name: end_to_end_id
+        tests: [not_null]
+      - name: x_message_type
+        tests:
+          - accepted_values:
+              values: ['PMN', 'icmn.pmn.pain001']
+      - name: record_source
+        tests:
+          - accepted_values:
+              values: ['ICMN_PMN_PAIN001']
+
+  - name: stg_pdm_cpo_psn_pain002
+    description: >
+      CPO PSN pain.002 business status reports, from topic cpo.psn.pain002.
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+      - name: message_id
+        tests: [not_null]
+      - name: transaction_status
+        tests: [not_null]
+      - name: end_to_end_id
+        tests: [not_null]
+      - name: record_source
+        tests:
+          - accepted_values:
+              values: ['CPO_PSN_PAIN002']
+
+  - name: stg_pdm_cpo_plm_pain002
+    description: >
+      CPO PLM pain.002 technical lifecycle status with x-* attributes, from topics
+      cpo.plm.pain002 (topic-stamped) and pdm.bronze.pain002 ('PLM').
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+      - name: message_id
+        tests: [not_null]
+      - name: transaction_status
+        tests: [not_null]
+      - name: end_to_end_id
+        tests: [not_null]
+      - name: x_message_type
+        tests:
+          - accepted_values:
+              values: ['PLM', 'cpo.plm.pain002']
+      - name: record_source
+        tests:
+          - accepted_values:
+              values: ['CPO_PLM_PAIN002']

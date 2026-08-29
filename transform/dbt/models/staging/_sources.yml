@@ -1,0 +1,80 @@
+# models/staging/_sources.yml
+version: 2
+
+sources:
+  - name: s3_raw
+    description: >
+      Raw payment events archived as Avro in MinIO/S3 (bucket dp-ai-payment) by the
+      payment-events consumer. Each Avro record is a PaymentEvent whose parsed_event_data
+      holds the ISO 20022 XML parsed to JSON ($.xml.Document...) and whose payload.x_attributes
+      map carries the technical x-* attributes. The archive is hive-partitioned as
+      raw/v2/category=pdm/source_group=.../source_system=.../year=.../topic=<topic>/partition=.../offset=...
+      so every source below scans a topic-scoped slice with hive_partitioning=true.
+      NOTE: globs use '**/topic=' because date partitions sit between category and topic
+      in the physical key layout.
+    tables:
+      - name: icmn_vpm_pain001
+        description: "ICMN VPM pain.001 - business payment initiation (topic icmn.vpm.pain001)"
+        meta:
+          external_location: "read_avro('s3://dp-ai-payment/raw/v2/**/topic=icmn.vpm.pain001/**/*.avro', hive_partitioning=true)"
+
+      - name: icmn_pmn_pain001
+        description: "ICMN PMN pain.001 - technical lifecycle initiation (topics icmn.pmn.pain001 and pdm.bronze.pain001; variant selected on x-messageType in SQL)"
+        meta:
+          external_location: "read_avro(['s3://dp-ai-payment/raw/v2/**/topic=icmn.pmn.pain001/**/*.avro', 's3://dp-ai-payment/raw/v2/**/topic=pdm.bronze.pain001/**/*.avro'], hive_partitioning=true)"
+
+      - name: cpo_psn_pain002
+        description: "CPO PSN pain.002 - business status reports (topic cpo.psn.pain002)"
+        meta:
+          external_location: "read_avro('s3://dp-ai-payment/raw/v2/**/topic=cpo.psn.pain002/**/*.avro', hive_partitioning=true)"
+
+      - name: cpo_plm_pain002
+        description: "CPO PLM pain.002 - technical lifecycle status (topics cpo.plm.pain002 and pdm.bronze.pain002; variant selected on x-messageType in SQL)"
+        meta:
+          external_location: "read_avro(['s3://dp-ai-payment/raw/v2/**/topic=cpo.plm.pain002/**/*.avro', 's3://dp-ai-payment/raw/v2/**/topic=pdm.bronze.pain002/**/*.avro'], hive_partitioning=true)"
+
+      - name: wendi_camt053
+        description: "Wendi CAMT.053 - end-of-day bank statements"
+        meta:
+          external_location: "read_avro('s3://dp-ai-payment/raw/v2/**/topic=pdm.bronze.camt053/**/*.avro', hive_partitioning=true)"
+
+      - name: wendi_camt052
+        description: "Wendi CAMT.052 - intraday account reports"
+        meta:
+          external_location: "read_avro('s3://dp-ai-payment/raw/v2/**/topic=pdm.bronze.camt052/**/*.avro', hive_partitioning=true)"
+
+      - name: wendi_camt054
+        description: "Wendi CAMT.054 - transaction notifications"
+        meta:
+          external_location: "read_avro('s3://dp-ai-payment/raw/v2/**/topic=pdm.bronze.camt054/**/*.avro', hive_partitioning=true)"
+
+      - name: wendi_transactions
+        description: "Wendi wallet transaction events (JSON records under parsed_event_data.json[*])"
+        meta:
+          external_location: "read_avro('s3://dp-ai-payment/raw/v2/**/topic=pdm.bronze.wendi/**/*.avro', hive_partitioning=true)"
+
+      - name: mobile_mtn_pacs008
+        description: "MTN PACS.008 - interbank settlements (source_system=mtn selected in SQL)"
+        meta:
+          external_location: "read_avro('s3://dp-ai-payment/raw/v2/**/topic=pdm.bronze.pacs008/**/*.avro', hive_partitioning=true)"
+
+      - name: mobile_airtel_pacs008
+        description: "Airtel PACS.008 - interbank settlements (source_system=airtel selected in SQL)"
+        meta:
+          external_location: "read_avro('s3://dp-ai-payment/raw/v2/**/topic=pdm.bronze.pacs008/**/*.avro', hive_partitioning=true)"
+
+      - name: mobile_pacs002
+        description: "Mobile network PACS.002 - payment status reports"
+        meta:
+          external_location: "read_avro('s3://dp-ai-payment/raw/v2/**/topic=pdm.bronze.pacs002/**/*.avro', hive_partitioning=true)"
+
+      - name: agent_transactions
+        description: "Agent network - cash-out transactions (topic pdm.bronze.agent)"
+        meta:
+          external_location: "read_avro('s3://dp-ai-payment/raw/v2/**/topic=pdm.bronze.agent/**/*.avro', hive_partitioning=true)"
+
+      - name: pdmis_records
+        description: "PDMIS - beneficiaries, loans, saccos, households, business plans, special groups (JSON records under parsed_event_data.json[*], split by source_key)"
+        meta:
+          external_location: "read_avro('s3://dp-ai-payment/raw/v2/**/topic=pdm.bronze.pdmis/**/*.avro', hive_partitioning=true)"
+

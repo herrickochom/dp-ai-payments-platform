@@ -12,4 +12,4 @@ select
     kafka_partition,
     kafka_offset,
     kafka_timestamp
-from {{ ref('stg_icmn_vpm_pain001') }}
+from {{ ref('br_pdm_icmn_vpm_pain001') }}

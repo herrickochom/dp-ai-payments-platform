@@ -1,4 +1,4 @@
 {{ config(materialized='iceberg_table') }}
 
 select *
-from {{ ref('br_icmn_pmn_pain001') }}
+from {{ ref('stg_pdm_cpo_plm_pain002') }}

@@ -18,6 +18,6 @@ select
     status.kafka_topic as status_kafka_topic,
     status.kafka_partition as status_kafka_partition,
     status.kafka_offset as status_kafka_offset
-from {{ ref('stg_cpo_psn_pain002') }} status
-left join {{ ref('stg_icmn_vpm_pain001') }} payment
+from {{ ref('br_pdm_cpo_psn_pain002') }} status
+left join {{ ref('br_pdm_icmn_vpm_pain001') }} payment
   on status.original_message_id = payment.message_id

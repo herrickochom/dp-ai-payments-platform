@@ -1,61 +1,157 @@
-# infrastructure/kafka/topics.yaml
+# ============================================================================
+# Kafka Topics Configuration - PDM Platform
+# ============================================================================
+
 topics:
-  # ICMM Systems - VPM (Virtual Payment Message)
+  # ==========================================================================
+  # 1. ICMN Topics (Interbank Customer Messaging Network)
+  # ==========================================================================
   - name: icmn.vpm.pain001
     partitions: 6
-    replication_factor: 1
-    description: "VPM Payment Initiation (Business) - PAIN.001"
-    retention_ms: 604800000  # 7 days
-    cleanup_policy: delete
+    replication: 1
+    retention_ms: 604800000   # 7 days
+    description: "VPM Business Payment Initiation"
 
-  - name: icmn.vpm.pain002
-    partitions: 6
-    replication_factor: 1
-    description: "VPM Payment Status (Business) - PAIN.002"
-    retention_ms: 604800000
-    cleanup_policy: delete
-
-  # ICMM Systems - PMN (Payment Management Notification)
   - name: icmn.pmn.pain001
     partitions: 6
-    replication_factor: 1
-    description: "PMN Technical Initiation - PAIN.001 (x-* attributes)"
-    retention_ms: 604800000
-    cleanup_policy: delete
+    replication: 1
+    retention_ms: 604800000   # 7 days
+    description: "PMN Technical Lifecycle"
 
-  - name: icmn.pmn.pain002
-    partitions: 6
-    replication_factor: 1
-    description: "PMN Technical Status - PAIN.002 (x-* attributes)"
-    retention_ms: 604800000
-    cleanup_policy: delete
-
-  # CPO Systems - PSN (Payment Service Notification)
-  - name: cpo.psn.pain001
-    partitions: 6
-    replication_factor: 1
-    description: "PSN Business Initiation - PAIN.001"
-    retention_ms: 604800000
-    cleanup_policy: delete
-
+  # ==========================================================================
+  # 2. CPO Topics (Cloud Payment Orchestrator)
+  # ==========================================================================
   - name: cpo.psn.pain002
     partitions: 6
-    replication_factor: 1
-    description: "PSN Business Status - PAIN.002"
-    retention_ms: 604800000
-    cleanup_policy: delete
-
-  # CPO Systems - PLM (Payment Lifecycle Management)
-  - name: cpo.plm.pain001
-    partitions: 6
-    replication_factor: 1
-    description: "PLM Technical Initiation - PAIN.001 (x-* attributes)"
-    retention_ms: 604800000
-    cleanup_policy: delete
+    replication: 1
+    retention_ms: 604800000   # 7 days
+    description: "PSN Business Status"
 
   - name: cpo.plm.pain002
     partitions: 6
-    replication_factor: 1
-    description: "PLM Technical Lifecycle - PAIN.002 (x-* attributes)"
-    retention_ms: 604800000
-    cleanup_policy: delete
+    replication: 1
+    retention_ms: 604800000   # 7 days
+    description: "PLM Technical Lifecycle"
+
+  # ==========================================================================
+  # 3. Wendi Topics (PostBank Digital Wallet)
+  # ==========================================================================
+  - name: wendi.camt053
+    partitions: 4
+    replication: 1
+    retention_ms: 2592000000  # 30 days
+    description: "End-of-Day Bank Statements"
+
+  - name: wendi.camt052
+    partitions: 4
+    replication: 1
+    retention_ms: 86400000    # 1 day
+    description: "Intraday Account Reports"
+
+  - name: wendi.camt054
+    partitions: 8
+    replication: 1
+    retention_ms: 604800000   # 7 days
+    description: "Transaction Notifications"
+
+  - name: wendi.transactions
+    partitions: 8
+    replication: 1
+    retention_ms: 604800000   # 7 days
+    description: "Wendi Platform Transactions"
+
+  # ==========================================================================
+  # 4. Mobile Networks Topics
+  # ==========================================================================
+  - name: mobile.mtn.pacs008
+    partitions: 6
+    replication: 1
+    retention_ms: 604800000   # 7 days
+    description: "MTN Interbank Settlement"
+
+  - name: mobile.mtn.pacs002
+    partitions: 4
+    replication: 1
+    retention_ms: 604800000   # 7 days
+    description: "MTN Interbank Status"
+
+  - name: mobile.airtel.pacs008
+    partitions: 6
+    replication: 1
+    retention_ms: 604800000   # 7 days
+    description: "Airtel Interbank Settlement"
+
+  - name: mobile.airtel.pacs002
+    partitions: 4
+    replication: 1
+    retention_ms: 604800000   # 7 days
+    description: "Airtel Interbank Status"
+
+  # ==========================================================================
+  # 5. Agent Network Topics
+  # ==========================================================================
+  - name: agent.transactions
+    partitions: 8
+    replication: 1
+    retention_ms: 2592000000  # 30 days
+    description: "Agent Cash-out Transactions"
+
+  - name: agent.profiles
+    partitions: 4
+    replication: 1
+    retention_ms: 604800000   # 7 days
+    description: "Agent Profiles"
+
+  - name: agent.locations
+    partitions: 4
+    replication: 1
+    retention_ms: 604800000   # 7 days
+    description: "Agent Locations"
+
+  # ==========================================================================
+  # 6. PDMIS Topics (Government System)
+  # ==========================================================================
+  - name: pdmis.beneficiaries
+    partitions: 8
+    replication: 1
+    retention_ms: 604800000   # 7 days
+    description: "Beneficiary Data"
+
+  - name: pdmis.loans
+    partitions: 8
+    replication: 1
+    retention_ms: 604800000   # 7 days
+    description: "Loan Data"
+
+  - name: pdmis.saccos
+    partitions: 4
+    replication: 1
+    retention_ms: 604800000   # 7 days
+    description: "SACCO Data"
+
+  - name: pdmis.households
+    partitions: 4
+    replication: 1
+    retention_ms: 604800000   # 7 days
+    description: "Household Data"
+
+  - name: pdmis.business_plans
+    partitions: 4
+    replication: 1
+    retention_ms: 604800000   # 7 days
+    description: "Business Plans"
+
+  # ==========================================================================
+  # 7. Reconciliation Topics
+  # ==========================================================================
+  - name: reconciliation.links
+    partitions: 8
+    replication: 1
+    retention_ms: 2592000000  # 30 days
+    description: "PDM-Payment Reconciliation Links"
+
+  - name: reconciliation.status
+    partitions: 8
+    replication: 1
+    retention_ms: 604800000   # 7 days
+    description: "Reconciliation Status Events"

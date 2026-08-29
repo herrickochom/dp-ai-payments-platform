@@ -19,6 +19,6 @@ select
     _kafka_metadata.partition as kafka_partition,
     _kafka_metadata.offset as kafka_offset,
     _kafka_metadata.timestamp as kafka_timestamp
-from {{ bronze_valid_events() }}
+from {{ raw_valid_events() }}
 where _kafka_metadata.topic = 'cpo.psn.pain002'
   and parsed_event_data is not null

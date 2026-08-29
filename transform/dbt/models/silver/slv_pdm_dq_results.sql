@@ -27,4 +27,4 @@ select
         then 'PASS'
         else 'FAIL'
     end as dq_status
-from {{ ref('stg_icmn_vpm_pain001') }}
+from {{ ref('br_pdm_icmn_vpm_pain001') }}

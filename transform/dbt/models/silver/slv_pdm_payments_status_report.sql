@@ -21,4 +21,4 @@ select
     kafka_partition,
     kafka_offset,
     kafka_timestamp
-from {{ ref('stg_cpo_psn_pain002') }}
+from {{ ref('br_pdm_cpo_psn_pain002') }}

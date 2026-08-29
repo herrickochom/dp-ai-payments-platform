@@ -17,4 +17,4 @@ select
     kafka_partition,
     kafka_offset,
     kafka_timestamp
-from {{ ref('stg_icm_vpm_pain001_remittence') }}
+from {{ ref('br_pdm_icm_vpm_pain001_remittence') }}

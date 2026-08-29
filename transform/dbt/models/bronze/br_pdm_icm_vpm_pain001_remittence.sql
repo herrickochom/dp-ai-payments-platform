@@ -24,7 +24,7 @@ with vpm_payments as (
         kafka_partition,
         kafka_offset,
         kafka_timestamp
-    from {{ ref('br_icmn_vpm_pain001') }}
+    from {{ ref('stg_pdm_icmn_vpm_pain001') }}
 )
 
 select

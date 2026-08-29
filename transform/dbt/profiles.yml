@@ -1,12 +1,12 @@
-dp_ai_payments:
+pdm_platform:
   target: dev
   outputs:
     dev:
       type: duckdb
-      path: /tmp/dp_ai_payments.duckdb
+      path: /tmp/pdm.duckdb
       database: lakehouse
       schema: staging
-      extensions: [httpfs, iceberg]
+      extensions: [httpfs, avro, iceberg]
       settings:
         s3_region: eu-west-1
         s3_endpoint: minio:9000
