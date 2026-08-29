@@ -1,25 +1,10 @@
-FROM python:3.11-slim
+FROM confluentinc/cp-kafka:7.5.0
 
-# Install required OS utilities
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        jq \
-        curl \
-    && rm -rf /var/lib/apt/lists/*
+USER root
 
-# Install Python dependencies
-RUN pip install --no-cache-dir pyyaml
+RUN yum install -y jq curl \
+    && yum clean all
 
-# Copy Kafka CLI tools from Confluent image
-COPY --from=confluentinc/cp-kafka:latest \
-    /usr/bin/kafka-topics \
-    /usr/bin/kafka-topics
-
-COPY --from=confluentinc/cp-kafka:latest \
-    /usr/bin/kafka-configs \
-    /usr/bin/kafka-configs
-
-# Copy init script and config
 COPY platform/kafka/create-topics.sh /app/create-topics.sh
 COPY platform/kafka/topics.yaml /app/topics.yaml
 

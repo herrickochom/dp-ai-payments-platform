@@ -2,5 +2,5 @@
 set -e
 
 echo "Running PostgreSQL healthcheck..."
-pg_isready -U ${POSTGRES_USER} || exit 1
+pg_isready -h postgres -p 5432 -U "${POSTGRES_USER}" -d postgres || exit 1
 echo "PostgreSQL is ready."

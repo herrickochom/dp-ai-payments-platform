@@ -17,8 +17,6 @@ RUN mkdir -p /deployments/config
 # COPY platform/postgres/config/application.properties /deployments/config/application.properties 2>/dev/null || true
 
 HEALTHCHECK --interval=5s --timeout=5s --retries=20 \
-  CMD pg_isready -U ${POSTGRES_USER} || exit 1
+  CMD pg_isready -U ${POSTGRES_USER} -d postgres || exit 1
 
 EXPOSE 5432
-
-CMD ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]

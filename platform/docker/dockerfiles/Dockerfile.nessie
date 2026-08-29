@@ -8,5 +8,3 @@ ENV QUARKUS_HTTP_PORT=19120 \
     QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://postgres:5432/nessie
 
 EXPOSE 19120
-
-CMD ["java", "-jar", "/app/nessie-quarkus.jar"]

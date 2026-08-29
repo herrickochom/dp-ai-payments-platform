@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 """
-Payment Event Producer - Reads XML files and produces to system-specific Kafka topics.
+Payment Event Producer - Reads source XML/JSON files and produces to PDM platform Kafka topics.
 
-Produces to 12 system-specific topics:
-- icmn.vpm.pain001, icmn.vpm.pain002
-- icmn.pmn.pain001, icmn.pmn.pain002
-- cpo.psn.pain001, cpo.psn.pain002
-- cpo.plm.pain001, cpo.plm.pain002
+Source domains supported:
+- ICMN, CPO, Wendi, Mobile Networks, Agent Network and PDMIS
+- Reconciliation topics are intentionally excluded because they are downstream-derived events.
 """
 
 import os
@@ -53,75 +51,42 @@ class Config:
 # Topic to System Mapping
 # ------------------------------------------------------------------------------
 TOPIC_MAPPINGS = {
-    "wendi.pain001": {"category": "wendi", "system": "wendi", "msg_type": "pain001", "description": "Wendi payment initiation", "has_technical_attrs": False},
-    "wendi.pain002": {"category": "wendi", "system": "wendi", "msg_type": "pain002", "description": "Wendi payment status", "has_technical_attrs": True},
-    "agent.profiles": {"category": "agent", "system": "agent", "msg_type": "profiles", "description": "Agent profiles", "has_technical_attrs": False},
-    "agent.locations": {"category": "agent", "system": "agent", "msg_type": "locations", "description": "Agent locations", "has_technical_attrs": False},
-    "agent.transactions": {"category": "agent", "system": "agent", "msg_type": "transactions", "description": "Agent transactions", "has_technical_attrs": False},
-    # ICMM Systems - VPM (Virtual Payment Message)
-    "icmn.vpm.pain001": {
-        "category": "icmn",
-        "system": "vpm",
-        "msg_type": "pain001",
-        "description": "VPM Payment Initiation (Business)",
-        "has_technical_attrs": False
-    },
-    "icmn.vpm.pain002": {
-        "category": "icmn",
-        "system": "vpm",
-        "msg_type": "pain002",
-        "description": "VPM Payment Status (Business)",
-        "has_technical_attrs": False
-    },
-    
-    # ICMM Systems - PMN (Payment Management Notification)
-    "icmn.pmn.pain001": {
-        "category": "icmn",
-        "system": "pmn",
-        "msg_type": "pain001",
-        "description": "PMN Technical Initiation (x-* attributes)",
-        "has_technical_attrs": True
-    },
-    "icmn.pmn.pain002": {
-        "category": "icmn",
-        "system": "pmn",
-        "msg_type": "pain002",
-        "description": "PMN Technical Status (x-* attributes)",
-        "has_technical_attrs": True
-    },
-    
-    # CPO Systems - PSN (Payment Service Notification)
-    "cpo.psn.pain001": {
-        "category": "cpo",
-        "system": "psn",
-        "msg_type": "pain001",
-        "description": "PSN Business Initiation",
-        "has_technical_attrs": False
-    },
-    "cpo.psn.pain002": {
-        "category": "cpo",
-        "system": "psn",
-        "msg_type": "pain002",
-        "description": "PSN Business Status",
-        "has_technical_attrs": False
-    },
-    
-    # CPO Systems - PLM (Payment Lifecycle Management)
-    "cpo.plm.pain001": {
-        "category": "cpo",
-        "system": "plm",
-        "msg_type": "pain001",
-        "description": "PLM Technical Initiation (x-* attributes)",
-        "has_technical_attrs": True
-    },
-    "cpo.plm.pain002": {
-        "category": "cpo",
-        "system": "plm",
-        "msg_type": "pain002",
-        "description": "PLM Technical Lifecycle (x-* attributes)",
-        "has_technical_attrs": True
-    },
+    # ICMN
+    "icmn.vpm.pain001": {"category": "icmn", "system": "vpm", "msg_type": "pain001", "description": "VPM Payment Initiation", "has_technical_attrs": False},
+    "icmn.pmn.pain001": {"category": "icmn", "system": "pmn", "msg_type": "pain001", "description": "PMN Payment Initiation", "has_technical_attrs": True},
+
+    # CPO
+    "cpo.psn.pain002": {"category": "cpo", "system": "psn", "msg_type": "pain002", "description": "PSN Payment Status", "has_technical_attrs": False},
+    "cpo.plm.pain002": {"category": "cpo", "system": "plm", "msg_type": "pain002", "description": "PLM Payment Lifecycle", "has_technical_attrs": True},
+
+    # Wendi
+    "wendi.pain001": {"category": "wendi", "system": "wendi", "msg_type": "pain001", "description": "Wendi Payment Initiation", "has_technical_attrs": False},
+    "wendi.pain002": {"category": "wendi", "system": "wendi", "msg_type": "pain002", "description": "Wendi Payment Status", "has_technical_attrs": True},
+    "wendi.camt052": {"category": "wendi", "system": "wendi", "msg_type": "camt052", "description": "Wendi Account Report", "has_technical_attrs": False},
+    "wendi.camt053": {"category": "wendi", "system": "wendi", "msg_type": "camt053", "description": "Wendi Account Statement", "has_technical_attrs": False},
+    "wendi.camt054": {"category": "wendi", "system": "wendi", "msg_type": "camt054", "description": "Wendi Debit/Credit Notification", "has_technical_attrs": False},
+    "wendi.transactions": {"category": "wendi", "system": "wendi", "msg_type": "transactions", "description": "Wendi Transactions", "has_technical_attrs": False},
+
+    # Mobile Networks
+    "mobile.mtn.pacs008": {"category": "mobile_networks", "system": "mtn", "msg_type": "pacs008", "description": "MTN FI-to-FI Customer Credit Transfer", "has_technical_attrs": False},
+    "mobile.mtn.pacs002": {"category": "mobile_networks", "system": "mtn", "msg_type": "pacs002", "description": "MTN Payment Status", "has_technical_attrs": False},
+    "mobile.airtel.pacs008": {"category": "mobile_networks", "system": "airtel", "msg_type": "pacs008", "description": "Airtel FI-to-FI Customer Credit Transfer", "has_technical_attrs": False},
+    "mobile.airtel.pacs002": {"category": "mobile_networks", "system": "airtel", "msg_type": "pacs002", "description": "Airtel Payment Status", "has_technical_attrs": False},
+
+    # Agent Network
+    "agent.profiles": {"category": "agent_network", "system": "agent", "msg_type": "profiles", "description": "Agent Profiles", "has_technical_attrs": False},
+    "agent.locations": {"category": "agent_network", "system": "agent", "msg_type": "locations", "description": "Agent Locations", "has_technical_attrs": False},
+    "agent.transactions": {"category": "agent_network", "system": "agent", "msg_type": "transactions", "description": "Agent Transactions", "has_technical_attrs": False},
+
+    # PDMIS
+    "pdmis.beneficiaries": {"category": "pdmis", "system": "pdmis", "msg_type": "beneficiaries", "description": "PDMIS Beneficiaries", "has_technical_attrs": False},
+    "pdmis.business_plans": {"category": "pdmis", "system": "pdmis", "msg_type": "business_plans", "description": "PDMIS Business Plans", "has_technical_attrs": False},
+    "pdmis.households": {"category": "pdmis", "system": "pdmis", "msg_type": "households", "description": "PDMIS Households", "has_technical_attrs": False},
+    "pdmis.loans": {"category": "pdmis", "system": "pdmis", "msg_type": "loans", "description": "PDMIS Loans", "has_technical_attrs": False},
+    "pdmis.saccos": {"category": "pdmis", "system": "pdmis", "msg_type": "saccos", "description": "PDMIS SACCOs", "has_technical_attrs": False},
+    "pdmis.special_groups": {"category": "pdmis", "system": "pdmis", "msg_type": "special_groups", "description": "PDMIS Special Groups", "has_technical_attrs": False},
 }
+
 
 # ------------------------------------------------------------------------------
 # Avro Schema (for validation)
@@ -286,55 +251,62 @@ def parse_generic_xml(file_path: str) -> Dict[str, Any]:
         return {}
 
 def detect_system_from_path(file_path: str) -> tuple:
-    """
-    Detect system, msg_type from file path.
-    Returns: (system, msg_type, topic)
-    """
+    """Detect (system, msg_type, topic) from the source path or filename."""
     path = Path(file_path)
-    normalized = path.as_posix()
+    normalized = path.as_posix().lower()
+    name = path.name.lower()
 
-    explicit_routes = {
-        "/wendi/pain001/": ("wendi", "pain001", "wendi.pain001"),
-        "/wendi/pain002/": ("wendi", "pain002", "wendi.pain002"),
-        "/agent_network/agent_transactions/": ("agent", "transactions", "agent.transactions"),
-    }
-    for marker, route in explicit_routes.items():
-        if marker in normalized:
-            return route
-
-    json_routes = {
+    # Exact entity feeds where filename is the most reliable routing key.
+    filename_routes = {
         "agent_profiles.json": ("agent", "profiles", "agent.profiles"),
         "agent_locations.json": ("agent", "locations", "agent.locations"),
         "agent_transactions.json": ("agent", "transactions", "agent.transactions"),
+        "beneficiaries.json": ("pdmis", "beneficiaries", "pdmis.beneficiaries"),
+        "business_plans.json": ("pdmis", "business_plans", "pdmis.business_plans"),
+        "households.json": ("pdmis", "households", "pdmis.households"),
+        "loans.json": ("pdmis", "loans", "pdmis.loans"),
+        "saccos.json": ("pdmis", "saccos", "pdmis.saccos"),
+        "special_groups.json": ("pdmis", "special_groups", "pdmis.special_groups"),
+        "transactions.json": ("wendi", "transactions", "wendi.transactions"),
+        "wendi_transactions.json": ("wendi", "transactions", "wendi.transactions"),
     }
-    if path.name in json_routes:
-        return json_routes[path.name]
-    
-    # Try to extract from path: data/{category}/{system}/{msg_type}/{file}
-    parts = path.parts
-    if len(parts) >= 4:
-        category = parts[-4]  # icmn or cpo
-        system = parts[-3]    # vpm, pmn, psn, plm
-        msg_type = parts[-2]  # pain001, pain002, etc.
-        
-        # Construct topic
-        topic = f"{category}.{system}.{msg_type}"
-        
-        # Validate topic exists
-        if topic in TOPIC_MAPPINGS:
-            return system, msg_type, topic
-        
-        # Try alternative mappings
-        if category == "icmn" and system == "vpm" and msg_type == "pain001":
-            return "vpm", "pain001", "icmn.vpm.pain001"
-        elif category == "icmn" and system == "pmn" and msg_type == "pain001":
-            return "pmn", "pain001", "icmn.pmn.pain001"
-        elif category == "cpo" and system == "psn" and msg_type == "pain002":
-            return "psn", "pain002", "cpo.psn.pain002"
-        elif category == "cpo" and system == "plm" and msg_type == "pain002":
-            return "plm", "pain002", "cpo.plm.pain002"
-    
+    if name in filename_routes:
+        # Avoid routing an unrelated transactions.json as Wendi.
+        if name == "transactions.json" and "/wendi/" not in normalized:
+            pass
+        else:
+            return filename_routes[name]
+
+    # Path markers cover the full source-domain layout.
+    route_markers = [
+        ("/icmn/vpm/pain001/", ("vpm", "pain001", "icmn.vpm.pain001")),
+        ("/icmn/pmn/pain001/", ("pmn", "pain001", "icmn.pmn.pain001")),
+        ("/cpo/psn/pain002/", ("psn", "pain002", "cpo.psn.pain002")),
+        ("/cpo/plm/pain002/", ("plm", "pain002", "cpo.plm.pain002")),
+        ("/wendi/pain001/", ("wendi", "pain001", "wendi.pain001")),
+        ("/wendi/pain002/", ("wendi", "pain002", "wendi.pain002")),
+        ("/wendi/camt052/", ("wendi", "camt052", "wendi.camt052")),
+        ("/wendi/camt053/", ("wendi", "camt053", "wendi.camt053")),
+        ("/wendi/camt054/", ("wendi", "camt054", "wendi.camt054")),
+        ("/mobile_networks/mtn/pacs008/", ("mtn", "pacs008", "mobile.mtn.pacs008")),
+        ("/mobile_networks/mtn/pacs002/", ("mtn", "pacs002", "mobile.mtn.pacs002")),
+        ("/mobile_networks/airtel/pacs008/", ("airtel", "pacs008", "mobile.airtel.pacs008")),
+        ("/mobile_networks/airtel/pacs002/", ("airtel", "pacs002", "mobile.airtel.pacs002")),
+        ("/agent_network/agent_transactions/", ("agent", "transactions", "agent.transactions")),
+    ]
+    for marker, route in route_markers:
+        if marker in normalized:
+            return route
+
+    # PDMIS files can be nested below an entity directory with arbitrary filenames.
+    pdmis_entities = ("beneficiaries", "business_plans", "households", "loans", "saccos", "special_groups")
+    if "/pdmis/" in normalized:
+        for entity in pdmis_entities:
+            if f"/pdmis/{entity}/" in normalized or f"/{entity}/" in normalized:
+                return "pdmis", entity, f"pdmis.{entity}"
+
     return "unknown", "unknown", "unknown"
+
 
 def parse_event(file_path: str) -> Optional[Dict[str, Any]]:
     """Parse XML file and create event with proper topic mapping"""
@@ -347,9 +319,11 @@ def parse_event(file_path: str) -> Optional[Dict[str, Any]]:
     # Parse based on message type
     if "pain001" in msg_type.lower():
         payload = parse_pain001_xml(file_path)
-    elif "pain002" in msg_type.lower() or "pacs" in msg_type.lower():
+    elif "pain002" in msg_type.lower():
         payload = parse_pain002_xml(file_path)
     else:
+        # PACS/CAMT are preserved losslessly here. Message-family-specific
+        # projections can be added without changing the raw contract.
         payload = parse_generic_xml(file_path)
 
     # event_data is the immutable, original source message.  The separate
@@ -399,9 +373,10 @@ def parse_event(file_path: str) -> Optional[Dict[str, Any]]:
     return event
 
 def parse_json_events(file_path: str) -> list[Dict[str, Any]]:
-    """Create one Kafka event per object in a JSON array source file."""
+    """Create one Kafka event per JSON object for Agent, Wendi or PDMIS feeds."""
     system, msg_type, topic = detect_system_from_path(file_path)
-    if topic == "unknown":
+    if topic == "unknown" or topic not in TOPIC_MAPPINGS:
+        logger.warning(f"Unknown JSON system/topic for {file_path}, skipping")
         return []
     try:
         document = json.loads(Path(file_path).read_text(encoding="utf-8"))
@@ -411,14 +386,36 @@ def parse_json_events(file_path: str) -> list[Dict[str, Any]]:
 
     records = document if isinstance(document, list) else [document]
     events = []
+    id_candidates = (
+        "transaction_id", "payment_id", "loan_id", "beneficiary_id", "household_id",
+        "sacco_id", "business_plan_id", "special_group_id", "agent_id", "event_id", "id"
+    )
+    date_candidates = (
+        "created_at", "transaction_timestamp", "timestamp", "payment_date",
+        "disbursement_date", "updated_at"
+    )
+
     for record in records:
         if not isinstance(record, dict):
             continue
-        message_id = next((str(record[key]) for key in (
-            "transaction_id", "agent_id", "event_id"
-        ) if record.get(key)), f"{system.upper()}-{msg_type}-{uuid.uuid4().hex[:8]}")
-        creation_date = str(record.get("created_at") or record.get("transaction_timestamp") or time.strftime("%Y-%m-%dT%H:%M:%S.000Z"))
-        amount = record.get("amount", 0.0)
+        message_id = next(
+            (str(record[key]) for key in id_candidates if record.get(key) is not None),
+            f"{system.upper()}-{msg_type}-{uuid.uuid4().hex[:8]}",
+        )
+        creation_date = next(
+            (str(record[key]) for key in date_candidates if record.get(key)),
+            time.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
+        )
+        amount = next(
+            (record[key] for key in ("amount", "loan_amount", "disbursed_amount", "instructed_amount") if record.get(key) is not None),
+            0.0,
+        )
+        try:
+            amount = float(amount)
+        except (TypeError, ValueError):
+            amount = 0.0
+
+        raw = json.dumps(record, separators=(",", ":"), ensure_ascii=False)
         events.append({
             "event_id": str(uuid.uuid4()),
             "message_id": message_id,
@@ -426,18 +423,19 @@ def parse_json_events(file_path: str) -> list[Dict[str, Any]]:
             "source_system": system,
             "source_key": os.path.basename(file_path),
             "source_location": file_path,
-            "instructed_amount": float(amount) if amount is not None else 0.0,
+            "instructed_amount": amount,
             "currency": str(record.get("currency") or "UGX"),
             "creation_date": creation_date,
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
             "version": "1.0.0",
-            "event_data": json.dumps(record),
-            "payload": json.dumps(record),
+            "event_data": raw,
+            "payload": raw,
             "x_attributes": None,
-            "parsed_event_data": json.dumps(record),
+            "parsed_event_data": raw,
             "_topic": topic,
         })
     return events
+
 
 # ------------------------------------------------------------------------------
 # Main Producer
@@ -484,18 +482,13 @@ def main():
     
     producer = SerializingProducer(producer_config)
     
-    # Find all XML files and supported JSON entity feeds.
+    # Discover all supported source files across the six source domains.
     xml_files = glob.glob(f"{Config.DATA_ROOT}/**/*.xml", recursive=True)
-    json_files = [
-        f"{Config.DATA_ROOT}/agent_network/agent_profiles.json",
-        f"{Config.DATA_ROOT}/agent_network/agent_locations.json",
-        f"{Config.DATA_ROOT}/agent_network/agent_transactions.json",
-    ]
-    json_files = [path for path in json_files if Path(path).is_file()]
-    logger.info(f"📄 Found {len(xml_files)} XML files")
-    
-    if not xml_files:
-        logger.warning("No XML files found. Run payment_xml_generator.py first.")
+    json_files = glob.glob(f"{Config.DATA_ROOT}/**/*.json", recursive=True)
+    logger.info(f"📄 Found {len(xml_files)} XML files and {len(json_files)} JSON files")
+
+    if not xml_files and not json_files:
+        logger.warning("No supported XML/JSON source files found under DATA_ROOT.")
         return
     
     # Group files by topic
@@ -513,9 +506,11 @@ def main():
             topic = event.pop("_topic")
             json_events_by_topic.setdefault(topic, []).append(event)
     
-    logger.info(f"📋 Files grouped by topic:")
+    logger.info("📋 Source records grouped by topic:")
     for topic, files in files_by_topic.items():
-        logger.info(f"  • {topic}: {len(files)} files")
+        logger.info(f"  • {topic}: {len(files)} XML files")
+    for topic, events in json_events_by_topic.items():
+        logger.info(f"  • {topic}: {len(events)} JSON records")
     
     # Produce events
     produced = 0

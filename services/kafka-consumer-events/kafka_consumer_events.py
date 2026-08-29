@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 """
-Payment Events Consumer - Reads from system-specific Kafka topics
-and stores raw events in MinIO/S3 with date partitioning in Avro format.
+Payment Events Consumer - Reads source-domain Kafka topics and stores immutable
+raw events in MinIO/S3 with date partitioning in Avro format.
 
-Topics consumed:
-- icmn.vpm.pain001, icmn.vpm.pain002
-- icmn.pmn.pain001, icmn.pmn.pain002
-- cpo.psn.pain001, cpo.psn.pain002
-- cpo.plm.pain001, cpo.plm.pain002
+Consumes the 23 source-ingestion topics for ICMN, CPO, Wendi, Mobile Networks,
+Agent Network and PDMIS. Reconciliation topics are downstream-derived and excluded.
 """
 
 import os
@@ -54,15 +51,35 @@ class Settings:
     # Kafka
     KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092")
     KAFKA_TOPICS = os.getenv("KAFKA_TOPICS", "").split(",") if os.getenv("KAFKA_TOPICS") else [
+        # ICMN
         "icmn.vpm.pain001",
-        "icmn.vpm.pain002",
         "icmn.pmn.pain001",
-        "icmn.pmn.pain002",
-        "cpo.psn.pain001",
+        # CPO
         "cpo.psn.pain002",
-        "cpo.plm.pain001",
-        "cpo.plm.pain002", "wendi.pain001", "wendi.pain002",
-        "agent.profiles", "agent.locations", "agent.transactions",
+        "cpo.plm.pain002",
+        # Wendi
+        "wendi.camt052",
+        "wendi.camt053",
+        "wendi.camt054",
+        "wendi.transactions",
+        "wendi.pain001",
+        "wendi.pain002",
+        # Mobile Networks
+        "mobile.mtn.pacs008",
+        "mobile.mtn.pacs002",
+        "mobile.airtel.pacs008",
+        "mobile.airtel.pacs002",
+        # Agent Network
+        "agent.transactions",
+        "agent.profiles",
+        "agent.locations",
+        # PDMIS
+        "pdmis.beneficiaries",
+        "pdmis.business_plans",
+        "pdmis.households",
+        "pdmis.loans",
+        "pdmis.saccos",
+        "pdmis.special_groups",
     ]
     KAFKA_GROUP_ID = os.getenv("KAFKA_GROUP_ID", "payment-events-consumer")
     
@@ -109,7 +126,9 @@ PAYMENT_EVENT_AVRO_SCHEMA = avro.schema.parse("""
                 {"name": "partition", "type": "int"},
                 {"name": "offset", "type": "long"},
                 {"name": "timestamp", "type": "string"},
-                {"name": "category", "type": ["string", "null"]}
+                {"name": "category", "type": ["string", "null"]},
+                {"name": "source_group", "type": ["string", "null"]},
+                {"name": "source_system", "type": ["string", "null"]}
             ]
         }}
     ]
@@ -120,25 +139,43 @@ PAYMENT_EVENT_AVRO_SCHEMA = avro.schema.parse("""
 # Topic to System Mapping
 # ------------------------------------------------------------------------------
 def parse_topic(topic: str) -> Dict[str, str]:
-    """
-    Parse topic name to extract system information.
-    
-    Topic format: {category}.{system}.{msg_type}
-    Example: icmn.vpm.pain001 → {'category': 'icmn', 'system': 'vpm', 'msg_type': 'pain001'}
-    """
-    parts = topic.split('.')
-    if len(parts) == 3:
-        return {
-            'category': parts[0],      # icmn or cpo
-            'system': parts[1],        # vpm, pmn, psn, plm
-            'msg_type': parts[2]       # pain001, pain002, etc.
-        }
-    else:
-        return {
-            'category': 'unknown',
-            'system': 'unknown',
-            'msg_type': 'unknown'
-        }
+    """Return canonical source-domain metadata for a configured topic."""
+    topic_map = {
+        "icmn.vpm.pain001": {"category": "icmn", "source_group": "icmn", "system": "vpm", "msg_type": "pain001"},
+        "icmn.pmn.pain001": {"category": "icmn", "source_group": "icmn", "system": "pmn", "msg_type": "pain001"},
+        "cpo.psn.pain002": {"category": "cpo", "source_group": "cpo", "system": "psn", "msg_type": "pain002"},
+        "cpo.plm.pain002": {"category": "cpo", "source_group": "cpo", "system": "plm", "msg_type": "pain002"},
+        "wendi.camt052": {"category": "wendi", "source_group": "wendi", "system": "wendi", "msg_type": "camt052"},
+        "wendi.camt053": {"category": "wendi", "source_group": "wendi", "system": "wendi", "msg_type": "camt053"},
+        "wendi.camt054": {"category": "wendi", "source_group": "wendi", "system": "wendi", "msg_type": "camt054"},
+        "wendi.transactions": {"category": "wendi", "source_group": "wendi", "system": "wendi", "msg_type": "transactions"},
+        "wendi.pain001": {"category": "wendi", "source_group": "wendi", "system": "wendi", "msg_type": "pain001"},
+        "wendi.pain002": {"category": "wendi", "source_group": "wendi", "system": "wendi", "msg_type": "pain002"},
+        "mobile.mtn.pacs008": {"category": "mobile_networks", "source_group": "mobile", "system": "mtn", "msg_type": "pacs008"},
+        "mobile.mtn.pacs002": {"category": "mobile_networks", "source_group": "mobile", "system": "mtn", "msg_type": "pacs002"},
+        "mobile.airtel.pacs008": {"category": "mobile_networks", "source_group": "mobile", "system": "airtel", "msg_type": "pacs008"},
+        "mobile.airtel.pacs002": {"category": "mobile_networks", "source_group": "mobile", "system": "airtel", "msg_type": "pacs002"},
+        "agent.transactions": {"category": "agent_network", "source_group": "agent", "system": "agent", "msg_type": "transactions"},
+        "agent.profiles": {"category": "agent_network", "source_group": "agent", "system": "agent", "msg_type": "profiles"},
+        "agent.locations": {"category": "agent_network", "source_group": "agent", "system": "agent", "msg_type": "locations"},
+        "pdmis.beneficiaries": {"category": "pdmis", "source_group": "pdmis", "system": "pdmis", "msg_type": "beneficiaries"},
+        "pdmis.business_plans": {"category": "pdmis", "source_group": "pdmis", "system": "pdmis", "msg_type": "business_plans"},
+        "pdmis.households": {"category": "pdmis", "source_group": "pdmis", "system": "pdmis", "msg_type": "households"},
+        "pdmis.loans": {"category": "pdmis", "source_group": "pdmis", "system": "pdmis", "msg_type": "loans"},
+        "pdmis.saccos": {"category": "pdmis", "source_group": "pdmis", "system": "pdmis", "msg_type": "saccos"},
+        "pdmis.special_groups": {"category": "pdmis", "source_group": "pdmis", "system": "pdmis", "msg_type": "special_groups"},
+    }
+    if topic in topic_map:
+        return topic_map[topic]
+
+    parts = topic.split(".")
+    return {
+        "category": parts[0] if parts else "unknown",
+        "source_group": parts[0] if parts else "unknown",
+        "system": parts[1] if len(parts) > 2 else parts[0] if parts else "unknown",
+        "msg_type": parts[-1] if parts else "unknown",
+    }
+
 
 # ------------------------------------------------------------------------------
 # MinIO Client
@@ -193,13 +230,16 @@ def store_event_to_s3(
     """
     Store event in MinIO/S3 as Avro with date partitioning.
     
-    Path: raw/{category}/year=YYYY/month=MM/day=DD/topic={topic}/partition={p}/offset={o}/{uuid}.avro
+    Path: raw/v2/category={category}/source_group={source_group}/source_system={system}/
+          year=YYYY/month=MM/day=DD/topic={topic}/partition={p}/offset={o}/{uuid}.avro
     """
     minio_client = get_minio_client()
     
     # Parse topic to get category/system/msg_type
     topic_info = parse_topic(topic)
     category = topic_info['category']
+    source_group = topic_info['source_group']
+    source_system = topic_info['system']
     
     # Date partitioning
     year = timestamp.strftime("%Y")
@@ -212,9 +252,9 @@ def store_event_to_s3(
     
     # Construct S3 key
     s3_key = (
-        f"{Settings.RAW_PREFIX}/{category}/year={year}/month={month}/day={day}/"
-        f"topic={topic}/partition={partition}/offset={offset}/"
-        f"{filename}"
+        f"{Settings.RAW_PREFIX}/category={category}/source_group={source_group}/"
+        f"source_system={source_system}/year={year}/month={month}/day={day}/"
+        f"topic={topic}/partition={partition}/offset={offset}/{filename}"
     )
     
     event_data = event.get("event_data")
@@ -231,7 +271,7 @@ def store_event_to_s3(
         "event_id": event.get("event_id", str(uuid.uuid4())),
         "message_id": event.get("message_id"),
         "timestamp": event.get("timestamp", timestamp.isoformat()),
-        "source_system": event.get("source_system", topic_info['system']),
+        "source_system": event.get("source_system") or source_system,
         "message_type": event.get("message_type", topic_info['msg_type']),
         "payload": {
             "amount": event.get("instructed_amount"),
@@ -249,6 +289,8 @@ def store_event_to_s3(
             "offset": offset,
             "timestamp": timestamp.isoformat(),
             "category": category,
+            "source_group": source_group,
+            "source_system": source_system,
         }
     }
     
@@ -303,6 +345,8 @@ def store_to_dlq(
     
     topic_info = parse_topic(topic)
     category = topic_info['category']
+    source_group = topic_info['source_group']
+    source_system = topic_info['system']
     
     now = datetime.now(pytz.UTC)
     year = now.strftime("%Y")
@@ -311,8 +355,8 @@ def store_to_dlq(
     
     file_id = uuid.uuid4()
     s3_key = (
-        f"bronze/invalid/{category}/year={year}/month={month}/day={day}/"
-        f"topic={topic}/partition={partition}/offset={offset}/"
+        f"bronze/invalid/category={category}/source_group={source_group}/source_system={source_system}/"
+        f"year={year}/month={month}/day={day}/topic={topic}/partition={partition}/offset={offset}/"
         f"{file_id}.json"
     )
     

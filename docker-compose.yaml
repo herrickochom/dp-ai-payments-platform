@@ -64,7 +64,7 @@ services:
       QUARKUS_CONFIG_LOCATIONS: /deployments/config/application.properties
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-pdm_platform}
       # Superset is created by 20_create_superset_db.sh; keep this list
       # disjoint so PostgreSQL initialization cannot abort on a duplicate.
       POSTGRES_MULTIPLE_DATABASES: metabase
@@ -76,7 +76,7 @@ services:
     networks:
       - data-platform-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -89,6 +89,7 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-pdm_platform}
     depends_on:
       postgres:
         condition: service_healthy
@@ -174,6 +175,8 @@ services:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.kafka-broker
     container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-kafka
+    # Fresh named volumes are root-owned; Kafka must initialise and format them.
+    user: "0:0"
     environment:
       CLUSTER_ID: "XwjubDNrR0q4Q6FLK0M7Xg"
       KAFKA_CLUSTER_ID: "XwjubDNrR0q4Q6FLK0M7Xg"
@@ -503,7 +506,7 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_BUCKET: dp-ai-payment
-      RAW_ROOT: raw
+      RAW_ROOT: raw/v2
       NESSIE_ENDPOINT: http://nessie-rest-proxy:19121
     volumes:
       - ./transform/dbt:/usr/app/dbt
@@ -538,7 +541,7 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_ENDPOINT: http://minio:9000
       MINIO_BUCKET: dp-ai-payment
-      RAW_ROOT: raw
+      RAW_ROOT: raw/v2
       NESSIE_ENDPOINT: http://nessie-rest-proxy:19121
     volumes:
       - ./transform/dbt:/usr/app/dbt
