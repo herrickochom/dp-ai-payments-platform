@@ -1,8 +1,8 @@
 FROM trinodb/trino:latest
 
 # Copy custom configurations
-COPY platform/trino/etc /usr/lib/trino/etc/
-COPY platform/trino/catalog /usr/lib/trino/etc/catalog/
+COPY platform/trino/etc /etc/trino/
+COPY platform/trino/catalog /etc/trino/catalog/
 
 EXPOSE 8080
 

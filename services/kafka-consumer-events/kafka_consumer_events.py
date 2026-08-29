@@ -25,7 +25,9 @@ import pytz
 
 # Avro imports
 import avro.schema
-from avro.io import DatumWriter, BinaryEncoder
+from avro.io import DatumWriter
+from avro.datafile import DataFileWriter
+
 from avro.errors import AvroException
 
 # ------------------------------------------------------------------------------
@@ -89,7 +91,7 @@ class Settings:
 # ------------------------------------------------------------------------------
 # Avro Schema Definition
 # ------------------------------------------------------------------------------
-# This schema is used when storing events in Avro format
+# This schema is used when storing events as Avro Object Container Files (OCF)
 PAYMENT_EVENT_AVRO_SCHEMA = avro.schema.parse("""
 {
     "type": "record",
@@ -196,26 +198,59 @@ def get_minio_client():
 # ------------------------------------------------------------------------------
 def serialize_to_avro(event: Dict[str, Any]) -> bytes:
     """
-    Serialize event to Avro binary format.
-    
-    Args:
-        event: Dictionary event to serialize
-        
-    Returns:
-        bytes: Avro serialized data
+    Serialize an event as an Avro Object Container File (OCF).
+
+    DuckDB read_avro() requires Avro OCF files. A valid Avro OCF starts
+    with the four magic bytes: b"Obj\\x01".
     """
+    buffer = io.BytesIO()
+    writer = None
+
     try:
-        bytes_writer = io.BytesIO()
-        encoder = BinaryEncoder(bytes_writer)
-        writer = DatumWriter(PAYMENT_EVENT_AVRO_SCHEMA)
-        writer.write(event, encoder)
-        return bytes_writer.getvalue()
-    except AvroException as e:
-        logger.error(f"Avro serialization error: {e}")
+        writer = DataFileWriter(
+            buffer,
+            DatumWriter(),
+            PAYMENT_EVENT_AVRO_SCHEMA,
+        )
+
+        writer.append(event)
+        writer.flush()
+
+        avro_data = buffer.getvalue()
+
+        expected_magic = bytes((0x4F, 0x62, 0x6A, 0x01))
+        actual_magic = avro_data[:4]
+
+        if actual_magic != expected_magic:
+            raise AvroException(
+                "Serialized output is not a valid Avro Object Container File: "
+                f"expected magic={expected_magic!r}, actual={actual_magic!r}"
+            )
+
+        logger.debug(
+            "Serialized Avro OCF successfully: %d bytes, magic=%r",
+            len(avro_data),
+            actual_magic,
+        )
+
+        return avro_data
+
+    except AvroException as exc:
+        logger.error("Avro serialization error: %s", exc)
         raise
-    except Exception as e:
-        logger.error(f"Unexpected error during Avro serialization: {e}")
+
+    except Exception as exc:
+        logger.exception("Unexpected error during Avro serialization: %s", exc)
         raise
+
+    finally:
+        if writer is not None:
+            try:
+                writer.close()
+            except Exception:
+                logger.debug("Ignoring Avro writer close error", exc_info=True)
+
+
 
 # ------------------------------------------------------------------------------
 # Event Storage
@@ -320,7 +355,7 @@ def store_event_to_s3(
                 Body=json.dumps(enriched_event, indent=2).encode("utf-8"),
                 ContentType="application/json",
             )
-            logger.warning(f"⚠️  Stored as JSON fallback: s3://{Settings.MINIO_BUCKET}/{json_key}")
+            logger.warning(f"⚠️  Stored JSON fallback (not Avro): s3://{Settings.MINIO_BUCKET}/{json_key}")
             return json_key
         except Exception as fallback_error:
             logger.error(f"❌ Fallback storage also failed: {fallback_error}")
@@ -385,6 +420,41 @@ def store_to_dlq(
 # ------------------------------------------------------------------------------
 def main():
     """Main consumer loop"""
+
+    # Fail fast if the runtime Avro library cannot produce a valid OCF.
+    self_test_now = datetime.now(pytz.UTC).isoformat()
+    self_test_event = {
+        "event_id": "avro-ocf-self-test",
+        "message_id": None,
+        "timestamp": self_test_now,
+        "source_system": "self-test",
+        "message_type": "self-test",
+        "payload": {
+            "amount": None,
+            "currency": None,
+            "debtor": None,
+            "creditor": None,
+            "status": None,
+            "x_attributes": {},
+        },
+        "event_data": None,
+        "parsed_event_data": None,
+        "_kafka_metadata": {
+            "topic": "self-test",
+            "partition": 0,
+            "offset": 0,
+            "timestamp": self_test_now,
+            "category": "self-test",
+            "source_group": "self-test",
+            "source_system": "self-test",
+        },
+    }
+
+    self_test_bytes = serialize_to_avro(self_test_event)
+    if self_test_bytes[:4] != bytes((0x4F, 0x62, 0x6A, 0x01)):
+        raise RuntimeError("Avro OCF startup self-test failed")
+
+    logger.info("✅ Avro OCF startup self-test passed")
     logger.info("=" * 80)
     logger.info("🚀 Payment Events Consumer (Raw Layer - Avro Storage)")
     logger.info("=" * 80)
@@ -392,7 +462,7 @@ def main():
     logger.info(f"📦 Consumer Group: {Settings.KAFKA_GROUP_ID}")
     logger.info(f"🪣 MinIO Bucket: {Settings.MINIO_BUCKET}")
     logger.info(f"📡 Schema Registry: {Settings.SCHEMA_REGISTRY_URL}")
-    logger.info(f"📄 Storage Format: AVRO (with JSON fallback)")
+    logger.info("📄 Storage Format: AVRO OCF (JSON fallback on serialization/storage failure)")
     logger.info("=" * 80)
     
     # Initialize Schema Registry client
@@ -505,7 +575,7 @@ def main():
         logger.info(f"📊 Final Statistics:")
         logger.info(f"   ✅ Successfully processed (Avro): {processed_count}")
         logger.info(f"   ❌ Errors: {error_count}")
-        logger.info(f"   📄 Storage Format: Avro (with JSON fallback)")
+        logger.info("   📄 Storage Format: Avro OCF (JSON fallback on failure)")
         logger.info("=" * 80)
         consumer.close()
         logger.info("✅ Consumer closed")

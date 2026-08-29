@@ -1,41 +1,676 @@
 version: 2
 
 models:
+
+  # ============================================================================
+  # AGENT NETWORK
+  # ============================================================================
+
   - name: br_pdm_agent_locations
     description: Source-shaped agent location records decoded from Raw Avro.
+    columns:
+      - name: event_id
+        data_tests:
+          - not_null
+          - unique
+
+      - name: kafka_topic
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - agent.locations
+
+      - name: kafka_partition
+        data_tests:
+          - not_null
+
+      - name: kafka_offset
+        data_tests:
+          - not_null
+
+      - name: kafka_timestamp
+        data_tests:
+          - not_null
+
+      - name: record_source
+        data_tests:
+          - not_null
+
   - name: br_pdm_agent_profiles
     description: Source-shaped agent profile records decoded from Raw Avro.
+    columns:
+      - name: event_id
+        data_tests:
+          - not_null
+          - unique
+
+      - name: kafka_topic
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - agent.profiles
+
+      - name: kafka_partition
+        data_tests:
+          - not_null
+
+      - name: kafka_offset
+        data_tests:
+          - not_null
+
+      - name: kafka_timestamp
+        data_tests:
+          - not_null
+
+      - name: record_source
+        data_tests:
+          - not_null
+
   - name: br_pdm_agent_transactions
     description: Source-shaped agent cash-out events decoded from Raw Avro.
+    columns:
+      - name: event_id
+        data_tests:
+          - not_null
+          - unique
+
+      - name: transaction_id
+        data_tests:
+          - not_null
+
+      - name: loan_id
+        description: Critical PDM loan linkage identifier.
+        data_tests:
+          - not_null
+
+      - name: kafka_topic
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - agent.transactions
+
+      - name: kafka_partition
+        data_tests:
+          - not_null
+
+      - name: kafka_offset
+        data_tests:
+          - not_null
+
+      - name: kafka_timestamp
+        data_tests:
+          - not_null
+
+      - name: record_source
+        data_tests:
+          - not_null
+
+  # ============================================================================
+  # CPO
+  # ============================================================================
+
+  - name: br_pdm_cpo_plm_pain002
+    description: Source-shaped CPO PLM PAIN.002 payment status messages.
+    columns:
+      - name: event_id
+        data_tests:
+          - not_null
+          - unique
+
+      - name: kafka_topic
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - cpo.plm.pain002
+
+      - name: kafka_partition
+        data_tests:
+          - not_null
+
+      - name: kafka_offset
+        data_tests:
+          - not_null
+
+      - name: kafka_timestamp
+        data_tests:
+          - not_null
+
+      - name: record_source
+        data_tests:
+          - not_null
+
+  - name: br_pdm_cpo_psn_pain002
+    description: Source-shaped CPO PSN PAIN.002 payment status messages.
+    columns:
+      - name: event_id
+        data_tests:
+          - not_null
+          - unique
+
+      - name: kafka_topic
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - cpo.psn.pain002
+
+      - name: kafka_partition
+        data_tests:
+          - not_null
+
+      - name: kafka_offset
+        data_tests:
+          - not_null
+
+      - name: kafka_timestamp
+        data_tests:
+          - not_null
+
+      - name: record_source
+        data_tests:
+          - not_null
+
+  # ============================================================================
+  # ICMN
+  # ============================================================================
+
+  - name: br_pdm_icmn_pmn_pain001
+    description: Source-shaped ICMN PMN PAIN.001 payment instruction messages.
+    columns:
+      - name: event_id
+        data_tests:
+          - not_null
+          - unique
+
+      - name: kafka_topic
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - icmn.pmn.pain001
+
+      - name: kafka_partition
+        data_tests:
+          - not_null
+
+      - name: kafka_offset
+        data_tests:
+          - not_null
+
+      - name: kafka_timestamp
+        data_tests:
+          - not_null
+
+      - name: record_source
+        data_tests:
+          - not_null
+
+  - name: br_pdm_icmn_vpm_pain001
+    description: Source-shaped ICMN VPM PAIN.001 payment instruction messages.
+    columns:
+      - name: event_id
+        data_tests:
+          - not_null
+          - unique
+
+      - name: kafka_topic
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - icmn.vpm.pain001
+
+      - name: kafka_partition
+        data_tests:
+          - not_null
+
+      - name: kafka_offset
+        data_tests:
+          - not_null
+
+      - name: kafka_timestamp
+        data_tests:
+          - not_null
+
+      - name: record_source
+        data_tests:
+          - not_null
+
+  # ============================================================================
+  # MOBILE NETWORKS
+  # ============================================================================
+
   - name: br_pdm_mobile_airtel_pacs002
     description: Source-shaped Airtel PACS.002 status messages.
+    columns:
+      - name: event_id
+        data_tests: [not_null, unique]
+
+      - name: kafka_topic
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - mobile.airtel.pacs002
+
+      - name: kafka_partition
+        data_tests: [not_null]
+
+      - name: kafka_offset
+        data_tests: [not_null]
+
+      - name: kafka_timestamp
+        data_tests: [not_null]
+
+      - name: record_source
+        data_tests: [not_null]
+
   - name: br_pdm_mobile_airtel_pacs008
     description: Source-shaped Airtel PACS.008 settlement messages.
+    columns:
+      - name: event_id
+        data_tests: [not_null, unique]
+
+      - name: kafka_topic
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - mobile.airtel.pacs008
+
+      - name: kafka_partition
+        data_tests: [not_null]
+
+      - name: kafka_offset
+        data_tests: [not_null]
+
+      - name: kafka_timestamp
+        data_tests: [not_null]
+
+      - name: record_source
+        data_tests: [not_null]
+
   - name: br_pdm_mobile_mtn_pacs002
     description: Source-shaped MTN PACS.002 status messages.
+    columns:
+      - name: event_id
+        data_tests: [not_null, unique]
+
+      - name: kafka_topic
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - mobile.mtn.pacs002
+
+      - name: kafka_partition
+        data_tests: [not_null]
+
+      - name: kafka_offset
+        data_tests: [not_null]
+
+      - name: kafka_timestamp
+        data_tests: [not_null]
+
+      - name: record_source
+        data_tests: [not_null]
+
   - name: br_pdm_mobile_mtn_pacs008
     description: Source-shaped MTN PACS.008 settlement messages.
+    columns:
+      - name: event_id
+        data_tests: [not_null, unique]
+
+      - name: kafka_topic
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - mobile.mtn.pacs008
+
+      - name: kafka_partition
+        data_tests: [not_null]
+
+      - name: kafka_offset
+        data_tests: [not_null]
+
+      - name: kafka_timestamp
+        data_tests: [not_null]
+
+      - name: record_source
+        data_tests: [not_null]
+
+  # ============================================================================
+  # PDMIS
+  # ============================================================================
+
   - name: br_pdm_pdmis_beneficiaries
     description: Source-shaped PDMIS beneficiary records.
+    columns:
+      - name: event_id
+        data_tests: [not_null, unique]
+
+      - name: kafka_topic
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - pdmis.beneficiaries
+
+      - name: kafka_partition
+        data_tests: [not_null]
+
+      - name: kafka_offset
+        data_tests: [not_null]
+
+      - name: kafka_timestamp
+        data_tests: [not_null]
+
+      - name: record_source
+        data_tests: [not_null]
+
   - name: br_pdm_pdmis_business_plans
     description: Source-shaped PDMIS business-plan records.
+    columns:
+      - name: event_id
+        data_tests: [not_null, unique]
+
+      - name: kafka_topic
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - pdmis.business_plans
+
+      - name: kafka_partition
+        data_tests: [not_null]
+
+      - name: kafka_offset
+        data_tests: [not_null]
+
+      - name: kafka_timestamp
+        data_tests: [not_null]
+
+      - name: record_source
+        data_tests: [not_null]
+
   - name: br_pdm_pdmis_households
     description: Source-shaped PDMIS household records.
+    columns:
+      - name: event_id
+        data_tests: [not_null, unique]
+
+      - name: kafka_topic
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - pdmis.households
+
+      - name: kafka_partition
+        data_tests: [not_null]
+
+      - name: kafka_offset
+        data_tests: [not_null]
+
+      - name: kafka_timestamp
+        data_tests: [not_null]
+
+      - name: record_source
+        data_tests: [not_null]
+
   - name: br_pdm_pdmis_loans
     description: Source-shaped PDMIS loan records.
+    columns:
+      - name: event_id
+        data_tests: [not_null, unique]
+
+      - name: kafka_topic
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - pdmis.loans
+
+      - name: kafka_partition
+        data_tests: [not_null]
+
+      - name: kafka_offset
+        data_tests: [not_null]
+
+      - name: kafka_timestamp
+        data_tests: [not_null]
+
+      - name: record_source
+        data_tests: [not_null]
+
   - name: br_pdm_pdmis_saccos
     description: Source-shaped PDMIS SACCO records.
+    columns:
+      - name: event_id
+        data_tests: [not_null, unique]
+
+      - name: kafka_topic
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - pdmis.saccos
+
+      - name: kafka_partition
+        data_tests: [not_null]
+
+      - name: kafka_offset
+        data_tests: [not_null]
+
+      - name: kafka_timestamp
+        data_tests: [not_null]
+
+      - name: record_source
+        data_tests: [not_null]
+
   - name: br_pdm_pdmis_special_groups
     description: Source-shaped PDMIS special-group reference records.
+    columns:
+      - name: event_id
+        data_tests: [not_null, unique]
+
+      - name: kafka_topic
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - pdmis.special_groups
+
+      - name: kafka_partition
+        data_tests: [not_null]
+
+      - name: kafka_offset
+        data_tests: [not_null]
+
+      - name: kafka_timestamp
+        data_tests: [not_null]
+
+      - name: record_source
+        data_tests: [not_null]
+
+  # ============================================================================
+  # WENDI
+  # ============================================================================
+
   - name: br_pdm_wendi_camt052
     description: Source-shaped Wendi CAMT.052 account reports.
+    columns:
+      - name: event_id
+        data_tests: [not_null, unique]
+
+      - name: kafka_topic
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - wendi.camt052
+
+      - name: kafka_partition
+        data_tests: [not_null]
+
+      - name: kafka_offset
+        data_tests: [not_null]
+
+      - name: kafka_timestamp
+        data_tests: [not_null]
+
+      - name: record_source
+        data_tests: [not_null]
+
   - name: br_pdm_wendi_camt053
     description: Source-shaped Wendi CAMT.053 statements.
+    columns:
+      - name: event_id
+        data_tests: [not_null, unique]
+
+      - name: kafka_topic
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - wendi.camt053
+
+      - name: kafka_partition
+        data_tests: [not_null]
+
+      - name: kafka_offset
+        data_tests: [not_null]
+
+      - name: kafka_timestamp
+        data_tests: [not_null]
+
+      - name: record_source
+        data_tests: [not_null]
+
   - name: br_pdm_wendi_camt054
     description: Source-shaped Wendi CAMT.054 notifications.
+    columns:
+      - name: event_id
+        data_tests: [not_null, unique]
+
+      - name: kafka_topic
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - wendi.camt054
+
+      - name: kafka_partition
+        data_tests: [not_null]
+
+      - name: kafka_offset
+        data_tests: [not_null]
+
+      - name: kafka_timestamp
+        data_tests: [not_null]
+
+      - name: record_source
+        data_tests: [not_null]
+
   - name: br_pdm_wendi_pain001
     description: Source-shaped Wendi PAIN.001 payment instructions.
+    columns:
+      - name: event_id
+        data_tests: [not_null, unique]
+
+      - name: kafka_topic
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - wendi.pain001
+
+      - name: kafka_partition
+        data_tests: [not_null]
+
+      - name: kafka_offset
+        data_tests: [not_null]
+
+      - name: kafka_timestamp
+        data_tests: [not_null]
+
+      - name: record_source
+        data_tests: [not_null]
+
   - name: br_pdm_wendi_pain002
     description: Source-shaped Wendi PAIN.002 status reports.
+    columns:
+      - name: event_id
+        data_tests: [not_null, unique]
+
+      - name: kafka_topic
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - wendi.pain002
+
+      - name: kafka_partition
+        data_tests: [not_null]
+
+      - name: kafka_offset
+        data_tests: [not_null]
+
+      - name: kafka_timestamp
+        data_tests: [not_null]
+
+      - name: record_source
+        data_tests: [not_null]
+
   - name: br_pdm_wendi_transactions
     description: Source-shaped Wendi wallet transaction events.
+    columns:
+      - name: event_id
+        data_tests: [not_null, unique]
+
+      - name: kafka_topic
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - wendi.transactions
+
+      - name: kafka_partition
+        data_tests: [not_null]
+
+      - name: kafka_offset
+        data_tests: [not_null]
+
+      - name: kafka_timestamp
+        data_tests: [not_null]
+
+      - name: record_source
+        data_tests: [not_null]

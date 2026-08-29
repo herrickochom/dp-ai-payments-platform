@@ -1,4 +1,4 @@
-{{ config(materialized='iceberg_table') }}
+{{ config(materialized='view') }}
 
 with raw_data as (
 

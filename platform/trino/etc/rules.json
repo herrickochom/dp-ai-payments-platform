@@ -1,26 +1,38 @@
 {
   "catalogs": [
     {
+      "user": ".*",
       "catalog": "iceberg",
       "allow": "all"
+    },
+    {
+      "user": ".*",
+      "catalog": "system",
+      "allow": "read-only"
     }
   ],
   "schemas": [
     {
+      "user": ".*",
+      "catalog": "iceberg",
       "schema": ".*",
       "owner": false
     }
   ],
   "tables": [
     {
+      "user": ".*",
+      "catalog": "iceberg",
+      "schema": ".*",
       "table": ".*",
       "privileges": ["SELECT", "INSERT", "DELETE", "UPDATE"]
     }
   ],
-  "sessions": [
+  "system_session_properties": [
     {
       "user": ".*",
-      "groups": [".*"]
+      "property": ".*",
+      "allow": true
     }
   ]
 }

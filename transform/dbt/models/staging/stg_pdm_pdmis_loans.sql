@@ -1,4 +1,4 @@
-{{ config(materialized='iceberg_table') }}
+{{ config(materialized='view') }}
 
 with raw_data as (
     select event_id, event_data, parsed_event_data, _kafka_metadata, year, month, day

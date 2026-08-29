@@ -18,7 +18,7 @@ select
     {{ gold_surrogate_key(['cast(payment.occurred_at as date)']) }} as payment_date_sk,
     {{ gold_surrogate_key(['coalesce(entity.transaction_beneficiary_id, entity.loan_beneficiary_id)']) }} as beneficiary_sk,
     {{ gold_surrogate_key(['coalesce(entity.transaction_sacco_id, entity.loan_sacco_id)']) }} as sacco_sk,
-    {{ gold_surrogate_key(['entity.transaction_agent_id']) }} as agent_sk,
+    {{ gold_surrogate_key(['agent.agent_id']) }} as agent_sk,
     {{ gold_surrogate_key(['beneficiary.region', 'beneficiary.district', 'beneficiary.parish', 'beneficiary.village']) }} as geography_sk,
     payment.source_system, payment.transaction_id, payment.end_to_end_id as loan_id,
     payment.message_id, payment.instruction_id, payment.uetr, payment.occurred_at,
@@ -40,6 +40,8 @@ left join {{ ref('slv_pdm_payment_entity_matches') }} entity
   on payment.source_system = entity.source_system and payment.transaction_id = entity.transaction_id
 left join {{ ref('slv_pdm_beneficiaries') }} beneficiary
   on coalesce(entity.transaction_beneficiary_id, entity.loan_beneficiary_id) = beneficiary.beneficiary_id
+left join {{ ref('slv_pdm_agents') }} agent
+  on entity.transaction_agent_id = agent.agent_id
 left join reconciliation
   on payment.source_system = reconciliation.source_system and payment.transaction_id = reconciliation.transaction_id
 left join creditors on payment.message_id = creditors.message_id

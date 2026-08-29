@@ -25,11 +25,8 @@ with transactions as (
            'WENDI_WALLET', event_timestamp, amount, currency, transaction_status
     from {{ ref('br_pdm_wendi_transactions') }}
     union all
-    select coalesce(transaction_id, source_json_transaction_id), coalesce(loan_id, source_json_loan_id),
-           null, null, null, coalesce(beneficiary_id, source_json_beneficiary_id), null,
-           coalesce(agent_id, source_json_agent_id), 'AGENT',
-           coalesce(transaction_timestamp, try_cast(source_json_transaction_timestamp as timestamp)),
-           coalesce(amount, try_cast(source_json_amount as double)), 'UGX', coalesce(status, source_json_status)
+    select transaction_id, loan_id, null, null, null, beneficiary_id, null,
+           agent_id, 'AGENT', transaction_timestamp, amount, 'UGX', status
     from {{ ref('br_pdm_agent_transactions') }}
 )
 select * from transactions
