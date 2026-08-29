@@ -1,13 +1,12 @@
 {{ config(materialized='iceberg_table') }}
 
-select event_id, message_id, 'vpm' as payment_source, 'debtor' as account_role,
-       debtor_account_id as account_id, debtor_agent_id as agent_id,
-       kafka_topic, kafka_partition, kafka_offset
+select debtor_account_id as account_id, debtor_account_issuer as account_issuer,
+       cast(null as varchar) as account_scheme
 from {{ ref('br_pdm_icmn_vpm_pain001') }}
+where debtor_account_id is not null
 
-union all
+union
 
-select event_id, message_id, 'vpm' as payment_source, 'creditor' as account_role,
-       creditor_account_id as account_id, creditor_agent_id as agent_id,
-       kafka_topic, kafka_partition, kafka_offset
+select creditor_account_id, creditor_account_issuer, creditor_account_scheme
 from {{ ref('br_pdm_icmn_vpm_pain001') }}
+where creditor_account_id is not null

@@ -1,0 +1,140 @@
+version: 2
+
+models:
+  - name: slv_pdm_beneficiaries
+    description: Canonical beneficiary entity at one row per beneficiary_id.
+    meta: {natural_key: [beneficiary_id], normal_form: 3NF}
+    columns:
+      - name: beneficiary_id
+        data_tests: [not_null, unique]
+      - name: household_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('slv_pdm_households')
+                field: household_id
+      - name: special_group_code
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('slv_pdm_special_groups')
+                field: group_code
+  - name: slv_pdm_households
+    description: Canonical household entity at one row per household_id.
+    meta: {natural_key: [household_id], normal_form: 3NF}
+    columns:
+      - name: household_id
+        data_tests: [not_null, unique]
+  - name: slv_pdm_saccos
+    description: Canonical SACCO entity at one row per sacco_id.
+    meta: {natural_key: [sacco_id], normal_form: 3NF}
+    columns:
+      - name: sacco_id
+        data_tests: [not_null, unique]
+  - name: slv_pdm_special_groups
+    description: Canonical special-group reference entity.
+    meta: {natural_key: [group_code], normal_form: 3NF}
+    columns:
+      - name: group_code
+        data_tests: [not_null, unique]
+  - name: slv_pdm_business_plans
+    description: Canonical business-plan entity linked to beneficiary and loan.
+    meta: {natural_key: [business_plan_id], normal_form: 3NF}
+    columns:
+      - name: business_plan_id
+        data_tests: [not_null, unique]
+      - name: beneficiary_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('slv_pdm_beneficiaries')
+                field: beneficiary_id
+  - name: slv_pdm_loans
+    description: Canonical loan entity linked to beneficiary, SACCO and business plan.
+    meta: {natural_key: [loan_id], normal_form: 3NF}
+    columns:
+      - name: loan_id
+        data_tests: [not_null, unique]
+      - name: beneficiary_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('slv_pdm_beneficiaries')
+                field: beneficiary_id
+      - name: sacco_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('slv_pdm_saccos')
+                field: sacco_id
+      - name: business_plan_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('slv_pdm_business_plans')
+                field: business_plan_id
+  - name: slv_pdm_agents
+    description: Canonical agent entity at one row per agent_id.
+    meta: {natural_key: [agent_id], normal_form: 3NF}
+    columns:
+      - name: agent_id
+        data_tests: [not_null, unique]
+  - name: slv_pdm_agent_locations
+    description: Agent-location relationship by agent and location type.
+    meta: {natural_key: [agent_id, location_type], normal_form: 3NF}
+  - name: slv_pdm_payments_messages
+    description: Canonical cross-system payment-message envelope.
+    meta: {natural_key: [source_system, message_id], normal_form: 3NF}
+    columns:
+      - name: message_id
+        data_tests: [not_null]
+  - name: slv_pdm_batch
+    description: Payment-information batch entity.
+    meta: {natural_key: [batch_id], normal_form: 3NF}
+    columns:
+      - name: batch_id
+        data_tests: [not_null, unique]
+  - name: slv_pdm_payments_transactions
+    description: Canonical transaction entity integrated across payment systems.
+    meta: {natural_key: [source_system, transaction_id], normal_form: 3NF}
+    columns:
+      - name: transaction_id
+        data_tests: [not_null]
+      - name: end_to_end_id
+        description: Lifecycle link to the PDM loan_id.
+  - name: slv_pdm_payment_entity_matches
+    description: Explicit cross-domain matching of canonical payments to loans, beneficiaries, SACCOs, business plans and agents.
+    meta: {natural_key: [source_system, transaction_id], normal_form: 3NF}
+    columns:
+      - name: entity_match_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [MATCHED, NOT_APPLICABLE, LOAN_NOT_MATCHED, BENEFICIARY_NOT_MATCHED, BENEFICIARY_MISMATCH, SACCO_NOT_MATCHED, SACCO_MISMATCH, BUSINESS_PLAN_NOT_MATCHED, AGENT_NOT_MATCHED]
+  - name: slv_pdm_payments_accounts
+    description: Canonical payment-account entity.
+    meta: {natural_key: [account_issuer, account_id], normal_form: 3NF}
+  - name: slv_pdm_payments_party
+    description: Canonical payment party identified by its source account.
+    meta: {natural_key: [account_issuer, account_id], normal_form: 3NF}
+  - name: slv_pdm_payment_party_roles
+    description: Relationship assigning debtor and creditor roles within a payment message.
+    meta: {natural_key: [message_id, party_role], normal_form: 3NF}
+  - name: slv_pdm_payments_remittance
+    description: Payment-remittance relationship without derived calendar attributes.
+    meta: {natural_key: [message_id, remittance_type, creditor_reference], normal_form: 3NF}
+  - name: slv_pdm_payments_status_report
+    description: Canonical business payment-status entity.
+    meta: {natural_key: [status_source, message_id], normal_form: 3NF}
+  - name: slv_pdm_payments_pmn_lifecycle_events
+    description: Canonical PMN technical lifecycle event.
+    meta: {natural_key: [message_id], normal_form: 3NF}
+  - name: slv_pdm_payments_plm_lifecycle_events
+    description: Canonical PLM technical lifecycle event.
+    meta: {natural_key: [message_id], normal_form: 3NF}
+  - name: slv_pdm_payments_reconciliation
+    description: Natural-key relationship between status reports and originating payment messages or transactions.
+    meta: {natural_key: [status_source, status_message_id, transaction_source, transaction_id], normal_form: 3NF}
+  - name: slv_pdm_dq_results
+    description: Normalized cross-domain business-validation results, one row per canonical entity and rule.
+    meta: {natural_key: [entity_type, entity_id, rule_code], normal_form: 3NF}

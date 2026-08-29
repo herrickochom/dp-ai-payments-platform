@@ -53,6 +53,11 @@ class Config:
 # Topic to System Mapping
 # ------------------------------------------------------------------------------
 TOPIC_MAPPINGS = {
+    "wendi.pain001": {"category": "wendi", "system": "wendi", "msg_type": "pain001", "description": "Wendi payment initiation", "has_technical_attrs": False},
+    "wendi.pain002": {"category": "wendi", "system": "wendi", "msg_type": "pain002", "description": "Wendi payment status", "has_technical_attrs": True},
+    "agent.profiles": {"category": "agent", "system": "agent", "msg_type": "profiles", "description": "Agent profiles", "has_technical_attrs": False},
+    "agent.locations": {"category": "agent", "system": "agent", "msg_type": "locations", "description": "Agent locations", "has_technical_attrs": False},
+    "agent.transactions": {"category": "agent", "system": "agent", "msg_type": "transactions", "description": "Agent transactions", "has_technical_attrs": False},
     # ICMM Systems - VPM (Virtual Payment Message)
     "icmn.vpm.pain001": {
         "category": "icmn",
@@ -271,12 +276,39 @@ def parse_pain002_xml(file_path: str) -> Dict[str, Any]:
         logger.error(f"Error parsing XML {file_path}: {e}")
         return {}
 
+def parse_generic_xml(file_path: str) -> Dict[str, Any]:
+    """Preserve an arbitrary XML document as the canonical nested JSON shape."""
+    try:
+        root = ET.parse(file_path).getroot()
+        return {"xml": {root.tag.rsplit('}', 1)[-1]: xml_to_dict(root)}}
+    except Exception as exc:
+        logger.error(f"Error parsing XML {file_path}: {exc}")
+        return {}
+
 def detect_system_from_path(file_path: str) -> tuple:
     """
     Detect system, msg_type from file path.
     Returns: (system, msg_type, topic)
     """
     path = Path(file_path)
+    normalized = path.as_posix()
+
+    explicit_routes = {
+        "/wendi/pain001/": ("wendi", "pain001", "wendi.pain001"),
+        "/wendi/pain002/": ("wendi", "pain002", "wendi.pain002"),
+        "/agent_network/agent_transactions/": ("agent", "transactions", "agent.transactions"),
+    }
+    for marker, route in explicit_routes.items():
+        if marker in normalized:
+            return route
+
+    json_routes = {
+        "agent_profiles.json": ("agent", "profiles", "agent.profiles"),
+        "agent_locations.json": ("agent", "locations", "agent.locations"),
+        "agent_transactions.json": ("agent", "transactions", "agent.transactions"),
+    }
+    if path.name in json_routes:
+        return json_routes[path.name]
     
     # Try to extract from path: data/{category}/{system}/{msg_type}/{file}
     parts = path.parts
@@ -318,7 +350,7 @@ def parse_event(file_path: str) -> Optional[Dict[str, Any]]:
     elif "pain002" in msg_type.lower() or "pacs" in msg_type.lower():
         payload = parse_pain002_xml(file_path)
     else:
-        payload = {}
+        payload = parse_generic_xml(file_path)
 
     # event_data is the immutable, original source message.  The separate
     # parsed_event_data JSON supports field extraction without altering XML.
@@ -366,6 +398,47 @@ def parse_event(file_path: str) -> Optional[Dict[str, Any]]:
     
     return event
 
+def parse_json_events(file_path: str) -> list[Dict[str, Any]]:
+    """Create one Kafka event per object in a JSON array source file."""
+    system, msg_type, topic = detect_system_from_path(file_path)
+    if topic == "unknown":
+        return []
+    try:
+        document = json.loads(Path(file_path).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        logger.error(f"Unable to parse JSON source {file_path}: {exc}")
+        return []
+
+    records = document if isinstance(document, list) else [document]
+    events = []
+    for record in records:
+        if not isinstance(record, dict):
+            continue
+        message_id = next((str(record[key]) for key in (
+            "transaction_id", "agent_id", "event_id"
+        ) if record.get(key)), f"{system.upper()}-{msg_type}-{uuid.uuid4().hex[:8]}")
+        creation_date = str(record.get("created_at") or record.get("transaction_timestamp") or time.strftime("%Y-%m-%dT%H:%M:%S.000Z"))
+        amount = record.get("amount", 0.0)
+        events.append({
+            "event_id": str(uuid.uuid4()),
+            "message_id": message_id,
+            "event_type": msg_type,
+            "source_system": system,
+            "source_key": os.path.basename(file_path),
+            "source_location": file_path,
+            "instructed_amount": float(amount) if amount is not None else 0.0,
+            "currency": str(record.get("currency") or "UGX"),
+            "creation_date": creation_date,
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
+            "version": "1.0.0",
+            "event_data": json.dumps(record),
+            "payload": json.dumps(record),
+            "x_attributes": None,
+            "parsed_event_data": json.dumps(record),
+            "_topic": topic,
+        })
+    return events
+
 # ------------------------------------------------------------------------------
 # Main Producer
 # ------------------------------------------------------------------------------
@@ -411,8 +484,14 @@ def main():
     
     producer = SerializingProducer(producer_config)
     
-    # Find all XML files
+    # Find all XML files and supported JSON entity feeds.
     xml_files = glob.glob(f"{Config.DATA_ROOT}/**/*.xml", recursive=True)
+    json_files = [
+        f"{Config.DATA_ROOT}/agent_network/agent_profiles.json",
+        f"{Config.DATA_ROOT}/agent_network/agent_locations.json",
+        f"{Config.DATA_ROOT}/agent_network/agent_transactions.json",
+    ]
+    json_files = [path for path in json_files if Path(path).is_file()]
     logger.info(f"📄 Found {len(xml_files)} XML files")
     
     if not xml_files:
@@ -427,6 +506,12 @@ def main():
             if topic not in files_by_topic:
                 files_by_topic[topic] = []
             files_by_topic[topic].append(file_path)
+
+    json_events_by_topic = {}
+    for file_path in json_files:
+        for event in parse_json_events(file_path):
+            topic = event.pop("_topic")
+            json_events_by_topic.setdefault(topic, []).append(event)
     
     logger.info(f"📋 Files grouped by topic:")
     for topic, files in files_by_topic.items():
@@ -438,17 +523,14 @@ def main():
     
     for topic, files in files_by_topic.items():
         logger.info(f"📤 Producing to topic: {topic}")
-        
+
         for file_path in files:
             event = parse_event(file_path)
             if event is None:
                 failed += 1
                 continue
-            
             try:
-                # Use event_id as message key for idempotency
                 key = event.get("event_id", str(uuid.uuid4()))
-                
                 producer.produce(
                     topic=topic,
                     key=key,
@@ -458,12 +540,27 @@ def main():
                     )
                 )
                 produced += 1
-                
                 if produced % 10 == 0:
                     logger.info(f"  📊 Produced {produced} events...")
-                    
             except Exception as e:
                 logger.error(f"❌ Error producing {file_path}: {e}")
+                failed += 1
+
+    for topic, events in json_events_by_topic.items():
+        logger.info(f"📤 Producing {len(events)} JSON records to topic: {topic}")
+        for event in events:
+            try:
+                producer.produce(
+                    topic=topic,
+                    key=event["event_id"],
+                    value=event,
+                    on_delivery=lambda err, msg: (
+                        logger.error(f"❌ Delivery failed: {err}") if err else None
+                    ),
+                )
+                produced += 1
+            except Exception as exc:
+                logger.error(f"❌ Error producing JSON event to {topic}: {exc}")
                 failed += 1
     
     # Flush all messages

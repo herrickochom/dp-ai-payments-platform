@@ -1,52 +1,13 @@
 version: 2
 
 models:
-  - name: br_cpo_psn_pain002
-    description: PSN PAIN.002 fields extracted from Bronze parsed_event_data JSON.
-  - name: br_cpo_plm_pain002
-    description: PLM PAIN.002 lifecycle and x-* fields extracted from Bronze parsed_event_data JSON.
-  - name: br_icmn_pmn_pain001
-    description: PMN PAIN.001 payment-initiation fields extracted from Bronze parsed_event_data JSON.
-  - name: br_icmn_vpm_pain001
-    description: VPM PAIN.001 payment-initiation fields extracted from Bronze parsed_event_data JSON.
-  - name: slv_payments_transactions
-    description: Canonical PAIN.001 payment instruction events, without surrogate keys.
-  - name: slv_payments_messages
-    description: Canonical payment-message envelope.
-  - name: slv_payments_plm_lifecycle_events
-    description: PLM lifecycle events.
-  - name: slv_payments_pmn_lifecycle_events
-    description: PMN lifecycle events.
-  - name: slv_raw_payload_audit
-    description: Immutable payment payload and Kafka-lineage audit.
-  - name: slv_payments_address
-    description: Debtor and creditor postal addresses extracted from PAIN.001 payloads.
-  - name: slv_payments_remittence
-    description: Payment remittance text and invoice references.
-  - name: slv_payments_reconciliation
-    description: PAIN.002 statuses reconciled to their original PAIN.001 messages.
-  - name: slv_payments_information
-    description: Canonical PAIN.001 payment-level information.
-  - name: slv_payments_accounts
-    description: Debtor and creditor payment-account records.
-  - name: slv_payments_party
-    description: Debtor and creditor party records.
-  - name: slv_dq_results
-    description: Row-level data-quality checks for payment instructions.
-  - name: slv_file_submission
-    description: File and Kafka-partition submission audit aggregates.
-  - name: slv_batch
-    description: VPM payment batch and control-total records.
-  - name: slv_payments_status_report
-    description: Canonical PSN PAIN.002 business payment status report.
-    columns:
-      - name: event_id
-        tests: [not_null]
-      - name: kafka_topic
-        tests: [not_null]
-      - name: status_source
-        tests:
-          - accepted_values:
-              values: [psn]
-  - name: gld_payments_daily_summary
-    description: Daily payment count and amount summary by source system and currency.
+  - name: br_pdm_cpo_psn_pain002
+    description: Source-shaped CPO PSN PAIN.002 records.
+  - name: br_pdm_cpo_plm_pain002
+    description: Source-shaped CPO PLM PAIN.002 records.
+  - name: br_pdm_icmn_pmn_pain001
+    description: Source-shaped ICMN PMN PAIN.001 records.
+  - name: br_pdm_icmn_vpm_pain001
+    description: Source-shaped ICMN VPM PAIN.001 records.
+  - name: gld_pdm_payments_daily_summary
+    description: Daily payment metrics by source system and currency.

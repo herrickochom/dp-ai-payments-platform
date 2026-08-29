@@ -5,76 +5,573 @@ models:
     description: >
       ICMN VPM pain.001 business payment instructions, extracted from the raw Avro
       archive (parsed_event_data JSON) on topic icmn.vpm.pain001.
+    meta:
+      extraction_coverage: complete
+      observed_source_leaf_fields: 24
     columns:
       - name: event_id
         tests: [not_null, unique]
+
       - name: message_id
         tests: [not_null]
+
       - name: end_to_end_id
         description: "Critical link: EndToEndId = loan_id."
         tests: [not_null]
+
       - name: kafka_topic
         tests: [not_null]
+
       - name: record_source
         tests:
           - accepted_values:
-              values: ['ICMN_VPM_PAIN001']
+              arguments:
+                values:
+                  - ICMN_VPM_PAIN001
 
   - name: stg_pdm_icmn_pmn_pain001
     description: >
       ICMN PMN pain.001 technical lifecycle initiation with x-* attributes, from
-      topics icmn.pmn.pain001 (topic-stamped) and pdm.bronze.pain001 ('PMN').
+      topic icmn.pmn.pain001 (x_message_type falls back to the topic name when
+      the x-attribute is absent).
+    meta:
+      extraction_coverage: complete
+      observed_source_leaf_fields: 112
+      repeated_field_strategy: "x-* fields are projected separately at group, payment and transaction levels"
     columns:
       - name: event_id
         tests: [not_null, unique]
+
       - name: message_id
         tests: [not_null]
+
       - name: end_to_end_id
         tests: [not_null]
+
       - name: x_message_type
         tests:
           - accepted_values:
-              values: ['PMN', 'icmn.pmn.pain001']
+              arguments:
+                values:
+                  - PMN
+                  - icmn.pmn.pain001
+
       - name: record_source
         tests:
           - accepted_values:
-              values: ['ICMN_PMN_PAIN001']
+              arguments:
+                values:
+                  - ICMN_PMN_PAIN001
 
   - name: stg_pdm_cpo_psn_pain002
     description: >
       CPO PSN pain.002 business status reports, from topic cpo.psn.pain002.
+      end_to_end_id is extracted from OrgnlEndToEndId and provides the direct
+      loan link; original_message_id links back to the originating pain.001.
+    meta:
+      extraction_coverage: complete
+      observed_source_leaf_fields: 15
     columns:
       - name: event_id
         tests: [not_null, unique]
+
       - name: message_id
         tests: [not_null]
+
       - name: transaction_status
         tests: [not_null]
-      - name: end_to_end_id
+
+      - name: original_message_id
+        description: "Links back to the original pain.001 message (VPM/PMN MsgId)."
         tests: [not_null]
+
       - name: record_source
         tests:
           - accepted_values:
-              values: ['CPO_PSN_PAIN002']
+              arguments:
+                values:
+                  - CPO_PSN_PAIN002
 
   - name: stg_pdm_cpo_plm_pain002
     description: >
-      CPO PLM pain.002 technical lifecycle status with x-* attributes, from topics
-      cpo.plm.pain002 (topic-stamped) and pdm.bronze.pain002 ('PLM').
+      CPO PLM pain.002 technical lifecycle status with x-* attributes, from
+      topic cpo.plm.pain002.
+    meta:
+      extraction_coverage: complete
+      observed_source_leaf_fields: 113
+      repeated_field_strategy: "x-* fields are projected separately at group, original-group and original-payment levels"
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+
+      - name: message_id
+        tests: [not_null]
+
+      - name: transaction_status
+        tests: [not_null]
+
+      - name: end_to_end_id
+        description: "OrgnlEndToEndId = loan_id from the original payment instruction."
+        tests: [not_null]
+
+      - name: record_source
+        tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - CPO_PLM_PAIN002
+
+  - name: stg_pdm_wendi_camt053
+    description: >
+      Wendi CAMT.053 end-of-day bank statements, from topic wendi.camt053.
+    meta:
+      extraction_coverage: complete
+      observed_source_leaf_fields: 37
+      repeated_field_strategy: "closing balance is preferred, with opening balance as fallback"
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+
+      - name: message_id
+        tests: [not_null]
+
+      - name: end_to_end_id
+        description: "Critical link: EndToEndId = loan_id."
+        tests: [not_null]
+
+      - name: kafka_topic
+        tests: [not_null]
+
+      - name: record_source
+        tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - WENDI_CAMT053
+
+  - name: stg_pdm_wendi_camt052
+    description: >
+      Wendi CAMT.052 intraday account reports, from topic wendi.camt052.
+    meta:
+      extraction_coverage: complete
+      observed_source_leaf_fields: 9
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+
+      - name: message_id
+        tests: [not_null]
+
+      - name: kafka_topic
+        tests: [not_null]
+
+      - name: record_source
+        tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - WENDI_CAMT052
+
+  - name: stg_pdm_wendi_camt054
+    description: >
+      Wendi CAMT.054 transaction notifications, from topic wendi.camt054.
+    meta:
+      extraction_coverage: complete
+      observed_source_leaf_fields: 17
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+
+      - name: message_id
+        tests: [not_null]
+
+      - name: end_to_end_id
+        description: "Critical link: EndToEndId = loan_id."
+        tests: [not_null]
+
+      - name: kafka_topic
+        tests: [not_null]
+
+      - name: record_source
+        tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - WENDI_CAMT054
+
+  - name: stg_pdm_wendi_transactions
+    description: >
+      Wendi wallet transaction events (disbursements, repayments), from topic
+      wendi.transactions.
+    meta:
+      extraction_coverage: complete
+      observed_source_leaf_fields: 25
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+
+      - name: wallet_event_id
+        tests: [not_null]
+
+      - name: loan_id
+        description: "Critical link: loan_id = EndToEndId."
+        tests: [not_null]
+
+      - name: kafka_topic
+        tests: [not_null]
+
+      - name: record_source
+        tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - WENDI_TRANSACTIONS
+
+  - name: stg_pdm_mobile_mtn_pacs008
+    description: >
+      MTN PACS.008 interbank settlement transfers, from topic mobile.mtn.pacs008.
+    meta:
+      extraction_coverage: complete
+      observed_source_leaf_fields: 85
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+
+      - name: message_id
+        tests: [not_null]
+
+      - name: end_to_end_id
+        description: "Critical link: EndToEndId = loan_id."
+        tests: [not_null]
+
+      - name: kafka_topic
+        tests: [not_null]
+
+      - name: record_source
+        tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - MOBILE_MTN_PACS008
+
+  - name: stg_pdm_mobile_airtel_pacs008
+    description: >
+      Airtel PACS.008 interbank settlement transfers, from topic
+      mobile.airtel.pacs008.
+    meta:
+      extraction_coverage: complete
+      observed_source_leaf_fields: 85
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+
+      - name: message_id
+        tests: [not_null]
+
+      - name: end_to_end_id
+        description: "Critical link: EndToEndId = loan_id."
+        tests: [not_null]
+
+      - name: kafka_topic
+        tests: [not_null]
+
+      - name: record_source
+        tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - MOBILE_AIRTEL_PACS008
+
+  - name: stg_pdm_mobile_mtn_pacs002
+    description: >
+      MTN PACS.002 interbank payment status reports, from topic
+      mobile.mtn.pacs002.
+    meta:
+      extraction_coverage: complete
+      observed_source_leaf_fields: 32
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+
+      - name: message_id
+        tests: [not_null]
+
+      - name: end_to_end_id
+        description: "OrgnlEndToEndId = loan_id."
+        tests: [not_null]
+
+      - name: kafka_topic
+        tests: [not_null]
+
+      - name: record_source
+        tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - MOBILE_MTN_PACS002
+
+  - name: stg_pdm_mobile_airtel_pacs002
+    description: >
+      Airtel PACS.002 interbank payment status reports, from topic
+      mobile.airtel.pacs002.
+    meta:
+      extraction_coverage: complete
+      observed_source_leaf_fields: 32
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+
+      - name: message_id
+        tests: [not_null]
+
+      - name: end_to_end_id
+        description: "OrgnlEndToEndId = loan_id."
+        tests: [not_null]
+
+      - name: kafka_topic
+        tests: [not_null]
+
+      - name: record_source
+        tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - MOBILE_AIRTEL_PACS002
+
+  - name: stg_pdm_agent_transactions
+    description: >
+      Agent network cash-out transactions, from topic agent.transactions.
+    meta:
+      extraction_coverage: complete
+      observed_xml_leaf_fields: 17
+      observed_json_leaf_fields: 17
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+
+      - name: transaction_id
+        tests: [not_null]
+
+      - name: loan_id
+        description: "Critical link: loan_id = EndToEndId."
+        tests: [not_null]
+
+      - name: kafka_topic
+        tests: [not_null]
+
+      - name: record_source
+        tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - AGENT_TRANSACTIONS
+
+  - name: stg_pdm_pdmis_beneficiaries
+    description: One typed row per PDMIS beneficiary registration event.
+    meta:
+      extraction_coverage: complete
+      observed_source_leaf_fields: 22
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+      - name: beneficiary_id
+        tests: [not_null]
+      - name: beneficiary_token
+        description: Non-sensitive identifier used across payment processing.
+        tests: [not_null]
+      - name: nin_hashed
+        description: Hashed national identifier retained for governed matching.
+        tests: [not_null]
+      - name: kafka_topic
+        tests:
+          - accepted_values:
+              arguments:
+                values: [pdmis.beneficiaries]
+      - name: record_source
+        tests:
+          - accepted_values:
+              arguments:
+                values: [PDMIS_BENEFICIARIES]
+
+  - name: stg_pdm_pdmis_business_plans
+    description: One typed row per PDMIS business-plan event.
+    meta:
+      extraction_coverage: complete
+      observed_source_leaf_fields: 19
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+      - name: business_plan_id
+        tests: [not_null]
+      - name: loan_id
+        description: Links the plan to its PDMIS loan and payment EndToEndId.
+        tests: [not_null]
+      - name: beneficiary_id
+        tests: [not_null]
+      - name: kafka_topic
+        tests:
+          - accepted_values:
+              arguments:
+                values: [pdmis.business_plans]
+      - name: record_source
+        tests:
+          - accepted_values:
+              arguments:
+                values: [PDMIS_BUSINESS_PLANS]
+
+  - name: stg_pdm_pdmis_households
+    description: One typed row per PDMIS household profile event.
+    meta:
+      extraction_coverage: complete
+      observed_source_leaf_fields: 17
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+      - name: household_id
+        tests: [not_null]
+      - name: head_of_household
+        tests: [not_null]
+      - name: kafka_topic
+        tests:
+          - accepted_values:
+              arguments:
+                values: [pdmis.households]
+      - name: record_source
+        tests:
+          - accepted_values:
+              arguments:
+                values: [PDMIS_HOUSEHOLDS]
+
+  - name: stg_pdm_pdmis_loans
+    description: One typed row per PDMIS loan lifecycle event.
+    meta:
+      extraction_coverage: complete
+      observed_source_leaf_fields: 22
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+      - name: loan_id
+        description: Critical lifecycle key; equals ISO 20022 EndToEndId.
+        tests: [not_null]
+      - name: beneficiary_id
+        tests: [not_null]
+      - name: sacco_id
+        tests: [not_null]
+      - name: business_plan_id
+        tests: [not_null]
+      - name: kafka_topic
+        tests:
+          - accepted_values:
+              arguments:
+                values: [pdmis.loans]
+      - name: record_source
+        tests:
+          - accepted_values:
+              arguments:
+                values: [PDMIS_LOANS]
+
+  - name: stg_pdm_pdmis_saccos
+    description: One typed row per PDMIS SACCO master-data event.
+    meta:
+      extraction_coverage: complete
+      observed_source_leaf_fields: 22
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+      - name: sacco_id
+        tests: [not_null]
+      - name: sacco_name
+        tests: [not_null]
+      - name: wendi_account
+        tests: [not_null]
+      - name: kafka_topic
+        tests:
+          - accepted_values:
+              arguments:
+                values: [pdmis.saccos]
+      - name: record_source
+        tests:
+          - accepted_values:
+              arguments:
+                values: [PDMIS_SACCOS]
+
+  - name: stg_pdm_pdmis_special_groups
+    description: One typed row per PDMIS special-group reference event.
+    meta:
+      extraction_coverage: complete
+      observed_source_leaf_fields: 4
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+      - name: group_code
+        tests: [not_null]
+      - name: group_name
+        tests: [not_null]
+      - name: quota_percentage
+        tests: [not_null]
+      - name: kafka_topic
+        tests:
+          - accepted_values:
+              arguments:
+                values: [pdmis.special_groups]
+      - name: record_source
+        tests:
+          - accepted_values:
+              arguments:
+                values: [PDMIS_SPECIAL_GROUPS]
+
+  - name: stg_pdm_agent_profiles
+    description: Typed agent registration and operational profile feed.
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+      - name: agent_id
+        tests: [not_null]
+      - name: record_source
+        tests:
+          - accepted_values:
+              arguments:
+                values: [AGENT_PROFILES]
+
+  - name: stg_pdm_agent_locations
+    description: Typed agent geographic location feed.
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+      - name: agent_id
+        tests: [not_null]
+      - name: record_source
+        tests:
+          - accepted_values:
+              arguments:
+                values: [AGENT_LOCATIONS]
+
+  - name: stg_pdm_wendi_pain001
+    description: Wendi pain.001 business payment instructions with the complete message retained.
     columns:
       - name: event_id
         tests: [not_null, unique]
       - name: message_id
         tests: [not_null]
-      - name: transaction_status
-        tests: [not_null]
       - name: end_to_end_id
         tests: [not_null]
-      - name: x_message_type
-        tests:
-          - accepted_values:
-              values: ['PLM', 'cpo.plm.pain002']
       - name: record_source
         tests:
           - accepted_values:
-              values: ['CPO_PLM_PAIN002']
+              arguments:
+                values: [WENDI_PAIN001]
+
+  - name: stg_pdm_wendi_pain002
+    description: Wendi pain.002 business status reports with the complete report retained.
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+      - name: message_id
+        tests: [not_null]
+      - name: end_to_end_id
+        tests: [not_null]
+      - name: record_source
+        tests:
+          - accepted_values:
+              arguments:
+                values: [WENDI_PAIN002]

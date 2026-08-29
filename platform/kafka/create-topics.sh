@@ -96,6 +96,8 @@ create_topic "wendi.camt053" 4 1 2592000000
 create_topic "wendi.camt052" 4 1 86400000
 create_topic "wendi.camt054" 8 1 604800000
 create_topic "wendi.transactions" 8 1
+create_topic "wendi.pain001" 6 1
+create_topic "wendi.pain002" 6 1
 
 echo ""
 echo "=========================================="
@@ -126,6 +128,7 @@ create_topic "pdmis.loans" 8 1
 create_topic "pdmis.saccos" 4 1
 create_topic "pdmis.households" 4 1
 create_topic "pdmis.business_plans" 4 1
+create_topic "pdmis.special_groups" 4 1
 
 echo ""
 echo "=========================================="
@@ -143,12 +146,12 @@ echo ""
 echo "📊 Summary by System:"
 echo "  ICMN  : 2 topics (vpm.pain001, pmn.pain001)"
 echo "  CPO   : 2 topics (psn.pain002, plm.pain002)"
-echo "  Wendi : 4 topics"
+echo "  Wendi : 6 topics"
 echo "  Mobile: 4 topics"
 echo "  Agent : 3 topics"
-echo "  PDMIS : 5 topics"
+echo "  PDMIS : 6 topics"
 echo "  Recon : 2 topics"
-echo "  TOTAL : 22 topics"
+echo "  TOTAL : 25 topics"
 echo ""
 echo "Available topics:"
 $KAFKA_CMD --bootstrap-server "$BOOTSTRAP_SERVER" --list | sort

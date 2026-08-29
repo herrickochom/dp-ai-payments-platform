@@ -374,7 +374,7 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
       KAFKA_GROUP_ID: payment-events-consumer
       SCHEMA_REGISTRY_URL: http://schema-registry:8081
-      KAFKA_TOPICS: icmn.vpm.pain001,icmn.vpm.pain002,icmn.pmn.pain001,icmn.pmn.pain002,cpo.psn.pain001,cpo.psn.pain002,cpo.plm.pain001,cpo.plm.pain002,pdm.bronze.pdmis,pdm.bronze.pain001,pdm.bronze.pain002,pdm.bronze.pacs008,pdm.bronze.pacs002,pdm.bronze.camt053,pdm.bronze.camt052,pdm.bronze.camt054,pdm.bronze.wendi,pdm.bronze.agent
+      KAFKA_TOPICS: icmn.vpm.pain001,icmn.pmn.pain001,cpo.psn.pain002,cpo.plm.pain002,wendi.pain001,wendi.pain002,wendi.camt053,wendi.camt052,wendi.camt054,wendi.transactions,mobile.mtn.pacs008,mobile.mtn.pacs002,mobile.airtel.pacs008,mobile.airtel.pacs002,agent.transactions,agent.profiles,agent.locations,pdmis.beneficiaries,pdmis.loans,pdmis.saccos,pdmis.households,pdmis.business_plans,pdmis.special_groups
     depends_on:
       redis:
         condition: service_healthy

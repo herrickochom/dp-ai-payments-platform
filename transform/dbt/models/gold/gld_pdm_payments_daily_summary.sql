@@ -1,7 +1,7 @@
 {{ config(materialized='iceberg_table') }}
 
 select
-    cast(creation_at as date) as payment_date,
+    cast(occurred_at as date) as payment_date,
     source_system,
     currency,
     count(*) as transaction_count,

@@ -60,6 +60,18 @@ topics:
     retention_ms: 604800000   # 7 days
     description: "Wendi Platform Transactions"
 
+  - name: wendi.pain001
+    partitions: 6
+    replication: 1
+    retention_ms: 604800000
+    description: "Wendi Business Payment Initiations"
+
+  - name: wendi.pain002
+    partitions: 6
+    replication: 1
+    retention_ms: 604800000
+    description: "Wendi Payment Status Reports"
+
   # ==========================================================================
   # 4. Mobile Networks Topics
   # ==========================================================================
@@ -140,6 +152,12 @@ topics:
     replication: 1
     retention_ms: 604800000   # 7 days
     description: "Business Plans"
+
+  - name: pdmis.special_groups
+    partitions: 4
+    replication: 1
+    retention_ms: 604800000
+    description: "Special Group Reference Data"
 
   # ==========================================================================
   # 7. Reconciliation Topics

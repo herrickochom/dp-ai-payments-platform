@@ -49,6 +49,7 @@ class Settings:
     MINIO_ACCESS_KEY = os.getenv("MINIO_ROOT_USER", "minioadmin")
     MINIO_SECRET_KEY = os.getenv("MINIO_ROOT_PASSWORD", "minioadmin")
     MINIO_BUCKET = os.getenv("MINIO_BUCKET", "dp-ai-payment")
+    RAW_PREFIX = os.getenv("RAW_PREFIX", "raw/v2").strip("/")
     
     # Kafka
     KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092")
@@ -60,7 +61,8 @@ class Settings:
         "cpo.psn.pain001",
         "cpo.psn.pain002",
         "cpo.plm.pain001",
-        "cpo.plm.pain002",
+        "cpo.plm.pain002", "wendi.pain001", "wendi.pain002",
+        "agent.profiles", "agent.locations", "agent.transactions",
     ]
     KAFKA_GROUP_ID = os.getenv("KAFKA_GROUP_ID", "payment-events-consumer")
     
@@ -210,7 +212,7 @@ def store_event_to_s3(
     
     # Construct S3 key
     s3_key = (
-        f"raw/{category}/year={year}/month={month}/day={day}/"
+        f"{Settings.RAW_PREFIX}/{category}/year={year}/month={month}/day={day}/"
         f"topic={topic}/partition={partition}/offset={offset}/"
         f"{filename}"
     )

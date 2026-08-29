@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: br_pdm_agent_locations
+    description: Source-shaped agent location records decoded from Raw Avro.
+  - name: br_pdm_agent_profiles
+    description: Source-shaped agent profile records decoded from Raw Avro.
+  - name: br_pdm_agent_transactions
+    description: Source-shaped agent cash-out events decoded from Raw Avro.
+  - name: br_pdm_mobile_airtel_pacs002
+    description: Source-shaped Airtel PACS.002 status messages.
+  - name: br_pdm_mobile_airtel_pacs008
+    description: Source-shaped Airtel PACS.008 settlement messages.
+  - name: br_pdm_mobile_mtn_pacs002
+    description: Source-shaped MTN PACS.002 status messages.
+  - name: br_pdm_mobile_mtn_pacs008
+    description: Source-shaped MTN PACS.008 settlement messages.
+  - name: br_pdm_pdmis_beneficiaries
+    description: Source-shaped PDMIS beneficiary records.
+  - name: br_pdm_pdmis_business_plans
+    description: Source-shaped PDMIS business-plan records.
+  - name: br_pdm_pdmis_households
+    description: Source-shaped PDMIS household records.
+  - name: br_pdm_pdmis_loans
+    description: Source-shaped PDMIS loan records.
+  - name: br_pdm_pdmis_saccos
+    description: Source-shaped PDMIS SACCO records.
+  - name: br_pdm_pdmis_special_groups
+    description: Source-shaped PDMIS special-group reference records.
+  - name: br_pdm_wendi_camt052
+    description: Source-shaped Wendi CAMT.052 account reports.
+  - name: br_pdm_wendi_camt053
+    description: Source-shaped Wendi CAMT.053 statements.
+  - name: br_pdm_wendi_camt054
+    description: Source-shaped Wendi CAMT.054 notifications.
+  - name: br_pdm_wendi_pain001
+    description: Source-shaped Wendi PAIN.001 payment instructions.
+  - name: br_pdm_wendi_pain002
+    description: Source-shaped Wendi PAIN.002 status reports.
+  - name: br_pdm_wendi_transactions
+    description: Source-shaped Wendi wallet transaction events.
