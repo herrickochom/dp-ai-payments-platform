@@ -9,5 +9,3 @@ models:
     description: Source-shaped ICMN PMN PAIN.001 records.
   - name: br_pdm_icmn_vpm_pain001
     description: Source-shaped ICMN VPM PAIN.001 records.
-  - name: gld_pdm_payments_daily_summary
-    description: Daily payment metrics by source system and currency.

@@ -66,6 +66,41 @@ POC_CASES = {
     "LOAN-010": {"status": STATUS_ACSC, "amount": 1000000, "account": "25678DIVERTED", "name": "Diverted Case", "project": "MAIZE", "desc": "Account mismatch (diverted)"},
 }
 
+# Karamoja is a sub-region rather than a district. Moroto is used as the initial
+# Karamoja district while retaining "Karamoja" as the analytical region.
+PDM_LOCATIONS = [
+    {
+        "code": "KAM", "region": "Eastern", "district": "Kamuli",
+        "sub_county": "Kamuli Municipality", "parish": "Kamuli Central",
+        "village": "Namwendwa", "latitude": 0.9472, "longitude": 33.1197,
+    },
+    {
+        "code": "KUM", "region": "Eastern", "district": "Kumi",
+        "sub_county": "Kumi Municipality", "parish": "Kumi Central",
+        "village": "Boma", "latitude": 1.4608, "longitude": 33.9361,
+    },
+    {
+        "code": "BUK", "region": "Eastern", "district": "Bukedea",
+        "sub_county": "Bukedea Town Council", "parish": "Bukedea Central",
+        "village": "Emokor", "latitude": 1.3475, "longitude": 34.0447,
+    },
+    {
+        "code": "MBA", "region": "Eastern", "district": "Mbale",
+        "sub_county": "Mbale City", "parish": "Namakwekwe",
+        "village": "Namakwekwe", "latitude": 1.0806, "longitude": 34.1750,
+    },
+    {
+        "code": "MRT", "region": "Karamoja", "district": "Moroto",
+        "sub_county": "Moroto Municipality", "parish": "Camp Swahili",
+        "village": "Camp Swahili", "latitude": 2.5345, "longitude": 34.6666,
+    },
+    {
+        "code": "MSK", "region": "Central", "district": "Masaka",
+        "sub_county": "Masaka City", "parish": "Nyendo",
+        "village": "Nyendo", "latitude": -0.3338, "longitude": 31.7341,
+    },
+]
+
 # ============================================================================
 # Helper Functions
 # ============================================================================
@@ -83,6 +118,23 @@ def generate_date(offset_days: int = 0) -> str:
 
 def generate_phone() -> str:
     return f"256{random.randint(700000000, 799999999)}"
+
+def build_lifecycle_context(loan_id: str) -> Dict[str, str]:
+    """Create stable identifiers shared by every message in a payment lifecycle."""
+    return {
+        "vpm_message_id": f"ICMN-VPM-{loan_id}",
+        "pmn_message_id": f"ICMN-PMN-{loan_id}",
+        "vpm_transaction_id": f"TX-{loan_id}",
+        "pmn_transaction_id": f"PMN-TX-{loan_id}",
+        "psn_message_id": f"CPO-PSN-{loan_id}",
+        "plm_message_id": f"CPO-PLM-{loan_id}",
+        "wendi_statement_message_id": f"WENDI-STMT-{loan_id}",
+        "wendi_notification_message_id": f"WENDI-NTF-{loan_id}",
+        "mtn_message_id": f"MTN-PACS008-{loan_id}",
+        "mtn_transaction_id": f"MTN-TX-{loan_id}",
+        "airtel_message_id": f"AIRTEL-PACS008-{loan_id}",
+        "airtel_transaction_id": f"AIRTEL-TX-{loan_id}",
+    }
 
 def child(parent: ET.Element, name: str, text: str = None, **attributes) -> ET.Element:
     node = ET.SubElement(parent, name, attributes)
@@ -198,17 +250,21 @@ def write_json(path: Path, data: Any) -> None:
 
 def generate_pdmis_data() -> Dict[str, Any]:
     """Generate PDMIS government system data"""
-    
-    saccos = [{
-        "sacco_id": "SACCO-KAM-001",
-        "name": "Kamuli Central PDM SACCO",
-        "registration_number": "KAM-SACCO-001",
-        "wendi_account": "256791234567",
-        "parish": "Kamuli Central",
-        "district": "Kamuli",
-        "registration_date": generate_date(-365),
-        "is_active": True
-    }]
+
+    saccos = []
+    for index, location in enumerate(PDM_LOCATIONS, 1):
+        saccos.append({
+            "sacco_id": f"SACCO-{location['code']}-001",
+            "name": f"{location['parish']} PDM SACCO",
+            "registration_number": f"{location['code']}-SACCO-001",
+            "wendi_account": f"25679{index:07d}",
+            "parish": location["parish"],
+            "sub_county": location["sub_county"],
+            "district": location["district"],
+            "region": location["region"],
+            "registration_date": generate_date(-365),
+            "is_active": True,
+        })
     
     special_groups = [
         {"group_code": "WOMEN", "group_name": "Women", "quota_percentage": 30.0},
@@ -220,16 +276,32 @@ def generate_pdmis_data() -> Dict[str, Any]:
     
     beneficiaries = []
     for i, (loan_id, case_data) in enumerate(POC_CASES.items(), 1):
-        nin = f"CM{random.randint(9000000, 9999999)}{random.randint(100, 999)}"
+        location = PDM_LOCATIONS[(i - 1) % len(PDM_LOCATIONS)]
+        # Deterministic POC anomalies allow downstream identity controls to be tested.
+        nin = (
+            beneficiaries[0]["nin"]
+            if loan_id == "LOAN-002"
+            else f"CM{random.randint(9000000, 9999999)}{random.randint(100, 999)}"
+        )
+        registered_phone = case_data["account"]
+        if loan_id == "LOAN-004":
+            registered_phone = beneficiaries[2]["phone"]
+        elif loan_id == "LOAN-010":
+            registered_phone = "256780000010"
         ben = {
             "beneficiary_id": f"BEN-{i:04d}",
             "nin": nin,
             "nin_hashed": hashlib.sha256(nin.encode()).hexdigest(),
+            "nin_verified": loan_id not in {"LOAN-008"},
             "beneficiary_token": f"TOKEN-{nin[:8]}",
             "name": case_data["name"],
-            "phone": case_data["account"],
-            "parish": "Kamuli Central",
-            "district": "Kamuli",
+            "phone": registered_phone,
+            "phone_verified": loan_id not in {"LOAN-008", "LOAN-010"},
+            "household_id": f"HH-{i:05d}",
+            "village": location["village"],
+            "parish": location["parish"],
+            "district": location["district"],
+            "region": location["region"],
             "special_group": random.choice(["WOMEN", "YOUTH", "GENERAL"]),
             "registration_date": generate_date(-300),
             "is_active": True
@@ -238,12 +310,15 @@ def generate_pdmis_data() -> Dict[str, Any]:
     
     households = []
     for i in range(1, 11):
+        location = PDM_LOCATIONS[(i - 1) % len(PDM_LOCATIONS)]
         household = {
             "household_id": f"HH-{i:05d}",
             "head_of_household": beneficiaries[i-1]["name"],
             "member_count": random.randint(2, 8),
-            "parish": "Kamuli Central",
-            "district": "Kamuli",
+            "village": location["village"],
+            "parish": location["parish"],
+            "district": location["district"],
+            "region": location["region"],
             "economic_status": random.choice(["LOW", "MEDIUM", "HIGH"]),
             "registration_date": generate_date(-300)
         }
@@ -251,10 +326,11 @@ def generate_pdmis_data() -> Dict[str, Any]:
     
     loans = []
     for i, (loan_id, case_data) in enumerate(POC_CASES.items(), 1):
+        location = PDM_LOCATIONS[(i - 1) % len(PDM_LOCATIONS)]
         loan = {
             "loan_id": loan_id,
             "beneficiary_id": f"BEN-{i:04d}",
-            "sacco_id": "SACCO-KAM-001",
+            "sacco_id": f"SACCO-{location['code']}-001",
             "application_date": generate_date(-90),
             "approval_date": generate_date(-60),
             "amount_requested": case_data["amount"],
@@ -264,18 +340,21 @@ def generate_pdmis_data() -> Dict[str, Any]:
                            "REJECTED" if case_data["status"] == STATUS_RJCT else 
                            "APPROVED",
             "business_plan_id": f"BP-{i:05d}",
-            "project_type": case_data["project"]
+            "project_type": case_data["project"],
+            "project_location": f"{location['parish']}, {location['district']}",
         }
         loans.append(loan)
     
     business_plans = []
     for i, (loan_id, case_data) in enumerate(POC_CASES.items(), 1):
+        location = PDM_LOCATIONS[(i - 1) % len(PDM_LOCATIONS)]
         plan = {
             "business_plan_id": f"BP-{i:05d}",
             "loan_id": loan_id,
             "beneficiary_id": f"BEN-{i:04d}",
             "project_type": case_data["project"],
             "description": f"{case_data['project']} farming project",
+            "location": f"{location['village']}, {location['parish']}, {location['district']}",
             "expected_revenue": case_data["amount"] * random.uniform(1.2, 2.0),
             "submission_date": generate_date(-85),
             "approval_status": "APPROVED"
@@ -295,14 +374,14 @@ def generate_pdmis_data() -> Dict[str, Any]:
 # 2. ICMN - Interbank Customer Messaging Network (XML)
 # ============================================================================
 
-def generate_icmn_vpm(loan_id: str, case_data: dict, sacco: dict, beneficiary: dict) -> bytes:
+def generate_icmn_vpm(loan_id: str, case_data: dict, sacco: dict, beneficiary: dict, lifecycle: dict) -> bytes:
     """Generate ICMN/VPM - Business PAIN.001 (Virtual Payment Management)"""
     ns = PAIN001_NS
     root = ET.Element("Document", xmlns=ns)
     init = child(root, "CstmrCdtTrfInitn")
     
     header = child(init, "GrpHdr")
-    child(header, "MsgId", f"ICMN-VPM-{loan_id}-{datetime.now().strftime('%Y%m%d%H%M%S')}")
+    child(header, "MsgId", lifecycle["vpm_message_id"])
     child(header, "CreDtTm", generate_timestamp())
     child(header, "NbOfTxs", "1")
     child(header, "CtrlSum", str(case_data["amount"]))
@@ -327,7 +406,7 @@ def generate_icmn_vpm(loan_id: str, case_data: dict, sacco: dict, beneficiary: d
     pmt_id = child(tx, "PmtId")
     child(pmt_id, "InstrId", f"INSTR-{loan_id}")
     child(pmt_id, "EndToEndId", loan_id)
-    child(pmt_id, "TxId", f"TX-{loan_id}-{uuid.uuid4().hex[:8]}")
+    child(pmt_id, "TxId", lifecycle["vpm_transaction_id"])
     child(pmt_id, "UETR", str(uuid.uuid4()))
     
     amt = child(tx, "Amt")
@@ -347,14 +426,14 @@ def generate_icmn_vpm(loan_id: str, case_data: dict, sacco: dict, beneficiary: d
     
     return ET.tostring(root, encoding="utf-8", xml_declaration=True)
 
-def generate_icmn_pmn(loan_id: str, case_data: dict, sacco: dict, beneficiary: dict) -> bytes:
+def generate_icmn_pmn(loan_id: str, case_data: dict, sacco: dict, beneficiary: dict, lifecycle: dict) -> bytes:
     """Generate ICMN/PMN - Technical PAIN.001 (Payment Management Notification)"""
     ns = PAIN001_NS
     root = ET.Element("Document", xmlns=ns)
     init = child(root, "CstmrCdtTrfInitn")
     
     header = child(init, "GrpHdr")
-    child(header, "MsgId", f"ICMN-PMN-{loan_id}-{datetime.now().strftime('%Y%m%d%H%M%S')}")
+    child(header, "MsgId", lifecycle["pmn_message_id"])
     child(header, "CreDtTm", generate_timestamp())
     child(header, "NbOfTxs", "1")
     child(header, "CtrlSum", str(case_data["amount"]))
@@ -374,6 +453,7 @@ def generate_icmn_pmn(loan_id: str, case_data: dict, sacco: dict, beneficiary: d
     pmt_id = child(tx, "PmtId")
     child(pmt_id, "InstrId", f"PMN-INSTR-{loan_id}")
     child(pmt_id, "EndToEndId", loan_id)
+    child(pmt_id, "TxId", lifecycle["pmn_transaction_id"])
     
     add_technical_attrs_pmn(tx)
     
@@ -386,18 +466,18 @@ def generate_icmn_pmn(loan_id: str, case_data: dict, sacco: dict, beneficiary: d
 # 3. CPO - Cloud Payment Orchestrator (XML)
 # ============================================================================
 
-def generate_cpo_psn(loan_id: str, case_data: dict) -> bytes:
+def generate_cpo_psn(loan_id: str, case_data: dict, lifecycle: dict) -> bytes:
     """Generate CPO/PSN - Business PAIN.002 (Payment Service Notification)"""
     ns = PAIN002_NS
     root = ET.Element("Document", xmlns=ns)
     report = child(root, "CstmrPmtStsRpt")
     
     header = child(report, "GrpHdr")
-    child(header, "MsgId", f"CPO-PSN-{loan_id}-{datetime.now().strftime('%Y%m%d%H%M%S')}")
+    child(header, "MsgId", lifecycle["psn_message_id"])
     child(header, "CreDtTm", generate_timestamp(1))
     
     original_grp = child(report, "OrgnlGrpInfAndSts")
-    child(original_grp, "OrgnlMsgId", f"ICMN-VPM-{loan_id}-{datetime.now().strftime('%Y%m%d%H%M%S')}")
+    child(original_grp, "OrgnlMsgId", lifecycle["vpm_message_id"])
     child(original_grp, "OrgnlMsgNmId", "pain.001.001.09")
     child(original_grp, "OrgnlNbOfTxs", "1")
     child(original_grp, "OrgnlCtrlSum", str(case_data["amount"]))
@@ -415,25 +495,25 @@ def generate_cpo_psn(loan_id: str, case_data: dict) -> bytes:
     
     child(original_pmt, "OrgnlInstrId", f"INSTR-{loan_id}")
     child(original_pmt, "OrgnlEndToEndId", loan_id)
-    child(original_pmt, "OrgnlTxId", f"TX-{loan_id}-{uuid.uuid4().hex[:8]}")
+    child(original_pmt, "OrgnlTxId", lifecycle["vpm_transaction_id"])
     child(original_pmt, "OrgnlUETR", str(uuid.uuid4()))
     
     return ET.tostring(root, encoding="utf-8", xml_declaration=True)
 
-def generate_cpo_plm(loan_id: str, case_data: dict) -> bytes:
+def generate_cpo_plm(loan_id: str, case_data: dict, lifecycle: dict) -> bytes:
     """Generate CPO/PLM - Technical PAIN.002 (Payment Lifecycle Management)"""
     ns = PAIN002_NS
     root = ET.Element("Document", xmlns=ns)
     report = child(root, "CstmrPmtStsRpt")
     
     header = child(report, "GrpHdr")
-    child(header, "MsgId", f"CPO-PLM-{loan_id}-{datetime.now().strftime('%Y%m%d%H%M%S')}")
+    child(header, "MsgId", lifecycle["plm_message_id"])
     child(header, "CreDtTm", generate_timestamp(1))
     
     add_technical_attrs_plm(header)
     
     original_grp = child(report, "OrgnlGrpInfAndSts")
-    child(original_grp, "OrgnlMsgId", f"ICMN-PMN-{loan_id}-{datetime.now().strftime('%Y%m%d%H%M%S')}")
+    child(original_grp, "OrgnlMsgId", lifecycle["pmn_message_id"])
     child(original_grp, "OrgnlMsgNmId", "pain.001.001.09")
     child(original_grp, "OrgnlNbOfTxs", "1")
     child(original_grp, "GrpSts", case_data["status"])
@@ -448,7 +528,7 @@ def generate_cpo_plm(loan_id: str, case_data: dict) -> bytes:
     
     child(original_pmt, "OrgnlInstrId", f"PMN-INSTR-{loan_id}")
     child(original_pmt, "OrgnlEndToEndId", loan_id)
-    child(original_pmt, "OrgnlTxId", f"PMN-TX-{loan_id}")
+    child(original_pmt, "OrgnlTxId", lifecycle["pmn_transaction_id"])
     child(original_pmt, "x-processingStatus", random.choice(["PROCESSING", "COMPLETED", "FAILED"]))
     child(original_pmt, "x-errorCode", f"ERR-{random.randint(100,999)}")
     child(original_pmt, "x-retryAttempt", str(random.randint(0, 5)))
@@ -460,14 +540,14 @@ def generate_cpo_plm(loan_id: str, case_data: dict) -> bytes:
 # 4. Wendi - PostBank Digital Wallet (XML)
 # ============================================================================
 
-def generate_wendi_camt053(loan_id: str, case_data: dict, sacco: dict) -> bytes:
+def generate_wendi_camt053(loan_id: str, case_data: dict, sacco: dict, lifecycle: dict) -> bytes:
     """Generate Wendi/CAMT.053 - End-of-Day Statement"""
     ns = CAMT053_NS
     root = ET.Element("Document", xmlns=ns)
     stmt = child(root, "BkToCstmrStmt")
     
     header = child(stmt, "GrpHdr")
-    child(header, "MsgId", f"WENDI-STMT-{loan_id}-{datetime.now().strftime('%Y%m%d')}")
+    child(header, "MsgId", lifecycle["wendi_statement_message_id"])
     child(header, "CreDtTm", generate_timestamp())
     
     statement = child(stmt, "Stmt")
@@ -504,6 +584,7 @@ def generate_wendi_camt053(loan_id: str, case_data: dict, sacco: dict) -> bytes:
     tx_dtls = child(entry_dtls, "TxDtls")
     refs = child(tx_dtls, "Refs")
     child(refs, "EndToEndId", loan_id)
+    child(refs, "TxId", lifecycle["vpm_transaction_id"])
     
     remit = child(tx_dtls, "RmtInf")
     child(remit, "Ustrd", f"PDM Loan {loan_id} - {case_data['project']}")
@@ -536,14 +617,14 @@ def generate_wendi_camt052(sacco: dict, transactions: list) -> bytes:
     
     return ET.tostring(root, encoding="utf-8", xml_declaration=True)
 
-def generate_wendi_camt054(loan_id: str, case_data: dict, beneficiary: dict) -> bytes:
+def generate_wendi_camt054(loan_id: str, case_data: dict, beneficiary: dict, lifecycle: dict) -> bytes:
     """Generate Wendi/CAMT.054 - Transaction Notification"""
     ns = CAMT054_NS
     root = ET.Element("Document", xmlns=ns)
     notif = child(root, "BkToCstmrDbtCdtNtfctn")
     
     header = child(notif, "GrpHdr")
-    child(header, "MsgId", f"WENDI-NTF-{loan_id}-{datetime.now().strftime('%Y%m%d%H%M%S')}")
+    child(header, "MsgId", lifecycle["wendi_notification_message_id"])
     child(header, "CreDtTm", generate_timestamp())
     
     notification = child(notif, "Ntfctn")
@@ -565,6 +646,7 @@ def generate_wendi_camt054(loan_id: str, case_data: dict, beneficiary: dict) -> 
     tx_dtls = child(entry_dtls, "TxDtls")
     refs = child(tx_dtls, "Refs")
     child(refs, "EndToEndId", loan_id)
+    child(refs, "TxId", lifecycle["vpm_transaction_id"])
     remit = child(tx_dtls, "RmtInf")
     child(remit, "Ustrd", f"PDM Loan {loan_id} disbursement to {beneficiary['name']}")
     
@@ -574,14 +656,15 @@ def generate_wendi_camt054(loan_id: str, case_data: dict, beneficiary: dict) -> 
 # 5. Mobile Networks (XML)
 # ============================================================================
 
-def generate_mobile_pacs008(loan_id: str, case_data: dict, sacco: dict, beneficiary: dict, network: str = "MTN") -> bytes:
+def generate_mobile_pacs008(loan_id: str, case_data: dict, sacco: dict, beneficiary: dict, lifecycle: dict, network: str = "MTN") -> bytes:
     """Generate Mobile Network/PACS.008 - Interbank Settlement"""
     ns = PACS008_NS
     root = ET.Element("Document", xmlns=ns)
     transfer = child(root, "FIToFICstmrCdtTrf")
     
     header = child(transfer, "GrpHdr")
-    child(header, "MsgId", f"{network}-PACS008-{loan_id}-{uuid.uuid4().hex[:8]}")
+    network_key = network.lower()
+    child(header, "MsgId", lifecycle[f"{network_key}_message_id"])
     child(header, "CreDtTm", generate_timestamp())
     child(header, "NbOfTxs", "1")
     child(header, "CtrlSum", str(case_data["amount"]))
@@ -589,7 +672,7 @@ def generate_mobile_pacs008(loan_id: str, case_data: dict, sacco: dict, benefici
     tx = child(transfer, "CdtTrfTxInf")
     pmt_id = child(tx, "PmtId")
     child(pmt_id, "EndToEndId", loan_id)
-    child(pmt_id, "TxId", f"TX-{loan_id}-{uuid.uuid4().hex[:8]}")
+    child(pmt_id, "TxId", lifecycle[f"{network_key}_transaction_id"])
     
     amt = child(tx, "Amt")
     child(amt, "InstdAmt", str(case_data["amount"]), Ccy="UGX")
@@ -627,11 +710,45 @@ def generate_mobile_pacs008(loan_id: str, case_data: dict, sacco: dict, benefici
     
     return ET.tostring(root, encoding="utf-8", xml_declaration=True)
 
+def generate_mobile_pacs002(
+    loan_id: str, case_data: dict, lifecycle: dict, network: str = "MTN"
+) -> bytes:
+    """Generate settlement status linked to the originating PACS.008 transaction."""
+    root = ET.Element("Document", xmlns=PACS002_NS)
+    report = child(root, "FIToFIPmtStsRpt")
+    header = child(report, "GrpHdr")
+    network_key = network.lower()
+    child(header, "MsgId", f"{network.upper()}-PACS002-{loan_id}")
+    child(header, "CreDtTm", generate_timestamp(3))
+
+    status = child(report, "TxInfAndSts")
+    original_end_to_end = child(status, "OrgnlEndToEndId")
+    child(original_end_to_end, "EndToEndId", loan_id)
+    original_transaction = child(status, "OrgnlTxId")
+    child(original_transaction, "TxId", lifecycle[f"{network_key}_transaction_id"])
+    child(status, "TxSts", case_data["status"])
+    child(status, "StsReqId", f"STATUS-{network.upper()}-{loan_id}")
+    if case_data["status"] == STATUS_RJCT:
+        reason = child(status, "StsRsnInf")
+        reason_code = child(reason, "Rsn")
+        child(reason_code, "Cd", "AC01")
+        child(reason, "AddtlInf", "Creditor account is invalid")
+    settlement = child(status, "SttlmInf")
+    settlement_method = child(settlement, "SttlmMtd")
+    child(settlement_method, "Cd", "CLRG")
+    child(settlement, "ClrSys", "UNIS")
+    child(status, "AccptncDtTm", generate_timestamp(3))
+    child(status, "AcctSvcrRef", f"ASR-{network.upper()}-{loan_id}")
+    child(status, "ClrSysRef", f"CLR-{network.upper()}-{loan_id}")
+    return ET.tostring(root, encoding="utf-8", xml_declaration=True)
+
 # ============================================================================
 # 6. Agent Network (Custom XML)
 # ============================================================================
 
-def generate_agent_transaction(loan_id: str, case_data: dict, beneficiary: dict) -> bytes:
+def generate_agent_transaction(
+    loan_id: str, case_data: dict, beneficiary: dict, location_data: dict
+) -> bytes:
     """Generate Agent Network - Cash-out Transaction"""
     root = ET.Element("AgentTransaction")
     child(root, "transaction_id", generate_id("AGT-TX", 12))
@@ -650,9 +767,9 @@ def generate_agent_transaction(loan_id: str, case_data: dict, beneficiary: dict)
     child(root, "reference", f"REF-{loan_id[:8]}")
     
     location = child(root, "location")
-    child(location, "latitude", str(-0.3167 + random.uniform(-0.02, 0.02)))
-    child(location, "longitude", str(32.5833 + random.uniform(-0.02, 0.02)))
-    child(location, "address", "Kamuli, Uganda")
+    child(location, "latitude", str(location_data["latitude"] + random.uniform(-0.02, 0.02)))
+    child(location, "longitude", str(location_data["longitude"] + random.uniform(-0.02, 0.02)))
+    child(location, "address", f"{location_data['parish']}, {location_data['district']}, Uganda")
     
     return ET.tostring(root, encoding="utf-8", xml_declaration=True)
 
@@ -688,72 +805,98 @@ def main():
     write_json(DATA_ROOT / "pdmis" / "special_groups.json", pdmis_data["special_groups"])
     logger.info("  ✅ Created 6 JSON files in pdmis/")
     
-    sacco = pdmis_data["saccos"][0]
+    saccos_by_id = {sacco["sacco_id"]: sacco for sacco in pdmis_data["saccos"]}
     beneficiaries = pdmis_data["beneficiaries"]
-    all_transactions = []
+    loans = pdmis_data["loans"]
+    transactions_by_sacco = {sacco_id: [] for sacco_id in saccos_by_id}
     
     logger.info("📨 Generating ISO 20022 messages...")
     
     for i, (loan_id, case_data) in enumerate(POC_CASES.items()):
         beneficiary = beneficiaries[i]
+        loan = loans[i]
+        sacco = saccos_by_id[loan["sacco_id"]]
+        location_data = PDM_LOCATIONS[i % len(PDM_LOCATIONS)]
+        lifecycle = build_lifecycle_context(loan_id)
         seq = i + 1
         
         # 1. ICMN - VPM (Business Payment Initiation)
-        icmn_vpm = generate_icmn_vpm(loan_id, case_data, sacco, beneficiary)
+        icmn_vpm = generate_icmn_vpm(loan_id, case_data, sacco, beneficiary, lifecycle)
         write_xml(DATA_ROOT / "icmn" / "vpm" / "pain001" / f"vpm_{seq:04d}.xml", icmn_vpm)
         
         # 2. ICMN - PMN (Technical Lifecycle)
-        icmn_pmn = generate_icmn_pmn(loan_id, case_data, sacco, beneficiary)
+        icmn_pmn = generate_icmn_pmn(loan_id, case_data, sacco, beneficiary, lifecycle)
         write_xml(DATA_ROOT / "icmn" / "pmn" / "pain001" / f"pmn_{seq:04d}.xml", icmn_pmn)
         
         # 3. CPO - PSN (Business Status)
-        cpo_psn = generate_cpo_psn(loan_id, case_data)
+        cpo_psn = generate_cpo_psn(loan_id, case_data, lifecycle)
         write_xml(DATA_ROOT / "cpo" / "psn" / "pain002" / f"psn_{seq:04d}.xml", cpo_psn)
         
         # 4. CPO - PLM (Technical Lifecycle)
-        cpo_plm = generate_cpo_plm(loan_id, case_data)
+        cpo_plm = generate_cpo_plm(loan_id, case_data, lifecycle)
         write_xml(DATA_ROOT / "cpo" / "plm" / "pain002" / f"plm_{seq:04d}.xml", cpo_plm)
         
         # 5. Wendi - CAMT.053 (Bank Statement)
-        wendi_camt053 = generate_wendi_camt053(loan_id, case_data, sacco)
+        wendi_camt053 = generate_wendi_camt053(loan_id, case_data, sacco, lifecycle)
         write_xml(DATA_ROOT / "wendi" / "camt053" / f"camt053_{seq:04d}.xml", wendi_camt053)
         
         # 6. Wendi - CAMT.054 (Notification)
-        wendi_camt054 = generate_wendi_camt054(loan_id, case_data, beneficiary)
+        wendi_camt054 = generate_wendi_camt054(loan_id, case_data, beneficiary, lifecycle)
         write_xml(DATA_ROOT / "wendi" / "camt054" / f"camt054_{seq:04d}.xml", wendi_camt054)
         
-        # 7. Mobile - MTN PACS.008 (Settlement)
-        mobile_mtn = generate_mobile_pacs008(loan_id, case_data, sacco, beneficiary, "MTN")
-        write_xml(DATA_ROOT / "mobile_networks" / "mtn" / "pacs008" / f"pacs008_mtn_{seq:04d}.xml", mobile_mtn)
+        # 7-8. One mobile settlement route and its linked status per loan.
+        network = "MTN" if i % 2 == 0 else "AIRTEL"
+        network_path = network.lower()
+        mobile_settlement = generate_mobile_pacs008(
+            loan_id, case_data, sacco, beneficiary, lifecycle, network
+        )
+        write_xml(
+            DATA_ROOT / "mobile_networks" / network_path / "pacs008"
+            / f"pacs008_{network_path}_{seq:04d}.xml",
+            mobile_settlement,
+        )
+        mobile_status = generate_mobile_pacs002(loan_id, case_data, lifecycle, network)
+        write_xml(
+            DATA_ROOT / "mobile_networks" / network_path / "pacs002"
+            / f"pacs002_{network_path}_{seq:04d}.xml",
+            mobile_status,
+        )
         
-        # 8. Mobile - Airtel PACS.008 (Settlement)
-        mobile_airtel = generate_mobile_pacs008(loan_id, case_data, sacco, beneficiary, "AIRTEL")
-        write_xml(DATA_ROOT / "mobile_networks" / "airtel" / "pacs008" / f"pacs008_airtel_{seq:04d}.xml", mobile_airtel)
-        
-        # 9. Agent Network - Cash-Out
-        agent_tx = generate_agent_transaction(loan_id, case_data, beneficiary)
+        # 10. Agent Network - Cash-Out
+        agent_tx = generate_agent_transaction(loan_id, case_data, beneficiary, location_data)
         write_xml(DATA_ROOT / "agent_network" / "agent_transactions" / f"agent_tx_{seq:04d}.xml", agent_tx)
         
         # Track for CAMT.052
         if case_data["status"] == STATUS_ACSC:
-            all_transactions.append({"amount": case_data["amount"], "event_type": "DISBURSEMENT"})
+            transactions_by_sacco[sacco["sacco_id"]].append(
+                {"amount": case_data["amount"], "event_type": "DISBURSEMENT"}
+            )
         
         logger.debug(f"  ✅ Generated {seq}/10: {loan_id}")
     
     # 10. Wendi - CAMT.052 (Intraday Report)
-    wendi_camt052 = generate_wendi_camt052(sacco, all_transactions)
-    write_xml(DATA_ROOT / "wendi" / "camt052" / "camt052_report_001.xml", wendi_camt052)
+    for report_number, sacco in enumerate(pdmis_data["saccos"], 1):
+        wendi_camt052 = generate_wendi_camt052(
+            sacco, transactions_by_sacco[sacco["sacco_id"]]
+        )
+        write_xml(
+            DATA_ROOT / "wendi" / "camt052" / f"camt052_report_{report_number:03d}.xml",
+            wendi_camt052,
+        )
     
     logger.info("")
     logger.info("=" * 70)
     logger.info("✅ XML Generation Complete!")
-    logger.info(f"📁 Total files generated: {len(POC_CASES) * 9 + 1}")
+    total_xml_files = len(POC_CASES) * 9 + len(pdmis_data["saccos"])
+    logger.info(f"📁 Total XML files generated: {total_xml_files}")
     logger.info("")
     logger.info("📂 Directory Structure:")
     logger.info("  ├── pdmis/ (6 JSON files)")
     logger.info("  ├── icmn/ (20 XML files)")
     logger.info("  ├── cpo/ (20 XML files)")
-    logger.info("  ├── wendi/ (31 XML files)")
+    logger.info(
+        f"  ├── wendi/ ({len(POC_CASES) * 2 + len(pdmis_data['saccos'])} XML files)"
+    )
     logger.info("  ├── mobile_networks/ (20 XML files)")
     logger.info("  └── agent_network/ (10 XML files)")
     logger.info("=" * 70)

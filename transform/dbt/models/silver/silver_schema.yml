@@ -138,3 +138,9 @@ models:
   - name: slv_pdm_dq_results
     description: Normalized cross-domain business-validation results, one row per canonical entity and rule.
     meta: {natural_key: [entity_type, entity_id, rule_code], normal_form: 3NF}
+  - name: slv_pdm_payment_lifecycle
+    description: One-row-per-loan control view from approval through instruction, status, settlement, credit, cash-out and repayment.
+    meta: {natural_key: [loan_id], normal_form: control_view}
+    columns:
+      - name: loan_id
+        data_tests: [not_null, unique]

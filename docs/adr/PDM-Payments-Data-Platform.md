@@ -5,6 +5,12 @@
 **Deciders:** Project Team, PDM Secretariat, Technical Architects
 **Last Updated:** 2026-08-28
 
+> **Modeling update (2026-08-29):** The source-system decision in this ADR remains
+> valid. Its Silver/Gold model mapping sections are superseded by
+> [ADR-002: PDM Dimensional Gold Analytics](./ADR-002-PDM-Dimensional-Gold-Analytics.md).
+> Silver is now canonical 3NF with natural keys; Gold owns dimensional surrogate
+> keys and atomic measures; Consumption owns stakeholder aggregates and indicators.
+
 ## 📌 Context and Problem Statement
 The Uganda Parish Development Model (PDM) is a government program that has disbursed over UGX 3.2 trillion to over 4 million beneficiaries through over 10,500 parish-level SACCOs. Despite the digital PDMIS system and the Wendi mobile wallet platform, significant fraud persists at the community level.
 

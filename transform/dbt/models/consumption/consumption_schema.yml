@@ -1,0 +1,82 @@
+version: 2
+
+models:
+  - name: cns_pdm_payments_daily_summary
+    description: Daily stakeholder payment metrics by source, currency, reconciliation and entity matching.
+    meta:
+      grain: [payment_date_sk, source_system, currency]
+      audience: [PDM leadership, PDM Secretariat, finance operations]
+  - name: cns_pdm_parish_performance
+    description: Parish-level PDM loan disbursement, outstanding balance and repayment performance.
+    meta:
+      grain: [geography_sk]
+      audience: [PDM leadership, district leadership, parish officers]
+  - name: cns_pdm_agent_risk_indicators
+    description: Daily investigation-triage indicators for rapid cash-out, excess amount, reconciliation and agent identity concerns.
+    meta:
+      grain: [agent_sk, cashout_date_sk]
+      audience: [internal audit, IGG, investigators]
+    columns:
+      - name: risk_band
+        data_tests:
+          - accepted_values:
+              arguments: {values: [LOW, MEDIUM, HIGH]}
+  - name: cns_pdm_beneficiary_insights
+    description: Beneficiary oversight view for multiple loans, verification, repayment and cash-out monitoring.
+    meta:
+      grain: [beneficiary_sk]
+      audience: [PDM Secretariat, district leadership, authorised investigators]
+    columns:
+      - name: beneficiary_sk
+        data_tests: [not_null, unique]
+      - name: oversight_status
+        data_tests:
+          - accepted_values:
+              arguments: {values: [STANDARD, REVIEW]}
+  - name: cns_pdm_beneficiary_identity_alerts
+    description: Authorised investigator view of shared identity, shared phone, multiple-loan and payment-account substitution indicators.
+    meta:
+      grain: [beneficiary_sk]
+      audience: [internal audit, IGG, authorised investigators]
+      classification: restricted
+    columns:
+      - name: beneficiary_sk
+        data_tests: [not_null, unique]
+      - name: identity_risk_band
+        data_tests:
+          - accepted_values:
+              arguments: {values: [LOW, MEDIUM, HIGH]}
+  - name: cns_pdm_lifecycle_exceptions
+    description: Investigator control view tracing approved, instructed, status, settled, credited, cash-out and repaid stages with amount variances.
+    meta:
+      grain: [loan_id]
+      audience: [PDM Secretariat, internal audit, IGG, authorised investigators]
+    columns:
+      - name: lifecycle_sk
+        data_tests: [not_null, unique]
+      - name: intervention_priority
+        data_tests:
+          - accepted_values:
+              arguments: {values: [LOW, MEDIUM, HIGH]}
+  - name: cns_pdm_duplicate_fragmentation_alerts
+    description: Same-entitlement duplicate, cross-channel, repeated-amount and fragmented-payment indicators.
+    meta:
+      grain: [beneficiary_sk, loan_id, payment_date_sk, currency]
+      audience: [payment operations, internal audit, authorised investigators]
+    columns:
+      - name: payment_pattern_sk
+        data_tests: [not_null, unique]
+      - name: payment_pattern_risk_band
+        data_tests:
+          - accepted_values:
+              arguments: {values: [LOW, MEDIUM, HIGH]}
+  - name: cns_pdm_geographic_risk
+    description: Parish peer-comparison view combining disbursement, repayment and beneficiary identity indicators.
+    meta:
+      grain: [geography_sk]
+      audience: [PDM leadership, PDM Secretariat, district leadership]
+    columns:
+      - name: geographic_risk_band
+        data_tests:
+          - accepted_values:
+              arguments: {values: [LOW, MEDIUM, HIGH]}

@@ -32,9 +32,11 @@ models:
     gold:
       +materialized: table
       +schema: gold
+    consumption:
+      +materialized: table
+      +schema: consumption
 
 vars:
   s3_bucket: "dp-ai-payment"
   s3_path: "raw"
   iceberg_catalog: "pdm_catalog"
-
