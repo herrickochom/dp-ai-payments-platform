@@ -36,12 +36,12 @@ contains an Unknown member so incomplete relationships do not remove facts.
 
 | Model | Grain | Purpose |
 | --- | --- | --- |
-| `dim_pdm_date` | One calendar date | Shared calendar attributes |
-| `dim_pdm_geography` | Region, district, parish, village | Uganda administrative drill-down |
-| `dim_pdm_special_group` | PDM special-group code | Inclusion analysis |
-| `dim_pdm_beneficiary` | One beneficiary | Beneficiary and verification attributes |
-| `dim_pdm_sacco` | One SACCO | Parish SACCO oversight |
-| `dim_pdm_agent` | One agent | Agent identity, network and primary location |
+| `gld_dim_pdm_date` | One calendar date | Shared calendar attributes |
+| `gld_dim_pdm_geography` | Region, district, parish, village | Uganda administrative drill-down |
+| `gld_dim_pdm_special_group` | PDM special-group code | Inclusion analysis |
+| `gld_dim_pdm_beneficiary` | One beneficiary | Beneficiary and verification attributes |
+| `gld_dim_pdm_sacco` | One SACCO | Parish SACCO oversight |
+| `gld_dim_pdm_agent` | One agent | Agent identity, network and primary location |
 
 Geography and special group are snowflaked from beneficiary, SACCO and agent
 dimensions because they are shared analytical axes.
@@ -50,10 +50,10 @@ dimensions because they are shared analytical axes.
 
 | Model | Grain | Additive measures |
 | --- | --- | --- |
-| `fct_pdm_payments` | Source system + transaction | Payment amount/count, status-match counts |
-| `fct_pdm_loans` | Loan | Requested, approved, disbursed, repaid, interest, outstanding |
-| `fct_pdm_agent_cashouts` | Agent cash-out transaction | Cash-out amount/count and monitoring flags |
-| `fct_pdm_payment_lifecycle` | Loan | Accumulating approval-to-repayment control stages and amount variances |
+| `gld_fct_pdm_payments` | Source system + transaction | Payment amount/count, status-match counts |
+| `gld_fct_pdm_loans` | Loan | Requested, approved, disbursed, repaid, interest, outstanding |
+| `gld_fct_pdm_agent_cashouts` | Agent cash-out transaction | Cash-out amount/count and monitoring flags |
+| `gld_fct_pdm_payment_lifecycle` | Loan | Accumulating approval-to-repayment control stages and amount variances |
 
 Facts join to conformed dimensions through Gold surrogate keys. They retain source
 natural keys for audit traversal back through Silver to Kafka and MinIO lineage.

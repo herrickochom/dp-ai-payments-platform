@@ -1,10 +1,13 @@
 {{ config(materialized='iceberg_table', tags=['consumption', 'risk', 'geography']) }}
 
 with identity_alerts as (
-    select geography_sk,
+    select
+        {{ gold_surrogate_key(['geography.region', 'geography.district', 'geography.parish']) }} as parish_sk,
         count(*) filter (where identity_risk_band = 'HIGH') as high_identity_alert_count,
         sum(account_substitution_amount) as account_substitution_amount
-    from {{ ref('cns_pdm_beneficiary_identity_alerts') }}
+    from {{ ref('cns_pdm_beneficiary_identity_alerts') }} identity
+    left join {{ ref('gld_dim_pdm_geography') }} geography
+      on identity.geography_sk = geography.geography_sk
     group by 1
 ), parish_metrics as (
     select
@@ -28,4 +31,4 @@ select
         else 'LOW'
     end as geographic_risk_band
 from parish_metrics parish
-left join identity_alerts identity using (geography_sk)
+left join identity_alerts identity using (parish_sk)

@@ -1,0 +1,32 @@
+databases:
+  - database_name: "PDM Lakehouse"
+    sqlalchemy_uri: "trino://pdm@trino:8080/iceberg/consumption"
+    expose_in_sqllab: true
+    allow_ctas: false
+    allow_cvas: false
+    allow_dml: false
+
+    tables:
+      - table_name: "cns_pdm_executive_overview"
+        schema: "consumption"
+
+      - table_name: "cns_pdm_geographic_risk"
+        schema: "consumption"
+
+      - table_name: "cns_pdm_financial_fund_flow"
+        schema: "consumption"
+
+      - table_name: "cns_pdm_fraud_risk_insights"
+        schema: "consumption"
+
+      - table_name: "cns_pdm_loan_intervention_dashboard"
+        schema: "consumption"
+
+      - table_name: "cns_pdm_payments_daily_summary"
+        schema: "consumption"
+
+      - table_name: "cns_pdm_fund_flow_funnel"
+        schema: "consumption"
+
+      - table_name: "cns_pdm_lifecycle_exceptions"
+        schema: "consumption"

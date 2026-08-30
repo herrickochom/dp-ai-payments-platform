@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: dim_pdm_date
+  - name: gld_dim_pdm_date
     description: Conformed calendar dimension used by all PDM Gold facts.
     columns:
       - name: date_sk
@@ -9,17 +9,17 @@ models:
       - name: calendar_date
         description: Null only for the mandatory Unknown dimension member.
         data_tests: [unique]
-  - name: dim_pdm_geography
+  - name: gld_dim_pdm_geography
     description: Snowflaked Uganda geography dimension at region, district, parish and village grain.
     columns:
       - name: geography_sk
         data_tests: [not_null, unique]
-  - name: dim_pdm_special_group
+  - name: gld_dim_pdm_special_group
     description: PDM inclusion category dimension for women, youth, PWD and other targeted groups.
     columns:
       - name: special_group_sk
         data_tests: [not_null, unique]
-  - name: dim_pdm_beneficiary
+  - name: gld_dim_pdm_beneficiary
     description: Type-1 beneficiary dimension with geography and special-group surrogate keys.
     columns:
       - name: beneficiary_sk
@@ -27,22 +27,22 @@ models:
       - name: geography_sk
         data_tests:
           - relationships:
-              arguments: {to: "ref('dim_pdm_geography')", field: geography_sk}
+              arguments: {to: "ref('gld_dim_pdm_geography')", field: geography_sk}
       - name: special_group_sk
         data_tests:
           - relationships:
-              arguments: {to: "ref('dim_pdm_special_group')", field: special_group_sk}
-  - name: dim_pdm_sacco
+              arguments: {to: "ref('gld_dim_pdm_special_group')", field: special_group_sk}
+  - name: gld_dim_pdm_sacco
     description: Type-1 PDM SACCO dimension.
     columns:
       - name: sacco_sk
         data_tests: [not_null, unique]
-  - name: dim_pdm_agent
+  - name: gld_dim_pdm_agent
     description: Type-1 Wendi agent dimension enriched with primary location coordinates.
     columns:
       - name: agent_sk
         data_tests: [not_null, unique]
-  - name: fct_pdm_payments
+  - name: gld_fct_pdm_payments
     description: Atomic accumulating payment fact at source-system and transaction grain.
     meta: {grain: [source_system, transaction_id]}
     columns:
@@ -51,24 +51,24 @@ models:
       - name: payment_date_sk
         data_tests:
           - relationships:
-              arguments: {to: "ref('dim_pdm_date')", field: date_sk}
+              arguments: {to: "ref('gld_dim_pdm_date')", field: date_sk}
       - name: beneficiary_sk
         data_tests:
           - relationships:
-              arguments: {to: "ref('dim_pdm_beneficiary')", field: beneficiary_sk}
+              arguments: {to: "ref('gld_dim_pdm_beneficiary')", field: beneficiary_sk}
       - name: sacco_sk
         data_tests:
           - relationships:
-              arguments: {to: "ref('dim_pdm_sacco')", field: sacco_sk}
+              arguments: {to: "ref('gld_dim_pdm_sacco')", field: sacco_sk}
       - name: agent_sk
         data_tests:
           - relationships:
-              arguments: {to: "ref('dim_pdm_agent')", field: agent_sk}
+              arguments: {to: "ref('gld_dim_pdm_agent')", field: agent_sk}
       - name: geography_sk
         data_tests:
           - relationships:
-              arguments: {to: "ref('dim_pdm_geography')", field: geography_sk}
-  - name: fct_pdm_loans
+              arguments: {to: "ref('gld_dim_pdm_geography')", field: geography_sk}
+  - name: gld_fct_pdm_loans
     description: Atomic loan fact containing approved, disbursed, repaid and outstanding measures.
     meta: {grain: [loan_id]}
     columns:
@@ -77,16 +77,16 @@ models:
       - name: beneficiary_sk
         data_tests:
           - relationships:
-              arguments: {to: "ref('dim_pdm_beneficiary')", field: beneficiary_sk}
+              arguments: {to: "ref('gld_dim_pdm_beneficiary')", field: beneficiary_sk}
       - name: sacco_sk
         data_tests:
           - relationships:
-              arguments: {to: "ref('dim_pdm_sacco')", field: sacco_sk}
+              arguments: {to: "ref('gld_dim_pdm_sacco')", field: sacco_sk}
       - name: geography_sk
         data_tests:
           - relationships:
-              arguments: {to: "ref('dim_pdm_geography')", field: geography_sk}
-  - name: fct_pdm_agent_cashouts
+              arguments: {to: "ref('gld_dim_pdm_geography')", field: geography_sk}
+  - name: gld_fct_pdm_agent_cashouts
     description: Transaction fact for agent cash-outs and fraud-monitoring signals.
     meta: {grain: [transaction_id]}
     columns:
@@ -95,12 +95,12 @@ models:
       - name: beneficiary_sk
         data_tests:
           - relationships:
-              arguments: {to: "ref('dim_pdm_beneficiary')", field: beneficiary_sk}
+              arguments: {to: "ref('gld_dim_pdm_beneficiary')", field: beneficiary_sk}
       - name: agent_sk
         data_tests:
           - relationships:
-              arguments: {to: "ref('dim_pdm_agent')", field: agent_sk}
-  - name: fct_pdm_payment_lifecycle
+              arguments: {to: "ref('gld_dim_pdm_agent')", field: agent_sk}
+  - name: gld_fct_pdm_payment_lifecycle
     description: Accumulating control fact tracing each loan from approval through instruction, settlement, credit, cash-out and repayment.
     meta: {grain: [loan_id]}
     columns:

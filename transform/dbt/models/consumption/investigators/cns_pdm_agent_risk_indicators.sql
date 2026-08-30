@@ -19,5 +19,5 @@ select
         when sum(case when days_from_loan_approval between 0 and 1 then 1 else 0 end) > 0 then 'MEDIUM'
         else 'LOW'
     end as risk_band
-from {{ ref('fct_pdm_agent_cashouts') }}
+from {{ ref('gld_fct_pdm_agent_cashouts') }}
 group by 1, 2

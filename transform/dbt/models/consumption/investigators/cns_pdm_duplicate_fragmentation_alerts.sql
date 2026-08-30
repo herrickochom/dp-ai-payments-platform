@@ -12,8 +12,9 @@ with entitlements as (
         sum(payment.payment_amount) as total_instructed_amount,
         min(payment.payment_amount) as minimum_instruction_amount,
         max(payment.payment_amount) as maximum_instruction_amount
-    from {{ ref('fct_pdm_payments') }} payment
-    where payment.source_system in ('ICMN_VPM', 'WENDI_PAIN001')
+    from {{ ref('gld_fct_pdm_payments') }} payment
+    -- Wendi PAIN.001 is a routed copy of ICMN VPM, not a second entitlement.
+    where payment.source_system = 'ICMN_VPM'
     group by 1, 2, 3, 4
 )
 select
@@ -35,4 +36,4 @@ select
         else 'LOW'
     end as payment_pattern_risk_band
 from entitlements
-left join {{ ref('slv_pdm_loans') }} loan using (loan_id)
+left join {{ ref('gld_fct_pdm_loans') }} loan using (loan_id)

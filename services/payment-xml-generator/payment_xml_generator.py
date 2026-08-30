@@ -33,7 +33,7 @@ import logging
 # ============================================================================
 
 PROJECT_ROOT = Path(os.getenv("PROJECT_ROOT", "/home/hochom/projects/dp-ai-payments-platform"))
-DATA_ROOT = PROJECT_ROOT / "data"
+DATA_ROOT = Path(os.getenv("DATA_ROOT", str(PROJECT_ROOT / "data")))
 
 # ISO 20022 Namespaces
 PAIN001_NS = "urn:iso:std:iso:20022:tech:xsd:pain.001.001.09"
@@ -243,6 +243,30 @@ def write_json(path: Path, data: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w") as f:
         json.dump(data, f, indent=2, default=str)
+
+def clean_generated_xml() -> int:
+    """Remove only XML paths owned by this generator before a repeatable run."""
+    generated_directories = [
+        DATA_ROOT / "icmn" / "vpm" / "pain001",
+        DATA_ROOT / "icmn" / "pmn" / "pain001",
+        DATA_ROOT / "cpo" / "psn" / "pain002",
+        DATA_ROOT / "cpo" / "plm" / "pain002",
+        DATA_ROOT / "wendi" / "camt052",
+        DATA_ROOT / "wendi" / "camt053",
+        DATA_ROOT / "wendi" / "camt054",
+        DATA_ROOT / "mobile_networks" / "mtn" / "pacs008",
+        DATA_ROOT / "mobile_networks" / "mtn" / "pacs002",
+        DATA_ROOT / "mobile_networks" / "airtel" / "pacs008",
+        DATA_ROOT / "mobile_networks" / "airtel" / "pacs002",
+        DATA_ROOT / "agent_network" / "agent_transactions",
+    ]
+    removed_count = 0
+    for directory in generated_directories:
+        if directory.exists():
+            for xml_path in directory.glob("*.xml"):
+                xml_path.unlink()
+                removed_count += 1
+    return removed_count
 
 # ============================================================================
 # 1. PDMIS - Government System Data (JSON)
@@ -781,6 +805,11 @@ def main():
     parser = argparse.ArgumentParser(description="PDM ISO 20022 XML Generator")
     parser.add_argument("--count", "-c", type=int, default=10, help="Number of cases (default: 10)")
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output")
+    parser.add_argument(
+        "--clean",
+        action="store_true",
+        help="Remove existing XML files from generator-owned output folders first",
+    )
     args = parser.parse_args()
     
     logger = logging.getLogger("pdm_xml_generator")
@@ -793,6 +822,10 @@ def main():
     logger.info(f"Output Directory: {DATA_ROOT}")
     logger.info(f"Number of POC Cases: {args.count}")
     logger.info("")
+
+    if args.clean:
+        removed_count = clean_generated_xml()
+        logger.info(f"🧹 Removed {removed_count} previously generated XML files")
     
     # Generate PDMIS data
     logger.info("📊 Generating PDMIS (Government System) data...")
@@ -812,7 +845,8 @@ def main():
     
     logger.info("📨 Generating ISO 20022 messages...")
     
-    for i, (loan_id, case_data) in enumerate(POC_CASES.items()):
+    selected_cases = list(POC_CASES.items())[:args.count]
+    for i, (loan_id, case_data) in enumerate(selected_cases):
         beneficiary = beneficiaries[i]
         loan = loans[i]
         sacco = saccos_by_id[loan["sacco_id"]]
@@ -836,13 +870,24 @@ def main():
         cpo_plm = generate_cpo_plm(loan_id, case_data, lifecycle)
         write_xml(DATA_ROOT / "cpo" / "plm" / "pain002" / f"plm_{seq:04d}.xml", cpo_plm)
         
-        # 5. Wendi - CAMT.053 (Bank Statement)
-        wendi_camt053 = generate_wendi_camt053(loan_id, case_data, sacco, lifecycle)
-        write_xml(DATA_ROOT / "wendi" / "camt053" / f"camt053_{seq:04d}.xml", wendi_camt053)
-        
-        # 6. Wendi - CAMT.054 (Notification)
-        wendi_camt054 = generate_wendi_camt054(loan_id, case_data, beneficiary, lifecycle)
-        write_xml(DATA_ROOT / "wendi" / "camt054" / f"camt054_{seq:04d}.xml", wendi_camt054)
+        # Booked statements and credit notifications are evidence of successful
+        # settlement, so rejected/pending attempts must not emit them.
+        if case_data["status"] == STATUS_ACSC:
+            wendi_camt053 = generate_wendi_camt053(
+                loan_id, case_data, sacco, lifecycle
+            )
+            write_xml(
+                DATA_ROOT / "wendi" / "camt053" / f"camt053_{seq:04d}.xml",
+                wendi_camt053,
+            )
+
+            wendi_camt054 = generate_wendi_camt054(
+                loan_id, case_data, beneficiary, lifecycle
+            )
+            write_xml(
+                DATA_ROOT / "wendi" / "camt054" / f"camt054_{seq:04d}.xml",
+                wendi_camt054,
+            )
         
         # 7-8. One mobile settlement route and its linked status per loan.
         network = "MTN" if i % 2 == 0 else "AIRTEL"
@@ -862,9 +907,16 @@ def main():
             mobile_status,
         )
         
-        # 10. Agent Network - Cash-Out
-        agent_tx = generate_agent_transaction(loan_id, case_data, beneficiary, location_data)
-        write_xml(DATA_ROOT / "agent_network" / "agent_transactions" / f"agent_tx_{seq:04d}.xml", agent_tx)
+        # Cash-out can occur only after a successful beneficiary credit.
+        if case_data["status"] == STATUS_ACSC:
+            agent_tx = generate_agent_transaction(
+                loan_id, case_data, beneficiary, location_data
+            )
+            write_xml(
+                DATA_ROOT / "agent_network" / "agent_transactions"
+                / f"agent_tx_{seq:04d}.xml",
+                agent_tx,
+            )
         
         # Track for CAMT.052
         if case_data["status"] == STATUS_ACSC:
@@ -872,7 +924,7 @@ def main():
                 {"amount": case_data["amount"], "event_type": "DISBURSEMENT"}
             )
         
-        logger.debug(f"  ✅ Generated {seq}/10: {loan_id}")
+        logger.debug(f"  ✅ Generated {seq}/{len(selected_cases)}: {loan_id}")
     
     # 10. Wendi - CAMT.052 (Intraday Report)
     for report_number, sacco in enumerate(pdmis_data["saccos"], 1):
@@ -887,7 +939,14 @@ def main():
     logger.info("")
     logger.info("=" * 70)
     logger.info("✅ XML Generation Complete!")
-    total_xml_files = len(POC_CASES) * 9 + len(pdmis_data["saccos"])
+    successful_case_count = sum(
+        case_data["status"] == STATUS_ACSC for _, case_data in selected_cases
+    )
+    total_xml_files = (
+        len(selected_cases) * 6
+        + successful_case_count * 3
+        + len(pdmis_data["saccos"])
+    )
     logger.info(f"📁 Total XML files generated: {total_xml_files}")
     logger.info("")
     logger.info("📂 Directory Structure:")
@@ -895,10 +954,10 @@ def main():
     logger.info("  ├── icmn/ (20 XML files)")
     logger.info("  ├── cpo/ (20 XML files)")
     logger.info(
-        f"  ├── wendi/ ({len(POC_CASES) * 2 + len(pdmis_data['saccos'])} XML files)"
+        f"  ├── wendi/ ({successful_case_count * 2 + len(pdmis_data['saccos'])} XML files)"
     )
     logger.info("  ├── mobile_networks/ (20 XML files)")
-    logger.info("  └── agent_network/ (10 XML files)")
+    logger.info(f"  └── agent_network/ ({successful_case_count} XML files)")
     logger.info("=" * 70)
 
 if __name__ == "__main__":

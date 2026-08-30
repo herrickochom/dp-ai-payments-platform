@@ -1,40 +1,75 @@
 # /home/hochom/projects/dp-ai-payments-platform/transform/dbt/dbt_project.yml
-name: 'pdm_platform'
-version: '1.0.0'
+
+name: "pdm_platform"
+version: "1.0.0"
 config-version: 2
 
-profile: 'pdm_platform'
+profile: "pdm_platform"
 
-model-paths: ["models"]
-analysis-paths: ["analyses"]
-test-paths: ["tests"]
-seed-paths: ["seeds"]
-macro-paths: ["macros"]
-snapshot-paths: ["snapshots"]
+# ------------------------------------------------------------------------------
+# Project paths
+# ------------------------------------------------------------------------------
+
+model-paths:
+  - "models"
+
+analysis-paths:
+  - "analyses"
+
+test-paths:
+  - "tests"
+
+seed-paths:
+  - "seeds"
+
+macro-paths:
+  - "macros"
+
+snapshot-paths:
+  - "snapshots"
 
 target-path: "target"
+
 clean-targets:
   - "target"
   - "dbt_packages"
 
+# ------------------------------------------------------------------------------
+# Model configuration
+# ------------------------------------------------------------------------------
+
 models:
   pdm_platform:
     +materialized: table
+
     staging:
+      +database: pdm
       +materialized: view
       +schema: staging
+
     bronze:
+      +database: lakehouse
       +materialized: table
       +schema: bronze
+
     silver:
+      +database: lakehouse
       +materialized: table
       +schema: silver
+
     gold:
+      +database: lakehouse
       +materialized: table
       +schema: gold
+
     consumption:
+      +database: lakehouse
       +materialized: table
       +schema: consumption
+
+# ------------------------------------------------------------------------------
+# Project variables
+# ------------------------------------------------------------------------------
 
 vars:
   s3_bucket: "dp-ai-payment"

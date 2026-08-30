@@ -11,23 +11,32 @@
       "allow": "read-only"
     }
   ],
+
   "schemas": [
     {
       "user": ".*",
       "catalog": "iceberg",
       "schema": ".*",
-      "owner": false
+      "owner": true
     }
   ],
+
   "tables": [
     {
       "user": ".*",
       "catalog": "iceberg",
       "schema": ".*",
       "table": ".*",
-      "privileges": ["SELECT", "INSERT", "DELETE", "UPDATE"]
+      "privileges": [
+        "SELECT",
+        "INSERT",
+        "DELETE",
+        "UPDATE",
+        "OWNERSHIP"
+      ]
     }
   ],
+
   "system_session_properties": [
     {
       "user": ".*",

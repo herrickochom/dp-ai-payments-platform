@@ -8,5 +8,5 @@ select
     sum(case when is_reconciled then 1 else 0 end) as reconciled_transaction_count,
     sum(case when not is_reconciled then 1 else 0 end) as unreconciled_transaction_count,
     sum(case when is_entity_matched then 1 else 0 end) as entity_matched_transaction_count
-from {{ ref('fct_pdm_payments') }}
+from {{ ref('gld_fct_pdm_payments') }}
 group by 1, 2, 3

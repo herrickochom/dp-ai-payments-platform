@@ -1,0 +1,31 @@
+{{ config(materialized='iceberg_table', tags=['consumption', 'finance']) }}
+
+select
+    lifecycle_sk,
+    loan_id,
+    beneficiary_sk,
+    sacco_sk,
+    geography_sk,
+    amount_approved as approved_amount,
+    instructed_amount,
+    settled_amount,
+    credited_amount,
+    cashout_amount,
+    amount_repaid as repaid_amount,
+    approved_to_instructed_variance as approved_to_instruction_variance,
+    instructed_to_settled_variance as instruction_to_settlement_variance,
+    settled_to_credited_variance as settlement_to_credit_variance,
+    credited_to_cashout_variance as credit_to_cashout_variance,
+    disbursed_to_credited_variance,
+    coalesce(amount_repaid, 0) - coalesce(amount_approved, 0) as approval_to_repayment_variance,
+    approved_control_status,
+    instructed_control_status,
+    sent_status_control_status as accepted_control_status,
+    settled_control_status,
+    credited_control_status,
+    cashout_control_status,
+    repaid_control_status,
+    cast(null as double) as recovered_amount,
+    recovery_control_status,
+    intervention_priority
+from {{ ref('cns_pdm_lifecycle_exceptions') }}

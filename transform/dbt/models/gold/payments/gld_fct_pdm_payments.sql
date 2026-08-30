@@ -33,8 +33,11 @@ select
     entity.entity_match_status = 'MATCHED' as is_entity_matched,
     coalesce(reconciliation.matched_status_event_count, 0) > 0
         and coalesce(reconciliation.unmatched_status_event_count, 0) = 0 as is_reconciled,
-    creditors.account_id is not null and beneficiary.phone is not null
-        and creditors.account_id <> beneficiary.phone as is_account_substituted
+    creditors.account_issuer in ('MTN', 'AIRTEL')
+        and nullif(regexp_replace(creditors.account_id, '[^0-9]', ''), '') is not null
+        and nullif(regexp_replace(beneficiary.phone, '[^0-9]', ''), '') is not null
+        and regexp_replace(creditors.account_id, '[^0-9]', '')
+            <> regexp_replace(beneficiary.phone, '[^0-9]', '') as is_account_substituted
 from {{ ref('slv_pdm_payments_transactions') }} payment
 left join {{ ref('slv_pdm_payment_entity_matches') }} entity
   on payment.source_system = entity.source_system and payment.transaction_id = entity.transaction_id

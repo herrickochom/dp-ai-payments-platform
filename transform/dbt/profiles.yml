@@ -1,28 +1,56 @@
+# /home/hochom/projects/dp-ai-payments-platform/transform/dbt/profiles.yml
+
 pdm_platform:
   target: dev
+
   outputs:
     dev:
       type: duckdb
-      path: /tmp/pdm.duckdb
+
+      # Local DuckDB execution database.
+      path: "/tmp/pdm.duckdb"
+
+      # Attached Nessie/Iceberg catalog alias.
       database: lakehouse
+
+      # Default dbt schema.
       schema: staging
-      extensions: [httpfs, avro, iceberg]
+
+      # ------------------------------------------------------------------------
+      # DuckDB extensions
+      # ------------------------------------------------------------------------
+
+      extensions:
+        - httpfs
+        - avro
+        - iceberg
+
+      # ------------------------------------------------------------------------
+      # MinIO / S3 configuration
+      # ------------------------------------------------------------------------
+
       settings:
-        s3_region: eu-west-1
-        s3_endpoint: minio:9000
-        s3_url_style: path
+        s3_region: "eu-west-1"
+        s3_endpoint: "minio:9000"
+        s3_url_style: "path"
         s3_use_ssl: false
         s3_access_key_id: "{{ env_var('MINIO_ROOT_USER') }}"
         s3_secret_access_key: "{{ env_var('MINIO_ROOT_PASSWORD') }}"
+
       secrets:
         - type: s3
           provider: config
           key_id: "{{ env_var('MINIO_ROOT_USER') }}"
           secret: "{{ env_var('MINIO_ROOT_PASSWORD') }}"
-          region: eu-west-1
-          endpoint: minio:9000
-          url_style: path
+          region: "eu-west-1"
+          endpoint: "minio:9000"
+          url_style: "path"
           use_ssl: false
+
+      # ------------------------------------------------------------------------
+      # Nessie Iceberg REST catalog
+      # ------------------------------------------------------------------------
+
       attach:
         - path: payments
           alias: lakehouse

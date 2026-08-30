@@ -8,7 +8,7 @@ with loans as (
         sum(amount_disbursed) as disbursed_amount,
         sum(amount_repaid) as repaid_amount,
         sum(outstanding_amount) as outstanding_amount
-    from {{ ref('fct_pdm_loans') }}
+    from {{ ref('gld_fct_pdm_loans') }}
     group by 1
 ), cashouts as (
     select
@@ -17,7 +17,7 @@ with loans as (
         sum(cashout_amount) as cashout_amount,
         sum(case when days_from_loan_approval between 0 and 1 then 1 else 0 end) as rapid_cashout_count,
         sum(case when not is_reconciled then 1 else 0 end) as unreconciled_cashout_count
-    from {{ ref('fct_pdm_agent_cashouts') }}
+    from {{ ref('gld_fct_pdm_agent_cashouts') }}
     group by 1
 )
 select
@@ -44,7 +44,7 @@ select
           or not coalesce(beneficiary.nin_verified, false) then 'REVIEW'
         else 'STANDARD'
     end as oversight_status
-from {{ ref('dim_pdm_beneficiary') }} beneficiary
+from {{ ref('gld_dim_pdm_beneficiary') }} beneficiary
 left join loans using (beneficiary_sk)
 left join cashouts using (beneficiary_sk)
 where beneficiary.beneficiary_id is not null

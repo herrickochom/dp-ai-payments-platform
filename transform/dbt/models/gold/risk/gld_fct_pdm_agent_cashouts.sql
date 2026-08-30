@@ -12,7 +12,7 @@ select
     end as days_from_loan_approval,
     payment.payment_amount > coalesce(loan.amount_approved, loan.amount_disbursed) as exceeds_approved_amount,
     1 as cashout_count
-from {{ ref('fct_pdm_payments') }} payment
+from {{ ref('gld_fct_pdm_payments') }} payment
 left join {{ ref('slv_pdm_loans') }} loan on payment.loan_id = loan.loan_id
 left join {{ ref('slv_pdm_agents') }} agent
   on payment.agent_sk = {{ gold_surrogate_key(['agent.agent_id']) }}

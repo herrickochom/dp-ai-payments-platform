@@ -5,7 +5,7 @@ with nin_reuse as (
         nin_hashed,
         count(*) as beneficiary_count,
         count(distinct geography_sk) as geography_count
-    from {{ ref('dim_pdm_beneficiary') }}
+    from {{ ref('gld_dim_pdm_beneficiary') }}
     where beneficiary_id is not null and nin_hashed is not null
     group by 1
 ), phone_reuse as (
@@ -13,7 +13,7 @@ with nin_reuse as (
         phone_hashed,
         count(*) as beneficiary_count,
         count(distinct geography_sk) as geography_count
-    from {{ ref('dim_pdm_beneficiary') }}
+    from {{ ref('gld_dim_pdm_beneficiary') }}
     where beneficiary_id is not null and phone_hashed is not null
     group by 1
 ), loans as (
@@ -22,14 +22,14 @@ with nin_reuse as (
         count(*) as loan_count,
         sum(amount_approved) as approved_amount,
         sum(amount_disbursed) as disbursed_amount
-    from {{ ref('fct_pdm_loans') }}
+    from {{ ref('gld_fct_pdm_loans') }}
     group by 1
 ), payments as (
     select
         beneficiary_sk,
         count(*) filter (where is_account_substituted) as account_substitution_count,
         sum(payment_amount) filter (where is_account_substituted) as account_substitution_amount
-    from {{ ref('fct_pdm_payments') }}
+    from {{ ref('gld_fct_pdm_payments') }}
     group by 1
 )
 select
@@ -66,7 +66,7 @@ select
           or coalesce(loans.loan_count, 0) > 1 then 'MEDIUM'
         else 'LOW'
     end as identity_risk_band
-from {{ ref('dim_pdm_beneficiary') }} beneficiary
+from {{ ref('gld_dim_pdm_beneficiary') }} beneficiary
 left join nin_reuse using (nin_hashed)
 left join phone_reuse using (phone_hashed)
 left join loans using (beneficiary_sk)

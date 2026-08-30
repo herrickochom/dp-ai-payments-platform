@@ -432,6 +432,7 @@ services:
       - analytics
       - trino
       - dbt
+      - dashboard
     environment:
       JAVA_TOOL_OPTIONS: "-Xmx768M"
       TRINO_CONFIG_DIR: /etc/trino
@@ -474,15 +475,26 @@ services:
     profiles:
       - analytics
       - metabase
+      - dashboard
     environment:
       MB_DB_TYPE: postgres
       MB_DB_DBNAME: metabase
-      MB_DB_PORT: 5432
+      MB_DB_PORT: "5432"
       MB_DB_USER: ${POSTGRES_USER}
       MB_DB_PASS: ${POSTGRES_PASSWORD}
       MB_DB_HOST: postgres
+
+      MB_SITE_NAME: "PDM Analytics"
+      MB_SITE_LOCALE: en
+      MB_JETTY_PORT: "3000"
+      JAVA_TIMEZONE: Africa/Kampala
+
+      TRINO_HOST: trino
+      TRINO_PORT: "8080"
+      TRINO_CATALOG: iceberg
+      TRINO_SCHEMA: consumption
     ports:
-      - "3000:3000"
+      - "${METABASE_PORT:-3000}:3000"
     volumes:
       - metabase-data:/metabase-data
     restart: unless-stopped
@@ -490,6 +502,8 @@ services:
       - data-platform-network
     depends_on:
       postgres:
+        condition: service_healthy
+      trino:
         condition: service_healthy
 
   superset:
@@ -500,21 +514,64 @@ services:
     profiles:
       - analytics
       - superset
+      - dashboard
     environment:
       SUPERSET_CONFIG_PATH: /app/pythonpath/superset_config.py
-      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY:-your-secret-key-change-in-production}
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
       SUPERSET_LOAD_EXAMPLES: "no"
-      SUPERSET__SQLALCHEMY_DATABASE_URI: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/superset
+
+      SUPERSET_ADMIN_USERNAME: ${SUPERSET_ADMIN_USERNAME:-admin}
+      SUPERSET_ADMIN_PASSWORD: ${SUPERSET_ADMIN_PASSWORD}
+      SUPERSET_ADMIN_FIRSTNAME: ${SUPERSET_ADMIN_FIRSTNAME:-PDM}
+      SUPERSET_ADMIN_LASTNAME: ${SUPERSET_ADMIN_LASTNAME:-Administrator}
+      SUPERSET_ADMIN_EMAIL: ${SUPERSET_ADMIN_EMAIL:-admin@pdm.local}
+
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      SUPERSET_METADATA_DB: superset
+
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+
+      TRINO_HOST: trino
+      TRINO_PORT: "8080"
+      TRINO_CATALOG: iceberg
+      TRINO_SCHEMA: consumption
     ports:
-      - "8088:8088"
+      - "${SUPERSET_PORT:-8088}:8088"
     volumes:
-      - superset-data:/app/superset_data
+      - ./platform/superset/superset_config.py:/app/pythonpath/superset_config.py:ro
+      - superset-data:/app/superset_home
     restart: unless-stopped
     networks:
       - data-platform-network
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+      trino:
+        condition: service_healthy
+    command:
+      - /bin/bash
+      - -c
+      - |
+        set -e
+        superset db upgrade
+        superset fab create-admin \
+          --username "$${SUPERSET_ADMIN_USERNAME}" \
+          --firstname "$${SUPERSET_ADMIN_FIRSTNAME}" \
+          --lastname "$${SUPERSET_ADMIN_LASTNAME}" \
+          --email "$${SUPERSET_ADMIN_EMAIL}" \
+          --password "$${SUPERSET_ADMIN_PASSWORD}" || true
+        superset init
+        exec gunicorn \
+          --bind 0.0.0.0:8088 \
+          --workers 4 \
+          --timeout 120 \
+          "superset.app:create_app()"
 
   dbt:
     build:
