@@ -1,0 +1,24 @@
+FROM python:3.11-slim
+
+# dbt's `debug` probes for git as a required dependency (and `dbt deps` needs
+# it for git-hosted packages). The slim base image ships without it.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install dbt and duckdb
+RUN pip install --no-cache-dir \
+    dbt-core \
+    dbt-duckdb \
+    duckdb \
+    boto3 \
+    pyarrow
+
+WORKDIR /usr/app/dbt
+
+# Copy entrypoint
+COPY platform/entrypoints/dbt-docker-entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["build"]

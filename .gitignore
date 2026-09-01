@@ -27,6 +27,8 @@ tmp/
 minio-data/
 pgdata/
 *.duckdb
+# ...but the DuckDB dbt image definition is code, not a local database file
+!Dockerfile.duckdb
 *.db
 *.sqlite
 
