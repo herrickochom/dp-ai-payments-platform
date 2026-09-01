@@ -17,7 +17,6 @@ ENABLE_PROXY_FIX = True
 
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-
 # =============================================================================
 # SUPERSET METADATA DATABASE
 #

@@ -1,6 +1,29 @@
 version: 2
 
 models:
+  - name: cns_pdm_executive_monthly_trend
+    description: >
+      Monthly leadership series combining approval-cohort funding measures
+      with payment activity recorded in the month. Outstanding and repayment
+      values in the loan section describe the current state of each approval
+      cohort and are not historical month-end balance snapshots.
+    config:
+      meta:
+        grain:
+          - reporting_month
+        audience:
+          - PDM Executive
+          - Government leadership
+          - Office of the President
+        metric_semantics:
+          loan_amounts: approval cohort
+          payment_amounts: transaction activity
+    columns:
+      - name: reporting_month
+        data_tests:
+          - not_null
+          - unique
+
   - name: cns_pdm_payments_daily_summary
     description: >
       Daily stakeholder payment metrics by source, currency,
@@ -169,7 +192,9 @@ models:
   - name: cns_pdm_geographic_risk
     description: >
       Parish peer-comparison view combining disbursement, repayment
-      and beneficiary identity indicators.
+      and beneficiary identity indicators, with Uganda map coordinates,
+      Superset-compatible district ISO mapping and executive geographic
+      risk severity.
     config:
       meta:
         grain:
@@ -180,8 +205,82 @@ models:
           - PDM leadership
           - PDM Secretariat
           - district leadership
+        risk_semantics:
+          LOW: Normal peer-relative conditions.
+          MEDIUM: Moderate peer deviation requiring monitoring.
+          HIGH: Material peer deviation or at least one high identity alert.
+          SEVERE: Exceptional peer deviation or repeated high identity alerts.
+          NO DATA: No usable mapped geographic risk value is available.
     columns:
+      - name: superset_district_iso
+        description: >
+          District subdivision code used to join the dataset to the ISO
+          property in Superset's bundled Uganda Country Map GeoJSON.
+
+      - name: map_mapping_status
+        description: >
+          MAPPED when a Superset-compatible district ISO value is available;
+          otherwise UNMAPPED.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - MAPPED
+                  - UNMAPPED
+
+      - name: latitude
+        description: >
+          Average valid agent latitude for mapping the parish, with a
+          reference-coordinate fallback where available.
+
+      - name: longitude
+        description: >
+          Average valid agent longitude for mapping the parish, with a
+          reference-coordinate fallback where available.
+
+      - name: mapped_agent_count
+        description: >
+          Number of valid agent coordinates contributing to the parish
+          centroid.
+
+      - name: coordinate_source
+        description: >
+          AGENT_GPS when valid agent coordinates are available, REFERENCE
+          when a maintained reference coordinate is used, and UNMAPPED when
+          neither source is available.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - AGENT_GPS
+                  - REFERENCE
+                  - UNMAPPED
+
+      - name: high_identity_alert_count
+        description: >
+          Count of HIGH beneficiary identity alerts associated with the
+          parish.
+
+      - name: account_substitution_amount
+        description: >
+          Total observed account-substitution amount associated with
+          beneficiary identity alerts in the parish.
+
+      - name: disbursement_peer_zscore
+        description: >
+          Parish disbursement-rate z-score relative to other parishes in the
+          same region.
+
+      - name: repayment_peer_zscore
+        description: >
+          Parish principal-repayment-rate z-score relative to other parishes
+          in the same region.
+
       - name: geographic_risk_band
+        description: >
+          Executive geographic severity band. LOW, MEDIUM, HIGH and SEVERE
+          represent increasing risk; NO DATA indicates that no usable mapped
+          geographic risk value is available.
         data_tests:
           - accepted_values:
               arguments:
@@ -189,6 +288,21 @@ models:
                   - LOW
                   - MEDIUM
                   - HIGH
+                  - SEVERE
+                  - NO DATA
+
+      - name: geographic_risk_score
+        description: >
+          Numeric map severity where 1 is LOW, 2 is MEDIUM, 3 is HIGH and
+          4 is SEVERE. NULL is intentionally used for NO DATA.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - 1
+                  - 2
+                  - 3
+                  - 4
 
   - name: cns_pdm_executive_overview
     description: >
@@ -207,6 +321,23 @@ models:
         data_tests:
           - not_null
           - unique
+
+      - name: as_of_date
+        description: >
+          Latest observable loan approval or payment event date in the
+          source data.
+        data_tests:
+          - not_null
+
+      - name: reporting_scope_status
+        description: >
+          Explicit qualification of whether the available reporting
+          population is nationally representative.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - LIMITED_SAMPLE
 
   - name: cns_pdm_loan_intervention_dashboard
     description: >

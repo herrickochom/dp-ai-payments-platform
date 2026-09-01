@@ -10,7 +10,22 @@ databases:
       - table_name: "cns_pdm_executive_overview"
         schema: "consumption"
 
+      - table_name: "cns_pdm_executive_monthly_trend"
+        schema: "consumption"
+
       - table_name: "cns_pdm_geographic_risk"
+        schema: "consumption"
+
+      - table_name: "cns_pdm_beneficiary_insights"
+        schema: "consumption"
+
+      - table_name: "cns_pdm_local_government_performance"
+        schema: "consumption"
+
+      - table_name: "cns_pdm_parish_performance"
+        schema: "consumption"
+
+      - table_name: "cns_pdm_social_impact"
         schema: "consumption"
 
       - table_name: "cns_pdm_financial_fund_flow"

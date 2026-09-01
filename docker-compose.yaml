@@ -543,6 +543,7 @@ services:
       - "${SUPERSET_PORT:-8088}:8088"
     volumes:
       - ./platform/superset/superset_config.py:/app/pythonpath/superset_config.py:ro
+      - ./platform/superset:/app/platform/superset
       - superset-data:/app/superset_home
     restart: unless-stopped
     networks:
