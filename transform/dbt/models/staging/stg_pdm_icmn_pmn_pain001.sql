@@ -5,9 +5,7 @@ with raw_data as (
     select
         event_id,
         message_id,
-        event_data,
         parsed_event_data,
-        payload,
         _kafka_metadata,
         year,
         month,
@@ -16,6 +14,34 @@ with raw_data as (
         's3://{{ var("s3_bucket") }}/{{ var("s3_path") }}/v2/**/topic=icmn.pmn.pain001/**/*.avro',
         hive_partitioning = true
     )
+    -- Filter as early as possible: never carry unrelated topics or
+    -- unparsable events into dedup/parsing.
+    where _kafka_metadata.topic = 'icmn.pmn.pain001'
+      and parsed_event_data is not null
+
+),
+
+deduplicated_raw as (
+
+    -- Keep only the latest Kafka record per event_id so duplicate/replayed
+    -- events are not parsed (and re-parsed) downstream.
+    select * exclude (_rn)
+
+    from (
+        select
+            raw_data.*,
+
+            row_number() over (
+                partition by event_id
+                order by
+                    try_cast(_kafka_metadata.timestamp as timestamp) desc nulls last,
+                    _kafka_metadata.offset desc nulls last
+            ) as _rn
+
+        from raw_data
+    )
+
+    where _rn = 1
 
 ),
 
@@ -160,15 +186,13 @@ parsed as (
         month,
         day,
 
-        event_data,
+        -- Retained for lineage/debugging; Bronze excludes it from Iceberg.
         parsed_event_data,
 
         current_timestamp as load_timestamp,
         'ICMN_PMN_PAIN001' as record_source
 
-    from raw_data
-    where _kafka_metadata.topic = 'icmn.pmn.pain001'
-      and parsed_event_data is not null
+    from deduplicated_raw
 
 )
 

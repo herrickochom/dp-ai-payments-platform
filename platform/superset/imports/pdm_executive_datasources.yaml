@@ -13,7 +13,31 @@ databases:
       - table_name: "cns_pdm_executive_monthly_trend"
         schema: "consumption"
 
-      - table_name: "cns_pdm_geographic_risk"
+      - table_name: "cns_pdm_parish_geographic_risk"
+        schema: "consumption"
+
+      - table_name: "cns_pdm_district_geographic_risk"
+        schema: "consumption"
+
+      - table_name: "cns_pdm_subcounty_geographic_risk"
+        schema: "consumption"
+
+      - table_name: "cns_pdm_village_geographic_risk"
+        schema: "consumption"
+
+      - table_name: "cns_pdm_geographic_risk_summary"
+        schema: "consumption"
+
+      - table_name: "cns_pdm_geographic_risk_drivers"
+        schema: "consumption"
+
+      - table_name: "cns_pdm_geographic_risk_trend"
+        schema: "consumption"
+
+      - table_name: "cns_pdm_geographic_coverage"
+        schema: "consumption"
+
+      - table_name: "cns_pdm_geographic_alerts"
         schema: "consumption"
 
       - table_name: "cns_pdm_beneficiary_insights"

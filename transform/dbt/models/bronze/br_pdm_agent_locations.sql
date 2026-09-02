@@ -1,3 +1,7 @@
 {{ config(materialized='iceberg_table') }}
 
-select * from {{ ref('stg_pdm_agent_locations') }}
+select * exclude (
+    event_data,
+    parsed_event_data
+)
+from {{ ref('stg_pdm_agent_locations') }}

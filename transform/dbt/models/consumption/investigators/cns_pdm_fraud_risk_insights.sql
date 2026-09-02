@@ -49,7 +49,7 @@ left join {{ ref('cns_pdm_beneficiary_identity_alerts') }} identity
   on lifecycle.beneficiary_sk = identity.beneficiary_sk
 left join {{ ref('gld_dim_pdm_geography') }} loan_geography
   on lifecycle.geography_sk = loan_geography.geography_sk
-left join {{ ref('cns_pdm_geographic_risk') }} geographic
+left join {{ ref('cns_pdm_parish_geographic_risk') }} geographic
   on loan_geography.region = geographic.region
  and loan_geography.district = geographic.district
  and loan_geography.parish = geographic.parish

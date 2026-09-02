@@ -1,4 +1,66 @@
-{{ config(materialized='iceberg_table') }}
+{{ config(
+    materialized='iceberg_table',
+    tags=['bronze', 'cpo', 'plm', 'pain002']
+) }}
 
-select *
+select
+    event_id,
+    envelope_message_id,
+    message_id,
+    xml_message_id,
+    original_message_id,
+    end_to_end_id,
+
+    creation_at,
+    xml_creation_at,
+    initiating_party,
+    original_message_id_flat,
+    original_message_type,
+    group_status,
+    transaction_status,
+    xml_group_status,
+    xml_transaction_status,
+    original_message_name_id,
+    original_number_of_transactions,
+    original_payment_information_id,
+    original_instruction_id,
+    original_transaction_id,
+    reason_code,
+    additional_info,
+
+    processing_status,
+    error_code,
+    retry_attempt,
+    system_latency,
+    system_latency_ms,
+    priority,
+    correlation_id,
+    trace_id,
+    span_id,
+    parent_span_id,
+    sampled,
+    trace_flags,
+    tenant_id,
+    environment,
+    source_version,
+    source_message_type,
+    source_message_version,
+    processing_node,
+    request_id,
+    source_timestamp,
+
+    kafka_topic,
+    kafka_partition,
+    kafka_offset,
+    kafka_timestamp,
+    category,
+    source_system,
+    source_group,
+
+    year,
+    month,
+    day,
+    load_timestamp,
+    record_source
+
 from {{ ref('stg_pdm_cpo_plm_pain002') }}

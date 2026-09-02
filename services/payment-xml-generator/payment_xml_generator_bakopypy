@@ -27,7 +27,6 @@ from xml.etree import ElementTree as ET
 from typing import Dict, List, Any, Optional
 import argparse
 import logging
-from collections import Counter
 
 # ============================================================================
 # Configuration
@@ -135,35 +134,6 @@ PDM_LOCATIONS = [
 
 PROJECT_TYPES = ["POULTRY", "CATTLE", "COFFEE", "MAIZE", "VEGETABLES", "FISH"]
 
-DEFAULT_CASE_COUNT = 1000
-DEFAULT_RANDOM_SEED = 20260902
-SPECIAL_GROUP_CODES = ["WOMEN", "YOUTH", "PWD", "ELDERLY", "GENERAL"]
-
-
-def location_for_case(case_index: int) -> Dict[str, Any]:
-    """Return a deterministic round-robin location for a zero-based case index."""
-    return PDM_LOCATIONS[case_index % len(PDM_LOCATIONS)]
-
-
-def build_coverage_summary(beneficiaries: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """Summarise synthetic geographic and special-group coverage for validation."""
-    district_counts = Counter(b["district"] for b in beneficiaries)
-    region_counts = Counter(b["region"] for b in beneficiaries)
-    special_group_counts = Counter(b["special_group"] for b in beneficiaries)
-    configured_districts = {location["district"] for location in PDM_LOCATIONS}
-    covered_districts = set(district_counts)
-    return {
-        "beneficiary_count": len(beneficiaries),
-        "configured_location_count": len(PDM_LOCATIONS),
-        "configured_district_count": len(configured_districts),
-        "covered_district_count": len(covered_districts),
-        "full_configured_district_coverage": configured_districts <= covered_districts,
-        "missing_configured_districts": sorted(configured_districts - covered_districts),
-        "region_counts": dict(sorted(region_counts.items())),
-        "district_counts": dict(sorted(district_counts.items())),
-        "special_group_counts": dict(sorted(special_group_counts.items())),
-    }
-
 
 def build_cases(count: int) -> Dict[str, Dict[str, Any]]:
     """Return the control cases plus scalable synthetic payment lifecycles."""
@@ -212,9 +182,6 @@ def build_lifecycle_context(loan_id: str) -> Dict[str, str]:
         "plm_message_id": f"CPO-PLM-{loan_id}",
         "wendi_statement_message_id": f"WENDI-STMT-{loan_id}",
         "wendi_notification_message_id": f"WENDI-NTF-{loan_id}",
-        "wendi_pain001_message_id": f"WENDI-PAIN001-{loan_id}",
-        "wendi_pain002_message_id": f"WENDI-PAIN002-{loan_id}",
-        "wendi_tx_id": f"WENDI-TX-{loan_id}",
         "mtn_message_id": f"MTN-PACS008-{loan_id}",
         "mtn_transaction_id": f"MTN-TX-{loan_id}",
         "airtel_message_id": f"AIRTEL-PACS008-{loan_id}",
@@ -339,8 +306,6 @@ def clean_generated_xml() -> int:
         DATA_ROOT / "wendi" / "camt052",
         DATA_ROOT / "wendi" / "camt053",
         DATA_ROOT / "wendi" / "camt054",
-        DATA_ROOT / "wendi" / "pain001",
-        DATA_ROOT / "wendi" / "pain002",
         DATA_ROOT / "mobile_networks" / "mtn" / "pacs008",
         DATA_ROOT / "mobile_networks" / "mtn" / "pacs002",
         DATA_ROOT / "mobile_networks" / "airtel" / "pacs008",
@@ -353,15 +318,6 @@ def clean_generated_xml() -> int:
             for xml_path in directory.glob("*.xml"):
                 xml_path.unlink()
                 removed_count += 1
-    # JSON feeds owned by this generator (agent register + wallet transactions).
-    for json_path in [
-        DATA_ROOT / "agent_network" / "agent_profiles.json",
-        DATA_ROOT / "agent_network" / "agent_locations.json",
-        DATA_ROOT / "wendi" / "wendi_transactions.json",
-    ]:
-        if json_path.exists():
-            json_path.unlink()
-            removed_count += 1
     return removed_count
 
 # ============================================================================
@@ -396,7 +352,7 @@ def generate_pdmis_data(cases: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
     
     beneficiaries = []
     for i, (loan_id, case_data) in enumerate(cases.items(), 1):
-        location = location_for_case(i - 1)
+        location = PDM_LOCATIONS[(i - 1) % len(PDM_LOCATIONS)]
         # Deterministic POC anomalies allow downstream identity controls to be tested.
         nin = (
             beneficiaries[0]["nin"]
@@ -420,10 +376,9 @@ def generate_pdmis_data(cases: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
             "household_id": f"HH-{i:05d}",
             "village": location["village"],
             "parish": location["parish"],
-            "sub_county": location["sub_county"],
             "district": location["district"],
             "region": location["region"],
-            "special_group": SPECIAL_GROUP_CODES[(i - 1) % len(SPECIAL_GROUP_CODES)],
+            "special_group": random.choice(["WOMEN", "YOUTH", "GENERAL"]),
             "registration_date": generate_date(-300),
             "is_active": True
         }
@@ -431,14 +386,13 @@ def generate_pdmis_data(cases: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
     
     households = []
     for i in range(1, len(cases) + 1):
-        location = location_for_case(i - 1)
+        location = PDM_LOCATIONS[(i - 1) % len(PDM_LOCATIONS)]
         household = {
             "household_id": f"HH-{i:05d}",
             "head_of_household": beneficiaries[i-1]["name"],
             "member_count": random.randint(2, 8),
             "village": location["village"],
             "parish": location["parish"],
-            "sub_county": location["sub_county"],
             "district": location["district"],
             "region": location["region"],
             "economic_status": random.choice(["LOW", "MEDIUM", "HIGH"]),
@@ -448,7 +402,7 @@ def generate_pdmis_data(cases: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
     
     loans = []
     for i, (loan_id, case_data) in enumerate(cases.items(), 1):
-        location = location_for_case(i - 1)
+        location = PDM_LOCATIONS[(i - 1) % len(PDM_LOCATIONS)]
         loan = {
             "loan_id": loan_id,
             "beneficiary_id": f"BEN-{i:04d}",
@@ -463,20 +417,20 @@ def generate_pdmis_data(cases: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
                            "APPROVED",
             "business_plan_id": f"BP-{i:05d}",
             "project_type": case_data["project"],
-            "project_location": f"{location['sub_county']}, {location['parish']}, {location['district']}",
+            "project_location": f"{location['parish']}, {location['district']}",
         }
         loans.append(loan)
     
     business_plans = []
     for i, (loan_id, case_data) in enumerate(cases.items(), 1):
-        location = location_for_case(i - 1)
+        location = PDM_LOCATIONS[(i - 1) % len(PDM_LOCATIONS)]
         plan = {
             "business_plan_id": f"BP-{i:05d}",
             "loan_id": loan_id,
             "beneficiary_id": f"BEN-{i:04d}",
             "project_type": case_data["project"],
             "description": f"{case_data['project']} farming project",
-            "location": f"{location['village']}, {location['sub_county']}, {location['parish']}, {location['district']}",
+            "location": f"{location['village']}, {location['parish']}, {location['district']}",
             "expected_revenue": case_data["amount"] * random.uniform(1.2, 2.0),
             "submission_date": generate_date(-85),
             "approval_status": "APPROVED"
@@ -778,179 +732,6 @@ def generate_wendi_camt054(loan_id: str, case_data: dict, beneficiary: dict, lif
 # 5. Mobile Networks (XML)
 # ============================================================================
 
-def generate_wendi_pain001(loan_id: str, case_data: dict, sacco: dict, beneficiary: dict, lifecycle: dict) -> bytes:
-    """Generate WENDI - Business PAIN.001 (wallet payment initiation)."""
-    ns = PAIN001_NS
-    root = ET.Element("Document", xmlns=ns)
-    init = child(root, "CstmrCdtTrfInitn")
-
-    header = child(init, "GrpHdr")
-    child(header, "MsgId", lifecycle["wendi_pain001_message_id"])
-    child(header, "CreDtTm", generate_timestamp())
-    child(header, "NbOfTxs", "1")
-    child(header, "CtrlSum", str(case_data["amount"]))
-
-    pmt_inf = child(init, "PmtInf")
-    child(pmt_inf, "PmtInfId", f"WENDI-PMT-{loan_id}")
-    child(pmt_inf, "PmtMtd", "TRF")
-    child(pmt_inf, "BtchBookg", "false")
-    child(pmt_inf, "NbOfTxs", "1")
-    child(pmt_inf, "CtrlSum", str(case_data["amount"]))
-    child(pmt_inf, "ReqdExctnDt", generate_date(1))
-
-    debtor = child(pmt_inf, "Dbtr")
-    child(debtor, "Nm", sacco["name"])
-    debtor_acct = child(pmt_inf, "DbtrAcct")
-    debtor_acct_id = child(debtor_acct, "Id")
-    debtor_acct_other = child(debtor_acct_id, "Othr")
-    child(debtor_acct_other, "Id", sacco["wendi_account"])
-    child(debtor_acct_other, "Issr", "WENDI")
-
-    tx = child(pmt_inf, "CdtTrfTxInf")
-    pmt_id = child(tx, "PmtId")
-    child(pmt_id, "InstrId", f"WENDI-INSTR-{loan_id}")
-    child(pmt_id, "EndToEndId", loan_id)
-    child(pmt_id, "TxId", lifecycle["wendi_tx_id"])
-    child(pmt_id, "UETR", str(uuid.uuid4()))
-
-    amt = child(tx, "Amt")
-    child(amt, "InstdAmt", str(case_data["amount"]), Ccy="UGX")
-
-    creditor = child(tx, "Cdtr")
-    child(creditor, "Nm", beneficiary["name"])
-    creditor_acct = child(tx, "CdtrAcct")
-    creditor_acct_id = child(creditor_acct, "Id")
-    creditor_acct_other = child(creditor_acct_id, "Othr")
-    child(creditor_acct_other, "Id", case_data["account"])
-    child(creditor_acct_other, "Issr", "MTN")
-    child(creditor_acct_other, "SchmeNm", "MSISDN")
-
-    remit = child(tx, "RmtInf")
-    child(remit, "Ustrd", f"PDM Loan {loan_id} - {case_data['project']}")
-
-    return ET.tostring(root, encoding="utf-8", xml_declaration=True)
-
-
-def generate_wendi_pain002(loan_id: str, case_data: dict, lifecycle: dict) -> bytes:
-    """Generate WENDI - PAIN.002 (wallet payment status report)."""
-    ns = PAIN002_NS
-    root = ET.Element("Document", xmlns=ns)
-    report = child(root, "CstmrPmtStsRpt")
-
-    header = child(report, "GrpHdr")
-    child(header, "MsgId", lifecycle["wendi_pain002_message_id"])
-    child(header, "CreDtTm", generate_timestamp(1))
-
-    original_grp = child(report, "OrgnlGrpInfAndSts")
-    child(original_grp, "OrgnlMsgId", lifecycle["wendi_pain001_message_id"])
-    child(original_grp, "OrgnlMsgNmId", "pain.001.001.09")
-    child(original_grp, "OrgnlNbOfTxs", "1")
-    child(original_grp, "OrgnlCtrlSum", str(case_data["amount"]))
-    child(original_grp, "GrpSts", case_data["status"])
-
-    original_pmt = child(report, "OrgnlPmtInfAndSts")
-    child(original_pmt, "OrgnlPmtInfId", f"WENDI-PMT-{loan_id}")
-    child(original_pmt, "TxSts", case_data["status"])
-
-    if case_data.get("status") == STATUS_RJCT:
-        sts_rsn = child(original_pmt, "StsRsnInf")
-        sts_rsn_code = child(sts_rsn, "Rsn")
-        child(sts_rsn_code, "Cd", "AC01")
-        child(sts_rsn, "AddtlInf", f"Invalid wallet account: {case_data['account']}")
-
-    child(original_pmt, "OrgnlInstrId", f"WENDI-INSTR-{loan_id}")
-    child(original_pmt, "OrgnlEndToEndId", loan_id)
-    child(original_pmt, "OrgnlTxId", lifecycle["wendi_tx_id"])
-    child(original_pmt, "OrgnlUETR", str(uuid.uuid4()))
-
-    return ET.tostring(root, encoding="utf-8", xml_declaration=True)
-
-
-def generate_wendi_transaction_record(
-    loan_id: str,
-    case_data: dict,
-    beneficiary: dict,
-    sacco: dict,
-    lifecycle: dict,
-    agent_id: str,
-) -> Dict[str, Any]:
-    """Build one wallet transaction record for the wendi.transactions JSON feed."""
-    return {
-        "event_id": f"WENDI-EVT-{loan_id}",
-        "loan_id": loan_id,
-        "beneficiary_id": beneficiary["beneficiary_id"],
-        "beneficiary_name": beneficiary["name"],
-        "sacco_id": sacco["sacco_id"],
-        "event_timestamp": generate_timestamp(1),
-        "event_type": "DISBURSEMENT",
-        "source_account": sacco["wendi_account"],
-        "source_account_type": "WALLET",
-        "destination_account": case_data["account"],
-        "destination_account_type": "MSISDN",
-        "amount": case_data["amount"],
-        "currency": "UGX",
-        "transaction_status": (
-            "SUCCESSFUL" if case_data["status"] == STATUS_ACSC else "FAILED"
-        ),
-        "wendi_transaction_id": lifecycle["wendi_tx_id"],
-        "agent_id": agent_id,
-        "device_id": f"DEV-{uuid.uuid4().hex[:8].upper()}",
-        "ip_address": f"41.210.{random.randint(0, 255)}.{random.randint(1, 254)}",
-        "user_agent": "Walletek/2.4.1 (Android 14)",
-        "metadata": {
-            "source_system": "WENDI",
-            "transaction_type": "PAYMENT",
-            "is_assisted": bool(random.random() < 0.3),
-            "processing_time_ms": random.randint(120, 4000),
-        },
-        "created_at": generate_timestamp(1),
-        "updated_at": generate_timestamp(1),
-    }
-
-
-def generate_agent_roster(case_count: int) -> Dict[str, Any]:
-    """Build the Wendi agent register and location feeds (agent.profiles/locations)."""
-    agent_count = max(min(case_count, 60), 12)
-    profiles: List[Dict[str, Any]] = []
-    locations: List[Dict[str, Any]] = []
-    for index in range(1, agent_count + 1):
-        location = PDM_LOCATIONS[(index - 1) % len(PDM_LOCATIONS)]
-        agent_id = f"AGENT-{index:04d}"
-        verified = index % 9 not in {0, 5}
-        profiles.append({
-            "agent_id": agent_id,
-            "agent_code": f"A-{location['code']}-{index:03d}",
-            "name": f"Wendi Agent {location['parish']} {index}",
-            "phone": generate_phone(),
-            "registration_number": f"{location['code']}-AGT-{index:04d}",
-            "registration_date": generate_date(-(240 + index)),
-            "network_provider": "WENDI",
-            "commission_rate": round(random.uniform(0.01, 0.05), 4),
-            "location": f"{location['village']}, {location['parish']}, {location['district']}",
-            "parish": location["parish"],
-            "district": location["district"],
-            "region": location["region"],
-            "verified": verified,
-            "is_active": True,
-            "created_at": generate_timestamp(-(24 * 30)),
-            "updated_at": generate_timestamp(),
-        })
-        locations.append({
-            "agent_id": agent_id,
-            "location_type": random.choice(["STORE", "KIOSK", "MOBILE_POINT", "SHOP"]),
-            "address": f"{location['parish']}, {location['district']}, Uganda",
-            "latitude": round(location["latitude"] + random.uniform(-0.05, 0.05), 6),
-            "longitude": round(location["longitude"] + random.uniform(-0.05, 0.05), 6),
-            "is_active": True,
-        })
-    return {"profiles": profiles, "locations": locations}
-
-
-def agent_for_case(roster: Dict[str, Any], case_index: int) -> str:
-    """Deterministically assign a roster agent to a zero-based case index."""
-    return roster["profiles"][case_index % len(roster["profiles"])]["agent_id"]
-
-
 def generate_mobile_pacs008(loan_id: str, case_data: dict, sacco: dict, beneficiary: dict, lifecycle: dict, network: str = "MTN") -> bytes:
     """Generate Mobile Network/PACS.008 - Interbank Settlement"""
     ns = PACS008_NS
@@ -1042,12 +823,12 @@ def generate_mobile_pacs002(
 # ============================================================================
 
 def generate_agent_transaction(
-    loan_id: str, case_data: dict, beneficiary: dict, location_data: dict, agent_id: str = None
+    loan_id: str, case_data: dict, beneficiary: dict, location_data: dict
 ) -> bytes:
     """Generate Agent Network - Cash-out Transaction"""
     root = ET.Element("AgentTransaction")
     child(root, "transaction_id", generate_id("AGT-TX", 12))
-    child(root, "agent_id", agent_id or f"AGENT-{random.randint(1000,9999):04d}")
+    child(root, "agent_id", f"AGENT-{random.randint(1000,9999):04d}")
     child(root, "loan_id", loan_id)
     child(root, "beneficiary_id", beneficiary["beneficiary_id"])
     child(root, "beneficiary_name", beneficiary["name"])
@@ -1074,14 +855,8 @@ def generate_agent_transaction(
 
 def main():
     parser = argparse.ArgumentParser(description="PDM ISO 20022 XML Generator")
-    parser.add_argument("--count", "-c", type=int, default=DEFAULT_CASE_COUNT, help=f"Number of cases (default: {DEFAULT_CASE_COUNT})")
+    parser.add_argument("--count", "-c", type=int, default=320, help="Number of cases (default: 320)")
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output")
-    parser.add_argument(
-        "--seed",
-        type=int,
-        default=DEFAULT_RANDOM_SEED,
-        help=f"Random seed for repeatable synthetic data (default: {DEFAULT_RANDOM_SEED})",
-    )
     parser.add_argument(
         "--clean",
         action="store_true",
@@ -1090,8 +865,6 @@ def main():
     args = parser.parse_args()
     if args.count < 1:
         parser.error("--count must be at least 1")
-
-    random.seed(args.seed)
     
     logger = logging.getLogger("pdm_xml_generator")
     if args.verbose:
@@ -1112,7 +885,6 @@ def main():
     logger.info("📊 Generating PDMIS (Government System) data...")
     cases = build_cases(args.count)
     pdmis_data = generate_pdmis_data(cases)
-    coverage = build_coverage_summary(pdmis_data["beneficiaries"])
     write_json(DATA_ROOT / "pdmis" / "beneficiaries.json", pdmis_data["beneficiaries"])
     write_json(DATA_ROOT / "pdmis" / "loans.json", pdmis_data["loans"])
     write_json(DATA_ROOT / "pdmis" / "saccos.json", pdmis_data["saccos"])
@@ -1120,34 +892,11 @@ def main():
     write_json(DATA_ROOT / "pdmis" / "business_plans.json", pdmis_data["business_plans"])
     write_json(DATA_ROOT / "pdmis" / "special_groups.json", pdmis_data["special_groups"])
     logger.info("  ✅ Created 6 JSON files in pdmis/")
-    logger.info(
-        "  🌍 Coverage: %s beneficiaries across %s/%s configured districts",
-        coverage["beneficiary_count"],
-        coverage["covered_district_count"],
-        coverage["configured_district_count"],
-    )
-    logger.info("  🌍 Full configured district coverage: %s", coverage["full_configured_district_coverage"])
-    if coverage["missing_configured_districts"]:
-        logger.warning("  ⚠️ Missing configured districts: %s", ", ".join(coverage["missing_configured_districts"]))
-    logger.info("  🌍 Region distribution: %s", coverage["region_counts"])
-    logger.info("  👥 Special-group distribution: %s", coverage["special_group_counts"])
     
     saccos_by_id = {sacco["sacco_id"]: sacco for sacco in pdmis_data["saccos"]}
     beneficiaries = pdmis_data["beneficiaries"]
     loans = pdmis_data["loans"]
     transactions_by_sacco = {sacco_id: [] for sacco_id in saccos_by_id}
-
-    # Wendi agent register feeds (agent.profiles / agent.locations).
-    agent_roster = generate_agent_roster(args.count)
-    write_json(
-        DATA_ROOT / "agent_network" / "agent_profiles.json",
-        agent_roster["profiles"],
-    )
-    write_json(
-        DATA_ROOT / "agent_network" / "agent_locations.json",
-        agent_roster["locations"],
-    )
-    wendi_transactions: List[Dict[str, Any]] = []
     
     logger.info("📨 Generating ISO 20022 messages...")
     
@@ -1156,20 +905,9 @@ def main():
         beneficiary = beneficiaries[i]
         loan = loans[i]
         sacco = saccos_by_id[loan["sacco_id"]]
-        location_data = location_for_case(i)
+        location_data = PDM_LOCATIONS[i % len(PDM_LOCATIONS)]
         lifecycle = build_lifecycle_context(loan_id)
         seq = i + 1
-
-        wendi_transactions.append(
-            generate_wendi_transaction_record(
-                loan_id,
-                case_data,
-                beneficiary,
-                sacco,
-                lifecycle,
-                agent_for_case(agent_roster, i),
-            )
-        )
         
         # 1. ICMN - VPM (Business Payment Initiation)
         icmn_vpm = generate_icmn_vpm(loan_id, case_data, sacco, beneficiary, lifecycle)
@@ -1186,12 +924,6 @@ def main():
         # 4. CPO - PLM (Technical Lifecycle)
         cpo_plm = generate_cpo_plm(loan_id, case_data, lifecycle)
         write_xml(DATA_ROOT / "cpo" / "plm" / "pain002" / f"plm_{seq:04d}.xml", cpo_plm)
-
-        # 4b. WENDI - PAIN.001 (wallet payment initiation) and PAIN.002 (status).
-        wendi_pain001 = generate_wendi_pain001(loan_id, case_data, sacco, beneficiary, lifecycle)
-        write_xml(DATA_ROOT / "wendi" / "pain001" / f"pain001_{seq:04d}.xml", wendi_pain001)
-        wendi_pain002 = generate_wendi_pain002(loan_id, case_data, lifecycle)
-        write_xml(DATA_ROOT / "wendi" / "pain002" / f"pain002_{seq:04d}.xml", wendi_pain002)
         
         # Booked statements and credit notifications are evidence of successful
         # settlement, so rejected/pending attempts must not emit them.
@@ -1233,8 +965,7 @@ def main():
         # Cash-out can occur only after a successful beneficiary credit.
         if case_data["status"] == STATUS_ACSC:
             agent_tx = generate_agent_transaction(
-                loan_id, case_data, beneficiary, location_data,
-                agent_id=agent_for_case(agent_roster, i),
+                loan_id, case_data, beneficiary, location_data
             )
             write_xml(
                 DATA_ROOT / "agent_network" / "agent_transactions"
@@ -1259,11 +990,6 @@ def main():
             DATA_ROOT / "wendi" / "camt052" / f"camt052_report_{report_number:03d}.xml",
             wendi_camt052,
         )
-
-    write_json(
-        DATA_ROOT / "wendi" / "wendi_transactions.json",
-        wendi_transactions,
-    )
     
     logger.info("")
     logger.info("=" * 70)
@@ -1280,12 +1006,12 @@ def main():
     logger.info("")
     logger.info("📂 Directory Structure:")
     logger.info("  ├── pdmis/ (6 JSON files)")
-    logger.info(f"  ├── icmn/ ({len(selected_cases) * 2} XML files)")
-    logger.info(f"  ├── cpo/ ({len(selected_cases) * 2} XML files)")
+    logger.info("  ├── icmn/ (20 XML files)")
+    logger.info("  ├── cpo/ (20 XML files)")
     logger.info(
         f"  ├── wendi/ ({successful_case_count * 2 + len(pdmis_data['saccos'])} XML files)"
     )
-    logger.info(f"  ├── mobile_networks/ ({len(selected_cases) * 2} XML files)")
+    logger.info("  ├── mobile_networks/ (20 XML files)")
     logger.info(f"  └── agent_network/ ({successful_case_count} XML files)")
     logger.info("=" * 70)
 

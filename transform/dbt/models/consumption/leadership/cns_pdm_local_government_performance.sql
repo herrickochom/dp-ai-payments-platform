@@ -22,4 +22,4 @@ select
          when risk.geographic_risk_band = 'MEDIUM' then 'AT_RISK'
          else 'ON_TRACK' end as local_performance_status
 from {{ ref('cns_pdm_parish_performance') }} parish
-left join {{ ref('cns_pdm_geographic_risk') }} risk using (parish_sk)
+left join {{ ref('cns_pdm_parish_geographic_risk') }} risk using (parish_sk)

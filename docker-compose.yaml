@@ -170,12 +170,30 @@ services:
   # 2. STREAMING LAYER (ALWAYS START)
   # ============================================================================
 
+  # ---------------------------------------------------------------------------
+  # KAFKA VOLUME OWNERSHIP INIT (one-shot)
+  # ---------------------------------------------------------------------------
+  # apache/kafka runs as appuser (uid 1000) and its entrypoint has no root
+  # phase, while freshly created named volumes are root-owned. This one-shot
+  # container fixes volume ownership so the broker can format and write its
+  # metadata/log dirs (prevents AccessDeniedException on bootstrap.checkpoint).
+  kafka-volume-init:
+    image: apache/kafka:4.3.1
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-kafka-volume-init
+    user: "0:0"
+    entrypoint: ["bash", "-c", "chown -R 1000:1000 /var/lib/kafka/data /var/lib/kafka/metadata"]
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+      - kafka-metadata:/var/lib/kafka/metadata
+    restart: "no"
+    networks:
+      - data-platform-network
+
   kafka:
     build:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.kafka-broker
     container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-kafka
-    # Fresh named volumes are root-owned; Kafka must initialise and format them.
     environment:
       CLUSTER_ID: "XwjubDNrR0q4Q6FLK0M7Xg"
       KAFKA_CLUSTER_ID: "XwjubDNrR0q4Q6FLK0M7Xg"
@@ -200,6 +218,8 @@ services:
       - kafka-metadata:/var/lib/kafka/metadata
     depends_on:
       postgres-healthcheck:
+        condition: service_completed_successfully
+      kafka-volume-init:
         condition: service_completed_successfully
     restart: unless-stopped
     networks:
@@ -358,7 +378,7 @@ services:
     restart: "no"
     networks:
       - data-platform-network
-    command: ["--count", "10", "--verbose"]
+    command: ["--count", "5", "--clean", "--verbose"]
 
   payment-producer:
     build:
@@ -417,6 +437,15 @@ services:
     restart: unless-stopped
     networks:
       - data-platform-network
+    healthcheck:
+      # dbt's staging models require at least one Avro object for every source.
+      # Do not declare ingestion ready merely because the long-running consumer
+      # process has started; it may still be draining the producer's backlog.
+      test: ["CMD", "python3", "/app/raw_data_healthcheck.py"]
+      interval: 5s
+      timeout: 15s
+      retries: 120
+      start_period: 5s
 
   # ============================================================================
   # 5. ANALYTICS LAYER (PROFILE: analytics)
@@ -436,12 +465,15 @@ services:
     environment:
       JAVA_TOOL_OPTIONS: "-Xmx768M"
       TRINO_CONFIG_DIR: /etc/trino
+      TRINO_INTERNAL_SHARED_SECRET: ${TRINO_INTERNAL_SHARED_SECRET}
+      TRINO_KEYSTORE_PASSWORD: ${TRINO_KEYSTORE_PASSWORD:-vbfma6z}
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "8089:8080"
+      - "8443:8443"
     volumes:
       # Mount configuration files individually so the catalog directory copied
       # into the image remains available to Trino.
@@ -454,6 +486,8 @@ services:
       - ./platform/trino/etc/password-auth.properties:/etc/trino/password-auth.properties:ro
       - ./platform/trino/etc/password-authenticator.properties:/etc/trino/password-authenticator.properties:ro
       - ./platform/trino/etc/rules.json:/etc/trino/rules.json:ro
+      - ./platform/trino/etc/password.db:/etc/trino/password.db:ro
+      - ./platform/trino/etc/trino-keystore.jks:/etc/trino/trino-keystore.jks:ro
     restart: unless-stopped
     networks:
       - data-platform-network
@@ -497,6 +531,8 @@ services:
       - "${METABASE_PORT:-3000}:3000"
     volumes:
       - metabase-data:/metabase-data
+      - ./platform/trino/etc/trino-truststore.jks:/etc/metabase/trino-truststore.jks:ro
+      - ./platform/metabase/plugins/starburst-4.1.0.metabase-driver.jar:/plugins/starburst-4.1.0.metabase-driver.jar:ro
     restart: unless-stopped
     networks:
       - data-platform-network
@@ -595,9 +631,14 @@ services:
     volumes:
       - ./transform/dbt:/usr/app/dbt
       - dbt-logs:/usr/app/dbt/logs
+      - ./tmp/duckdb:/tmp/duckdb_swap
     restart: "no"
     networks:
       - data-platform-network
+    # Both one-shot runners execute the same dbt project against the Nessie
+    # catalog; without ordering they race and the loser fails with
+    # "Table ... already exists". duckdb builds the lakehouse first (per the
+    # README runbook), then dbt reruns the project sequentially.
     depends_on:
       trino:
         condition: service_healthy
@@ -605,6 +646,8 @@ services:
         condition: service_healthy
       nessie:
         condition: service_healthy
+      duckdb:
+        condition: service_completed_successfully
 
   # DuckDB is the dbt execution engine for Bronze Parquet.  It reads directly
   # from MinIO and writes managed Iceberg tables through Nessie's REST catalog.
@@ -628,6 +671,7 @@ services:
     volumes:
       - ./transform/dbt:/usr/app/dbt
       - dbt-logs:/usr/app/dbt/logs
+      - ./tmp/duckdb:/tmp/duckdb_swap
     restart: "no"
     networks:
       - data-platform-network
@@ -635,6 +679,8 @@ services:
       minio:
         condition: service_healthy
       nessie:
+        condition: service_healthy
+      payment-consumer-events:
         condition: service_healthy
     command: ["build"]
 
@@ -646,6 +692,13 @@ services:
     profiles:
       - analytics
       - dbt
+    environment:
+      DBT_PROFILES_DIR: /usr/app/dbt
+      # profiles.yml resolves these via env_var() even when just parsing,
+      # so docs serve fails without them.
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      NESSIE_ENDPOINT: http://nessie:19120
     ports:
       - "3001:3000"
     restart: unless-stopped

@@ -2,6 +2,7 @@ FROM python:3.11-slim
 
 # Copy consumer script
 COPY services/kafka-consumer-events/kafka_consumer_events.py /app/consumer.py
+COPY services/kafka-consumer-events/raw_data_healthcheck.py /app/raw_data_healthcheck.py
 COPY services/shared/requirements-runtime.txt /app/requirements.txt
 
 WORKDIR /app

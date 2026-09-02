@@ -73,7 +73,15 @@ integration or canonical entity matching.
 | `cns_pdm_beneficiary_identity_alerts` | Beneficiary | Shared NIN/phone, multiple-loan and creditor-account substitution triage |
 | `cns_pdm_lifecycle_exceptions` | Loan | Approved-to-repayment evidence, missing stages and amount variances |
 | `cns_pdm_duplicate_fragmentation_alerts` | Beneficiary, loan, date, currency | Duplicate, cross-channel and fragmented instruction patterns |
-| `cns_pdm_geographic_risk` | Geography | Peer-relative parish performance and identity-risk concentration |
+| `cns_pdm_parish_geographic_risk` | Geography | Peer-relative parish performance, identity-risk concentration and map coordinates |
+| `cns_pdm_district_geographic_risk` | Geography (district) | District rollup of parish risk driving the Superset Uganda district map |
+| `cns_pdm_subcounty_geographic_risk` | Geography (sub-county) | SACCO-office attributed sub-county risk; the only platform source carrying sub_county |
+| `cns_pdm_village_geographic_risk` | Geography (village) | Village rows inheriting parish risk until village-grain facts exist |
+| `cns_pdm_geographic_risk_summary` | Snapshot | National KPI row: district, sub-county and parish counts by severity band |
+| `cns_pdm_geographic_risk_drivers` | Geography (parish) | Dominant risk driver per parish: disbursement, repayment or identity |
+| `cns_pdm_geographic_risk_trend` | Snapshot, geography (district) | Daily district risk snapshot for movement-over-time analysis |
+| `cns_pdm_geographic_coverage` | Geography (district) | ISO, coordinate and agent GPS mapping coverage |
+| `cns_pdm_geographic_alerts` | Geography (parish) | Prioritised parish exception list for operational triage |
 
 Metric definitions:
 

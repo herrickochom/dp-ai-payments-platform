@@ -16,6 +16,9 @@ pdm_platform:
       # Default dbt schema.
       schema: staging
 
+      # Keep dbt execution conservative for large synthetic datasets.
+      threads: 1
+
       # ------------------------------------------------------------------------
       # DuckDB extensions
       # ------------------------------------------------------------------------
@@ -26,10 +29,15 @@ pdm_platform:
         - iceberg
 
       # ------------------------------------------------------------------------
-      # MinIO / S3 configuration
+      # DuckDB runtime / memory configuration
       # ------------------------------------------------------------------------
 
       settings:
+        memory_limit: "6GB"
+        preserve_insertion_order: false
+        temp_directory: "/tmp/duckdb_swap"
+
+        # MinIO / S3 configuration
         s3_region: "eu-west-1"
         s3_endpoint: "minio:9000"
         s3_url_style: "path"

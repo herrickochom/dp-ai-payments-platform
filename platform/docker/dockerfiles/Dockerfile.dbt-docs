@@ -1,7 +1,7 @@
 FROM python:3.11-slim
 
-# Install dbt
-RUN pip install --no-cache-dir dbt-core dbt-postgres dbt-trino
+# Install dbt (dbt-duckdb is required: the project profile target is duckdb)
+RUN pip install --no-cache-dir dbt-core dbt-duckdb dbt-postgres dbt-trino
 
 WORKDIR /usr/app/dbt
 

@@ -1,4 +1,7 @@
 {{ config(materialized='iceberg_table') }}
 
-select *
+select * exclude (
+    event_data,
+    parsed_event_data
+)
 from {{ ref('stg_pdm_icmn_vpm_pain001') }}

@@ -75,7 +75,7 @@ with loan_base as (
         count(*) filter (where geographic_risk_band = 'HIGH') as parishes_critical,
         count(*) filter (where geographic_risk_band = 'SEVERE') as parishes_severe,
         count(*) filter (where geographic_risk_band = 'NO DATA') as parishes_no_data
-    from {{ ref('cns_pdm_geographic_risk') }}
+    from {{ ref('cns_pdm_parish_geographic_risk') }}
 
 ), monthly_kpis as (
     select

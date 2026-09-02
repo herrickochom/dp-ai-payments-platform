@@ -189,12 +189,184 @@ models:
                   - MEDIUM
                   - HIGH
 
-  - name: cns_pdm_geographic_risk
+  - name: cns_pdm_district_geographic_risk
     description: >
-      Parish peer-comparison view combining disbursement, repayment
+      District-grain rollup of parish geographic risk. District severity is
+      the worst observed parish severity (maximum risk score), so a single
+      severe parish escalates its district. District ISO mapping drives the
+      Superset Uganda district map.
+    config:
+      meta:
+        grain:
+          - region
+          - district
+        audience:
+          - PDM leadership
+          - PDM Secretariat
+          - district leadership
+    columns:
+      - name: superset_district_iso
+        description: >
+          District subdivision code used to join the dataset to the ISO
+          property in Superset's bundled Uganda Country Map GeoJSON.
+
+      - name: map_mapping_status
+        description: >
+          MAPPED when a Superset-compatible district ISO value is available;
+          otherwise UNMAPPED.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - MAPPED
+                  - UNMAPPED
+
+      - name: geographic_risk_band
+        description: >
+          District severity band taken from the worst assessed parish in the
+          district; NO DATA when the district has no assessed parish or no
+          district ISO mapping.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - LOW
+                  - MEDIUM
+                  - HIGH
+                  - SEVERE
+                  - NO DATA
+
+      - name: geographic_risk_score
+        description: >
+          Numeric district severity where 1 is LOW, 2 is MEDIUM, 3 is HIGH
+          and 4 is SEVERE. NULL is intentionally used for NO DATA.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - 1
+                  - 2
+                  - 3
+                  - 4
+
+      - name: high_identity_alert_count
+        description: >
+          Sum of HIGH beneficiary identity alerts across the district's
+          parishes.
+  - name: cns_pdm_subcounty_geographic_risk
+    description: >
+      Sub-county geographic risk attributed through SACCO office locations,
+      the only platform source carrying sub_county. Loans join to the
+      sub-county of the SACCO administering them; beneficiaries inherit the
+      same attribution path. Loans with no resolvable SACCO location are
+      retained in an Unknown bucket so sub-county totals reconcile with the
+      national portfolio. Bands are not gated on district ISO mapping
+      because sub-counties have no map layer.
+    config:
+      meta:
+        grain:
+          - region
+          - district
+          - sub_county
+        audience:
+          - PDM Secretariat
+          - district leadership
+        attribution_note: >
+          SACCO office attribution, not beneficiary residence. Drill from
+          sub-county to parish is filter-driven on region and district until
+          a parish-to-sub-county mapping exists.
+    columns:
+      - name: sub_county_sk
+        data_tests:
+          - not_null
+          - unique
+
+      - name: sacco_count
+        description: Number of distinct SACCOs administering loans in the sub-county.
+
+      - name: loan_count
+        description: Number of distinct loans attributed to the sub-county.
+
+      - name: disbursement_peer_zscore
+        description: >
+          Sub-county disbursement-rate z-score relative to other sub-counties
+          in the same region.
+
+      - name: repayment_peer_zscore
+        description: >
+          Sub-county principal-repayment-rate z-score relative to other
+          sub-counties in the same region.
+
+      - name: geographic_risk_band
+        description: >
+          Sub-county severity band using the same thresholds as the parish
+          model, without district ISO gating.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - LOW
+                  - MEDIUM
+                  - HIGH
+                  - SEVERE
+                  - NO DATA
+
+      - name: geographic_risk_score
+        description: >
+          Numeric severity where 1 is LOW, 2 is MEDIUM, 3 is HIGH and 4 is
+          SEVERE. NULL is intentionally used for NO DATA.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - 1
+                  - 2
+                  - 3
+                  - 4
+
+  - name: cns_pdm_geographic_risk_summary
+    description: >
+      Single-row national KPI snapshot across the geographic risk hierarchy:
+      district, sub-county and parish counts by severity band, mapping
+      coverage and identity-risk totals. Powers the national KPI row of the
+      geographic risk dashboard.
+    config:
+      meta:
+        grain:
+          - snapshot_date
+        audience:
+          - PDM Executive
+          - Government leadership
+    columns:
+      - name: snapshot_date
+        data_tests:
+          - not_null
+          - unique
+
+      - name: district_mapping_pct
+        description: >
+          Percentage of districts carrying a Superset-compatible district
+          ISO value.
+
+      - name: sub_county_count
+        description: Number of sub-counties present in the sub-county risk model.
+
+      - name: high_identity_alert_count
+        description: >
+          National total of HIGH beneficiary identity alerts across
+          parishes.
+
+
+
+
+  - name: cns_pdm_parish_geographic_risk
+    description: >
+      Parish-grain geographic risk model combining disbursement, repayment
       and beneficiary identity indicators, with Uganda map coordinates,
       Superset-compatible district ISO mapping and executive geographic
-      risk severity.
+      risk severity. This is the base grain of the geographic risk
+      hierarchy: district and sub-county models aggregate up from it and
+      the village model inherits down from it.
     config:
       meta:
         grain:
@@ -303,6 +475,173 @@ models:
                   - 2
                   - 3
                   - 4
+
+  - name: cns_pdm_geographic_risk_drivers
+    description: >
+      Parish-level explanation of what drives geographic risk: disbursement
+      deviation, repayment underperformance or beneficiary identity issues.
+      Magnitudes are normalised so the three drivers can be compared and the
+      largest is labelled the primary driver. LOW parishes carry no driver.
+    config:
+      meta:
+        grain:
+          - region
+          - district
+          - parish
+        audience:
+          - PDM leadership
+          - PDM Secretariat
+    columns:
+      - name: disbursement_risk_magnitude
+        description: >
+          Absolute disbursement peer z-score; higher values mean the parish
+          disbursed unusually fast or slow relative to regional peers.
+
+      - name: repayment_risk_magnitude
+        description: >
+          Positive repayment shortfall magnitude; higher values mean worse
+          repayment relative to regional peers.
+
+      - name: identity_risk_magnitude
+        description: Count of HIGH beneficiary identity alerts in the parish.
+
+      - name: primary_risk_driver
+        description: >
+          Dominant risk driver: IDENTITY, REPAYMENT, DISBURSEMENT, NONE for
+          LOW parishes with no material driver, or NO DATA when no risk
+          signal is available.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - IDENTITY
+                  - REPAYMENT
+                  - DISBURSEMENT
+                  - NONE
+                  - NO DATA
+
+
+  - name: cns_pdm_geographic_risk_trend
+    description: >
+      Daily district-grain risk snapshot for movement-over-time analysis.
+      With iceberg_table materialization each run stores the latest
+      snapshot; retain snapshot_date in the grain when history is
+      introduced so risk movement becomes queryable.
+    config:
+      meta:
+        grain:
+          - snapshot_date
+          - region
+          - district
+        audience:
+          - PDM leadership
+          - PDM Secretariat
+    columns:
+      - name: snapshot_date
+        data_tests:
+          - not_null
+
+      - name: severe_parish_count
+        description: Number of SEVERE parishes in the district on the snapshot date.
+
+  - name: cns_pdm_geographic_coverage
+    description: >
+      District-grain mapping coverage: parish counts with Superset district
+      ISO mapping, parish coordinates and coordinate source mix, plus agent
+      GPS coverage. Use it to explain why geographies are missing from map
+      visualisations.
+    config:
+      meta:
+        grain:
+          - region
+          - district
+        audience:
+          - PDM Secretariat
+          - MIS and data engineering
+    columns:
+      - name: iso_mapping_pct
+        description: Percentage of parishes whose district carries a Superset ISO value.
+
+      - name: coordinate_mapping_pct
+        description: Percentage of parishes with latitude and longitude resolved.
+
+      - name: unmapped_coordinate_parish_count
+        description: Parishes with neither agent GPS nor reference coordinates.
+
+  - name: cns_pdm_geographic_alerts
+    description: >
+      Prioritised parish exception list: SEVERE, HIGH, MEDIUM and NO DATA
+      parishes with a typed alert reason, ordered by alert priority. The
+      operational triage queue behind the geographic risk dashboard.
+    config:
+      meta:
+        grain:
+          - region
+          - district
+          - parish
+        audience:
+          - PDM Secretariat
+          - investigators
+        risk_semantics_note: >
+          Bands are triage indicators, not proof of fraud. Follow ADR-002
+          governance before any adverse action.
+    columns:
+      - name: alert_priority
+        description: 1 for SEVERE through 4 for LOW; 5 for NO DATA.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - 1
+                  - 2
+                  - 3
+                  - 4
+                  - 5
+
+      - name: alert_type
+        description: >
+          Typed reason for the alert: repeated or single identity alerts,
+          severe or high repayment underperformance, severe or high
+          disbursement outliers, NO_DATA or MONITOR.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - REPEATED_HIGH_IDENTITY_ALERTS
+                  - SEVERE_REPAYMENT_UNDERPERFORMANCE
+                  - SEVERE_DISBURSEMENT_OUTLIER
+                  - IDENTITY_ALERT
+                  - HIGH_REPAYMENT_UNDERPERFORMANCE
+                  - HIGH_DISBURSEMENT_OUTLIER
+                  - NO_DATA
+                  - MONITOR
+
+  - name: cns_pdm_village_geographic_risk
+    description: >
+      Village rows inheriting parish risk (risk_grain_source =
+      PARISH_INHERITED). Preserves the full geographic drill hierarchy
+      without overstating risk granularity until village-grain performance
+      facts exist.
+    config:
+      meta:
+        grain:
+          - region
+          - district
+          - parish
+          - village
+        audience:
+          - PDM Secretariat
+    columns:
+      - name: risk_grain_source
+        description: >
+          PARISH_INHERITED while village risk is derived from its parish;
+          replace with a native grain when village facts become available.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - PARISH_INHERITED
+
 
   - name: cns_pdm_executive_overview
     description: >

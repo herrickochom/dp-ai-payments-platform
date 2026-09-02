@@ -1,10 +1,18 @@
 FROM ghcr.io/projectnessie/nessie:0.108.4
 
-# Copy custom configuration
-COPY platform/nessie/config/application.properties /app/config/application.properties
+# Copy custom configuration.  run-java.sh cds to /deployments before exec'ing
+# the JVM, and Quarkus reads config/application.properties relative to the
+# process working directory, so the file must live in /deployments/config.
+# Without it Nessie silently falls back to the default IN_MEMORY version
+# store and wipes the catalog on every restart.  A copy under the image
+# WORKDIR (/home/nessie) is kept for tooling that assumes it.
+COPY platform/nessie/config/application.properties /deployments/config/application.properties
+COPY platform/nessie/config/application.properties /home/nessie/config/application.properties
 
-# Nessie HTTP + PostgreSQL persistence
+# Nessie HTTP + PostgreSQL persistence.  The named "postgresql" datasource
+# configured in application.properties (what JDBC2 actually uses) points at
+# the existing "postgres" database; keep this default-datasource URL aligned.
 ENV QUARKUS_HTTP_PORT=19120 \
-    QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://postgres:5432/nessie
+    QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://postgres:5432/postgres
 
 EXPOSE 19120
