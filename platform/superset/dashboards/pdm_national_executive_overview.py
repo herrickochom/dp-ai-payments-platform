@@ -4,24 +4,34 @@ Run inside the Superset container:
     python /app/platform/superset/dashboards/pdm_national_executive_overview.py
 
 This idempotent updater has no runtime dependency on the dbt project.
+It resolves the dashboard by title (optionally pinned with PDM_DASHBOARD_ID)
+and creates it when missing, so metadata-DB rebuilds that shift dashboard
+IDs do not break the run.
 """
 
 import json
+import os
 
 from superset.app import create_app
 
-DASHBOARD_ID = 1
-DASHBOARD_TITLE = "PDM National Executive Overview"
+# Optional pin to a specific metadata-DB dashboard ID (PDM_DASHBOARD_ID=2).
+# When unset, the dashboard is resolved by title and created if it does not
+# exist, so metadata-DB rebuilds that shift autoincrement IDs do not break
+# the updater. update_dashboard() overwrites this with the resolved ID.
+DASHBOARD_ID = int(os.environ["PDM_DASHBOARD_ID"]) if os.getenv("PDM_DASHBOARD_ID") else None
+DASHBOARD_TITLE = "PDM National Executive Intelligence Dashboard"
 
 NAVY, BLUE, TEAL = "#17365D", "#1F77B4", "#2A9D8F"
 GREEN, LIME = "#2E7D5B", "#7BC96F"
 AMBER, ORANGE, RED = "#F9C74F", "#F9844A", "#F94144"
 PAGE_BG, CARD_BG, BORDER = "#05070B", "#111827", "#334155"
 TEXT, TEXT_MUTED = "#FFFFFF", "#D1D5DB"
+NO_DATA = "#6B7280"
 
 DATASETS = {
     "overview": "cns_pdm_executive_overview",
-    "geographic": "cns_pdm_parish_geographic_risk",
+    "fund_flow": "cns_pdm_fund_flow_funnel",
+    "geographic": "cns_pdm_geographic_risk",
     "district_geographic": "cns_pdm_district_geographic_risk",
     "risk": "cns_pdm_fraud_risk_insights",
     "intervention": "cns_pdm_loan_intervention_dashboard",
@@ -33,47 +43,73 @@ OPTIONAL_LEADERSHIP_DATASETS = {
     "local_government": "cns_pdm_local_government_performance",
     "parish": "cns_pdm_parish_performance",
     "social_impact": "cns_pdm_social_impact",
-    "geographic_summary": "cns_pdm_geographic_risk_summary",
-    "geographic_drivers": "cns_pdm_geographic_risk_drivers",
-    "subcounty_geographic": "cns_pdm_subcounty_geographic_risk",
-    "village_geographic": "cns_pdm_village_geographic_risk",
-    "geographic_trend": "cns_pdm_geographic_risk_trend",
-    "geographic_coverage": "cns_pdm_geographic_coverage",
-    "geographic_alerts": "cns_pdm_geographic_alerts",
 }
+
+# Country Map does not match on district names. It matches the query entity
+# against the ISO property embedded in Superset's Uganda GeoJSON.
+MAP_ENTITY_CANDIDATES = (
+    "superset_district_iso",
+    "district_iso_code",
+    "iso_3166_2",
+)
 
 LABEL_COLORS = {
     "LOW": LIME, "MEDIUM": AMBER, "HIGH": ORANGE, "SEVERE": RED,
+    "NO DATA": NO_DATA, "NO_DATA": NO_DATA,
     "PROGRESSING": LIME, "REQUIRES_INTERVENTION": ORANGE,
     "Approved": BLUE, "Instructed": TEAL, "Settled": "#457B9D",
     "Credited": GREEN, "Cash-out": NAVY,
 }
 
 DASHBOARD_CSS = f"""
-.dashboard-content, .dashboard-grid {{ background: {PAGE_BG} !important; }}
-.dashboard-grid {{ padding: 10px 14px 18px 194px !important; }}
-.dashboard-content, .dashboard-grid, .dashboard-component-chart-holder {{
+.dashboard-content,
+.dashboard-grid {{
+  background: {PAGE_BG} !important;
   color: {TEXT} !important;
 }}
+
+.dashboard-grid {{
+  padding: 10px 14px 18px 194px !important;
+}}
+
 .dashboard-header-container {{
-  background: {CARD_BG} !important; border: 1px solid {BORDER} !important;
-  border-radius: 8px !important; box-shadow: 0 2px 8px rgba(23,54,93,.06) !important;
-  margin: 8px 14px 4px !important; padding: 7px 12px !important;
+  background: {CARD_BG} !important;
+  border: 1px solid {BORDER} !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(23,54,93,.06) !important;
+  margin: 8px 14px 4px !important;
+  padding: 7px 12px !important;
 }}
-.dashboard-header-container h1, .dashboard-header-container h2 {{
-  color: {TEXT} !important; font-size: 22px !important; font-weight: 800 !important;
+
+.dashboard-header-container h1,
+.dashboard-header-container h2 {{
+  color: {TEXT} !important;
+  font-size: 22px !important;
+  font-weight: 800 !important;
 }}
+
 .dashboard-component-chart-holder {{
-  background: {CARD_BG} !important; border: 1px solid {BORDER} !important;
-  border-radius: 8px !important; box-shadow: 0 2px 7px rgba(23,54,93,.055) !important;
+  background: {CARD_BG} !important;
+  border: 1px solid {BORDER} !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 7px rgba(23,54,93,.055) !important;
+  color: {TEXT} !important;
   overflow: hidden !important;
 }}
-.dashboard-component-chart-holder:hover {{ box-shadow: 0 4px 12px rgba(23,54,93,.10) !important; }}
-.slice_container {{ background: {CARD_BG} !important; }}
-.chart-header, .slice-header {{
-  color: {TEXT} !important; font-size: 12px !important; font-weight: 800 !important;
-  letter-spacing: .35px !important; text-transform: uppercase !important;
+
+.slice_container {{
+  background: {CARD_BG} !important;
 }}
+
+.chart-header,
+.slice-header {{
+  color: {TEXT} !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  letter-spacing: .35px !important;
+  text-transform: uppercase !important;
+}}
+
 .dashboard-component-chart-holder .header-title,
 .dashboard-component-chart-holder .header-title a,
 .dashboard-component-chart-holder table,
@@ -81,76 +117,154 @@ DASHBOARD_CSS = f"""
 .dashboard-component-chart-holder td,
 .dashboard-component-chart-holder label,
 .dashboard-component-chart-holder span,
-.dashboard-component-chart-holder p {{ color: {TEXT} !important; }}
-.dashboard-component-chart-holder th {{ color: {TEXT_MUTED} !important; }}
-.dashboard-component-chart-holder svg text {{ fill: {TEXT} !important; }}
-.dashboard-component-chart-holder table,
-.dashboard-component-chart-holder thead,
-.dashboard-component-chart-holder tbody,
-.dashboard-component-chart-holder tr,
-.dashboard-component-chart-holder th,
-.dashboard-component-chart-holder td {{ background: {CARD_BG} !important; }}
-.dashboard-component-chart-holder input,
-.dashboard-component-chart-holder button,
-.dashboard-component-chart-holder .ant-select-selector {{
-  background: #0B1220 !important;
-  border-color: {BORDER} !important;
+.dashboard-component-chart-holder p {{
   color: {TEXT} !important;
 }}
-[id^="CHART-KPI-"] {{ border-top: 4px solid {BLUE} !important; }}
-#CHART-KPI-HIGH-RISK {{ border-top-color: {RED} !important; }}
-[id^="CHART-KPI-"] .chart-header {{ background: #0B1220 !important; border-bottom: 1px solid {BORDER} !important; }}
-[id^="CHART-KPI-"] .chart-header,
-[id^="CHART-KPI-"] .header-title,
-[id^="CHART-KPI-"] .header-title a {{
-  color: {TEXT} !important;
-  font-weight: 900 !important;
-  text-transform: uppercase !important;
+
+.dashboard-component-chart-holder svg text {{
+  fill: {TEXT} !important;
 }}
-[id^="CHART-KPI-"] .big-number,
-[id^="CHART-KPI-"] .header-line,
-[id^="CHART-KPI-"] .metric-value {{
-  color: {TEXT} !important;
-  font-size: 20px !important;
-  font-weight: 600 !important;
-  line-height: 1.1 !important;
+
+[id^="CHART-KPI-"] {{
+  border-top: 4px solid {BLUE} !important;
 }}
-/* Superset 6 Big Number markup does not always retain the layout component ID. */
+
+#CHART-KPI-HIGH-RISK {{
+  border-top-color: {RED} !important;
+}}
+
 .superset-legacy-chart-big-number {{
   color: {TEXT} !important;
   opacity: 1 !important;
   visibility: visible !important;
 }}
+
 .superset-legacy-chart-big-number .text-container {{
   align-items: center !important;
   display: flex !important;
   justify-content: center !important;
   min-height: 90px !important;
-  overflow: visible !important;
 }}
+
 .superset-legacy-chart-big-number .header-line {{
   color: {TEXT} !important;
-  display: flex !important;
   font-size: 20px !important;
   font-weight: 600 !important;
-  justify-content: center !important;
-  line-height: 1.1 !important;
-  opacity: 1 !important;
-  visibility: visible !important;
 }}
-.superset-legacy-chart-big-number .subheader-line,
-[id^="CHART-KPI-"] .subheader-line {{
+
+.superset-legacy-chart-big-number .subheader-line {{
+  color: {TEXT_MUTED} !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  text-transform: none !important;
+}}
+
+/* LEFT NAVIGATION */
+.dashboard-grid .dragdroppable-row:has(.dashboard-component-markdown h4),
+.dashboard-grid .dragdroppable-column:has(.dashboard-component-markdown h4) {{
+  min-height: 0 !important;
+  overflow: visible !important;
+  position: relative !important;
+  z-index: 1000 !important;
+}}
+
+.dashboard-component-markdown:has(h4) {{
+  background: #0B1220 !important;
+  border: 1px solid {BORDER} !important;
+  border-left: 4px solid {BLUE} !important;
+  border-radius: 8px !important;
+  bottom: 18px !important;
+  box-sizing: border-box !important;
+  left: 14px !important;
+  overflow-y: auto !important;
+  padding: 12px 10px !important;
+  position: fixed !important;
+  top: 88px !important;
+  width: 166px !important;
+  z-index: 1000 !important;
+}}
+
+.dashboard-component-markdown:has(h4) h4 {{
+  display: none !important;
+}}
+
+.dashboard-component-markdown:has(h4) p {{
+  display: block !important;
+  margin: 2px 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+}}
+
+.dashboard-component-markdown:has(h4) a {{
+  border-left: 3px solid transparent !important;
+  border-radius: 5px !important;
+  color: {TEXT_MUTED} !important;
+  display: block !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  padding: 9px 9px !important;
+  text-decoration: none !important;
+  width: 100% !important;
+}}
+
+.dashboard-component-markdown:has(h4) p:first-of-type a {{
+  background: rgba(31,119,180,.20) !important;
+  border-left-color: {BLUE} !important;
   color: {TEXT} !important;
-  font-size: 14px !important;
-  font-weight: 600 !important;
-  line-height: 1.2 !important;
-  opacity: 1 !important;
-  text-transform: uppercase !important;
-  visibility: visible !important;
 }}
-#CHART-KPI-HIGH-RISK .big-number {{ color: {RED} !important; }}
+
+.dashboard-component-markdown:has(h4) a:hover,
+.dashboard-component-markdown:has(h4) a:focus {{
+  background: rgba(42,157,143,.18) !important;
+  border-left-color: {TEAL} !important;
+  color: {TEXT} !important;
+  outline: none !important;
+}}
+
+[id^="CHART-"] {{
+  scroll-margin-top: 96px !important;
+}}
+
+/* MAP LEGEND IS INSIDE THE MAP; THERE IS NO LEGEND DASHBOARD COMPONENT. */
+#CHART-GEOGRAPHIC-RISK,
+[data-test-chart-name="UGANDA GEOGRAPHIC RISK INTELLIGENCE"],
+[data-test-chart-name="Uganda Geographic Risk Intelligence"] {{
+  border-top: 4px solid {TEAL} !important;
+  overflow: hidden !important;
+  position: relative !important;
+}}
+
+#CHART-GEOGRAPHIC-RISK .slice_container,
+[data-test-chart-name="UGANDA GEOGRAPHIC RISK INTELLIGENCE"] .slice_container,
+[data-test-chart-name="Uganda Geographic Risk Intelligence"] .slice_container {{
+  position: relative !important;
+}}
+
+#CHART-GEOGRAPHIC-RISK .slice_container::after,
+[data-test-chart-name="UGANDA GEOGRAPHIC RISK INTELLIGENCE"] .slice_container::after,
+[data-test-chart-name="Uganda Geographic Risk Intelligence"] .slice_container::after {{
+  background: rgba(5,7,11,.92) !important;
+  border: 1px solid {BORDER} !important;
+  border-left: 4px solid {TEAL} !important;
+  border-radius: 8px !important;
+  bottom: 14px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,.35) !important;
+  color: {TEXT} !important;
+  content: "RISK SEVERITY\\A🟩 LOW (1)\\A🟨 MEDIUM (2)\\A🟧 HIGH (3)\\A🟥 SEVERE (4)\\A⬜ NO DATA" !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  line-height: 1.62 !important;
+  padding: 9px 11px !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  right: 14px !important;
+  white-space: pre-line !important;
+  z-index: 80 !important;
+}}
+
 #CHART-FUND-FLOW {{ border-top: 4px solid {BLUE} !important; }}
-#CHART-GEOGRAPHIC-RISK {{ border-top: 4px solid {TEAL} !important; }}
 #CHART-RISK-BANDS {{ border-top: 4px solid {ORANGE} !important; }}
 #CHART-RISK-INDICATORS {{ border-top: 4px solid {RED} !important; }}
 #CHART-INTERVENTION-STATUS {{ border-top: 4px solid {ORANGE} !important; }}
@@ -160,105 +274,57 @@ DASHBOARD_CSS = f"""
 #CHART-REGIONAL-FUNDING {{ border-top: 4px solid {BLUE} !important; }}
 #CHART-PARISH-PORTFOLIO {{ border-top: 4px solid {TEAL} !important; }}
 #CHART-LOCAL-RISK-REGISTER {{ border-top: 4px solid {AMBER} !important; }}
-.dashboard-grid .dragdroppable-row {{ margin-bottom: 4px !important; }}
+
 .dashboard-component-markdown {{
   background: transparent !important;
   color: {TEXT} !important;
 }}
+
 #MARKDOWN-EXECUTIVE-SUBTITLE {{
   background: linear-gradient(90deg, #111827 0%, #0B1220 100%) !important;
   border: 1px solid {BORDER} !important;
   border-radius: 8px !important;
   padding: 8px 14px !important;
 }}
-#ROW-EXECUTIVE-MENU {{
-  margin: 0 0 6px !important;
-  min-height: 190px !important;
-  overflow: visible !important;
-  position: relative !important;
-  z-index: 100 !important;
-}}
-#COLUMN-EXECUTIVE-MENU {{
-  min-height: 190px !important;
-  overflow: visible !important;
-  position: relative !important;
-  z-index: 100 !important;
-}}
-#MARKDOWN-EXECUTIVE-MENU {{
-  background: #0B1220 !important;
-  border: 1px solid {BORDER} !important;
-  border-left: 4px solid {BLUE} !important;
-  border-radius: 8px !important;
-  bottom: 18px !important;
-  left: 14px !important;
-  overflow-y: auto !important;
-  padding: 14px 10px !important;
-  position: fixed !important;
-  top: 88px !important;
-  width: 166px !important;
-  z-index: 100 !important;
-}}
-#MARKDOWN-EXECUTIVE-MENU h4 {{
-  color: {TEXT_MUTED} !important;
-  font-size: 11px !important;
-  font-weight: 900 !important;
-  letter-spacing: 1px !important;
-  margin: 0 8px 10px !important;
-}}
-#MARKDOWN-EXECUTIVE-MENU ul {{ list-style: none !important; margin: 0 !important; padding: 0 !important; }}
-#MARKDOWN-EXECUTIVE-MENU li {{ margin: 3px 0 !important; }}
-#MARKDOWN-EXECUTIVE-MENU a {{
-  border-left: 3px solid transparent !important;
-  border-radius: 5px !important;
-  color: {TEXT_MUTED} !important;
-  display: block !important;
-  font-size: 12px !important;
-  font-weight: 700 !important;
-  padding: 8px 9px !important;
-  text-decoration: none !important;
-}}
-#MARKDOWN-EXECUTIVE-MENU li:first-child a {{
-  background: rgba(31,119,180,.20) !important;
-  border-left-color: {BLUE} !important;
-  color: {TEXT} !important;
-}}
-#MARKDOWN-EXECUTIVE-MENU a:hover {{
-  background: rgba(42,157,143,.16) !important;
-  border-left-color: {TEAL} !important;
-  color: {TEXT} !important;
-}}
-@media (max-width: 900px) {{
-  .dashboard-grid {{ padding-left: 158px !important; }}
-  #MARKDOWN-EXECUTIVE-MENU {{ left: 6px !important; width: 140px !important; }}
-}}
+
 #MARKDOWN-EXECUTIVE-SUBTITLE p {{
   color: {TEXT_MUTED} !important;
   font-size: 13px !important;
   margin: 0 !important;
 }}
+
 #MARKDOWN-ANALYSIS-SECTION,
 #MARKDOWN-INTERVENTION-SECTION,
 #MARKDOWN-LEADERSHIP-SECTION {{
   border-left: 4px solid {BLUE} !important;
   padding: 4px 10px !important;
 }}
-#MARKDOWN-INTERVENTION-SECTION {{ border-left-color: {ORANGE} !important; }}
-#MARKDOWN-LEADERSHIP-SECTION {{ border-left-color: {TEAL} !important; }}
-#MARKDOWN-ANALYSIS-SECTION h3,
-#MARKDOWN-INTERVENTION-SECTION h3,
-#MARKDOWN-LEADERSHIP-SECTION h3 {{
-  color: {TEXT} !important;
-  font-size: 13px !important;
-  font-weight: 900 !important;
-  letter-spacing: .6px !important;
-  margin: 0 !important;
+
+#MARKDOWN-INTERVENTION-SECTION {{
+  border-left-color: {ORANGE} !important;
 }}
+
+#MARKDOWN-LEADERSHIP-SECTION {{
+  border-left-color: {TEAL} !important;
+}}
+
 #MARKDOWN-DASHBOARD-FOOTER {{
   border-top: 1px solid {BORDER} !important;
   color: {TEXT_MUTED} !important;
   font-size: 11px !important;
   padding: 8px 2px 0 !important;
   text-align: right !important;
+}}
+
+@media (max-width: 900px) {{
+  .dashboard-grid {{
+    padding-left: 158px !important;
+  }}
+
+  .dashboard-component-markdown:has(h4) {{
+    left: 6px !important;
+    width: 140px !important;
+  }}
 }}
 """
 
@@ -309,6 +375,94 @@ def upsert_chart(session, dashboard, dataset, name, viz_type, chart_params):
     return chart
 
 
+def dataset_column_names(dataset):
+    """Return physical/virtual column names registered on a Superset dataset."""
+    return {column.column_name for column in dataset.columns}
+
+
+def resolve_map_entity_column(dataset):
+    """Resolve the ISO key used by Superset's bundled Uganda Country Map.
+
+    The Country Map query emits the selected entity as ``country_id`` and the
+    frontend matches that value to ``feature.properties.ISO`` in uganda.geojson.
+    District names therefore cannot colour the polygons.
+    """
+    columns = dataset_column_names(dataset)
+    for candidate in MAP_ENTITY_CANDIDATES:
+        if candidate in columns:
+            return candidate
+    raise RuntimeError(
+        "cns_pdm_district_geographic_risk needs a Superset-map district ISO column. "
+        "Add one of: " + ", ".join(MAP_ENTITY_CANDIDATES) + ". "
+        "Values must match the ISO properties in Superset's bundled "
+        "uganda.geojson (for example UG-411 for Ntungamo). District names "
+        "such as 'Ntungamo' will render the geometry but will not colour it."
+    )
+
+
+
+def fetch_kpi_snapshot(dataset):
+    """Read the one-row executive overview for dynamic KPI subheaders.
+
+    The dashboard updater is intentionally best-effort here: if Superset has not
+    yet synchronised the new dbt columns, the main KPI cards still render and the
+    subheader falls back to 'MoM unavailable'.
+    """
+    from sqlalchemy import text as sql_text
+
+    columns = dataset_column_names(dataset)
+    required = {
+        "total_approved_amount_mom_pct", "total_approved_amount_mom_arrow",
+        "total_approved_amount_mom_status",
+        "total_settled_amount_mom_pct", "total_settled_amount_mom_arrow",
+        "total_settled_amount_mom_status",
+        "total_credited_amount_mom_pct", "total_credited_amount_mom_arrow",
+        "total_credited_amount_mom_status",
+        "total_disbursed_amount_mom_pct", "total_disbursed_amount_mom_arrow",
+        "total_disbursed_amount_mom_status",
+        "total_outstanding_amount_mom_pct", "total_outstanding_amount_mom_arrow",
+        "total_outstanding_amount_mom_status",
+        "high_risk_case_count_mom_pct", "high_risk_case_count_mom_arrow",
+        "high_risk_case_count_mom_status",
+    }
+    if not required.issubset(columns):
+        return None
+
+    select_columns = ", ".join(sorted(required))
+    qualified = f'"{dataset.schema}"."{dataset.table_name}"'
+    statement = sql_text(f"select {select_columns} from {qualified} limit 1")
+
+    try:
+        with dataset.database.get_sqla_engine(schema=dataset.schema) as engine:
+            with engine.connect() as connection:
+                row = connection.execute(statement).mappings().first()
+                return dict(row) if row else None
+    except Exception as exc:
+        print(f"WARNING: Could not load KPI MoM snapshot: {exc}")
+        return None
+
+
+def kpi_subheader(snapshot, base_column, unit):
+    """Build e.g. 'UGX · 🟢 ↑ 8.4% vs last month'."""
+    if not snapshot:
+        return f"{unit} · MoM unavailable"
+
+    arrow = snapshot.get(f"{base_column}_mom_arrow") or "—"
+    pct = snapshot.get(f"{base_column}_mom_pct")
+    status = snapshot.get(f"{base_column}_mom_status") or "NO_PRIOR"
+
+    if pct is None or status == "NO_PRIOR":
+        return f"{unit} · — No prior month"
+
+    marker = {
+        "FAVOURABLE": "🟢",
+        "UNFAVOURABLE": "🔴",
+        "NEUTRAL": "⚪",
+    }.get(status, "⚪")
+
+    return f"{unit} · {marker} {arrow} {abs(float(pct)):.1f}% vs last month"
+
+
 def configure_charts(session, dashboard, datasets):
     charts = {c.slice_name.strip(): c for c in dashboard.slices}
     recovered = charts.get("TOTAL RECOVERED") or charts.get("Total Recovered")
@@ -325,25 +479,33 @@ def configure_charts(session, dashboard, datasets):
         ("Outstanding", "total_outstanding_amount", "Outstanding", "UGX"),
         ("High Risk Cases", "high_risk_case_count", "High Risk Cases", "CASES"),
     )
+    kpi_snapshot = fetch_kpi_snapshot(datasets["overview"])
     for name, column, label, unit in kpis:
         charts[name] = upsert_chart(
             session, dashboard, datasets["overview"], name.upper(), "big_number_total",
-            params(datasets["overview"], "big_number_total",
-                   metric=metric(column, label), header_font_size=.42,
-                   subtitle_font_size=.20, show_metric_name=False,
-                   subheader=unit, subheader_font_size=.28,
-                   y_axis_format="SMART_NUMBER", time_format="smart_date",
-                   force_timestamp_formatting=False),
+            params(
+                datasets["overview"],
+                "big_number_total",
+                metric=metric(column, label),
+                header_font_size=.42,
+                subtitle_font_size=.20,
+                show_metric_name=False,
+                subheader=kpi_subheader(kpi_snapshot, column, unit),
+                subheader_font_size=.24,
+                y_axis_format="SMART_NUMBER",
+                time_format="smart_date",
+                force_timestamp_formatting=False,
+            ),
         )
 
-    funnel = charts["PDM Fund Flow"]
-    funnel.params = json.dumps(params(
-        funnel.datasource, "funnel", groupby=["stage"],
-        metric=metric("amount", "Amount"), row_limit=10, sort_by_metric=True,
-        percent_calculation_type="first_step", show_legend=False,
-        label_type=3, tooltip_label_type=5, number_format="SMART_NUMBER",
-        show_labels=True, show_tooltip_labels=True,
-    ))
+    charts["PDM Fund Flow"] = upsert_chart(
+        session, dashboard, datasets["fund_flow"], "PDM Fund Flow", "funnel",
+        params(datasets["fund_flow"], "funnel", groupby=["stage"],
+               metric=metric("amount", "Amount"), row_limit=10, sort_by_metric=True,
+               percent_calculation_type="first_step", show_legend=False,
+               label_type=3, tooltip_label_type=5, number_format="SMART_NUMBER",
+               show_labels=True, show_tooltip_labels=True),
+    )
 
     pie_common = dict(
         sort_by_metric=True, show_legend=True, legendType="scroll",
@@ -361,15 +523,28 @@ def configure_charts(session, dashboard, datasets):
         or charts.get("Geographic Risk Distribution")
     )
     if geographic_map is not None:
-        geographic_map.slice_name = "Uganda District Risk Map"
+        geographic_map.slice_name = "UGANDA GEOGRAPHIC RISK INTELLIGENCE"
+    map_entity = resolve_map_entity_column(datasets["district_geographic"])
     charts["Geographic Risk Distribution"] = upsert_chart(
         session, dashboard, datasets["district_geographic"],
-        "Uganda District Risk Map", "country_map",
-        params(datasets["district_geographic"], "country_map",
-               select_country="uganda", entity="district",
-               metric=metric("geographic_risk_score", "Risk: 1 Low · 2 Medium · 3 High", "MAX"),
-               number_format=".0f", linear_color_scheme="schemeYlOrRd",
-               row_limit=5000),
+        "UGANDA GEOGRAPHIC RISK INTELLIGENCE", "country_map",
+        params(
+            datasets["district_geographic"],
+            "country_map",
+            select_country="uganda",
+            entity=map_entity,
+            metric=metric(
+                "geographic_risk_score",
+                "District risk score: 1 Low · 2 Medium · 3 High · 4 Severe",
+                "MAX",
+            ),
+            # CountryMap uses categorical colours whenever color_scheme is set.
+            # Explicitly null it so the risk metric drives the sequential scale.
+            color_scheme=None,
+            linear_color_scheme="schemeYlOrRd",
+            number_format=".0f",
+            row_limit=5000,
+        ),
     )
     charts["Risk Cases by Risk Band"] = upsert_chart(
         session, dashboard, datasets["risk"], "Risk Cases by Risk Band", "echarts_timeseries_bar",
@@ -418,9 +593,9 @@ def configure_charts(session, dashboard, datasets):
                showTooltipPercentage=True),
     )
     charts["Regional Funding Delivery"] = upsert_chart(
-        session, dashboard, datasets["district_geographic"], "Regional Funding Delivery",
+        session, dashboard, datasets["geographic"], "Regional Funding Delivery",
         "echarts_timeseries_bar",
-        params(datasets["district_geographic"], "echarts_timeseries_bar", x_axis="region",
+        params(datasets["geographic"], "echarts_timeseries_bar", x_axis="region",
                xAxisForceCategorical=True,
                metrics=[metric("approved_amount", "Approved"),
                         metric("disbursed_amount", "Disbursed")],
@@ -508,6 +683,8 @@ def add_row(layout, row_id, specs):
     }
 
 
+
+
 def add_markdown_row(layout, row_id, component_id, code, height):
     column_id = component_id.replace("MARKDOWN-", "COLUMN-")
     layout[row_id] = {
@@ -541,17 +718,17 @@ def build_layout(charts):
     }
     add_markdown_row(
         layout, "ROW-EXECUTIVE-MENU", "MARKDOWN-EXECUTIVE-MENU",
-        "#### PDM MENU\n\n"
-        "- [Overview](#ROW-KPI)\n"
-        "- [Geography](#CHART-GEOGRAPHIC-RISK)\n"
-        "- [Interventions](#ROW-INTERVENTION)\n"
-        "- [Beneficiaries](#CHART-PARISH-PORTFOLIO)\n"
-        "- [Finance](#CHART-FUND-FLOW)\n"
-        "- [Risk and Fraud](#CHART-RISK-BANDS)\n"
-        "- [Reports](#CHART-LOCAL-RISK-REGISTER)\n"
-        "- [Data Quality](#CHART-RISK-INDICATORS)\n"
-        "- [PDM Analysis](#ROW-LEADERSHIP)",
-        24,
+        "#### NAVIGATION\\n\\n"
+        "[Overview](#CHART-KPI-APPROVED)\\n\\n"
+        "[Geography](#CHART-GEOGRAPHIC-RISK)\\n\\n"
+        "[Interventions](#CHART-INTERVENTION-STATUS)\\n\\n"
+        "[Beneficiaries](#CHART-PARISH-PORTFOLIO)\\n\\n"
+        "[Finance](#CHART-FUND-FLOW)\\n\\n"
+        "[Risk and Fraud](#CHART-RISK-BANDS)\\n\\n"
+        "[Reports](#CHART-LOCAL-RISK-REGISTER)\\n\\n"
+        "[Data Quality](#CHART-RISK-INDICATORS)\\n\\n"
+        "[PDM Analysis](#CHART-REGIONAL-FUNDING)",
+        18,
     )
     add_markdown_row(
         layout, "ROW-EXECUTIVE-SUBTITLE", "MARKDOWN-EXECUTIVE-SUBTITLE",
@@ -613,7 +790,35 @@ def update_dashboard():
         from superset.connectors.sqla.models import SqlaTable
         from superset.models.dashboard import Dashboard
 
-        dashboard = db.session.query(Dashboard).filter(Dashboard.id == DASHBOARD_ID).one()
+        global DASHBOARD_ID
+
+        # Resolve the dashboard: env pin first, then by title (the natural key
+        # this updater enforces on every run), then create it. A metadata-DB
+        # rebuild can change the autoincrement ID, so the title is what makes
+        # this updater idempotent across environments.
+        dashboard = None
+        if DASHBOARD_ID is not None:
+            dashboard = db.session.query(Dashboard).filter(
+                Dashboard.id == DASHBOARD_ID).one_or_none()
+            if dashboard is None:
+                print(f"WARNING: pinned dashboard id {DASHBOARD_ID} not found, "
+                      "falling back to title lookup")
+        if dashboard is None:
+            # Case-insensitive: the title may be re-cased from the Superset UI.
+            from sqlalchemy import func as sa_func
+
+            dashboard = db.session.query(Dashboard).filter(
+                sa_func.lower(Dashboard.dashboard_title) == DASHBOARD_TITLE.lower()
+            ).one_or_none()
+        if dashboard is None:
+            dashboard = Dashboard(
+                dashboard_title=DASHBOARD_TITLE,
+                slug="pdm-national-executive-intelligence",
+            )
+            db.session.add(dashboard)
+            db.session.flush()
+            print(f"Created dashboard {dashboard.id}: {DASHBOARD_TITLE}")
+        DASHBOARD_ID = dashboard.id
         registered = {d.table_name: d for d in db.session.query(SqlaTable)
                       .filter(SqlaTable.schema == "consumption").all()}
         missing = sorted(set(DATASETS.values()) - set(registered))
@@ -639,6 +844,10 @@ def update_dashboard():
         dashboard.dashboard_title = DASHBOARD_TITLE
         dashboard.published = True
         db.session.commit()
+        print(
+            "Uganda map entity column: "
+            f"{resolve_map_entity_column(datasets['district_geographic'])}"
+        )
         print(f"Updated dashboard {dashboard.id}: {dashboard.dashboard_title}")
         print(f"Dashboard charts: {len(dashboard.slices)}")
 
