@@ -1,11 +1,23 @@
 FROM python:3.11-slim
 
-# Copy script
-COPY services/payment-xml-generator/payment_xml_generator.py /app/generator.py
-COPY services/shared/requirements-runtime.txt /app/requirements.txt
-
 WORKDIR /app
-RUN pip install --no-cache-dir -r requirements.txt
 
-ENTRYPOINT ["python3", "/app/generator.py"]
-CMD ["--count", "10", "--verbose"]
+COPY services/shared/requirements-runtime.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+# COPY services/payment-xml-generator/generator_common.py /app/generator_common.py
+# COPY services/payment-xml-generator/pdmis_generator.py /app/pdmis_generator.py
+# COPY services/payment-xml-generator/icmn_generator.py /app/icmn_generator.py
+# COPY services/payment-xml-generator/cpo_generator.py /app/cpo_generator.py
+# COPY services/payment-xml-generator/wendi_generator.py /app/wendi_generator.py
+# COPY services/payment-xml-generator/mobile_networks_generator.py /app/mobile_networks_generator.py
+# COPY services/payment-xml-generator/agent_network_generator.py /app/agent_network_generator.py
+# COPY services/payment-xml-generator/generate_all_sources.py /app/generate_all_sources.py
+
+COPY services/payment-xml-generator/ /app/
+
+ENV PYTHONUNBUFFERED=1
+ENV DATA_ROOT=/app/data
+
+ENTRYPOINT ["python3", "/app/generate_all_sources.py"]
+CMD ["--count", "100", "--clean"]

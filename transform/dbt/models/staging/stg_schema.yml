@@ -5,9 +5,10 @@ models:
     description: >
       ICMN VPM pain.001 business payment instructions, extracted from the raw Avro
       archive (parsed_event_data JSON) on topic icmn.vpm.pain001.
-    meta:
-      extraction_coverage: complete
-      observed_source_leaf_fields: 24
+    config:
+      meta:
+        extraction_coverage: complete
+        observed_source_leaf_fields: 24
     columns:
       - name: event_id
         tests: [not_null, unique]
@@ -32,12 +33,15 @@ models:
   - name: stg_pdm_icmn_pmn_pain001
     description: >
       ICMN PMN pain.001 technical lifecycle initiation with x-* attributes, from
-      topic icmn.pmn.pain001 (x_message_type falls back to the topic name when
-      the x-attribute is absent).
-    meta:
-      extraction_coverage: complete
-      observed_source_leaf_fields: 112
-      repeated_field_strategy: "x-* fields are projected separately at group, payment and transaction levels"
+      topic icmn.pmn.pain001. x_message_type prefers the GrpHdr (document-level)
+      x-messageType because the producer's flattened x-attributes map collapses
+      per-level values last-write-wins ("PMN-TX"), falling back to that map and
+      then to the topic name when the attribute is absent.
+    config:
+      meta:
+        extraction_coverage: complete
+        observed_source_leaf_fields: 112
+        repeated_field_strategy: "x-* fields are projected separately at group, payment and transaction levels"
     columns:
       - name: event_id
         tests: [not_null, unique]
@@ -68,9 +72,10 @@ models:
       CPO PSN pain.002 business status reports, from topic cpo.psn.pain002.
       end_to_end_id is extracted from OrgnlEndToEndId and provides the direct
       loan link; original_message_id links back to the originating pain.001.
-    meta:
-      extraction_coverage: complete
-      observed_source_leaf_fields: 15
+    config:
+      meta:
+        extraction_coverage: complete
+        observed_source_leaf_fields: 15
     columns:
       - name: event_id
         tests: [not_null, unique]
@@ -96,10 +101,11 @@ models:
     description: >
       CPO PLM pain.002 technical lifecycle status with x-* attributes, from
       topic cpo.plm.pain002.
-    meta:
-      extraction_coverage: complete
-      observed_source_leaf_fields: 113
-      repeated_field_strategy: "x-* fields are projected separately at group, original-group and original-payment levels"
+    config:
+      meta:
+        extraction_coverage: complete
+        observed_source_leaf_fields: 113
+        repeated_field_strategy: "x-* fields are projected separately at group, original-group and original-payment levels"
     columns:
       - name: event_id
         tests: [not_null, unique]
@@ -124,10 +130,11 @@ models:
   - name: stg_pdm_wendi_camt053
     description: >
       Wendi CAMT.053 end-of-day bank statements, from topic wendi.camt053.
-    meta:
-      extraction_coverage: complete
-      observed_source_leaf_fields: 37
-      repeated_field_strategy: "closing balance is preferred, with opening balance as fallback"
+    config:
+      meta:
+        extraction_coverage: complete
+        observed_source_leaf_fields: 37
+        repeated_field_strategy: "closing balance is preferred, with opening balance as fallback"
     columns:
       - name: event_id
         tests: [not_null, unique]
@@ -152,9 +159,10 @@ models:
   - name: stg_pdm_wendi_camt052
     description: >
       Wendi CAMT.052 intraday account reports, from topic wendi.camt052.
-    meta:
-      extraction_coverage: complete
-      observed_source_leaf_fields: 9
+    config:
+      meta:
+        extraction_coverage: complete
+        observed_source_leaf_fields: 9
     columns:
       - name: event_id
         tests: [not_null, unique]
@@ -175,9 +183,10 @@ models:
   - name: stg_pdm_wendi_camt054
     description: >
       Wendi CAMT.054 transaction notifications, from topic wendi.camt054.
-    meta:
-      extraction_coverage: complete
-      observed_source_leaf_fields: 17
+    config:
+      meta:
+        extraction_coverage: complete
+        observed_source_leaf_fields: 17
     columns:
       - name: event_id
         tests: [not_null, unique]
@@ -203,9 +212,10 @@ models:
     description: >
       Wendi wallet transaction events (disbursements, repayments), from topic
       wendi.transactions.
-    meta:
-      extraction_coverage: complete
-      observed_source_leaf_fields: 25
+    config:
+      meta:
+        extraction_coverage: complete
+        observed_source_leaf_fields: 25
     columns:
       - name: event_id
         tests: [not_null, unique]
@@ -230,9 +240,10 @@ models:
   - name: stg_pdm_mobile_mtn_pacs008
     description: >
       MTN PACS.008 interbank settlement transfers, from topic mobile.mtn.pacs008.
-    meta:
-      extraction_coverage: complete
-      observed_source_leaf_fields: 85
+    config:
+      meta:
+        extraction_coverage: complete
+        observed_source_leaf_fields: 85
     columns:
       - name: event_id
         tests: [not_null, unique]
@@ -258,9 +269,10 @@ models:
     description: >
       Airtel PACS.008 interbank settlement transfers, from topic
       mobile.airtel.pacs008.
-    meta:
-      extraction_coverage: complete
-      observed_source_leaf_fields: 85
+    config:
+      meta:
+        extraction_coverage: complete
+        observed_source_leaf_fields: 85
     columns:
       - name: event_id
         tests: [not_null, unique]
@@ -286,9 +298,10 @@ models:
     description: >
       MTN PACS.002 interbank payment status reports, from topic
       mobile.mtn.pacs002.
-    meta:
-      extraction_coverage: complete
-      observed_source_leaf_fields: 32
+    config:
+      meta:
+        extraction_coverage: complete
+        observed_source_leaf_fields: 32
     columns:
       - name: event_id
         tests: [not_null, unique]
@@ -314,9 +327,10 @@ models:
     description: >
       Airtel PACS.002 interbank payment status reports, from topic
       mobile.airtel.pacs002.
-    meta:
-      extraction_coverage: complete
-      observed_source_leaf_fields: 32
+    config:
+      meta:
+        extraction_coverage: complete
+        observed_source_leaf_fields: 32
     columns:
       - name: event_id
         tests: [not_null, unique]
@@ -341,10 +355,11 @@ models:
   - name: stg_pdm_agent_transactions
     description: >
       Agent network cash-out transactions, from topic agent.transactions.
-    meta:
-      extraction_coverage: complete
-      observed_xml_leaf_fields: 17
-      observed_json_leaf_fields: 17
+    config:
+      meta:
+        extraction_coverage: complete
+        observed_xml_leaf_fields: 17
+        observed_json_leaf_fields: 17
     columns:
       - name: event_id
         tests: [not_null, unique]
@@ -368,9 +383,10 @@ models:
 
   - name: stg_pdm_pdmis_beneficiaries
     description: One typed row per PDMIS beneficiary registration event.
-    meta:
-      extraction_coverage: complete
-      observed_source_leaf_fields: 22
+    config:
+      meta:
+        extraction_coverage: complete
+        observed_source_leaf_fields: 22
     columns:
       - name: event_id
         tests: [not_null, unique]
@@ -395,9 +411,10 @@ models:
 
   - name: stg_pdm_pdmis_business_plans
     description: One typed row per PDMIS business-plan event.
-    meta:
-      extraction_coverage: complete
-      observed_source_leaf_fields: 19
+    config:
+      meta:
+        extraction_coverage: complete
+        observed_source_leaf_fields: 19
     columns:
       - name: event_id
         tests: [not_null, unique]
@@ -421,9 +438,10 @@ models:
 
   - name: stg_pdm_pdmis_households
     description: One typed row per PDMIS household profile event.
-    meta:
-      extraction_coverage: complete
-      observed_source_leaf_fields: 17
+    config:
+      meta:
+        extraction_coverage: complete
+        observed_source_leaf_fields: 17
     columns:
       - name: event_id
         tests: [not_null, unique]
@@ -444,9 +462,10 @@ models:
 
   - name: stg_pdm_pdmis_loans
     description: One typed row per PDMIS loan lifecycle event.
-    meta:
-      extraction_coverage: complete
-      observed_source_leaf_fields: 22
+    config:
+      meta:
+        extraction_coverage: complete
+        observed_source_leaf_fields: 22
     columns:
       - name: event_id
         tests: [not_null, unique]
@@ -472,9 +491,10 @@ models:
 
   - name: stg_pdm_pdmis_saccos
     description: One typed row per PDMIS SACCO master-data event.
-    meta:
-      extraction_coverage: complete
-      observed_source_leaf_fields: 22
+    config:
+      meta:
+        extraction_coverage: complete
+        observed_source_leaf_fields: 22
     columns:
       - name: event_id
         tests: [not_null, unique]
@@ -497,9 +517,10 @@ models:
 
   - name: stg_pdm_pdmis_special_groups
     description: One typed row per PDMIS special-group reference event.
-    meta:
-      extraction_coverage: complete
-      observed_source_leaf_fields: 4
+    config:
+      meta:
+        extraction_coverage: complete
+        observed_source_leaf_fields: 4
     columns:
       - name: event_id
         tests: [not_null, unique]

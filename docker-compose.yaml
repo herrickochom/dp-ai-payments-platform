@@ -360,25 +360,25 @@ services:
   # 4. DATA PIPELINE LAYER (ALWAYS START)
   # ============================================================================
 
-  # payment-xml-generator:
-  #   build:
-  #     context: .
-  #     dockerfile: platform/docker/dockerfiles/Dockerfile.payment-xml-generator
-  #   container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-payment-xml-generator
-  #   environment:
-  #     DATA_ROOT: /app/data
-  #     PYTHONUNBUFFERED: "1"
-  #   volumes:
-  #     - ./data:/app/data
-  #   depends_on:
-  #     minio:
-  #       condition: service_healthy
-  #     postgres-healthcheck:
-  #       condition: service_completed_successfully
-  #   restart: "no"
-  #   networks:
-  #     - data-platform-network
-  #   command: ["--count", "5", "--clean", "--verbose"]
+  payment-xml-generator:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.payment-xml-generator
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-payment-xml-generator
+    environment:
+      DATA_ROOT: /app/data
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      minio:
+        condition: service_healthy
+      postgres-healthcheck:
+        condition: service_completed_successfully
+    restart: "no"
+    networks:
+      - data-platform-network
+    command: ["--count", "${PDM_GENERATOR_COUNT:-100}", "--clean"]
 
   payment-producer:
     build:
@@ -400,8 +400,8 @@ services:
         condition: service_completed_successfully
       schema-registry:
         condition: service_healthy
-      # payment-xml-generator:
-      #   condition: service_completed_successfully
+      payment-xml-generator:
+        condition: service_completed_successfully
     restart: "no"
     networks:
       - data-platform-network
