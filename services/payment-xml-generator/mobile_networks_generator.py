@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 from xml.etree import ElementTree as ET
 
-from common_generator import (
+from generator_common import (
     DATA_ROOT,
     PACS002_NS,
     PACS008_NS,

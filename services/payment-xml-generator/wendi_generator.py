@@ -7,7 +7,7 @@ import argparse
 from collections import defaultdict
 from xml.etree import ElementTree as ET
 
-from common_generator import (
+from generator_common import (
     CAMT052_NS,
     CAMT053_NS,
     CAMT054_NS,

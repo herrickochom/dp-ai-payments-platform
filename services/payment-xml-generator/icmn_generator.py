@@ -7,7 +7,7 @@ import argparse
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
-from common_generator import (
+from generator_common import (
     DATA_ROOT,
     PAIN001_NS,
     child,

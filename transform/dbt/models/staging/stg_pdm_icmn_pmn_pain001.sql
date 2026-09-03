@@ -153,8 +153,14 @@ parsed as (
             {% endfor %}
         {% endfor %}
 
-        -- technical lifecycle x-* attributes
+        -- Technical lifecycle x-* attributes. The producer's flattened
+        -- x_attributes map is built last-write-wins over every x-* element in
+        -- the document, so for PMN it surfaces the transaction-level value
+        -- ("PMN-TX"). The document's message type is the GrpHdr-level one, so
+        -- read that first; the flattened map and topic name remain fallbacks
+        -- for events that never carried per-level attributes.
         coalesce(
+            {{ extract_json('parsed_event_data', '$.xml.Document.CstmrCdtTrfInitn.GrpHdr.x-messageType') }},
             {{ extract_json('parsed_event_data', '$.x_attributes.x-messageType') }},
             _kafka_metadata.topic
         ) as x_message_type,

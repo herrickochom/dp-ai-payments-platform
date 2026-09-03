@@ -8,7 +8,7 @@ import hashlib
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
-from common_generator import (
+from generator_common import (
     DATA_ROOT,
     PDMIS_ROOT,
     child,
