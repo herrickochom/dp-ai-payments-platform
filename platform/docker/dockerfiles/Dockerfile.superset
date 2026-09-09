@@ -1,9 +1,15 @@
-FROM apache/superset:latest
+# ==============================================================================
+# Apache Superset 6.1.0 - PDM Executive Intelligence
+# ==============================================================================
+# Pinned release for reproducible builds. Avoid :latest in a controlled stack.
+# ==============================================================================
+
+FROM apache/superset:6.1.0
 
 USER root
 
 RUN . /app/.venv/bin/activate && \
-    uv pip install \
+    uv pip install --no-cache \
         psycopg2-binary \
         "trino[sqlalchemy]" \
         redis
@@ -11,8 +17,15 @@ RUN . /app/.venv/bin/activate && \
 COPY platform/superset/superset_config.py \
     /app/pythonpath/superset_config.py
 
-RUN chown superset:superset \
-    /app/pythonpath/superset_config.py
+COPY platform/superset/dashboards/ \
+    /app/platform/superset/dashboards/
+
+RUN chown -R superset:superset \
+    /app/pythonpath \
+    /app/platform/superset
+
+ENV SUPERSET_CONFIG_PATH=/app/pythonpath/superset_config.py \
+    PYTHONUNBUFFERED=1
 
 USER superset
 

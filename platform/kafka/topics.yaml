@@ -135,6 +135,12 @@ topics:
     retention_ms: 604800000   # 7 days
     description: "Loan Data"
 
+  - name: pdmis.repayments
+    partitions: 8
+    replication: 1
+    retention_ms: 604800000
+    description: "Repayment Event Data"
+
   - name: pdmis.saccos
     partitions: 4
     replication: 1

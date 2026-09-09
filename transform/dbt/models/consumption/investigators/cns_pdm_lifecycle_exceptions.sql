@@ -38,15 +38,16 @@ select
         as has_rejected_resubmission,
     lifecycle.settlement_channel_count > 1 as has_dual_settlement_route,
     lifecycle.cashout_count > 1 as has_multiple_cashouts,
-    lifecycle.credited_to_cashout_variance > 0 as has_cashout_above_credit,
+    coalesce(lifecycle.credited_to_cashout_variance > 0, false)
+        as has_cashout_above_credit,
     lifecycle.rejected_status_count > 0
         and lifecycle.credit_notification_count > 0 as has_credit_after_rejection,
     case
-        when lifecycle.approved_to_instructed_variance <> 0
-          or lifecycle.instructed_to_settled_variance <> 0
-          or lifecycle.settled_to_credited_variance <> 0
-          or lifecycle.disbursed_to_credited_variance <> 0
-          or lifecycle.credited_to_cashout_variance > 0
+        when coalesce(lifecycle.approved_to_instructed_variance <> 0, false)
+          or coalesce(lifecycle.instructed_to_settled_variance <> 0, false)
+          or coalesce(lifecycle.settled_to_credited_variance <> 0, false)
+          or coalesce(lifecycle.disbursed_to_credited_variance <> 0, false)
+          or coalesce(lifecycle.credited_to_cashout_variance > 0, false)
           or (lifecycle.rejected_status_count > 0 and lifecycle.instruction_count > 1)
           or lifecycle.settlement_channel_count > 1
           or lifecycle.cashout_count > 1

@@ -22,6 +22,8 @@ select
     {{ extract_json('parsed_event_data', '$.land_ownership') }} as land_ownership,
     {{ extract_json('parsed_event_data', '$.village') }} as village,
     {{ extract_json('parsed_event_data', '$.parish') }} as parish,
+    {{ extract_json('parsed_event_data', '$.sub_county') }} as sub_county,
+    {{ extract_json('parsed_event_data', '$.county') }} as county,
     {{ extract_json('parsed_event_data', '$.district') }} as district,
     {{ extract_json('parsed_event_data', '$.region') }} as region,
     try_cast({{ extract_json('parsed_event_data', '$.registration_date') }} as date) as registration_date,

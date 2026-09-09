@@ -33,9 +33,13 @@ pdm_platform:
       # ------------------------------------------------------------------------
 
       settings:
-        memory_limit: "6GB"
+        memory_limit: "7GB"
         preserve_insertion_order: false
-        temp_directory: "/tmp/duckdb_swap"
+
+        # Do not configure temp_directory here. dbt-duckdb reapplies settings
+        # whenever it opens a connection, but DuckDB cannot set this option
+        # after the temp directory has been used for spilling. The Compose
+        # services mount the swap volume at DuckDB's default path instead.
 
         # MinIO / S3 configuration
         s3_region: "eu-west-1"

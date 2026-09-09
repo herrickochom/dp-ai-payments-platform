@@ -19,11 +19,20 @@ select
     {{ gold_surrogate_key(['coalesce(entity.transaction_beneficiary_id, entity.loan_beneficiary_id)']) }} as beneficiary_sk,
     {{ gold_surrogate_key(['coalesce(entity.transaction_sacco_id, entity.loan_sacco_id)']) }} as sacco_sk,
     {{ gold_surrogate_key(['agent.agent_id']) }} as agent_sk,
-    {{ gold_surrogate_key(['beneficiary.region', 'beneficiary.district', 'beneficiary.parish', 'beneficiary.village']) }} as geography_sk,
+    {{ gold_surrogate_key(['beneficiary.region', 'beneficiary.district', 'beneficiary.county', 'beneficiary.sub_county', 'beneficiary.parish', 'beneficiary.village']) }} as geography_sk,
     payment.source_system, payment.transaction_id, payment.end_to_end_id as loan_id,
     payment.message_id, payment.instruction_id, payment.uetr, payment.occurred_at,
     payment.currency, payment.transaction_status, entity.entity_match_status,
-    sha256(coalesce(creditors.account_id, '__UNKNOWN__')) as creditor_account_hashed,
+    case
+        -- Same null-safety contract as phone_hashed in gld_dim_pdm_beneficiary:
+        -- missing or non-numeric creditor accounts hash to null rather than to
+        -- a shared sentinel, so they can never be correlated as one account.
+        when nullif(
+            regexp_replace(coalesce(creditors.account_id, ''), '[^0-9]', ''),
+            ''
+        ) is null then null
+        else sha256(regexp_replace(creditors.account_id, '[^0-9]', ''))
+    end as creditor_account_hashed,
     creditors.account_issuer as creditor_account_issuer,
     coalesce(reconciliation.status_event_count, 0) as status_event_count,
     coalesce(reconciliation.matched_status_event_count, 0) as matched_status_event_count,

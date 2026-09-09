@@ -13,12 +13,24 @@ from generator_common import (
     STATUS_PDNG,
     child,
     clean_directory,
-    eligible_contexts,
+    disbursement_contexts,
+    event_date,
     event_timestamp,
     stable_uuid,
     validate_xml_no_empty_text,
     write_xml,
 )
+
+CPO_INITIATING_PARTY = "PostBank Uganda"
+
+
+def status_reason(status: str) -> tuple[str, str]:
+    """(reason code, additional info) reported for a payment status."""
+    if status == STATUS_ACSC:
+        return "ACSC", "Payment instruction settled successfully"
+    if status == STATUS_PDNG:
+        return "PDNG", "Payment instruction pending settlement"
+    return "RJCT", "Payment instruction rejected by the clearing system"
 
 
 def processing_status(status: str) -> str:
@@ -34,13 +46,15 @@ def generate_psn(context: dict) -> bytes:
     status = context["status"]
     amount = context["amount"]
     loan_id = loan["loan_id"]
+    reason_code, reason_detail = status_reason(status)
 
     root = ET.Element("Document", xmlns=PAIN002_NS)
     report = child(root, "CstmrPmtStsRpt")
 
     header = child(report, "GrpHdr")
     child(header, "MsgId", lifecycle["psn_message_id"])
-    child(header, "CreDtTm", event_timestamp(loan, 2))
+    child(header, "CreDtTm", event_timestamp(loan, "disbursement"))
+    child(header, "InitgPty", CPO_INITIATING_PARTY)
 
     group = child(report, "OrgnlGrpInfAndSts")
     child(group, "OrgnlMsgId", lifecycle["vpm_message_id"])
@@ -52,6 +66,11 @@ def generate_psn(context: dict) -> bytes:
     pmt = child(report, "OrgnlPmtInfAndSts")
     child(pmt, "OrgnlPmtInfId", f"PMT-{loan_id}")
     child(pmt, "TxSts", status)
+    reason = child(pmt, "StsRsnInf")
+    child(child(reason, "Rsn"), "Cd", reason_code)
+    child(reason, "AddtlInf", reason_detail)
+    child(pmt, "SettlementStatus", "SETTLED" if status == STATUS_ACSC else "PENDING")
+    child(pmt, "BusinessDate", event_date(loan, "disbursement"))
     child(pmt, "OrgnlInstrId", f"INSTR-{loan_id}")
     child(pmt, "OrgnlEndToEndId", loan_id)
     child(pmt, "OrgnlTxId", lifecycle["vpm_transaction_id"])
@@ -85,6 +104,8 @@ def add_plm_attrs(parent: ET.Element, context: dict, stage: str) -> None:
         "x-retryAttempt": "0",
         "x-systemLatency": "350ms",
         "x-priority": "3",
+        "x-timestamp": event_timestamp(loan, "disbursement", 11),
+        "x-deadline": event_timestamp(loan, "disbursement", 12),
         "x-lifecycleStage": "SETTLED" if status == STATUS_ACSC else "ROUTED",
         "x-eventType": "COMPLETION" if status == STATUS_ACSC else "STATUS_CHANGE",
         "x-acknowledgment": "ACK" if status == STATUS_ACSC else "PENDING",
@@ -109,13 +130,15 @@ def generate_plm(context: dict) -> bytes:
     lifecycle = context["lifecycle"]
     status = context["status"]
     loan_id = loan["loan_id"]
+    reason_code, reason_detail = status_reason(status)
 
     root = ET.Element("Document", xmlns=PAIN002_NS)
     report = child(root, "CstmrPmtStsRpt")
 
     header = child(report, "GrpHdr")
     child(header, "MsgId", lifecycle["plm_message_id"])
-    child(header, "CreDtTm", event_timestamp(loan, 2, 11))
+    child(header, "CreDtTm", event_timestamp(loan, "disbursement", 11))
+    child(header, "InitgPty", CPO_INITIATING_PARTY)
     add_plm_attrs(header, context, "HEADER")
 
     group = child(report, "OrgnlGrpInfAndSts")
@@ -128,6 +151,11 @@ def generate_plm(context: dict) -> bytes:
     pmt = child(report, "OrgnlPmtInfAndSts")
     child(pmt, "OrgnlPmtInfId", f"PMN-PMT-{loan_id}")
     child(pmt, "TxSts", status)
+    reason = child(pmt, "StsRsnInf")
+    child(child(reason, "Rsn"), "Cd", reason_code)
+    child(reason, "AddtlInf", reason_detail)
+    child(pmt, "SettlementStatus", "SETTLED" if status == STATUS_ACSC else "PENDING")
+    child(pmt, "BusinessDate", event_date(loan, "disbursement"))
     add_plm_attrs(pmt, context, "PAYMENT")
     child(pmt, "OrgnlInstrId", f"PMN-INSTR-{loan_id}")
     child(pmt, "OrgnlEndToEndId", loan_id)
@@ -151,7 +179,7 @@ def main() -> None:
         clean_directory(psn_dir)
         clean_directory(plm_dir)
 
-    contexts = eligible_contexts(args.count)
+    contexts = disbursement_contexts(args.count)
     for seq, context in enumerate(contexts, 1):
         write_xml(psn_dir / f"psn_{seq:04d}.xml", generate_psn(context))
         write_xml(plm_dir / f"plm_{seq:04d}.xml", generate_plm(context))

@@ -49,6 +49,7 @@ DISTRICT_COORDINATES: Dict[str, Tuple[float, float]] = {
     "Mbale": (1.0806, 34.1750),
     "Jinja": (0.4479, 33.2026),
     "Iganga": (0.6092, 33.4686),
+    "Soroti": (1.7146, 33.6111),
     "Moroto": (2.5345, 34.6666),
     "Kotido": (2.9806, 34.1331),
     "Nakapiripirit": (1.8500, 34.7200),
@@ -88,6 +89,7 @@ def load_json(path: Path) -> Any:
 
 
 def write_json(path: Path, payload: Any) -> None:
+    validate_no_nulls(payload, str(path))
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
@@ -96,6 +98,7 @@ def write_json(path: Path, payload: Any) -> None:
 
 
 def write_xml(path: Path, content: bytes) -> None:
+    validate_xml_no_empty_text(content, str(path))
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(content)
 
@@ -154,15 +157,41 @@ def parse_iso_date(value: str) -> date:
     return date.fromisoformat(value)
 
 
-def event_timestamp(loan: Mapping[str, Any], offset_days: int = 0, hour: int = 10) -> str:
-    base = parse_iso_date(str(loan["approval_date"])) + timedelta(days=offset_days)
+LIFECYCLE_STAGE_FIELDS: Dict[str, str] = {
+    "application": "application_date",
+    "approval": "approval_date",
+    "verification": "verification_date",
+    "disbursement": "disbursement_date",
+    "cashout": "cashout_date",
+}
+
+
+def lifecycle_date(loan: Mapping[str, Any], stage: str) -> date:
+    """Return an authoritative PDMIS lifecycle date for a downstream event."""
+    try:
+        field = LIFECYCLE_STAGE_FIELDS[stage]
+    except KeyError as exc:
+        raise ValueError(f"Unsupported lifecycle stage: {stage}") from exc
+    value = loan.get(field)
+    if value in (None, "", "NOT_APPLICABLE"):
+        raise ValueError(f"{loan.get('loan_id')}: missing lifecycle date {field}")
+    return parse_iso_date(str(value))
+
+
+def event_timestamp(
+    loan: Mapping[str, Any],
+    stage: str = "approval",
+    hour: int = 10,
+    minute: int = 0,
+) -> str:
+    base = lifecycle_date(loan, stage)
     dt = datetime.combine(base, time(hour=hour), tzinfo=UGANDA_EAT)
+    dt = dt.replace(minute=minute)
     return dt.isoformat(timespec="seconds")
 
 
-def event_date(loan: Mapping[str, Any], offset_days: int = 0) -> str:
-    base = parse_iso_date(str(loan["approval_date"])) + timedelta(days=offset_days)
-    return base.isoformat()
+def event_date(loan: Mapping[str, Any], stage: str = "approval") -> str:
+    return lifecycle_date(loan, stage).isoformat()
 
 
 def iso_payment_status(loan_status: str) -> str:
@@ -177,16 +206,70 @@ def iso_payment_status(loan_status: str) -> str:
         raise ValueError(f"Unsupported PDMIS loan_status: {loan_status}") from exc
 
 
-def downstream_eligible(loan: Mapping[str, Any]) -> bool:
-    # Rejected applications do not proceed to the payment network.
-    return str(loan["loan_status"]) != "REJECTED"
+def disbursement_eligible(loan: Mapping[str, Any]) -> bool:
+    """Return whether a loan has an authoritative completed disbursement."""
+    return (
+        str(loan["loan_status"]) == "DISBURSED"
+        and loan.get("disbursement_date") not in (None, "", "NOT_APPLICABLE")
+        and float(loan.get("amount_disbursed", 0)) > 0
+    )
 
 
 def payment_amount(loan: Mapping[str, Any]) -> int:
-    amount = int(loan["amount_requested"])
-    if amount <= 0:
-        raise ValueError(f"{loan['loan_id']}: payment amount must be > 0")
+    """Return principal actually disbursed; approval amounts are not payments."""
+    if not disbursement_eligible(loan):
+        return 0
+    amount = int(loan["amount_disbursed"])
     return amount
+
+
+def authoritative_as_of_date(loans: Sequence[Mapping[str, Any]]) -> str:
+    """Return the single source observation date, rejecting mixed snapshots."""
+    values = {str(loan["as_of_date"]) for loan in loans}
+    if len(values) != 1:
+        raise ValueError(
+            "PDMIS loans must contain exactly one authoritative as_of_date; "
+            f"found {sorted(values)}"
+        )
+    return next(iter(values))
+
+
+def validate_loan_lifecycle_contract(loan: Mapping[str, Any]) -> None:
+    """Reject lifecycle states that could fabricate a funds-movement event."""
+    loan_id = str(loan["loan_id"])
+    status = str(loan["loan_status"])
+    amount_disbursed = float(loan["amount_disbursed"])
+    disbursement_value = loan.get("disbursement_date")
+    cashout_value = loan.get("cashout_date")
+
+    if status == "DISBURSED":
+        if amount_disbursed <= 0:
+            raise ValueError(f"{loan_id}: DISBURSED loan must have amount_disbursed > 0")
+        lifecycle = [
+            lifecycle_date(loan, stage)
+            for stage in (
+                "application",
+                "approval",
+                "verification",
+                "disbursement",
+                "cashout",
+            )
+        ]
+        as_of = parse_iso_date(str(loan["as_of_date"]))
+        if lifecycle != sorted(lifecycle) or lifecycle[-1] > as_of:
+            raise ValueError(
+                f"{loan_id}: lifecycle dates must be ordered and no later than as_of_date"
+            )
+        return
+
+    if status not in {"APPROVED", "REJECTED"}:
+        raise ValueError(f"{loan_id}: unsupported loan_status {status!r}")
+    if amount_disbursed != 0:
+        raise ValueError(f"{loan_id}: {status} loan must have amount_disbursed = 0")
+    if disbursement_value not in (None, "", "NOT_APPLICABLE"):
+        raise ValueError(f"{loan_id}: {status} loan cannot have disbursement_date")
+    if cashout_value not in (None, "", "NOT_APPLICABLE"):
+        raise ValueError(f"{loan_id}: {status} loan cannot have cashout_date")
 
 
 def lifecycle_context(loan_id: str) -> Dict[str, str]:
@@ -217,10 +300,56 @@ def network_for_index(index_zero_based: int) -> str:
     return "MTN" if index_zero_based % 2 == 0 else "AIRTEL"
 
 
+def network_for_account(account: str) -> str:
+    """Resolve the synthetic mobile network from the credited MSISDN."""
+    digits = "".join(character for character in str(account) if character.isdigit())
+    if digits.startswith("25677"):
+        return "MTN"
+    if digits.startswith("25678"):
+        return "AIRTEL"
+    raise ValueError(f"Unsupported synthetic mobile-money account: {account!r}")
+
+
+# ---------------------------------------------------------------------------
+# Creditor-account substitution scenarios
+# ---------------------------------------------------------------------------
+# A small deterministic share of beneficiaries received their PDM wallet on a
+# third-party MSISDN (a relative's wallet). Downstream, the payment facts flag
+# these as `is_account_substituted` and the beneficiary identity alerts raise
+# them to HIGH risk. The rule must be shared by every generator so the XML
+# messages and the wallet JSON stay consistent per loan.
+SUBSTITUTION_MODULUS = 12
+SUBSTITUTED_PHONE_PREFIX = "25678"
+
+
+def loan_serial(loan: Mapping[str, Any]) -> int:
+    try:
+        return int(str(loan["loan_id"]).rsplit("-", 1)[-1])
+    except (KeyError, ValueError) as exc:
+        raise ValueError(
+            f"Cannot derive numeric serial from loan_id: {loan.get('loan_id')!r}"
+        ) from exc
+
+
+def is_account_substituted(loan: Mapping[str, Any]) -> bool:
+    return loan_serial(loan) % SUBSTITUTION_MODULUS == 0
+
+
+def payment_account(loan: Mapping[str, Any], beneficiary: Mapping[str, Any]) -> str:
+    """Wallet MSISDN that actually received the disbursement for this loan."""
+    if is_account_substituted(loan):
+        serial = loan_serial(loan)
+        account = f"{SUBSTITUTED_PHONE_PREFIX}{serial % 10_000_000:07d}"
+        if account != str(beneficiary["phone"]):
+            return account
+    return str(beneficiary["phone"])
+
+
 def load_pdmis_context(count: int | None = None) -> List[Dict[str, Any]]:
     beneficiaries = load_json(PDMIS_ROOT / "beneficiaries.json")
     loans = load_json(PDMIS_ROOT / "loans.json")
     saccos = load_json(PDMIS_ROOT / "saccos.json")
+    authoritative_as_of_date(loans)
 
     beneficiary_by_id = {
         row["beneficiary_id"]: row
@@ -242,6 +371,10 @@ def load_pdmis_context(count: int | None = None) -> List[Dict[str, Any]]:
                 "beneficiary_id",
                 "sacco_id",
                 "approval_date",
+                "application_date",
+                "verification_date",
+                "disbursement_date",
+                "cashout_date",
                 "amount_requested",
                 "amount_approved",
                 "amount_disbursed",
@@ -250,6 +383,7 @@ def load_pdmis_context(count: int | None = None) -> List[Dict[str, Any]]:
                 "project_type",
             ),
         )
+        validate_loan_lifecycle_contract(loan)
 
         beneficiary = beneficiary_by_id.get(loan["beneficiary_id"])
         if beneficiary is None:
@@ -311,19 +445,12 @@ def load_pdmis_context(count: int | None = None) -> List[Dict[str, Any]]:
     return contexts
 
 
-def eligible_contexts(count: int | None = None) -> List[Dict[str, Any]]:
+def disbursement_contexts(count: int | None = None) -> List[Dict[str, Any]]:
+    """Contexts for records that represent movement of disbursed funds."""
     return [
         context
         for context in load_pdmis_context(count)
-        if downstream_eligible(context["loan"])
-    ]
-
-
-def successful_contexts(count: int | None = None) -> List[Dict[str, Any]]:
-    return [
-        context
-        for context in eligible_contexts(count)
-        if context["status"] == STATUS_ACSC
+        if disbursement_eligible(context["loan"])
     ]
 
 

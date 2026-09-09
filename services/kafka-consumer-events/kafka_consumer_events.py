@@ -80,6 +80,7 @@ class Settings:
         "pdmis.business_plans",
         "pdmis.households",
         "pdmis.loans",
+        "pdmis.repayments",
         "pdmis.saccos",
         "pdmis.special_groups",
     ]
@@ -164,6 +165,7 @@ def parse_topic(topic: str) -> Dict[str, str]:
         "pdmis.business_plans": {"category": "pdmis", "source_group": "pdmis", "system": "pdmis", "msg_type": "business_plans"},
         "pdmis.households": {"category": "pdmis", "source_group": "pdmis", "system": "pdmis", "msg_type": "households"},
         "pdmis.loans": {"category": "pdmis", "source_group": "pdmis", "system": "pdmis", "msg_type": "loans"},
+        "pdmis.repayments": {"category": "pdmis", "source_group": "pdmis", "system": "pdmis", "msg_type": "repayments"},
         "pdmis.saccos": {"category": "pdmis", "source_group": "pdmis", "system": "pdmis", "msg_type": "saccos"},
         "pdmis.special_groups": {"category": "pdmis", "source_group": "pdmis", "system": "pdmis", "msg_type": "special_groups"},
     }

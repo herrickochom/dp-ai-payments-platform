@@ -386,7 +386,7 @@ models:
     config:
       meta:
         extraction_coverage: complete
-        observed_source_leaf_fields: 22
+        observed_source_leaf_fields: 25
     columns:
       - name: event_id
         tests: [not_null, unique]
@@ -441,7 +441,7 @@ models:
     config:
       meta:
         extraction_coverage: complete
-        observed_source_leaf_fields: 17
+        observed_source_leaf_fields: 19
     columns:
       - name: event_id
         tests: [not_null, unique]
@@ -465,7 +465,7 @@ models:
     config:
       meta:
         extraction_coverage: complete
-        observed_source_leaf_fields: 22
+        observed_source_leaf_fields: 36
     columns:
       - name: event_id
         tests: [not_null, unique]
@@ -494,7 +494,7 @@ models:
     config:
       meta:
         extraction_coverage: complete
-        observed_source_leaf_fields: 22
+        observed_source_leaf_fields: 24
     columns:
       - name: event_id
         tests: [not_null, unique]

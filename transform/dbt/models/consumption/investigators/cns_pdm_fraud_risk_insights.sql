@@ -23,9 +23,10 @@ select
     coalesce(cashouts.rapid_cashout_flag, false) as rapid_cashout_flag,
     geographic.geographic_risk_band = 'HIGH' as geographic_anomaly_flag,
     coalesce(cashouts.amount_mismatch_flag, false)
-      or lifecycle.approved_to_instructed_variance <> 0
-      or lifecycle.instructed_to_settled_variance <> 0
-      or lifecycle.settled_to_credited_variance <> 0 as amount_mismatch_flag,
+      or coalesce(lifecycle.approved_to_instructed_variance <> 0, false)
+      or coalesce(lifecycle.instructed_to_settled_variance <> 0, false)
+      or coalesce(lifecycle.settled_to_credited_variance <> 0, false)
+        as amount_mismatch_flag,
     lifecycle.intervention_priority = 'HIGH' as lifecycle_exception_flag,
     coalesce(identity.has_account_substitution, false) as account_substitution_flag,
     (case when coalesce(patterns.duplicate_payment_flag, false) then 20 else 0 end

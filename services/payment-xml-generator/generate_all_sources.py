@@ -23,13 +23,20 @@ GENERATORS = (
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate all PDM synthetic sources.")
-    parser.add_argument("--count", type=int, default=100)
+    parser.add_argument("--count", type=int, default=1000)
+    parser.add_argument("--start-date", default="2024-01-01")
+    parser.add_argument("--as-of-date", default="2026-09-08")
     parser.add_argument("--clean", action="store_true")
     args = parser.parse_args()
 
     for filename in GENERATORS:
         command = [sys.executable, str(HERE / filename), "--count", str(args.count)]
-        if args.clean and filename != "pdmis_generator.py":
+        if filename == "pdmis_generator.py":
+            command.extend([
+                "--start-date", args.start_date,
+                "--as-of-date", args.as_of_date,
+            ])
+        if args.clean:
             command.append("--clean")
 
         print(f"\n>>> Running {filename}")

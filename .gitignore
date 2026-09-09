@@ -40,6 +40,12 @@ pgdata/
 *.jsonl
 # Note: Keep *.json if you have small config/schema files in JSON
 
+# Versioned Uganda map inputs/seeds used by the Superset district pipeline.
+!data/geospatial/
+!data/geospatial/uganda_superset.geojson
+!transform/dbt/seeds/uganda_superset_district_iso.csv
+!transform/dbt/seeds/uganda_district_geojson.csv
+
 # --- 4. Logs & Observability ---
 *.log
 logs/
