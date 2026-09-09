@@ -83,6 +83,7 @@ TOPIC_MAPPINGS = {
     "pdmis.business_plans": {"category": "pdmis", "system": "pdmis", "msg_type": "business_plans", "description": "PDMIS Business Plans", "has_technical_attrs": False},
     "pdmis.households": {"category": "pdmis", "system": "pdmis", "msg_type": "households", "description": "PDMIS Households", "has_technical_attrs": False},
     "pdmis.loans": {"category": "pdmis", "system": "pdmis", "msg_type": "loans", "description": "PDMIS Loans", "has_technical_attrs": False},
+    "pdmis.repayments": {"category": "pdmis", "system": "pdmis", "msg_type": "repayments", "description": "PDMIS Repayment Events", "has_technical_attrs": False},
     "pdmis.saccos": {"category": "pdmis", "system": "pdmis", "msg_type": "saccos", "description": "PDMIS SACCOs", "has_technical_attrs": False},
     "pdmis.special_groups": {"category": "pdmis", "system": "pdmis", "msg_type": "special_groups", "description": "PDMIS Special Groups", "has_technical_attrs": False},
 }
@@ -265,6 +266,7 @@ def detect_system_from_path(file_path: str) -> tuple:
         "business_plans.json": ("pdmis", "business_plans", "pdmis.business_plans"),
         "households.json": ("pdmis", "households", "pdmis.households"),
         "loans.json": ("pdmis", "loans", "pdmis.loans"),
+        "repayments.json": ("pdmis", "repayments", "pdmis.repayments"),
         "saccos.json": ("pdmis", "saccos", "pdmis.saccos"),
         "special_groups.json": ("pdmis", "special_groups", "pdmis.special_groups"),
         "transactions.json": ("wendi", "transactions", "wendi.transactions"),
@@ -299,7 +301,7 @@ def detect_system_from_path(file_path: str) -> tuple:
             return route
 
     # PDMIS files can be nested below an entity directory with arbitrary filenames.
-    pdmis_entities = ("beneficiaries", "business_plans", "households", "loans", "saccos", "special_groups")
+    pdmis_entities = ("beneficiaries", "business_plans", "households", "loans", "repayments", "saccos", "special_groups")
     if "/pdmis/" in normalized:
         for entity in pdmis_entities:
             if f"/pdmis/{entity}/" in normalized or f"/{entity}/" in normalized:

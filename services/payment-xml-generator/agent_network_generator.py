@@ -11,12 +11,13 @@ from xml.etree import ElementTree as ET
 from generator_common import (
     DATA_ROOT,
     PDMIS_ROOT,
+    authoritative_as_of_date,
     child,
     clean_directory,
     district_coordinates,
     event_timestamp,
     load_json,
-    successful_contexts,
+    disbursement_contexts,
     validate_no_nulls,
     validate_xml_no_empty_text,
     write_json,
@@ -33,6 +34,9 @@ def stable_fraction(value: str, scale: float) -> float:
 
 def generate_roster() -> dict:
     saccos = load_json(PDMIS_ROOT / "saccos.json")
+    loans = load_json(PDMIS_ROOT / "loans.json")
+    as_of_date = authoritative_as_of_date(loans)
+    registration_date = min(str(loan["application_date"]) for loan in loans)
     profiles = []
     locations = []
 
@@ -49,26 +53,31 @@ def generate_roster() -> dict:
                 "name": f"Wendi Agent {sacco['parish']} {index}",
                 "phone": phone,
                 "registration_number": f"AGT-REG-{index:05d}",
-                "registration_date": "2025-01-15",
+                "registration_date": registration_date,
                 "network_provider": "WENDI",
                 "commission_rate": round(0.015 + ((index % 7) * 0.0025), 4),
                 "location": f"{sacco['parish']}, {district}, Uganda",
+                "country": "UGANDA",
+                "village": sacco["village"],
                 "parish": sacco["parish"],
+                "sub_county": sacco["sub_county"],
+                "county": sacco["county"],
                 "district": district,
                 "region": sacco["region"],
                 "verified": True,
                 "is_active": True,
-                "created_at": "2025-01-15T09:00:00+03:00",
-                "updated_at": "2026-09-01T09:00:00+03:00",
+                "created_at": f"{registration_date}T09:00:00+03:00",
+                "updated_at": f"{as_of_date}T09:00:00+03:00",
             }
         )
 
         locations.append(
             {
                 "agent_id": agent_id,
-                "location_type": ("STORE", "KIOSK", "MOBILE_POINT", "SHOP")[
-                    (index - 1) % 4
-                ],
+                # The gold agent dimension joins its primary location on
+                # location_type = 'PRIMARY'; each agent owns exactly one
+                # location, so every location is that agent's primary.
+                "location_type": "PRIMARY",
                 "address": f"{sacco['parish']}, {district}, Uganda",
                 "latitude": round(
                     latitude + stable_fraction(f"{agent_id}-lat", 0.03),
@@ -110,10 +119,11 @@ def generate_transaction(context: dict, agent_id: str) -> bytes:
     root = ET.Element("AgentTransaction")
     child(root, "transaction_id", f"AGT-TX-{loan_id}")
     child(root, "agent_id", agent_id)
+    child(root, "sacco_id", context["sacco"]["sacco_id"])
     child(root, "loan_id", loan_id)
     child(root, "beneficiary_id", beneficiary["beneficiary_id"])
     child(root, "beneficiary_name", beneficiary["name"])
-    child(root, "transaction_timestamp", event_timestamp(loan, 4))
+    child(root, "transaction_timestamp", event_timestamp(loan, "cashout"))
     child(root, "transaction_type", "WITHDRAWAL")
     child(root, "amount", cashout_amount)
     child(root, "fee_amount", fee_amount)
@@ -154,7 +164,7 @@ def main() -> None:
     write_json(output_root / "agent_locations.json", roster["locations"])
 
     sacco_agents = agent_by_sacco(roster)
-    contexts = successful_contexts(args.count)
+    contexts = disbursement_contexts(args.count)
 
     for seq, context in enumerate(contexts, 1):
         agent_id = sacco_agents[context["loan"]["sacco_id"]]

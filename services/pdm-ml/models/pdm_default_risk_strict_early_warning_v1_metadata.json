@@ -1,0 +1,211 @@
+{
+  "model_name": "pdm_default_risk_strict_early_warning",
+  "model_version": "v1",
+  "synthetic_poc": true,
+  "target": "defaulted_within_90_days",
+  "trained_at_utc": "2026-09-08T10:48:29.113055+00:00",
+  "training_rows": 40000,
+  "test_rows": 10000,
+  "train_date_min": "2023-09-28",
+  "train_date_max": "2026-04-28",
+  "test_date_min": "2026-04-28",
+  "test_date_max": "2027-03-28",
+  "train_default_rate": 0.2345,
+  "test_default_rate": 0.2453,
+  "input_features": [
+    "loan_age_days",
+    "months_since_disbursement",
+    "project_type",
+    "special_group",
+    "amount_approved",
+    "amount_disbursed",
+    "interest_rate",
+    "interest_charged",
+    "loan_term_months",
+    "scheduled_monthly_repayment",
+    "amount_repaid_as_of_observation",
+    "outstanding_amount_as_of_observation",
+    "repayment_rate_as_of_observation",
+    "payment_failure_count",
+    "repayment_trend_3m",
+    "account_substituted",
+    "shared_identity_alert",
+    "nin_unverified",
+    "identity_alert_count",
+    "household_economic_score"
+  ],
+  "numeric_features": [
+    "loan_age_days",
+    "months_since_disbursement",
+    "amount_approved",
+    "amount_disbursed",
+    "interest_rate",
+    "interest_charged",
+    "loan_term_months",
+    "scheduled_monthly_repayment",
+    "amount_repaid_as_of_observation",
+    "outstanding_amount_as_of_observation",
+    "repayment_rate_as_of_observation",
+    "payment_failure_count",
+    "repayment_trend_3m",
+    "account_substituted",
+    "shared_identity_alert",
+    "nin_unverified",
+    "identity_alert_count",
+    "household_economic_score"
+  ],
+  "categorical_features": [
+    "project_type",
+    "special_group"
+  ],
+  "excluded_fields": [
+    "approval_date",
+    "arrears_amount_as_of_observation",
+    "beneficiary_id",
+    "county",
+    "days_past_due",
+    "defaulted_within_90_days",
+    "disbursement_date",
+    "district",
+    "loan_id",
+    "missed_instalment_count",
+    "observation_date",
+    "parish",
+    "region",
+    "sacco_id",
+    "snapshot_id",
+    "sub_county",
+    "synthetic_behaviour_profile",
+    "village",
+    "zero_payment_month_count"
+  ],
+  "transformed_features": [
+    "num__loan_age_days",
+    "num__months_since_disbursement",
+    "num__amount_approved",
+    "num__amount_disbursed",
+    "num__interest_rate",
+    "num__interest_charged",
+    "num__loan_term_months",
+    "num__scheduled_monthly_repayment",
+    "num__amount_repaid_as_of_observation",
+    "num__outstanding_amount_as_of_observation",
+    "num__repayment_rate_as_of_observation",
+    "num__payment_failure_count",
+    "num__repayment_trend_3m",
+    "num__account_substituted",
+    "num__shared_identity_alert",
+    "num__nin_unverified",
+    "num__identity_alert_count",
+    "num__household_economic_score",
+    "cat__project_type_CATTLE",
+    "cat__project_type_COFFEE",
+    "cat__project_type_FISH",
+    "cat__project_type_MAIZE",
+    "cat__project_type_POULTRY",
+    "cat__project_type_VEGETABLES",
+    "cat__special_group_ELDERLY",
+    "cat__special_group_GENERAL",
+    "cat__special_group_PWD",
+    "cat__special_group_WOMEN",
+    "cat__special_group_YOUTH"
+  ],
+  "metrics": {
+    "threshold": 0.5,
+    "roc_auc": 0.984968203875904,
+    "pr_auc": 0.9629559423981835,
+    "precision": 0.9229747675962815,
+    "recall": 0.8499796167957603,
+    "f1": 0.884974533106961,
+    "confusion_matrix": {
+      "tn": 7373,
+      "fp": 174,
+      "fn": 368,
+      "tp": 2085
+    }
+  },
+  "top_feature_importance": [
+    {
+      "feature": "num__outstanding_amount_as_of_observation",
+      "importance": 0.3834216892719269
+    },
+    {
+      "feature": "num__repayment_rate_as_of_observation",
+      "importance": 0.11667171865701675
+    },
+    {
+      "feature": "num__payment_failure_count",
+      "importance": 0.11092133074998856
+    },
+    {
+      "feature": "num__months_since_disbursement",
+      "importance": 0.10694464296102524
+    },
+    {
+      "feature": "num__amount_repaid_as_of_observation",
+      "importance": 0.07186941057443619
+    },
+    {
+      "feature": "num__amount_approved",
+      "importance": 0.04419378563761711
+    },
+    {
+      "feature": "num__loan_age_days",
+      "importance": 0.0415465384721756
+    },
+    {
+      "feature": "num__repayment_trend_3m",
+      "importance": 0.021117305383086205
+    },
+    {
+      "feature": "num__amount_disbursed",
+      "importance": 0.020145708695054054
+    },
+    {
+      "feature": "cat__project_type_CATTLE",
+      "importance": 0.006605802569538355
+    },
+    {
+      "feature": "num__interest_charged",
+      "importance": 0.006443352438509464
+    },
+    {
+      "feature": "num__account_substituted",
+      "importance": 0.006338643841445446
+    },
+    {
+      "feature": "num__shared_identity_alert",
+      "importance": 0.005357686430215836
+    },
+    {
+      "feature": "cat__project_type_FISH",
+      "importance": 0.005244456697255373
+    },
+    {
+      "feature": "num__household_economic_score",
+      "importance": 0.005225067492574453
+    },
+    {
+      "feature": "cat__project_type_VEGETABLES",
+      "importance": 0.005128809716552496
+    },
+    {
+      "feature": "num__nin_unverified",
+      "importance": 0.005034763365983963
+    },
+    {
+      "feature": "cat__project_type_POULTRY",
+      "importance": 0.004653350915759802
+    },
+    {
+      "feature": "cat__project_type_COFFEE",
+      "importance": 0.004486611112952232
+    },
+    {
+      "feature": "cat__special_group_PWD",
+      "importance": 0.004464239347726107
+    }
+  ],
+  "booster_file": "services/pdm-ml/models/pdm_default_risk_strict_early_warning_v1.json",
+  "pipeline_file": "services/pdm-ml/models/pdm_default_risk_strict_early_warning_v1.joblib"
+}

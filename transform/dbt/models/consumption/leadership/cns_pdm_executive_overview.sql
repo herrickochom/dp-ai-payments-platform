@@ -8,6 +8,7 @@ with loan_base as (
         loan.amount_approved,
         loan.amount_disbursed,
         loan.amount_repaid,
+        loan.principal_repaid,
         loan.outstanding_amount,
         approval_date.calendar_date as approval_date,
         cast(date_trunc('month', approval_date.calendar_date) as date) as approval_month
@@ -20,12 +21,12 @@ with loan_base as (
         sum(amount_approved) as total_approved_amount,
         sum(amount_disbursed) as total_disbursed_amount,
         sum(amount_repaid) as total_repaid_amount,
+        sum(principal_repaid) as total_principal_repaid_amount,
         sum(outstanding_amount) as total_outstanding_amount,
         count(*) as loan_count,
         count(*) filter (where outstanding_amount > 0) as active_loan_count,
         count(distinct beneficiary_sk) as beneficiary_count,
-        count(distinct sacco_sk) as sacco_count,
-        max(approval_date) as latest_loan_date
+        count(distinct sacco_sk) as sacco_count
     from loan_base
 
 ), lifecycle_by_loan as (
@@ -52,9 +53,14 @@ with loan_base as (
     select
         count(*) as payment_count,
         count(*) filter (where is_reconciled) as reconciled_payment_count,
-        count(*) filter (where not is_entity_matched) as unmatched_payment_count,
-        max(cast(occurred_at as date)) as latest_payment_date
+        count(*) filter (where not is_entity_matched) as unmatched_payment_count
     from {{ ref('gld_fct_pdm_payments') }}
+
+), source_as_of_date as (
+    -- Authoritative portfolio observation/reporting date (PDM POC v1 decision 7).
+    -- Never inferred from the latest approval or payment activity.
+    select max(cast(as_of_date as date)) as as_of_date
+    from {{ ref('slv_pdm_loans') }}
 
 ), high_risk_beneficiaries as (
     select distinct beneficiary_sk
@@ -137,10 +143,9 @@ with loan_base as (
 select
     'PDM_UGANDA' as programme_id,
 
-    greatest(
-        coalesce(loans.latest_loan_date, date '1900-01-01'),
-        coalesce(payments.latest_payment_date, date '1900-01-01')
-    ) as as_of_date,
+    -- Authoritative source observation date (decision 7); never derived from
+    -- the latest approval/payment timestamps.
+    source_as_of_date.as_of_date,
 
     loans.*,
     lifecycle.*,
@@ -150,6 +155,14 @@ select
     payments.reconciled_payment_count
         / nullif(payments.payment_count, 0) as reconciliation_rate,
 
+    -- Principal-based repayment (decisions 1-2): principal repaid against
+    -- principal disbursed. amount_repaid includes interest.
+    loans.total_principal_repaid_amount
+        / nullif(loans.total_disbursed_amount, 0) as principal_repayment_rate,
+
+    -- Deprecated backward-compatibility alias (decision 2): total contractual
+    -- repaid over principal disbursed. Retained only while the legacy Superset
+    -- gauge still binds to the repayment_rate column; do not reuse for new work.
     loans.total_repaid_amount
         / nullif(loans.total_disbursed_amount, 0) as repayment_rate,
 
@@ -298,6 +311,7 @@ select
     'NOT_OBSERVABLE' as recovery_observability_status
 
 from loans
+cross join source_as_of_date
 cross join lifecycle
 cross join payments
 cross join risks

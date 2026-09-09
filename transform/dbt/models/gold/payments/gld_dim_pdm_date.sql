@@ -7,6 +7,16 @@ with dates as (
     union
     select cast(approval_date as date) from {{ ref('slv_pdm_loans') }}
     union
+    select cast(verification_date as date) from {{ ref('slv_pdm_loans') }}
+    union
+    select cast(disbursement_date as date) from {{ ref('slv_pdm_loans') }}
+    union
+    select cast(cashout_date as date) from {{ ref('slv_pdm_loans') }}
+    union
+    select cast(as_of_date as date) from {{ ref('slv_pdm_loans') }}
+    union
+    select cast(last_payment_date as date) from {{ ref('slv_pdm_loans') }}
+    union
     select cast(registration_date as date) from {{ ref('slv_pdm_beneficiaries') }}
 )
 select

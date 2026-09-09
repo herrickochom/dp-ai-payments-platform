@@ -33,6 +33,7 @@ with sacco_subcounties as (
         loan.amount_approved,
         loan.amount_disbursed,
         loan.amount_repaid,
+        loan.principal_repaid,
         loan.outstanding_amount
     from {{ ref('gld_fct_pdm_loans') }} loan
     left join sacco_subcounties location
@@ -50,9 +51,12 @@ with sacco_subcounties as (
         sum(amount_approved) as approved_amount,
         sum(amount_disbursed) as disbursed_amount,
         sum(amount_repaid) as repaid_amount,
+        sum(principal_repaid) as principal_repaid_amount,
         sum(outstanding_amount) as outstanding_amount,
         sum(amount_disbursed) / nullif(sum(amount_approved), 0) as disbursement_rate,
-        sum(amount_repaid) / nullif(sum(amount_disbursed), 0) as principal_repayment_rate
+        -- Principal-based repayment (decisions 1-2): amount_repaid includes
+        -- interest and must not be divided by the principal denominator.
+        sum(principal_repaid) / nullif(sum(amount_disbursed), 0) as principal_repayment_rate
     from loan_subcounty
     group by region, district, sub_county
 

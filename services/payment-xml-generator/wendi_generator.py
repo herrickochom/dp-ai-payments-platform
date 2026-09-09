@@ -19,10 +19,12 @@ from generator_common import (
     STATUS_PDNG,
     child,
     clean_directory,
-    eligible_contexts,
+    authoritative_as_of_date,
+    disbursement_contexts,
     event_date,
     event_timestamp,
     load_json,
+    payment_account,
     stable_uuid,
     validate_no_nulls,
     validate_xml_no_empty_text,
@@ -30,12 +32,23 @@ from generator_common import (
     write_xml,
 )
 
+WENDI_INITIATING_PARTY = "WENDI Wallet Platform"
+
 
 def wallet_status(status: str) -> str:
     return {
         STATUS_ACSC: "SUCCESSFUL",
         STATUS_PDNG: "PENDING",
     }[status]
+
+
+def wallet_status_reason(status: str) -> tuple[str, str]:
+    """(reason code, additional info) for a wallet payment status report."""
+    if status == STATUS_ACSC:
+        return "ACSC", "Wallet credit completed successfully"
+    if status == STATUS_PDNG:
+        return "PDNG", "Wallet credit pending operator confirmation"
+    return "AC01", "Invalid wallet account"
 
 
 def generate_pain001(context: dict) -> bytes:
@@ -51,9 +64,10 @@ def generate_pain001(context: dict) -> bytes:
 
     header = child(init, "GrpHdr")
     child(header, "MsgId", lifecycle["wendi_pain001_message_id"])
-    child(header, "CreDtTm", event_timestamp(loan, 2, 14))
+    child(header, "CreDtTm", event_timestamp(loan, "verification", 14))
     child(header, "NbOfTxs", "1")
     child(header, "CtrlSum", amount)
+    child(header, "InitgPty", WENDI_INITIATING_PARTY)
 
     pmt_inf = child(init, "PmtInf")
     child(pmt_inf, "PmtInfId", f"WENDI-PMT-{loan_id}")
@@ -61,7 +75,7 @@ def generate_pain001(context: dict) -> bytes:
     child(pmt_inf, "BtchBookg", "false")
     child(pmt_inf, "NbOfTxs", "1")
     child(pmt_inf, "CtrlSum", amount)
-    child(pmt_inf, "ReqdExctnDt", event_date(loan, 3))
+    child(pmt_inf, "ReqdExctnDt", event_date(loan, "disbursement"))
 
     debtor = child(pmt_inf, "Dbtr")
     child(debtor, "Nm", sacco["name"])
@@ -69,6 +83,7 @@ def generate_pain001(context: dict) -> bytes:
     debtor_id = child(child(debtor_acct, "Id"), "Othr")
     child(debtor_id, "Id", sacco["wendi_account"])
     child(debtor_id, "Issr", "WENDI")
+    child(debtor_id, "SchmeNm", "WENDI")
 
     tx = child(pmt_inf, "CdtTrfTxInf")
     pmt_id = child(tx, "PmtId")
@@ -84,7 +99,7 @@ def generate_pain001(context: dict) -> bytes:
     child(creditor, "Nm", beneficiary["name"])
     creditor_acct = child(tx, "CdtrAcct")
     creditor_id = child(child(creditor_acct, "Id"), "Othr")
-    child(creditor_id, "Id", beneficiary["phone"])
+    child(creditor_id, "Id", payment_account(loan, beneficiary))
     child(creditor_id, "Issr", "MOBILE")
     child(creditor_id, "SchmeNm", "MSISDN")
 
@@ -108,7 +123,7 @@ def generate_pain002(context: dict) -> bytes:
 
     header = child(report, "GrpHdr")
     child(header, "MsgId", lifecycle["wendi_pain002_message_id"])
-    child(header, "CreDtTm", event_timestamp(loan, 3))
+    child(header, "CreDtTm", event_timestamp(loan, "disbursement"))
 
     group = child(report, "OrgnlGrpInfAndSts")
     child(group, "OrgnlMsgId", lifecycle["wendi_pain001_message_id"])
@@ -120,6 +135,10 @@ def generate_pain002(context: dict) -> bytes:
     pmt = child(report, "OrgnlPmtInfAndSts")
     child(pmt, "OrgnlPmtInfId", f"WENDI-PMT-{loan_id}")
     child(pmt, "TxSts", status)
+    reason_code, reason_detail = wallet_status_reason(status)
+    reason = child(pmt, "StsRsnInf")
+    child(child(reason, "Rsn"), "Cd", reason_code)
+    child(reason, "AddtlInf", reason_detail)
     child(pmt, "OrgnlInstrId", f"WENDI-INSTR-{loan_id}")
     child(pmt, "OrgnlEndToEndId", loan_id)
     child(pmt, "OrgnlTxId", lifecycle["wendi_tx_id"])
@@ -132,6 +151,7 @@ def generate_pain002(context: dict) -> bytes:
 
 def generate_camt053(context: dict) -> bytes:
     loan = context["loan"]
+    beneficiary = context["beneficiary"]
     sacco = context["sacco"]
     lifecycle = context["lifecycle"]
     amount = context["amount"]
@@ -141,11 +161,15 @@ def generate_camt053(context: dict) -> bytes:
     stmt = child(root, "BkToCstmrStmt")
     header = child(stmt, "GrpHdr")
     child(header, "MsgId", lifecycle["wendi_statement_message_id"])
-    child(header, "CreDtTm", event_timestamp(loan, 4))
+    child(header, "CreDtTm", event_timestamp(loan, "cashout"))
 
     statement = child(stmt, "Stmt")
-    child(statement, "Id", f"STMT-{loan_id}-{event_date(loan, 4)}")
-    child(statement, "CreDtTm", event_timestamp(loan, 4))
+    child(statement, "Id", f"STMT-{loan_id}-{event_date(loan, 'cashout')}")
+    child(statement, "CreDtTm", event_timestamp(loan, "cashout"))
+    child(statement, "ElctrncSeqNb", str(int(loan_id.split("-")[-1]) % 999 + 1))
+    period = child(statement, "FrToDt")
+    child(period, "FrDtTm", event_timestamp(loan, "disbursement"))
+    child(period, "ToDtTm", event_timestamp(loan, "cashout"))
 
     account = child(statement, "Acct")
     other = child(child(account, "Id"), "Othr")
@@ -156,24 +180,41 @@ def generate_camt053(context: dict) -> bytes:
     child(child(opening, "Tp"), "CdOrPrtry", "OPBD")
     child(opening, "Amt", "0.00", Ccy="UGX")
     child(opening, "CdtDbtInd", "CRDT")
-    child(opening, "Dt", event_date(loan, 3))
+    child(opening, "Dt", event_date(loan, "disbursement"))
 
     closing = child(statement, "Bal")
     child(child(closing, "Tp"), "CdOrPrtry", "CLBD")
     child(closing, "Amt", amount, Ccy="UGX")
     child(closing, "CdtDbtInd", "CRDT")
-    child(closing, "Dt", event_date(loan, 4))
+    child(closing, "Dt", event_date(loan, "cashout"))
 
     entry = child(statement, "Ntry")
     child(entry, "NtryRef", f"NTRY-{loan_id}")
     child(entry, "Amt", amount, Ccy="UGX")
     child(entry, "CdtDbtInd", "CRDT")
     child(entry, "Sts", "BOOK")
+    child(child(entry, "BookgDt"), "Dt", event_date(loan, "cashout"))
+    child(child(entry, "ValDt"), "Dt", event_date(loan, "cashout"))
+    child(entry, "BkTxCd", "PMNT-RCVD-EMIS")
+    child(entry, "AcctSvcrRef", f"ASR-WENDI-{loan_id}")
     details = child(entry, "NtryDtls")
     tx_details = child(details, "TxDtls")
     refs = child(tx_details, "Refs")
+    child(refs, "InstrId", f"WENDI-INSTR-{loan_id}")
     child(refs, "EndToEndId", loan_id)
     child(refs, "TxId", lifecycle["vpm_transaction_id"])
+    child(refs, "UETR", stable_uuid("uetr-vpm", loan_id))
+    tx_amount = child(tx_details, "Amt")
+    child(tx_amount, "Amt", amount, Ccy="UGX")
+    child(tx_amount, "CdtDbtInd", "CRDT")
+    child(child(tx_details, "Dbtr"), "Nm", sacco["name"])
+    child(child(tx_details, "Cdtr"), "Nm", beneficiary["name"])
+    debtor_agent_fi = child(child(tx_details, "DbtrAgt"), "FinInstnId")
+    child(debtor_agent_fi, "BICFI", "WENDI")
+    child(debtor_agent_fi, "Nm", "WENDI Wallet Platform")
+    creditor_agent_fi = child(child(tx_details, "CdtrAgt"), "FinInstnId")
+    child(creditor_agent_fi, "BICFI", "WENDI")
+    child(creditor_agent_fi, "Nm", "WENDI Wallet Platform")
     remit = child(tx_details, "RmtInf")
     child(remit, "Ustrd", f"PDM Loan {loan_id} - {loan['project_type']}")
 
@@ -193,25 +234,29 @@ def generate_camt054(context: dict) -> bytes:
     notif = child(root, "BkToCstmrDbtCdtNtfctn")
     header = child(notif, "GrpHdr")
     child(header, "MsgId", lifecycle["wendi_notification_message_id"])
-    child(header, "CreDtTm", event_timestamp(loan, 4))
+    child(header, "CreDtTm", event_timestamp(loan, "cashout"))
 
     notification = child(notif, "Ntfctn")
     child(notification, "Id", f"NTF-{loan_id}")
-    child(notification, "CreDtTm", event_timestamp(loan, 4))
+    child(notification, "CreDtTm", event_timestamp(loan, "cashout"))
 
     account = child(notification, "Acct")
     other = child(child(account, "Id"), "Othr")
-    child(other, "Id", beneficiary["phone"])
+    child(other, "Id", payment_account(loan, beneficiary))
     child(other, "Issr", "WENDI")
 
     entry = child(notification, "Ntry")
     child(entry, "Amt", amount, Ccy="UGX")
     child(entry, "CdtDbtInd", "CRDT")
     child(entry, "Sts", "BOOK")
+    child(child(entry, "BookgDt"), "Dt", event_date(loan, "cashout"))
     tx_details = child(child(entry, "NtryDtls"), "TxDtls")
     refs = child(tx_details, "Refs")
     child(refs, "EndToEndId", loan_id)
     child(refs, "TxId", lifecycle["vpm_transaction_id"])
+    tx_amount = child(tx_details, "Amt")
+    child(tx_amount, "Amt", amount, Ccy="UGX")
+    child(tx_amount, "CdtDbtInd", "CRDT")
     remit = child(tx_details, "RmtInf")
     child(remit, "Ustrd", f"PDM Loan {loan_id} disbursement to {beneficiary['name']}")
 
@@ -220,23 +265,24 @@ def generate_camt054(context: dict) -> bytes:
     return xml
 
 
-def generate_camt052(sacco: dict, total: int) -> bytes:
+def generate_camt052(sacco: dict, total: int, as_of_date: str) -> bytes:
     root = ET.Element("Document", xmlns=CAMT052_NS)
     report = child(root, "BkToCstmrAcctRpt")
     header = child(report, "GrpHdr")
     child(header, "MsgId", f"WENDI-INTRA-{sacco['sacco_id']}")
-    child(header, "CreDtTm", "2026-09-03T17:00:00+03:00")
+    child(header, "CreDtTm", f"{as_of_date}T17:00:00+03:00")
 
     account = child(report, "Acct")
     other = child(child(account, "Id"), "Othr")
     child(other, "Id", sacco["wendi_account"])
     child(other, "Issr", "WENDI")
+    child(other, "SchmeNm", "WENDI")
 
     balance = child(report, "Bal")
     child(child(balance, "Tp"), "CdOrPrtry", "XPCD")
     child(balance, "Amt", f"{total:.2f}", Ccy="UGX")
     child(balance, "CdtDbtInd", "CRDT")
-    child(balance, "Dt", "2026-09-03")
+    child(balance, "Dt", as_of_date)
 
     xml = ET.tostring(root, encoding="utf-8", xml_declaration=True)
     validate_xml_no_empty_text(xml, f"Wendi CAMT052 {sacco['sacco_id']}")
@@ -259,11 +305,11 @@ def transaction_record(context: dict, agent_id: str) -> dict:
         "beneficiary_id": beneficiary["beneficiary_id"],
         "beneficiary_name": beneficiary["name"],
         "sacco_id": sacco["sacco_id"],
-        "event_timestamp": event_timestamp(loan, 3, 13),
+        "event_timestamp": event_timestamp(loan, "disbursement", 13),
         "event_type": "DISBURSEMENT",
         "source_account": sacco["wendi_account"],
         "source_account_type": "WALLET",
-        "destination_account": beneficiary["phone"],
+        "destination_account": payment_account(loan, beneficiary),
         "destination_account_type": "MSISDN",
         "amount": amount,
         "currency": "UGX",
@@ -279,8 +325,8 @@ def transaction_record(context: dict, agent_id: str) -> dict:
             "is_assisted": False,
             "processing_time_ms": 200 + (numeric % 1800),
         },
-        "created_at": event_timestamp(loan, 3, 13),
-        "updated_at": event_timestamp(loan, 3, 14),
+        "created_at": event_timestamp(loan, "disbursement", 13),
+        "updated_at": event_timestamp(loan, "disbursement", 14),
     }
 
 
@@ -302,7 +348,9 @@ def main() -> None:
         for directory in dirs.values():
             clean_directory(directory)
 
-    contexts = eligible_contexts(args.count)
+    contexts = disbursement_contexts(args.count)
+    all_loans = load_json(PDMIS_ROOT / "loans.json")
+    as_of_date = authoritative_as_of_date(all_loans)
     saccos = load_json(PDMIS_ROOT / "saccos.json")
     sacco_index = {row["sacco_id"]: idx + 1 for idx, row in enumerate(saccos)}
     totals = defaultdict(int)
@@ -325,7 +373,7 @@ def main() -> None:
     for report_number, sacco in enumerate(saccos, 1):
         write_xml(
             dirs["camt052"] / f"camt052_report_{report_number:03d}.xml",
-            generate_camt052(sacco, totals[sacco["sacco_id"]]),
+            generate_camt052(sacco, totals[sacco["sacco_id"]], as_of_date),
         )
 
     validate_no_nulls(transactions, "wendi_transactions")

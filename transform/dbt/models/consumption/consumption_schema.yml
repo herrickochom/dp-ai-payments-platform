@@ -1,12 +1,41 @@
 version: 2
 
 models:
+  - name: cns_pdm_executive_geographic_drilldown
+    description: >
+      Privacy-limited executive drill source connecting the complete Uganda
+      administrative hierarchy to PDM SACCOs, beneficiaries, loans, financial
+      measures and risk. It intentionally excludes raw NIN and phone fields.
+    config:
+      meta:
+        grain:
+          - beneficiary_sk
+          - loan_sk
+        audience:
+          - PDM Executive
+          - Government leadership
+        classification: internal
+    columns:
+      - name: beneficiary_sk
+        data_tests: [not_null]
+      - name: geography_sk
+        data_tests: [not_null]
+      - name: risk_band
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - LOW
+                  - MEDIUM
+                  - HIGH
+
   - name: cns_pdm_executive_monthly_trend
     description: >
       Monthly leadership series combining approval-cohort funding measures
       with payment activity recorded in the month. Outstanding and repayment
       values in the loan section describe the current state of each approval
-      cohort and are not historical month-end balance snapshots.
+      cohort and are NOT historical month-end balance snapshots
+      (see series_basis / is_flagged_non_historical).
     config:
       meta:
         grain:
@@ -16,13 +45,35 @@ models:
           - Government leadership
           - Office of the President
         metric_semantics:
-          loan_amounts: approval cohort
+          loan_amounts: approval cohort current state (not history)
           payment_amounts: transaction activity
     columns:
       - name: reporting_month
         data_tests:
           - not_null
           - unique
+
+      - name: series_basis
+        description: >
+          APPROVAL_COHORT_CURRENT_STATE means the loan measures are the
+          current position of each approval cohort, not a reconstructed
+          month-end portfolio history.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - APPROVAL_COHORT_CURRENT_STATE
+
+      - name: is_flagged_non_historical
+        description: >
+          TRUE until repayment-event ingestion backs a genuine month-end
+          portfolio history; prevents presentation of cohort state as
+          historical trend.
+
+      - name: cohort_principal_repayment_rate
+        description: >
+          Principal repaid by an approval cohort divided by the cohort's
+          principal disbursed. Principal-based per PDM POC v1 decision 1-2.
 
   - name: cns_pdm_payments_daily_summary
     description: >
@@ -663,10 +714,24 @@ models:
 
       - name: as_of_date
         description: >
-          Latest observable loan approval or payment event date in the
-          source data.
+          Authoritative source as_of_date from the canonical loan observations
+          (max as_of_date). It is never inferred from the latest approval or
+          payment activity (PDM POC v1 decision 7).
         data_tests:
           - not_null
+
+      - name: principal_repayment_rate
+        description: >
+          Principal repaid divided by principal disbursed across the
+          portfolio. Principal-based per PDM POC v1 decisions 1-2.
+
+      - name: repayment_rate
+        description: >
+          DEPRECATED backward-compatibility alias retained only for the legacy
+          Superset repayment gauge: total contractual repaid divided by
+          principal disbursed. Do not use for new reporting; use
+          principal_repayment_rate. Do not re-alias this column to a new
+          formula (PDM POC v1 decision 2).
 
       - name: reporting_scope_status
         description: >

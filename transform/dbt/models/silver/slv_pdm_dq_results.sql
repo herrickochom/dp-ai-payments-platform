@@ -60,9 +60,24 @@ with validation_results as (
             ('REPAID_NOT_ABOVE_DUE', amount_repaid is null or
                 (amount_repaid >= 0 and amount_repaid <= coalesce(amount_disbursed, 0) + coalesce(interest_charged, 0)),
              'Repaid amount must be non-negative and not exceed principal plus charged interest'),
+            ('REPAID_COMPONENTS_RECONCILE',
+                abs(coalesce(amount_repaid, 0) - coalesce(principal_repaid, 0) - coalesce(interest_paid, 0)) <= 0.05,
+             'Amount repaid must equal principal repaid plus interest paid within UGX 0.05'),
+            ('OUTSTANDING_COMPONENTS_RECONCILE',
+                abs(coalesce(outstanding_balance, 0) - coalesce(principal_outstanding_balance, 0)
+                    - coalesce(interest_outstanding_balance, 0)) <= 0.05,
+             'Outstanding balance must equal principal plus interest outstanding within UGX 0.05'),
+            ('CONTRACTUAL_BALANCE_RECONCILES',
+                abs(coalesce(amount_disbursed, 0) + coalesce(interest_charged, 0)
+                    - coalesce(amount_repaid, 0) - coalesce(outstanding_balance, 0)) <= 0.05,
+             'Disbursed principal plus charged interest must reconcile to repaid plus outstanding within UGX 0.05'),
             ('APPROVAL_DATE_ORDER', approval_date is null or application_date is null
                 or approval_date >= application_date,
-             'Approval date cannot precede application date')
+             'Approval date cannot precede application date'),
+            ('LIFECYCLE_DATE_ORDER', loan_status <> 'DISBURSED' or
+                (approval_date <= verification_date and verification_date <= disbursement_date
+                 and disbursement_date <= cashout_date and cashout_date <= as_of_date),
+             'Disbursed loan lifecycle dates must be ordered through the observation date')
     ) as rule(rule_code, rule_passed, rule_detail)
 
     union all

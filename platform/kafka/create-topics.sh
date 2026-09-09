@@ -125,6 +125,7 @@ echo "=========================================="
 
 create_topic "pdmis.beneficiaries" 8 1
 create_topic "pdmis.loans" 8 1
+create_topic "pdmis.repayments" 8 1
 create_topic "pdmis.saccos" 4 1
 create_topic "pdmis.households" 4 1
 create_topic "pdmis.business_plans" 4 1
@@ -149,9 +150,9 @@ echo "  CPO   : 2 topics (psn.pain002, plm.pain002)"
 echo "  Wendi : 6 topics"
 echo "  Mobile: 4 topics"
 echo "  Agent : 3 topics"
-echo "  PDMIS : 6 topics"
+echo "  PDMIS : 7 topics"
 echo "  Recon : 2 topics"
-echo "  TOTAL : 25 topics"
+echo "  TOTAL : 26 topics"
 echo ""
 echo "Available topics:"
 $KAFKA_CMD --bootstrap-server "$BOOTSTRAP_SERVER" --list | sort

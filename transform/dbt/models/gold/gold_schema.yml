@@ -10,10 +10,25 @@ models:
         description: Null only for the mandatory Unknown dimension member.
         data_tests: [unique]
   - name: gld_dim_pdm_geography
-    description: Snowflaked Uganda geography dimension at region, district, parish and village grain.
+    description: Authoritative Uganda geography dimension at region, district, county, sub-county, parish and village grain.
     columns:
       - name: geography_sk
         data_tests: [not_null, unique]
+      - name: district_sk
+        description: Stable key for the Region to District path.
+        data_tests: [not_null]
+      - name: county_sk
+        description: Stable key for the Region to District to County path.
+        data_tests: [not_null]
+      - name: sub_county_sk
+        description: Stable key for the hierarchy through Sub County.
+        data_tests: [not_null]
+      - name: parish_sk
+        description: Stable key for the hierarchy through Parish.
+        data_tests: [not_null]
+      - name: village_sk
+        description: Stable key for the complete hierarchy through Village.
+        data_tests: [not_null]
   - name: gld_dim_pdm_special_group
     description: PDM inclusion category dimension for women, youth, PWD and other targeted groups.
     columns:
@@ -37,6 +52,10 @@ models:
     columns:
       - name: sacco_sk
         data_tests: [not_null, unique]
+      - name: geography_sk
+        data_tests:
+          - relationships:
+              arguments: {to: "ref('gld_dim_pdm_geography')", field: geography_sk}
   - name: gld_dim_pdm_agent
     description: Type-1 Wendi agent dimension enriched with primary location coordinates.
     columns:
@@ -69,7 +88,7 @@ models:
           - relationships:
               arguments: {to: "ref('gld_dim_pdm_geography')", field: geography_sk}
   - name: gld_fct_pdm_loans
-    description: Atomic loan fact containing approved, disbursed, repaid and outstanding measures.
+    description: Atomic loan fact. outstanding_balance and its legacy outstanding_amount alias both mean total contractual principal plus interest outstanding.
     meta: {grain: [loan_id]}
     columns:
       - name: loan_sk

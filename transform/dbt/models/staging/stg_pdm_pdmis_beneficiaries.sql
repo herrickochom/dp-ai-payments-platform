@@ -16,7 +16,12 @@ select
     {{ extract_json('parsed_event_data', '$.nin_hashed') }} as nin_hashed,
     try_cast({{ extract_json('parsed_event_data', '$.nin_verified') }} as boolean) as nin_verified,
     {{ extract_json('parsed_event_data', '$.name') }} as beneficiary_name,
-    try_cast({{ extract_json('parsed_event_data', '$.date_of_birth') }} as date) as date_of_birth,
+    cast(
+        try_strptime(
+            {{ extract_json('parsed_event_data', '$.date_of_birth') }},
+            '%d/%m/%Y'
+        ) as date
+    ) as date_of_birth,
     {{ extract_json('parsed_event_data', '$.gender') }} as gender,
     {{ extract_json('parsed_event_data', '$.phone') }} as phone,
     {{ extract_json('parsed_event_data', '$.alternative_phone') }} as alternative_phone,
@@ -26,6 +31,8 @@ select
     {{ extract_json('parsed_event_data', '$.special_group_code') }} as special_group_code,
     {{ extract_json('parsed_event_data', '$.village') }} as village,
     {{ extract_json('parsed_event_data', '$.parish') }} as parish,
+    {{ extract_json('parsed_event_data', '$.sub_county') }} as sub_county,
+    {{ extract_json('parsed_event_data', '$.county') }} as county,
     {{ extract_json('parsed_event_data', '$.district') }} as district,
     {{ extract_json('parsed_event_data', '$.region') }} as region,
     try_cast({{ extract_json('parsed_event_data', '$.registration_date') }} as date) as registration_date,
