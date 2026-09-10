@@ -2,6 +2,9 @@
 # Kafka Topics Configuration - PDM Platform
 # ============================================================================
 
+defaults:
+  cleanup_policy: delete
+
 topics:
   # ==========================================================================
   # 1. ICMN Topics (Interbank Customer Messaging Network)
@@ -166,16 +169,16 @@ topics:
     description: "Special Group Reference Data"
 
   # ==========================================================================
-  # 7. Reconciliation Topics
+  # 7. Shared operational failure topics
   # ==========================================================================
-  - name: reconciliation.links
-    partitions: 8
-    replication: 1
-    retention_ms: 2592000000  # 30 days
-    description: "PDM-Payment Reconciliation Links"
-
-  - name: reconciliation.status
+  - name: payment-events.retry
     partitions: 8
     replication: 1
     retention_ms: 604800000   # 7 days
-    description: "Reconciliation Status Events"
+    description: "Audit trail for bounded transient processing retries"
+
+  - name: payment-events.dlq
+    partitions: 8
+    replication: 1
+    retention_ms: 2592000000  # 30 days
+    description: "Terminal failures awaiting deliberate operator replay"

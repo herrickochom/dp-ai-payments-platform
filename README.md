@@ -60,6 +60,81 @@ Bronze onward is Iceberg in the Nessie catalog, so tables are addressed as
 `lakehouse.<layer>.<model>` rather than by S3 path. There is no Spark, Hudi, or
 Hive Metastore in this platform.
 
+## Kafka architecture and guarantees
+
+Local development deliberately runs one KRaft broker with RF=1. Containers use
+`kafka:9092`; host tools use `localhost:9094`. `platform/kafka/topics.yaml` is
+the sole topic manifest. Its reconciler creates topics, increases partition
+counts, and updates retention/cleanup; it fails on unsafe partition decreases or
+replication drift.
+
+The producer uses stable business keys: loan ID; loan/payment ID for repayments;
+beneficiary, agent, SACCO, household, business-plan, or special-group ID; payment
+or transaction ID for wallet events; and ISO message ID for XML payments. A stable
+source filename is the explicit final fallback. `event_id` remains unique event
+identity and is never a fallback partition key. Related entities consequently map
+to the same partition. Kafka guarantees order inside a partition, not across a
+topic.
+
+The `payment-events-consumer` group archives 24 domain topics with **at-least-once
+Kafka delivery plus an idempotent Raw sink**. Auto commit is disabled; durable
+storage precedes a synchronous commit. Raw identity is `(topic, partition, offset)`
+and ends in `.../offset=O/record.avro`. A crash before storage replays; a crash
+after storage but before commit replays as a harmless no-op; a crash after commit
+continues at the subsequent offset.
+
+Transient failures retry inline with configurable bounded exponential backoff and
+are audited in shared `payment-events.retry`. Permanent or exhausted failures go
+to `payment-events.dlq`; the source offset advances only after Kafka acknowledges
+the DLQ record. Two shared operational topics avoid 48 sparse per-source topics
+while preserving source coordinates, event/business IDs, error and retry details,
+timestamps, trace context, and original wire bytes. Replay is deliberate:
+
+```bash
+docker compose exec kafka kafka-consumer-groups --bootstrap-server kafka:9092 \
+  --group payment-events-consumer --describe
+docker compose run --rm --entrypoint python3 payment-consumer-events \
+  /app/replay_dlq.py --partition 0 --offset 12 --reason "schema repaired"
+# Inspect first; repeat with --execute to replay that one record.
+```
+
+One consumer is the local default. `docker compose up --scale
+payment-consumer-events=N` distributes partitions safely in the same group. Per-
+topic maximum parallelism is its partition count (4, 6, or 8).
+
+Schema Registry enforces `BACKWARD_TRANSITIVE`. Add fields with defaults (usually
+nullable); use Avro aliases for renames; only compatible type promotions are safe.
+Removing required fields, renaming without aliases, or changing incompatible types
+requires an explicitly versioned contract/topic. Kafka security protocol, SASL,
+TLS CA, and Schema Registry credentials are environment-configurable; local uses
+PLAINTEXT only for convenience.
+
+`services/kafka-consumer-bronze` is intentionally not deployed because dbt owns
+Bronze through Consumption. Unused reconciliation topics were replaced by retry/
+DLQ topics. The incomplete landing-ingestion and duplicate dev producer profiles
+are retained under `future-disabled`, preventing accidental startup.
+
+### Deployment shapes
+
+```text
+LOCAL DEVELOPMENT
+Sources -> Producer -> single-node Kafka + Schema Registry -> domain partitions
+        -> payment-events-consumer -> retry/DLQ -> idempotent MinIO Raw
+        -> dbt/DuckDB -> Iceberg/Nessie -> Trino -> Superset/Metabase/ML
+
+FUTURE CLOUD
+Sources -> Producers -> HA managed/distributed Kafka (3+ brokers, RF=3, min ISR=2)
+        -> replicated partitions -> horizontally scaled consumer group
+        -> bounded retry/DLQ -> cloud object-storage Raw -> Iceberg lakehouse
+        -> query/analytics layer -> BI/ML
+```
+
+Production must replace the local single broker, RF=1, and PLAINTEXT with an HA
+cluster or managed equivalent, RF=3, min ISR=2, replicated internal topics,
+TLS/SASL and ACLs, managed secrets, metrics/lag alerts, and durable object-store
+controls. `platform/kafka/production.env.example` records the portable client
+boundary without introducing any cloud-vendor SDK or endpoint.
+
 ## Run
 
 ```bash

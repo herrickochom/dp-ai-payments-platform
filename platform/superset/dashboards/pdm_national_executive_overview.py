@@ -194,13 +194,26 @@ def refresh_dataset(dataset: Any, session: Any) -> None:
 
 
 def mark_temporal(dataset: Any, name: str, session: Any) -> None:
+    """
+    Mark a temporal column in the Superset dataset metadata.
+
+    Superset time-series charts need more than TableColumn.is_dttm in some
+    persisted-chart paths: main_dttm_col must also be populated.
+    """
     for col in dataset.columns:
         if col.column_name == name:
             if hasattr(col, "is_dttm"):
                 col.is_dttm = True
+
+            if hasattr(dataset, "main_dttm_col"):
+                dataset.main_dttm_col = name
+
             session.flush()
             return
-    raise RuntimeError(f"{dataset.table_name} is missing temporal column {name!r}")
+
+    raise RuntimeError(
+        f"{dataset.table_name} is missing temporal column {name!r}"
+    )
 
 
 def trino_database(session: Any, Database: Any) -> Any:
@@ -334,6 +347,16 @@ def executive_snapshot(database: Any) -> Dict[str, Any]:
         raise RuntimeError("Executive KPI snapshot returned no row")
 
     snapshot = dict(row)
+
+    reporting_month = snapshot.get("kpi_reporting_month")
+    if reporting_month is not None:
+        try:
+            snapshot["reporting_month_label"] = reporting_month.strftime("%b %Y").upper()
+        except AttributeError:
+            snapshot["reporting_month_label"] = str(reporting_month)
+    else:
+        snapshot["reporting_month_label"] = "CURRENT MONTH"
+
     previous_month = snapshot.get("kpi_previous_month")
     if previous_month is not None:
         try:
@@ -361,7 +384,7 @@ def comparison_text(
         — vs AUG
     """
     if pct is None:
-        return f"— vs {previous_month_label}"
+        return f"MTD • — vs {previous_month_label}"
 
     value = float(pct)
 
@@ -372,7 +395,7 @@ def comparison_text(
     else:
         arrow = "—"
 
-    return f"{arrow} {abs(value):.1f}% vs {previous_month_label}"
+    return f"MTD • {arrow} {abs(value):.1f}% vs {previous_month_label}"
 
 
 
@@ -537,6 +560,10 @@ def upsert_chart(
             description=description,
         )
         session.add(chart)
+
+        if hasattr(chart, "query_context"):
+            chart.query_context = None
+
         session.flush()
         print(f"Created chart id={chart.id}: {name}")
     else:
@@ -546,6 +573,13 @@ def upsert_chart(
         chart.datasource_id = dataset.id
         chart.params = json.dumps(payload)
         chart.description = description
+
+        # Superset can retain a query_context generated for an older chart
+        # configuration. Clearing it forces the dashboard/API path to rebuild
+        # the query from the current params and current temporal metadata.
+        if hasattr(chart, "query_context"):
+            chart.query_context = None
+
         session.flush()
         print(f"Updated chart id={chart.id}: {name}")
 
@@ -794,12 +828,12 @@ def risk_profile_params() -> Dict[str, Any]:
         "adhoc_filters": [],
         "row_limit": 10,
         "show_legend": True,
-        "legendOrientation": "right",
-        "show_labels": True,
-        "label_type": "key_value_percent",
+        "legendOrientation": "bottom",
+        "show_labels": False,
+        "label_type": "key_percent",
         "number_format": ",d",
         "donut": True,
-        "innerRadius": 52,
+        "innerRadius": 58,
     }
 
 
@@ -1120,7 +1154,7 @@ def big_number_params(
     }
 
     if currency:
-        p["y_axis_format"] = ",.3s"
+        p["y_axis_format"] = ",.2f"
         p["currency_format"] = {
             "symbol": "UGX ",
             "symbolPosition": "prefix",
@@ -1138,12 +1172,11 @@ def ai_big_number_params(
     *,
     percentage: bool = False,
 ) -> Dict[str, Any]:
-    """Executive AI KPI sourced from persisted XGBoost scoring output."""
+    """Executive AI KPI using Big Number Total; no time-series column required."""
     return {
         "metric": metric(column, label, "MAX"),
         "adhoc_filters": [],
         "row_limit": 1,
-        "show_trend_line": False,
         "show_timestamp": False,
         "show_metric_name": False,
         "header_font_size": 0.48,
@@ -1217,7 +1250,7 @@ def funnel_params() -> Dict[str, Any]:
         "show_legend": False,
         "show_labels": True,
         "label_type": "key_value",
-        "number_format": ",.3s",
+        "number_format": ",.2f",
         "sort_by_metric": True,
     }
 
@@ -1238,11 +1271,15 @@ def monthly_trend_params() -> Dict[str, Any]:
         "show_legend": True,
         "legendOrientation": "top",
         "x_axis_time_format": "%b %Y",
-        "y_axis_format": ",.3s",
+        "y_axis_format": ",.2f",
         "rich_tooltip": True,
         "show_value": False,
-        "x_axis_title": "Reporting month",
-        "y_axis_title": "UGX",
+        "x_axis_title": "Month",
+        "y_axis_title": "Amount (UGX)",
+        "x_axis_title_margin": 22,
+        "y_axis_title_margin": 72,
+        "truncateXAxis": False,
+        "truncateYAxis": False,
     }
 
 
@@ -1263,9 +1300,13 @@ def monthly_volume_params() -> Dict[str, Any]:
         "x_axis_time_format": "%b %Y",
         "y_axis_format": ",d",
         "rich_tooltip": True,
-        "show_value": True,
-        "x_axis_title": "Reporting month",
-        "y_axis_title": "Count",
+        "show_value": False,
+        "x_axis_title": "Month",
+        "y_axis_title": "Programme reach (count)",
+        "x_axis_title_margin": 22,
+        "y_axis_title_margin": 58,
+        "truncateXAxis": False,
+        "truncateYAxis": False,
     }
 
 
@@ -1604,9 +1645,9 @@ def position_json(
         36,
     )
     chart = by_name[TOP_DISTRICTS_CHART]
-    layout[f"CHART-{chart.id}"] = chart_node(chart, "ROW_DISTRICT_RISK_PROFILE", 7, 36)
+    layout[f"CHART-{chart.id}"] = chart_node(chart, "ROW_DISTRICT_RISK_PROFILE", 6, 38)
     chart = by_name[RISK_PROFILE_CHART]
-    layout[f"CHART-{chart.id}"] = chart_node(chart, "ROW_DISTRICT_RISK_PROFILE", 3, 36)
+    layout[f"CHART-{chart.id}"] = chart_node(chart, "ROW_DISTRICT_RISK_PROFILE", 4, 38)
 
     layout["MD_LEFT_NAV_TOP"] = markdown_node(
         "MD_LEFT_NAV_TOP",
@@ -1626,9 +1667,9 @@ def position_json(
         40,
     )
     chart = by_name[MONTHLY_TREND_CHART]
-    layout[f"CHART-{chart.id}"] = chart_node(chart, "ROW_FUNDING", 7, 40)
+    layout[f"CHART-{chart.id}"] = chart_node(chart, "ROW_FUNDING", 7, 44)
     chart = by_name[FUNNEL_CHART]
-    layout[f"CHART-{chart.id}"] = chart_node(chart, "ROW_FUNDING", 3, 40)
+    layout[f"CHART-{chart.id}"] = chart_node(chart, "ROW_FUNDING", 3, 44)
 
     layout["MD_LEFT_NAV_BOTTOM"] = markdown_node(
         "MD_LEFT_NAV_BOTTOM",
@@ -1915,7 +1956,7 @@ svg {{
     height: 100%;
     min-height: 100%;
     box-sizing: border-box;
-    padding: 14px 11px;
+    padding: 16px 13px;
     background: linear-gradient(180deg, var(--pdm-navy-2) 0%, var(--pdm-navy) 100%);
     color: #FFFFFF;
     box-shadow: 0 2px 8px rgba(11, 31, 58, 0.16);
@@ -1941,8 +1982,8 @@ svg {{
 .pdm-left-nav-brand {{
     padding: 4px 4px 12px 4px;
     color: #FFFFFF;
-    font-size: 17px;
-    line-height: 1;
+    font-size: 20px;
+    line-height: 1.05;
     font-weight: 900;
     letter-spacing: 0.07em;
     border-bottom: 3px solid var(--pdm-yellow);
@@ -1959,19 +2000,19 @@ svg {{
 .pdm-left-nav-heading {{
     margin-bottom: 6px;
     color: #9CC5F5;
-    font-size: 11.5px;
-    line-height: 1.15;
+    font-size: 13.5px;
+    line-height: 1.2;
     font-weight: 900;
     letter-spacing: 0.09em;
 }}
 
 .pdm-left-nav-item {{
     margin: 2px 0;
-    padding: 6px 7px;
+    padding: 7px 8px;
     border-radius: 7px;
     color: #E7EEF7;
-    font-size: 12.5px;
-    line-height: 1.2;
+    font-size: 14.5px;
+    line-height: 1.28;
     font-weight: 700;
 }}
 
@@ -1987,8 +2028,35 @@ svg {{
     padding-top: 11px;
     border-top: 1px solid rgba(255, 255, 255, 0.22);
     color: #C5D4E5;
-    font-size: 9px;
-    line-height: 1.6;
+    font-size: 11px;
+    line-height: 1.55;
+}}
+
+
+/* --------------------------------------------------------------------------
+   Chart readability: axes, legends and labels
+   -------------------------------------------------------------------------- */
+
+.dashboard-component-chart-holder .echarts-for-react {{
+    font-size: 13px !important;
+}}
+
+.dashboard-component-chart-holder canvas {{
+    image-rendering: auto;
+}}
+
+/* Give ECharts charts more breathing room below legends and around axes. */
+.dashboard-component-chart-holder .chart-slice {{
+    padding-bottom: 4px !important;
+}}
+
+/* Slightly larger native filter/menu text for executive readability. */
+.dashboard-content .ant-select,
+.dashboard-content .ant-select-selection-item,
+.dashboard-content .ant-select-item,
+.dashboard-content [class*="FilterControl"],
+.dashboard-content [class*="NativeFilter"] {{
+    font-size: 14px !important;
 }}
 
 /*
@@ -2302,6 +2370,7 @@ def update_dashboard() -> None:
             database=database,
             table_name=EXECUTIVE_AI_RISK,
         )
+        mark_temporal(executive_ai, "observation_date", session)
         intervention_ds = physical_dataset(
             session,
             SqlaTable,
@@ -2485,7 +2554,7 @@ def update_dashboard() -> None:
                 Slice,
                 name=AI_AVG_RISK_CHART,
                 dataset=executive_ai,
-                viz_type="big_number",
+                viz_type="big_number_total",
                 params=ai_big_number_params(
                     "avg_probability_default_90d",
                     AI_AVG_RISK_CHART,
@@ -2506,7 +2575,7 @@ def update_dashboard() -> None:
                 Slice,
                 name=AI_PRIORITY_CASES_CHART,
                 dataset=executive_ai,
-                viz_type="big_number",
+                viz_type="big_number_total",
                 params=ai_big_number_params(
                     "ai_priority_review_count",
                     AI_PRIORITY_CASES_CHART,
@@ -2603,7 +2672,7 @@ def update_dashboard() -> None:
         )
         charts.append(upsert_chart(session, Slice, name=FUNNEL_CHART, dataset=funnel_ds, viz_type="funnel", params=funnel_params(), owner_user=owner_user, aliases=["PDM Fund Flow"], description="Approved → Settled → Credited → Disbursed."))
         charts.append(upsert_chart(session, Slice, name=MONTHLY_TREND_CHART, dataset=monthly, viz_type="echarts_timeseries_line", params=monthly_trend_params(), owner_user=owner_user, aliases=["PDM Monthly Funding Trend"], description="Monthly approved, disbursed and repaid funding movement."))
-        charts.append(upsert_chart(session, Slice, name=MONTHLY_VOLUME_CHART, dataset=monthly, viz_type="echarts_timeseries_bar", params=monthly_volume_params(), owner_user=owner_user, aliases=["PDM Monthly Beneficiary & Loan Volume"], description="Monthly programme reach comparing approved beneficiaries and approved loans."))
+        charts.append(upsert_chart(session, Slice, name=MONTHLY_VOLUME_CHART, dataset=monthly, viz_type="echarts_timeseries_line", params=monthly_volume_params(), owner_user=owner_user, aliases=["PDM Monthly Beneficiary & Loan Volume"], description="Monthly programme reach trend comparing approved beneficiaries and approved loans."))
 
         dashboard.position_json = position_json(
             charts,
@@ -2667,6 +2736,8 @@ def update_dashboard() -> None:
             + (" -> ".join(hierarchy_label(c) for c in active_hierarchy_columns) or "none")
         )
         print("Executive table count: 1 (EXECUTIVE INTERVENTION PRIORITIES)")
+        print("Temporal metadata: reporting_month is main_dttm_col for monthly time-series datasets")
+        print("KPI comparisons: current reporting month shown as MTD versus prior month")
         print("Detailed District -> Beneficiary drill tables are intentionally excluded")
         print("Modern charts: Funnel, ECharts Line, ECharts Bar, Risk Profile")
         print("Executive design: focused national overview + one action table")

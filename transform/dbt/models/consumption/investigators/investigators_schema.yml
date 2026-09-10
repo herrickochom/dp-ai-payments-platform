@@ -1,0 +1,58 @@
+version: 2
+
+models:
+  - name: cns_pdm_lifecycle_exception_cases
+    description: >
+      Authorised-investigator case queue at loan, lifecycle-stage and
+      exception-type grain. Rows are deterministic control indicators rather
+      than fraud determinations. Event dates remain null when the source does
+      not provide a genuine timestamp.
+    config:
+      meta:
+        grain:
+          - loan_id
+          - lifecycle_stage
+          - exception_type
+        audience:
+          - internal audit
+          - authorised investigators
+        classification: restricted
+        interpretation: INDICATOR_NOT_FRAUD_DETERMINATION
+    columns:
+      - name: loan_id
+        data_tests: [not_null]
+      - name: beneficiary_id
+        data_tests: [not_null]
+      - name: lifecycle_stage
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - PAYMENT_INSTRUCTION
+                  - PAYMENT_SETTLEMENT
+                  - CREDITING
+                  - DISBURSEMENT
+                  - CASHOUT
+                  - REPAYMENT
+      - name: exception_type
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - MISSING_STAGE
+                  - SETTLEMENT_EXCEPTION
+                  - AMOUNT_VARIANCE
+      - name: exception_severity
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - MEDIUM
+                  - HIGH
+      - name: requires_review
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [true]

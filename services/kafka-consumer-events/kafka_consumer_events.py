@@ -3,7 +3,7 @@
 Payment Events Consumer - Reads source-domain Kafka topics and stores immutable
 raw events in MinIO/S3 with date partitioning in Avro format.
 
-Consumes the 23 source-ingestion topics for ICMN, CPO, Wendi, Mobile Networks,
+Consumes the 24 source-ingestion topics for ICMN, CPO, Wendi, Mobile Networks,
 Agent Network and PDMIS. Reconciliation topics are downstream-derived and excluded.
 """
 
@@ -13,9 +13,12 @@ import json
 import uuid
 import io
 import logging
+import base64
+import time
 from datetime import datetime
 from typing import Dict, Any, Optional
-from confluent_kafka import Consumer, KafkaError
+from confluent_kafka import Consumer, KafkaError, Producer
+from botocore.exceptions import ClientError, BotoCoreError
 from confluent_kafka.serialization import SerializationContext, MessageField
 from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry.avro import AvroDeserializer
@@ -85,9 +88,48 @@ class Settings:
         "pdmis.special_groups",
     ]
     KAFKA_GROUP_ID = os.getenv("KAFKA_GROUP_ID", "payment-events-consumer")
+    KAFKA_RETRY_TOPIC = os.getenv("KAFKA_RETRY_TOPIC", "payment-events.retry")
+    KAFKA_DLQ_TOPIC = os.getenv("KAFKA_DLQ_TOPIC", "payment-events.dlq")
+    MAX_PROCESSING_RETRIES = int(os.getenv("MAX_PROCESSING_RETRIES", "3"))
+    RETRY_INITIAL_DELAY_SECONDS = float(os.getenv("RETRY_INITIAL_DELAY_SECONDS", "1"))
+    RETRY_BACKOFF_MULTIPLIER = float(os.getenv("RETRY_BACKOFF_MULTIPLIER", "2"))
+    RETRY_MAX_DELAY_SECONDS = float(os.getenv("RETRY_MAX_DELAY_SECONDS", "30"))
+    KAFKA_SECURITY_PROTOCOL = os.getenv("KAFKA_SECURITY_PROTOCOL", "PLAINTEXT")
+    KAFKA_SASL_MECHANISM = os.getenv("KAFKA_SASL_MECHANISM")
+    KAFKA_SASL_USERNAME = os.getenv("KAFKA_SASL_USERNAME")
+    KAFKA_SASL_PASSWORD = os.getenv("KAFKA_SASL_PASSWORD")
+    KAFKA_SSL_CA_LOCATION = os.getenv("KAFKA_SSL_CA_LOCATION")
+    KAFKA_SSL_CERTIFICATE_LOCATION = os.getenv("KAFKA_SSL_CERTIFICATE_LOCATION")
+    KAFKA_SSL_KEY_LOCATION = os.getenv("KAFKA_SSL_KEY_LOCATION")
     
     # Schema Registry
     SCHEMA_REGISTRY_URL = os.getenv("SCHEMA_REGISTRY_URL", "http://schema-registry:8081")
+    SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO = os.getenv("SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO")
+
+
+def kafka_client_config() -> Dict[str, Any]:
+    result: Dict[str, Any] = {"security.protocol": Settings.KAFKA_SECURITY_PROTOCOL}
+    optional = {"sasl.mechanism": Settings.KAFKA_SASL_MECHANISM,
+                "sasl.username": Settings.KAFKA_SASL_USERNAME,
+                "sasl.password": Settings.KAFKA_SASL_PASSWORD,
+                "ssl.ca.location": Settings.KAFKA_SSL_CA_LOCATION,
+                "ssl.certificate.location": Settings.KAFKA_SSL_CERTIFICATE_LOCATION,
+                "ssl.key.location": Settings.KAFKA_SSL_KEY_LOCATION}
+    result.update({key: value for key, value in optional.items() if value})
+    return result
+
+
+class PermanentProcessingError(Exception):
+    """A poison record that will not succeed when retried unchanged."""
+
+
+def deterministic_s3_key(topic: str, partition: int, offset: int, timestamp: datetime) -> str:
+    info = parse_topic(topic)
+    return (
+        f"{Settings.RAW_PREFIX}/category={info['category']}/source_group={info['source_group']}/"
+        f"source_system={info['system']}/year={timestamp:%Y}/month={timestamp:%m}/day={timestamp:%d}/"
+        f"topic={topic}/partition={partition}/offset={offset}/record.avro"
+    )
 
 # ------------------------------------------------------------------------------
 # Avro Schema Definition
@@ -283,16 +325,7 @@ def store_event_to_s3(
     month = timestamp.strftime("%m")
     day = timestamp.strftime("%d")
     
-    # Generate unique filename
-    file_id = uuid.uuid4()
-    filename = f"{file_id}.avro"
-    
-    # Construct S3 key
-    s3_key = (
-        f"{Settings.RAW_PREFIX}/category={category}/source_group={source_group}/"
-        f"source_system={source_system}/year={year}/month={month}/day={day}/"
-        f"topic={topic}/partition={partition}/offset={offset}/{filename}"
-    )
+    s3_key = deterministic_s3_key(topic, partition, offset, timestamp)
     
     event_data = event.get("event_data")
     parsed_event_data = event.get("parsed_event_data")
@@ -332,7 +365,15 @@ def store_event_to_s3(
     }
     
     try:
-        # Serialize to Avro
+        try:
+            minio_client.head_object(Bucket=Settings.MINIO_BUCKET, Key=s3_key)
+            logger.info("Raw object already exists; replay is idempotent: s3://%s/%s",
+                        Settings.MINIO_BUCKET, s3_key)
+            return s3_key
+        except ClientError as exc:
+            if exc.response.get("Error", {}).get("Code") not in {"404", "NoSuchKey", "NotFound"}:
+                raise
+
         avro_data = serialize_to_avro(enriched_event)
         
         # Store in MinIO
@@ -346,22 +387,11 @@ def store_event_to_s3(
         logger.info(f"✅ Stored (Avro): s3://{Settings.MINIO_BUCKET}/{s3_key}")
         return s3_key
         
-    except Exception as e:
+    except (ClientError, BotoCoreError, OSError) as e:
         logger.error(f"❌ Failed to store event: {e}")
-        # Fallback: Store as JSON if Avro fails
-        try:
-            json_key = s3_key.replace(".avro", ".json")
-            minio_client.put_object(
-                Bucket=Settings.MINIO_BUCKET,
-                Key=json_key,
-                Body=json.dumps(enriched_event, indent=2).encode("utf-8"),
-                ContentType="application/json",
-            )
-            logger.warning(f"⚠️  Stored JSON fallback (not Avro): s3://{Settings.MINIO_BUCKET}/{json_key}")
-            return json_key
-        except Exception as fallback_error:
-            logger.error(f"❌ Fallback storage also failed: {fallback_error}")
-            return None
+        raise
+    except (AvroException, TypeError, ValueError) as e:
+        raise PermanentProcessingError(str(e)) from e
 
 # ------------------------------------------------------------------------------
 # Dead Letter Queue (Stored as JSON for readability)
@@ -417,6 +447,57 @@ def store_to_dlq(
     except Exception as e:
         logger.error(f"❌ Failed to store to DLQ: {e}")
 
+
+def failure_envelope(msg, event: Optional[Dict[str, Any]], error: Exception,
+                     retry_count: int, first_failure: str) -> Dict[str, Any]:
+    x_attributes = (event or {}).get("x_attributes") or {}
+    key = msg.key().decode("utf-8", errors="replace") if msg.key() else None
+    return {
+        "original_topic": msg.topic(), "original_partition": msg.partition(),
+        "original_offset": msg.offset(), "original_event_id": (event or {}).get("event_id"),
+        "business_key": key, "failure_reason": str(error), "error_type": type(error).__name__,
+        "retry_count": retry_count, "first_failure_timestamp": first_failure,
+        "last_failure_timestamp": datetime.now(pytz.UTC).isoformat(),
+        "correlation_id": x_attributes.get("x-correlationId"),
+        "trace_id": x_attributes.get("x-traceId"),
+        "original_key_base64": base64.b64encode(msg.key() or b"").decode("ascii"),
+        "original_payload_base64": base64.b64encode(msg.value() or b"").decode("ascii"),
+    }
+
+
+def publish_failure(producer: Producer, topic: str, envelope: Dict[str, Any]) -> bool:
+    result = {"called": False, "error": None}
+    producer.produce(topic, key=envelope.get("business_key"),
+                     value=json.dumps(envelope, separators=(",", ":")),
+                     callback=lambda error, _message: result.update(called=True, error=error))
+    remaining = producer.flush(30)
+    return remaining == 0 and result["called"] and result["error"] is None
+
+
+def retry_delay(attempt: int) -> float:
+    return min(Settings.RETRY_INITIAL_DELAY_SECONDS *
+               (Settings.RETRY_BACKOFF_MULTIPLIER ** max(0, attempt - 1)),
+               Settings.RETRY_MAX_DELAY_SECONDS)
+
+
+def should_send_to_dlq(error: Exception, attempt: int) -> bool:
+    return isinstance(error, PermanentProcessingError) or attempt >= Settings.MAX_PROCESSING_RETRIES
+
+
+def publish_dlq_then_commit(producer, consumer, msg, envelope: Dict[str, Any]) -> bool:
+    """Advance a poison record only after Kafka acknowledges its final DLQ copy."""
+    if not publish_failure(producer, Settings.KAFKA_DLQ_TOPIC, envelope):
+        return False
+    consumer.commit(msg, asynchronous=False)
+    return True
+
+
+def store_then_commit(consumer, msg, event: Dict[str, Any], timestamp: datetime) -> str:
+    """Durably store first, then synchronously commit the consumed coordinate."""
+    key = store_event_to_s3(event, msg.topic(), msg.partition(), msg.offset(), timestamp)
+    consumer.commit(msg, asynchronous=False)
+    return key
+
 # ------------------------------------------------------------------------------
 # Main Consumer
 # ------------------------------------------------------------------------------
@@ -468,9 +549,10 @@ def main():
     logger.info("=" * 80)
     
     # Initialize Schema Registry client
-    schema_registry_client = SchemaRegistryClient({
-        "url": Settings.SCHEMA_REGISTRY_URL
-    })
+    sr_config = {"url": Settings.SCHEMA_REGISTRY_URL}
+    if Settings.SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO:
+        sr_config["basic.auth.user.info"] = Settings.SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO
+    schema_registry_client = SchemaRegistryClient(sr_config)
     
     # Initialize Avro deserializer
     avro_deserializer = AvroDeserializer(
@@ -478,14 +560,20 @@ def main():
     )
     
     # Initialize Kafka consumer
-    consumer = Consumer({
+    consumer_config = {
         "bootstrap.servers": Settings.KAFKA_BOOTSTRAP_SERVERS,
         "group.id": Settings.KAFKA_GROUP_ID,
         "auto.offset.reset": "earliest",
         "enable.auto.commit": False,
         "max.poll.interval.ms": 300000,
         "session.timeout.ms": 45000,
-    })
+    }
+    consumer_config.update(kafka_client_config())
+    consumer = Consumer(consumer_config)
+    failure_producer_config = {"bootstrap.servers": Settings.KAFKA_BOOTSTRAP_SERVERS,
+                               "acks": "all", "enable.idempotence": True}
+    failure_producer_config.update(kafka_client_config())
+    failure_producer = Producer(failure_producer_config)
     
     # Subscribe to all topics
     consumer.subscribe(Settings.KAFKA_TOPICS)
@@ -508,66 +596,46 @@ def main():
                     logger.error(f"❌ Kafka error: {msg.error()}")
                 continue
             
-            # Process message
-            try:
-                # Deserialize Avro message
-                event = avro_deserializer(
-                    msg.value(),
-                    SerializationContext(msg.topic(), MessageField.VALUE)
-                )
-                
-                # Get timestamp
-                if msg.timestamp() is not None:
-                    ts_type, ts_ms = msg.timestamp()
-                    if ts_type == 0:  # CreateTime
-                        timestamp = datetime.fromtimestamp(ts_ms / 1000, pytz.UTC)
+            event = None
+            first_failure = datetime.now(pytz.UTC).isoformat()
+            for attempt in range(Settings.MAX_PROCESSING_RETRIES + 1):
+                try:
+                    if event is None:
+                        try:
+                            event = avro_deserializer(
+                                msg.value(), SerializationContext(msg.topic(), MessageField.VALUE)
+                            )
+                        except Exception as exc:
+                            raise PermanentProcessingError(str(exc)) from exc
+
+                    timestamp_data = msg.timestamp()
+                    if timestamp_data and timestamp_data[1] is not None and timestamp_data[1] >= 0:
+                        timestamp = datetime.fromtimestamp(timestamp_data[1] / 1000, pytz.UTC)
                     else:
-                        timestamp = datetime.now(pytz.UTC)
-                else:
-                    timestamp = datetime.now(pytz.UTC)
-                
-                # Store in S3 as Avro
-                s3_key = store_event_to_s3(
-                    event,
-                    msg.topic(),
-                    msg.partition(),
-                    msg.offset(),
-                    timestamp
-                )
-                
-                if s3_key:
-                    # Commit offset after successful storage
-                    consumer.commit(msg, asynchronous=False)
+                        # A stable epoch fallback keeps object identity deterministic
+                        # even for legacy records that have no Kafka timestamp.
+                        timestamp = datetime.fromtimestamp(0, pytz.UTC)
+
+                    store_then_commit(consumer, msg, event, timestamp)
                     processed_count += 1
-                    
                     if processed_count % 100 == 0:
                         logger.info(f"📊 Processed {processed_count} events")
-                else:
-                    # Store to DLQ if storage failed
-                    store_to_dlq(
-                        event,
-                        msg.topic(),
-                        msg.partition(),
-                        msg.offset(),
-                        "Failed to store to S3 (Avro and JSON fallback both failed)"
-                    )
-                    error_count += 1
-                    
-            except Exception as e:
-                logger.error(f"❌ Error processing message: {e}")
-                error_count += 1
-                
-                # Store raw message to DLQ
-                try:
-                    store_to_dlq(
-                        {"raw_value": str(msg.value())},
-                        msg.topic(),
-                        msg.partition(),
-                        msg.offset(),
-                        str(e)
-                    )
-                except Exception as dlq_error:
-                    logger.error(f"❌ Failed to store to DLQ: {dlq_error}")
+                    break
+                except Exception as exc:
+                    if not should_send_to_dlq(exc, attempt):
+                        envelope = failure_envelope(msg, event, exc, attempt + 1, first_failure)
+                        publish_failure(failure_producer, Settings.KAFKA_RETRY_TOPIC, envelope)
+                        time.sleep(retry_delay(attempt + 1))
+                        continue
+
+                    envelope = failure_envelope(msg, event, exc, attempt, first_failure)
+                    if publish_dlq_then_commit(failure_producer, consumer, msg, envelope):
+                        error_count += 1
+                        logger.error(json.dumps({"service": "payment-consumer-events",
+                                                 "event": "sent_to_dlq", **envelope}, default=str))
+                    else:
+                        logger.error("Final DLQ publication failed; offset remains uncommitted")
+                    break
     
     except KeyboardInterrupt:
         logger.info("🛑 Shutting down...")
@@ -577,7 +645,7 @@ def main():
         logger.info(f"📊 Final Statistics:")
         logger.info(f"   ✅ Successfully processed (Avro): {processed_count}")
         logger.info(f"   ❌ Errors: {error_count}")
-        logger.info("   📄 Storage Format: Avro OCF (JSON fallback on failure)")
+        logger.info("   📄 Storage Format: Avro OCF")
         logger.info("=" * 80)
         consumer.close()
         logger.info("✅ Consumer closed")
