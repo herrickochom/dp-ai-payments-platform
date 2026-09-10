@@ -230,19 +230,19 @@ services:
       KAFKA_PROCESS_ROLES: "broker,controller"
       KAFKA_NODE_ID: "1"
       KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
-      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093"
-      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092"
+      KAFKA_LISTENERS: "INTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,EXTERNAL://0.0.0.0:9094"
+      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka:9092,EXTERNAL://${KAFKA_EXTERNAL_HOST:-localhost}:${KAFKA_EXTERNAL_PORT:-9094}"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT"
       KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
-      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
       KAFKA_LOG_DIRS: "/var/lib/kafka/data"
       KAFKA_METADATA_LOG_DIR: "/var/lib/kafka/metadata"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
       KAFKA_HEAP_OPTS: "-Xmx512M"
       # Auto-create topics disabled - we'll create manually or via init
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
-      KAFKA_GROUP_ID: payment-events-consumer-v2
     ports:
-      - "9092:9092"
+      - "${KAFKA_EXTERNAL_PORT:-9094}:9094"
     volumes:
       - kafka-data:/var/lib/kafka/data
       - kafka-metadata:/var/lib/kafka/metadata
@@ -310,6 +310,22 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
+
+  schema-registry-init:
+    image: curlimages/curl:8.10.1
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-schema-registry-init
+    environment:
+      SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      SCHEMA_COMPATIBILITY: BACKWARD_TRANSITIVE
+    volumes:
+      - ./platform/kafka/configure-schema-registry.sh:/configure-schema-registry.sh:ro
+    entrypoint: ["/bin/sh", "/configure-schema-registry.sh"]
+    depends_on:
+      schema-registry:
+        condition: service_healthy
+    restart: "no"
+    networks:
+      - data-platform-network
 
   # ============================================================================
   # 3. CATALOG LAYER (ALWAYS START)
@@ -421,6 +437,7 @@ services:
       DATA_ROOT: /app/data
       PRODUCER_IDEMPOTENCE: "true"
       PRODUCER_ACKS: "all"
+      KAFKA_SECURITY_PROTOCOL: ${KAFKA_SECURITY_PROTOCOL:-PLAINTEXT}
     volumes:
       - ./data:/app/data:ro
     depends_on:
@@ -430,6 +447,8 @@ services:
         condition: service_completed_successfully
       schema-registry:
         condition: service_healthy
+      schema-registry-init:
+        condition: service_completed_successfully
       payment-xml-generator:
         condition: service_completed_successfully
     restart: "no"
@@ -440,7 +459,6 @@ services:
     build:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.payment-consumer-events
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-payment-consumer-events
     environment:
       S3_ENDPOINT: http://minio:9000
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
@@ -449,15 +467,24 @@ services:
       RAW_PREFIX: raw/v2
       KAFKA_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
       KAFKA_GROUP_ID: payment-events-consumer
+      KAFKA_RETRY_TOPIC: payment-events.retry
+      KAFKA_DLQ_TOPIC: payment-events.dlq
+      MAX_PROCESSING_RETRIES: ${MAX_PROCESSING_RETRIES:-3}
+      RETRY_INITIAL_DELAY_SECONDS: ${RETRY_INITIAL_DELAY_SECONDS:-1}
+      RETRY_BACKOFF_MULTIPLIER: ${RETRY_BACKOFF_MULTIPLIER:-2}
+      RETRY_MAX_DELAY_SECONDS: ${RETRY_MAX_DELAY_SECONDS:-30}
+      KAFKA_SECURITY_PROTOCOL: ${KAFKA_SECURITY_PROTOCOL:-PLAINTEXT}
       SCHEMA_REGISTRY_URL: http://schema-registry:8081
       KAFKA_TOPICS: icmn.vpm.pain001,icmn.pmn.pain001,cpo.psn.pain002,cpo.plm.pain002,wendi.pain001,wendi.pain002,wendi.camt053,wendi.camt052,wendi.camt054,wendi.transactions,mobile.mtn.pacs008,mobile.mtn.pacs002,mobile.airtel.pacs008,mobile.airtel.pacs002,agent.transactions,agent.profiles,agent.locations,pdmis.beneficiaries,pdmis.loans,pdmis.repayments,pdmis.saccos,pdmis.households,pdmis.business_plans,pdmis.special_groups
     depends_on:
-      redis:
-        condition: service_healthy
       kafka:
         condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
       schema-registry:
         condition: service_healthy
+      schema-registry-init:
+        condition: service_completed_successfully
       minio:
         condition: service_healthy
       minio-init-buckets:
@@ -956,8 +983,7 @@ services:
       dockerfile: platform/docker/dockerfiles/Dockerfile.s3-landing-kafka-ingestion
     container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-s3-landing-kafka-ingestion
     profiles:
-      - dev
-      - ingestion
+      - future-disabled
     environment:
       AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
       AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
@@ -1055,8 +1081,7 @@ services:
       dockerfile: platform/docker/dockerfiles/Dockerfile.payment-producer
     container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-payment-producer-dev
     profiles:
-      - dev
-      - producer
+      - future-disabled
     environment:
       S3_ENDPOINT: http://minio:9000
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
@@ -1064,8 +1089,8 @@ services:
       MINIO_BUCKET: dp-ai-payment
       KAFKA_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
       SCHEMA_REGISTRY_URL: http://schema-registry:8081
-      KAFKA_TOPIC: payment-events-dev
-    restart: unless-stopped
+      DATA_ROOT: /app/data
+    restart: "no"
     networks:
       - data-platform-network
     depends_on:
@@ -1252,4 +1277,3 @@ services:
       - /app/data/pdmis_ml/default_risk_current_predictions.jsonl
       - --summary
       - /app/data/pdmis_ml/default_risk_current_predictions_summary.json
-

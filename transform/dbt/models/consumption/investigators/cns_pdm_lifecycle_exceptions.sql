@@ -4,11 +4,19 @@ select
     lifecycle.lifecycle_sk,
     lifecycle.loan_id,
     lifecycle.beneficiary_sk,
+    beneficiary.beneficiary_id,
     lifecycle.sacco_sk,
+    sacco.sacco_id,
     lifecycle.geography_sk,
     geography.region,
     geography.district,
     geography.parish,
+    geography.county,
+    geography.sub_county,
+    geography.village,
+    cast(lifecycle.approval_date as date) as approval_date,
+    lifecycle.first_credited_at,
+    lifecycle.first_cashout_at,
     lifecycle.amount_approved,
     lifecycle.instructed_amount,
     lifecycle.settled_amount,
@@ -60,3 +68,5 @@ select
     end as intervention_priority
 from {{ ref('gld_fct_pdm_payment_lifecycle') }} lifecycle
 left join {{ ref('gld_dim_pdm_geography') }} geography using (geography_sk)
+left join {{ ref('gld_dim_pdm_beneficiary') }} beneficiary using (beneficiary_sk)
+left join {{ ref('gld_dim_pdm_sacco') }} sacco using (sacco_sk)

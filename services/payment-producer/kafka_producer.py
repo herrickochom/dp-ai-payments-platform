@@ -22,6 +22,7 @@ from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry.avro import AvroSerializer
 import avro.schema
 import xml.etree.ElementTree as ET
+from threading import Lock
 
 # ------------------------------------------------------------------------------
 # Logging
@@ -46,6 +47,19 @@ class Config:
     PRODUCER_IDEMPOTENCE = os.getenv("PRODUCER_IDEMPOTENCE", "true").lower() == "true"
     PRODUCER_ACKS = os.getenv("PRODUCER_ACKS", "all")
     PRODUCER_RETRIES = int(os.getenv("PRODUCER_RETRIES", "5"))
+    PRODUCER_DELIVERY_TIMEOUT_MS = int(os.getenv("PRODUCER_DELIVERY_TIMEOUT_MS", "120000"))
+    PRODUCER_REQUEST_TIMEOUT_MS = int(os.getenv("PRODUCER_REQUEST_TIMEOUT_MS", "30000"))
+    PRODUCER_LINGER_MS = int(os.getenv("PRODUCER_LINGER_MS", "10"))
+    PRODUCER_BATCH_SIZE = int(os.getenv("PRODUCER_BATCH_SIZE", "65536"))
+    PRODUCER_COMPRESSION_TYPE = os.getenv("PRODUCER_COMPRESSION_TYPE", "snappy")
+    KAFKA_SECURITY_PROTOCOL = os.getenv("KAFKA_SECURITY_PROTOCOL", "PLAINTEXT")
+    KAFKA_SASL_MECHANISM = os.getenv("KAFKA_SASL_MECHANISM")
+    KAFKA_SASL_USERNAME = os.getenv("KAFKA_SASL_USERNAME")
+    KAFKA_SASL_PASSWORD = os.getenv("KAFKA_SASL_PASSWORD")
+    KAFKA_SSL_CA_LOCATION = os.getenv("KAFKA_SSL_CA_LOCATION")
+    KAFKA_SSL_CERTIFICATE_LOCATION = os.getenv("KAFKA_SSL_CERTIFICATE_LOCATION")
+    KAFKA_SSL_KEY_LOCATION = os.getenv("KAFKA_SSL_KEY_LOCATION")
+    SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO = os.getenv("SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO")
 
 # ------------------------------------------------------------------------------
 # Topic to System Mapping
@@ -87,6 +101,83 @@ TOPIC_MAPPINGS = {
     "pdmis.saccos": {"category": "pdmis", "system": "pdmis", "msg_type": "saccos", "description": "PDMIS SACCOs", "has_technical_attrs": False},
     "pdmis.special_groups": {"category": "pdmis", "system": "pdmis", "msg_type": "special_groups", "description": "PDMIS Special Groups", "has_technical_attrs": False},
 }
+
+BUSINESS_KEY_FIELDS = {
+    "pdmis.loans": ("loan_id",),
+    "pdmis.repayments": ("loan_id", "payment_id", "repayment_id"),
+    "pdmis.beneficiaries": ("beneficiary_id",),
+    "pdmis.saccos": ("sacco_id",),
+    "pdmis.households": ("household_id",),
+    "pdmis.business_plans": ("business_plan_id",),
+    "pdmis.special_groups": ("special_group_id",),
+    "agent.transactions": ("agent_id", "transaction_id", "payment_id"),
+    "agent.profiles": ("agent_id",),
+    "agent.locations": ("agent_id",),
+    "wendi.transactions": ("payment_id", "transaction_id", "loan_id"),
+}
+
+
+def select_business_key(topic: str, event: Dict[str, Any]) -> str:
+    """Return a stable partition key; event_id is intentionally never used."""
+    raw_payload = event.get("parsed_event_data") or event.get("payload")
+    payload = {}
+    if isinstance(raw_payload, str):
+        try:
+            payload = json.loads(raw_payload)
+        except json.JSONDecodeError:
+            pass
+    elif isinstance(raw_payload, dict):
+        payload = raw_payload
+    for field in BUSINESS_KEY_FIELDS.get(topic, ("payment_id", "message_id")):
+        value = event.get(field) or payload.get(field)
+        if value not in (None, ""):
+            return str(value)
+    if event.get("message_id"):
+        return str(event["message_id"])
+    if event.get("source_key"):
+        return str(event["source_key"])
+    raise ValueError(f"No stable business key available for topic {topic}")
+
+
+def kafka_security_config() -> Dict[str, Any]:
+    config: Dict[str, Any] = {"security.protocol": Config.KAFKA_SECURITY_PROTOCOL}
+    optional = {
+        "sasl.mechanism": Config.KAFKA_SASL_MECHANISM,
+        "sasl.username": Config.KAFKA_SASL_USERNAME,
+        "sasl.password": Config.KAFKA_SASL_PASSWORD,
+        "ssl.ca.location": Config.KAFKA_SSL_CA_LOCATION,
+        "ssl.certificate.location": Config.KAFKA_SSL_CERTIFICATE_LOCATION,
+        "ssl.key.location": Config.KAFKA_SSL_KEY_LOCATION,
+    }
+    config.update({key: value for key, value in optional.items() if value})
+    return config
+
+
+class DeliveryTracker:
+    """Count broker acknowledgements rather than local queue acceptance."""
+    def __init__(self):
+        self.succeeded = 0
+        self.failed = 0
+        self._lock = Lock()
+
+    def callback(self, event_id: str, business_key: str):
+        def delivered(error, message):
+            with self._lock:
+                if error:
+                    self.failed += 1
+                else:
+                    self.succeeded += 1
+            details = {
+                "service": "payment-producer", "event": "kafka_delivery",
+                "topic": message.topic() if message else None,
+                "partition": message.partition() if message and not error else None,
+                "event_id": event_id, "business_key": business_key,
+                "result": "failed" if error else "delivered",
+                "error_type": type(error).__name__ if error else None,
+                "error": str(error) if error else None,
+            }
+            (logger.error if error else logger.info)(json.dumps(details, default=str))
+        return delivered
 
 
 # ------------------------------------------------------------------------------
@@ -457,7 +548,10 @@ def main():
     logger.info("✅ Avro schema loaded")
     
     # Initialize Schema Registry
-    sr_client = SchemaRegistryClient({"url": Config.SCHEMA_REGISTRY_URL})
+    sr_config = {"url": Config.SCHEMA_REGISTRY_URL}
+    if Config.SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO:
+        sr_config["basic.auth.user.info"] = Config.SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO
+    sr_client = SchemaRegistryClient(sr_config)
     
     # Initialize Avro serializer
     avro_serializer = AvroSerializer(
@@ -473,7 +567,13 @@ def main():
         "value.serializer": avro_serializer,
         "acks": Config.PRODUCER_ACKS,
         "retries": Config.PRODUCER_RETRIES,
+        "delivery.timeout.ms": Config.PRODUCER_DELIVERY_TIMEOUT_MS,
+        "request.timeout.ms": Config.PRODUCER_REQUEST_TIMEOUT_MS,
+        "linger.ms": Config.PRODUCER_LINGER_MS,
+        "batch.size": Config.PRODUCER_BATCH_SIZE,
+        "compression.type": Config.PRODUCER_COMPRESSION_TYPE,
     }
+    producer_config.update(kafka_security_config())
     
     if Config.PRODUCER_IDEMPOTENCE:
         producer_config.update({
@@ -483,6 +583,7 @@ def main():
         logger.info("🔒 Idempotent producer enabled")
     
     producer = SerializingProducer(producer_config)
+    delivery = DeliveryTracker()
     
     # Discover all supported source files across the six source domains.
     xml_files = glob.glob(f"{Config.DATA_ROOT}/**/*.xml", recursive=True)
@@ -515,7 +616,7 @@ def main():
         logger.info(f"  • {topic}: {len(events)} JSON records")
     
     # Produce events
-    produced = 0
+    queued = 0
     failed = 0
     
     for topic, files in files_by_topic.items():
@@ -527,18 +628,17 @@ def main():
                 failed += 1
                 continue
             try:
-                key = event.get("event_id", str(uuid.uuid4()))
+                key = select_business_key(topic, event)
                 producer.produce(
                     topic=topic,
                     key=key,
                     value=event,
-                    on_delivery=lambda err, msg: (
-                        logger.error(f"❌ Delivery failed: {err}") if err else None
-                    )
+                    on_delivery=delivery.callback(event["event_id"], key)
                 )
-                produced += 1
-                if produced % 10 == 0:
-                    logger.info(f"  📊 Produced {produced} events...")
+                queued += 1
+                producer.poll(0)
+                if queued % 10 == 0:
+                    logger.info(f"  📊 Queued {queued} events...")
             except Exception as e:
                 logger.error(f"❌ Error producing {file_path}: {e}")
                 failed += 1
@@ -547,29 +647,32 @@ def main():
         logger.info(f"📤 Producing {len(events)} JSON records to topic: {topic}")
         for event in events:
             try:
+                key = select_business_key(topic, event)
                 producer.produce(
                     topic=topic,
-                    key=event["event_id"],
+                    key=key,
                     value=event,
-                    on_delivery=lambda err, msg: (
-                        logger.error(f"❌ Delivery failed: {err}") if err else None
-                    ),
+                    on_delivery=delivery.callback(event["event_id"], key),
                 )
-                produced += 1
+                queued += 1
+                producer.poll(0)
             except Exception as exc:
                 logger.error(f"❌ Error producing JSON event to {topic}: {exc}")
                 failed += 1
     
     # Flush all messages
     logger.info("⏳ Flushing producer...")
-    producer.flush()
+    outstanding = producer.flush()
+    if outstanding:
+        delivery.failed += outstanding
+        logger.error("%d Kafka message(s) remained undelivered after flush", outstanding)
     
     # Summary
     logger.info("=" * 80)
     logger.info("📊 PRODUCTION SUMMARY")
     logger.info("=" * 80)
-    logger.info(f"✅ Successfully produced: {produced} events")
-    logger.info(f"❌ Failed: {failed} events")
+    logger.info(f"✅ Delivered: {delivery.succeeded} events")
+    logger.info(f"❌ Failed: {failed + delivery.failed} events")
     logger.info("=" * 80)
 
 if __name__ == "__main__":
