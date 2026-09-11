@@ -76,26 +76,49 @@ identity and is never a fallback partition key. Related entities consequently ma
 to the same partition. Kafka guarantees order inside a partition, not across a
 topic.
 
-The `payment-events-consumer` group archives 24 domain topics with **at-least-once
-Kafka delivery plus an idempotent Raw sink**. Auto commit is disabled; durable
-storage precedes a synchronous commit. Raw identity is `(topic, partition, offset)`
-and ends in `.../offset=O/record.avro`. A crash before storage replays; a crash
-after storage but before commit replays as a harmless no-op; a crash after commit
-continues at the subsequent offset.
+The `payment-events-consumer` group archives 24 domain topics with
+**at-least-once Kafka consumption plus a deterministic/idempotent MinIO sink**
+(not physical exactly-once; auto commit is disabled and durable storage precedes
+a synchronous commit). Raw identity is `(topic, partition, offset)` and ends in
+`.../offset=O/record.avro`. A crash before storage replays; a crash after storage
+but before commit replays as a harmless no-op; a crash after commit continues at
+the subsequent offset.
 
 Transient failures retry inline with configurable bounded exponential backoff and
 are audited in shared `payment-events.retry`. Permanent or exhausted failures go
-to `payment-events.dlq`; the source offset advances only after Kafka acknowledges
-the DLQ record. Two shared operational topics avoid 48 sparse per-source topics
-while preserving source coordinates, event/business IDs, error and retry details,
-timestamps, trace context, and original wire bytes. Replay is deliberate:
+to `payment-events.dlq` with **at-least-once publication plus a deterministic
+source-coordinate failure identity and duplicate-safe replay** (again, not
+physical exactly-once):
+
+* Every DLQ envelope carries `failure_id = <original_topic>:<original_partition>:<original_offset>`
+  and the DLQ record is keyed by it; `business_key` is preserved separately as
+  business metadata. The same source record reproduced on any replay therefore
+  always maps to the same deterministic identity.
+* **Offset invariant:** a source offset advances only after Raw storage succeeds
+  durably OR DLQ publication succeeds durably. If a poison record's DLQ
+  publication fails, the consumer does NOT commit it, does NOT process later
+  offsets, logs a `fail_stop_dlq_publish_failed` CRITICAL, and exits non-zero.
+  Docker's restart policy restarts it and Kafka replays the uncommitted source
+  record. A later offset can never be committed past the failed record.
+* The DLQ topic (cleanup.policy=delete) can still physically hold two records with
+  the same deterministic key (e.g. the consumer crashed between DLQ ack and source
+  commit, so Kafka replayed the record and the DLQ was published again). Those
+  duplicates are deterministically identifiable by `failure_id`, and replay
+  tooling is duplicate-safe: it scans the DLQ topic, groups envelopes by
+  `failure_id`, and refuses to re-execute a replay for an identity that has
+  duplicate envelopes unless `--allow-duplicate-replay` is passed explicitly.
+
+Replay is deliberate:
 
 ```bash
 docker compose exec kafka kafka-consumer-groups --bootstrap-server kafka:9092 \
   --group payment-events-consumer --describe
 docker compose run --rm --entrypoint python3 payment-consumer-events \
   /app/replay_dlq.py --partition 0 --offset 12 --reason "schema repaired"
-# Inspect first; repeat with --execute to replay that one record.
+# Inspect first; repeat with --execute to replay that one record. If the output
+# warns about duplicate DLQ envelopes for the same failure_id, use
+# --allow-duplicate-replay only when a duplicate source replay is explicitly
+# accepted.
 ```
 
 One consumer is the local default. `docker compose up --scale
