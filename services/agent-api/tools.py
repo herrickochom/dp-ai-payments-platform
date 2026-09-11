@@ -12,6 +12,7 @@ from trino_gateway import TrinoGateway
 SEARCH_STOP_WORDS = {"what", "which", "where", "have", "does", "with", "contain",
                      "contains", "information", "data", "table", "tables", "dataset",
                      "datasets", "pdm", "the", "and", "for"}
+SEARCH_STOP_WORDS.update({"build", "dashboard", "visualize", "visualise", "chart", "graph"})
 
 
 class ToolError(RuntimeError):

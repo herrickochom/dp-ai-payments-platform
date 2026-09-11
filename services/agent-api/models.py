@@ -9,11 +9,14 @@ class Permissions(BaseModel):
     can_discover_metadata: bool = True
     can_execute_read_queries: bool = True
     max_rows: int = Field(default=1000, ge=1)
+    can_build_visualizations: bool = True
+    can_build_dashboards: bool = True
+    can_publish_bi_assets: bool = False
 
 
 class AgentRequest(BaseModel):
     objective: str = Field(min_length=3, max_length=4000)
-    agent: Literal["data_discovery", "analytics"] | None = None
+    agent: Literal["data_discovery", "analytics", "visualization", "dashboard"] | None = None
     context: dict[str, Any] = Field(default_factory=dict)
     permissions: Permissions = Field(default_factory=Permissions)
 
@@ -72,4 +75,3 @@ class AnalyticalRequest(BaseModel):
     group_by: list[str] = Field(default_factory=list)
     order_by: list[OrderBy] = Field(default_factory=list)
     limit: int = Field(default=20, ge=1)
-

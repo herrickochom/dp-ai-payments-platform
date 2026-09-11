@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from agents import AnalyticsAgent, DataDiscoveryAgent
 from config import Settings
 from models import AgentRequest, AgentResponse, StructuredError
+from phase3_agents import DashboardAgent, VisualizationAgent
 from tools import ToolError, ToolRegistry
 from trino_gateway import TrinoGateway
 
@@ -16,12 +17,18 @@ class Orchestrator:
         self.gateway = gateway or TrinoGateway(self.settings)
         self.discovery = DataDiscoveryAgent()
         self.analytics = AnalyticsAgent(self.discovery, self.settings)
+        self.visualization = VisualizationAgent(self.analytics)
+        self.dashboard = DashboardAgent(self.visualization)
 
     def route(self, request: AgentRequest) -> str:
         if request.agent:
             return request.agent
         objective = request.objective.lower()
         analytical = ("performance", "worst", "best", "average", "total", "rate", "trend", " by ")
+        if any(token in objective for token in ("dashboard", "scorecard")):
+            return "dashboard"
+        if any(token in objective for token in ("visualize", "visualise", "chart", "graph")):
+            return "visualization"
         discovery = ("what table", "which dataset", "where is", "what data", "columns", "schema")
         if any(token in objective for token in discovery):
             return "data_discovery"
@@ -41,7 +48,8 @@ class Orchestrator:
             context=request.context, permissions=request.permissions)
         tools = ToolRegistry(self.gateway, self.settings)
         try:
-            agent = self.discovery if identity == "data_discovery" else self.analytics
+            agent = {"data_discovery": self.discovery, "analytics": self.analytics,
+                     "visualization": self.visualization, "dashboard": self.dashboard}[identity]
             response.result, response.evidence, response.warnings = agent.run(
                 request.objective, request.permissions, tools)
         except (ToolError, Exception) as exc:
@@ -55,4 +63,3 @@ class Orchestrator:
         logger.info("agent_request_completed", extra={"request_id": response.request_id,
             "agent": identity, "status": response.status, "tool_calls": len(tools.calls)})
         return response
-

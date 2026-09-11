@@ -117,6 +117,7 @@ class AnalyticsAgent:
             names = {c["column_name"] for c in dataset["columns"]}
             return (3 * bool(names & {"district", "region", "parish"})
                     + 4 * bool(names & {"principal_repayment_rate", "repayment_rate"})
+                    + 2 * ("principal_repayment_rate" in names)
                     + 2 * (dataset["schema"] == "consumption"))
         ranked = sorted(datasets, key=score, reverse=True)
         return ranked[0] if ranked and score(ranked[0]) >= 7 else None

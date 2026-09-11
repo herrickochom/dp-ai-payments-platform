@@ -260,8 +260,48 @@ category/time chart, and underlying table when supported, then validates and
 returns a dashboard definition. Run Phase 2 tests with
 `python3 tests/test_agent_phase2.py`.
 
-Known limits: no builder artifact persistence, overlap detection, renderer, or
-Superset adapter is implemented; joins are validated but single-primary-dataset
-specifications are the Phase 2 execution boundary. Phase 3 may add bounded
-Visualization and Dashboard Agents plus a Superset adapter without changing the
-builder domain models.
+Phase 2 itself has no artifact persistence, overlap detection, renderer, or BI
+coupling; joins are validated but single-primary-dataset specifications are its
+execution boundary. The separate Phase 3 layer below consumes these contracts.
+
+## Agent Phase 3 visualization, dashboards, and Superset
+
+Phase 3 extends the frozen contracts without putting BI-specific fields in them:
+
+```text
+User -> Orchestrator -> Discovery / Analytics / Visualization / Dashboard Agents
+  -> typed Phase 2 specifications -> deterministic builders -> BIAdapter
+  -> Superset
+```
+
+The bounded Visualization Agent uses a deterministic fallback when no model is
+configured: one measure becomes a KPI; category plus measure becomes a bar;
+time plus measure becomes a line; two measures can become a scatter; and detail
+fields become a table. Every proposal passes the existing Visualization Builder.
+The Dashboard Agent orders validated visualizations, selects a primary view, and
+proposes a 12-column layout; the Dashboard Builder remains the authority.
+
+`SupersetAdapter` is vendor-specific and replaceable. It maps validated physical
+datasets, `kpi`/`table`/`bar`/`line`/`scatter` types, layouts, and filters to
+Superset REST resources. Stable spec IDs are embedded in asset names/slugs, so a
+repeat publication performs lookup-and-update/reuse rather than deliberately
+creating new assets. This is idempotent intent, not transactional exactly-once:
+a remote failure may leave already-created assets, and the response reports the
+partial completion accurately.
+
+Publishing is opt-in and separate from read/build permissions. It requires
+`can_publish_bi_assets=true` plus `SUPERSET_PASSWORD`. Dry-run is the default and
+returns intended actions without changing Superset.
+
+```text
+POST /agents/visualize
+POST /agents/dashboard       # publish=false by default
+POST /publish/superset       # accepts a validated DashboardSpec
+```
+
+Environment: `SUPERSET_URL`, `SUPERSET_USERNAME`, `SUPERSET_PASSWORD`, and
+`SUPERSET_DATABASE_NAME`. Current limits include no cross-dataset native-filter
+scope translation, no application-side spec database, no transactional rollback
+of partial Superset publication, and deterministic (not model-driven) agent
+fallbacks. Phase 4 may add Data Quality and Insight Agents; it must continue to
+use these controlled contracts.
