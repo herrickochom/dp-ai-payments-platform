@@ -9,6 +9,7 @@ from config import Settings
 from builder_models import (BuildWorkflowRequest, DashboardBuildRequest,
                             DataSourceBuildRequest, VisualizationBuildRequest)
 from builders import recommend_visualizations
+from bi_adapter import DashboardAgentRequest, PublicationRequest, SupersetAdapter
 from models import AgentRequest
 from orchestrator import Orchestrator
 from tools import ToolRegistry
@@ -25,6 +26,8 @@ def agents():
     return {"agents": [
         {"id": "data_discovery", "capabilities": ["metadata search", "schema inspection", "join inference"]},
         {"id": "analytics", "capabilities": ["semantic analytical request", "bounded read-only query"]},
+        {"id": "visualization", "capabilities": ["bounded visualization recommendation"]},
+        {"id": "dashboard", "capabilities": ["bounded dashboard composition"]},
     ]}
 
 
@@ -98,4 +101,44 @@ def build_workflow(request: BuildWorkflowRequest):
                                analytical.tool_calls + tools.calls]}
     except Exception as exc:
         return JSONResponse(status_code=422, content={"status": "failed",
+            "error": {"category": type(exc).__name__, "message": str(exc)}})
+
+
+@app.post("/agents/visualize")
+def visualize(request: BuildWorkflowRequest):
+    response = orchestrator.execute(AgentRequest(agent="visualization", objective=request.objective,
+                                                 permissions=request.permissions))
+    return JSONResponse(status_code=200 if response.status == "completed" else 422,
+                        content=response.model_dump(mode="json"))
+
+
+@app.post("/agents/dashboard")
+def dashboard(request: DashboardAgentRequest):
+    response = orchestrator.execute(AgentRequest(agent="dashboard", objective=request.objective,
+                                                 permissions=request.permissions))
+    if response.status != "completed" or not response.result.get("dashboard"):
+        return JSONResponse(status_code=422, content=response.model_dump(mode="json"))
+    from builder_models import DashboardSpec
+    artifact = DashboardSpec.model_validate(response.result["dashboard"])
+    adapter = SupersetAdapter(settings)
+    try:
+        publication = (adapter.publish(artifact, request.permissions) if request.publish
+                       else adapter.plan(artifact))
+    except Exception as exc:
+        return JSONResponse(status_code=502, content={"status": "failed",
+            "error": {"category": type(exc).__name__, "message": str(exc)},
+            "dashboard": artifact.model_dump(mode="json")})
+    return {"status": "completed", "agent_response": response.model_dump(mode="json"),
+            "dashboard": artifact.model_dump(mode="json"), "superset": publication}
+
+
+@app.post("/publish/superset")
+def publish_superset(request: PublicationRequest):
+    adapter = SupersetAdapter(settings)
+    try:
+        result = (adapter.publish(request.dashboard, request.permissions) if request.publish
+                  else adapter.plan(request.dashboard))
+        return {"status": "completed", "superset": result}
+    except Exception as exc:
+        return JSONResponse(status_code=502, content={"status": "failed",
             "error": {"category": type(exc).__name__, "message": str(exc)}})

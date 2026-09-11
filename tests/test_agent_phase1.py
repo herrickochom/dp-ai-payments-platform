@@ -125,7 +125,9 @@ class ApiTests(unittest.TestCase):
         import api
         api.orchestrator = Orchestrator(Settings(), FakeGateway())
         cls.client = TestClient(api.app)
-    def test_agents_endpoint(self): self.assertEqual(2, len(self.client.get("/agents").json()["agents"]))
+    def test_agents_endpoint(self):
+        identities = {item["id"] for item in self.client.get("/agents").json()["agents"]}
+        self.assertTrue({"data_discovery", "analytics"}.issubset(identities))
     def test_health_endpoint(self): self.assertEqual(200, self.client.get("/agents/health").status_code)
     def test_query_endpoint_and_validation_error(self):
         self.assertEqual(200, self.client.post("/agents/query", json={"objective": "What tables contain repayment information?"}).status_code)

@@ -18,4 +18,8 @@ class Settings:
     model_provider: str = os.getenv("AGENT_MODEL_PROVIDER", "disabled")
     model_name: str = os.getenv("AGENT_MODEL", "")
     rag_enabled: bool = os.getenv("AGENT_RAG_ENABLED", "false").lower() == "true"
-
+    superset_url: str = os.getenv("SUPERSET_URL", "http://localhost:8088")
+    superset_username: str = os.getenv("SUPERSET_USERNAME", "admin")
+    superset_password: str | None = os.getenv("SUPERSET_PASSWORD")
+    superset_database_name: str = os.getenv("SUPERSET_DATABASE_NAME", "PDM Trino")
+    superset_public_url: str = os.getenv("SUPERSET_PUBLIC_URL", "http://localhost:8088")

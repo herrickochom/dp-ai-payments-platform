@@ -89,6 +89,8 @@ class VisualizationBuilder:
     def build(self, request: VisualizationBuildRequest) -> VisualizationSpec:
         if not request.permissions.can_execute_read_queries:
             raise PermissionDenied("read-query permission is required to build a visualization")
+        if not request.permissions.can_build_visualizations:
+            raise PermissionDenied("visualization build permission is required")
         fields = {field.name: field for field in request.data_source.fields}
         for encoding in request.encoding:
             field = fields.get(encoding.field)
@@ -124,6 +126,8 @@ class DashboardBuilder:
     def build(self, request: DashboardBuildRequest) -> DashboardSpec:
         if not request.permissions.can_execute_read_queries:
             raise PermissionDenied("read-query permission is required to build a dashboard")
+        if not request.permissions.can_build_dashboards:
+            raise PermissionDenied("dashboard build permission is required")
         identifiers = [visualization.id for visualization in request.visualizations]
         if len(identifiers) != len(set(identifiers)):
             raise BuilderValidationError("visualization IDs must be unique")
