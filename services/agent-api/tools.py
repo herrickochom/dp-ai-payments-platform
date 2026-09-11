@@ -43,15 +43,18 @@ class ToolRegistry:
         if len(self.calls) >= self.settings.max_tool_calls:
             raise ToolLimitExceeded(f"tool-call limit {self.settings.max_tool_calls} exceeded")
         started = time.monotonic()
+        record = ToolCall(tool=name, status="completed", duration_ms=0)
+        # Reserve the call before execution so nested controlled operations
+        # cannot bypass the global request limit.
+        self.calls.append(record)
         try:
             result = function()
         except Exception as exc:
-            self.calls.append(ToolCall(tool=name, status="failed",
-                duration_ms=(time.monotonic() - started) * 1000,
-                metadata={"error_category": type(exc).__name__}))
+            record.status = "failed"
+            record.duration_ms = (time.monotonic() - started) * 1000
+            record.metadata = {"error_category": type(exc).__name__}
             raise
-        self.calls.append(ToolCall(tool=name, status="completed",
-            duration_ms=(time.monotonic() - started) * 1000))
+        record.duration_ms = (time.monotonic() - started) * 1000
         return result
 
     def list_catalogs(self):
@@ -126,6 +129,18 @@ class ToolRegistry:
             return {"columns": columns, "rows": rows, "row_count": len(rows),
                     "query_id": query_id, "sql": validated["sql"]}
         return self._call("query.execute", execute)
+
+    def build_data_source(self, request):
+        from builders import DataSourceBuilder
+        return self._call("builder.datasource.build", lambda: DataSourceBuilder().build(request, self))
+
+    def build_visualization(self, request):
+        from builders import VisualizationBuilder
+        return self._call("builder.visualization.build", lambda: VisualizationBuilder().build(request))
+
+    def build_dashboard(self, request):
+        from builders import DashboardBuilder
+        return self._call("builder.dashboard.build", lambda: DashboardBuilder().build(request))
 
     def _rows(self, sql: str):
         columns, rows, _ = self.gateway.execute(sql)

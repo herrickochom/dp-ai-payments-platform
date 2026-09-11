@@ -2,6 +2,7 @@ from collections import defaultdict
 from typing import Any
 
 from config import Settings
+from builder_models import DataSourceBuildRequest
 from models import AnalyticalRequest, Evidence, Measure, OrderBy, Permissions
 from tools import PermissionDenied, ToolRegistry, quote_identifier
 
@@ -99,9 +100,13 @@ class AnalyticsAgent:
                f"FROM {quoted_dataset} WHERE {quote_identifier(dimension)} IS NOT NULL "
                f"GROUP BY {quote_identifier(dimension)} ORDER BY repayment_performance ASC LIMIT {spec.limit}")
         query_result = tools.execute_query(sql, min(permissions.max_rows, spec.limit))
+        data_source = tools.build_data_source(DataSourceBuildRequest(
+            semantic_request=spec, permissions=permissions,
+            query_id=query_result.get("query_id")))
         evidence.append(Evidence(kind="query", reference=query_result.get("query_id") or "trino-query",
             details={"dataset": dataset, "row_count": query_result["row_count"]}))
-        return {"analytical_request": spec.model_dump(), "query": query_result["sql"],
+        return {"analytical_request": spec.model_dump(),
+                "data_source": data_source.model_dump(), "query": query_result["sql"],
                 "data": {"columns": query_result["columns"], "rows": query_result["rows"],
                          "row_count": query_result["row_count"]},
                 "explanation": "Results are ordered from lowest to highest average repayment performance."}, evidence, warnings
@@ -115,4 +120,3 @@ class AnalyticsAgent:
                     + 2 * (dataset["schema"] == "consumption"))
         ranked = sorted(datasets, key=score, reverse=True)
         return ranked[0] if ranked and score(ranked[0]) >= 7 else None
-
