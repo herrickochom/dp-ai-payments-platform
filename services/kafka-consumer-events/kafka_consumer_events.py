@@ -123,6 +123,38 @@ class PermanentProcessingError(Exception):
     """A poison record that will not succeed when retried unchanged."""
 
 
+class DlqPublishFailedError(RuntimeError):
+    """A poison record was neither stored durably nor DLQ'd durably.
+
+    Fail-stop semantics: the source offset must NOT advance, later offsets in the
+    same partition must NOT be processed, and the consumer must terminate cleanly
+    so Docker's restart policy restarts it and Kafka replays the uncommitted
+    offset.  This is the only safe behaviour when a failed record can be laid down
+    in neither Raw nor the DLQ.
+    """
+
+    def __init__(self, envelope: Dict[str, Any]):
+        super().__init__(
+            "Final DLQ publication failed; source offset left uncommitted and consumer "
+            "stopping so the record is replayed on restart"
+        )
+        self.envelope = envelope
+
+
+def deterministic_failure_id(topic: str, partition: int, offset: int) -> str:
+    """Deterministic DLQ identity derived only from the original Kafka coordinates.
+
+    The exact same source record (same topic/partition/offset) always maps to the
+    exact same identity, including when Kafka replays an uncommitted offset after a
+    consumer restart.  Format: ``<topic>:<partition>:<offset>``.
+
+    Note: a deterministic key does NOT give physical exactly-once DLQ publication
+    on a ``cleanup.policy=delete`` topic; it makes duplicate DLQ events
+    deterministically identifiable and replay duplicate-safe.
+    """
+    return f"{topic}:{partition}:{offset}"
+
+
 def deterministic_s3_key(topic: str, partition: int, offset: int, timestamp: datetime) -> str:
     info = parse_topic(topic)
     return (
@@ -453,6 +485,7 @@ def failure_envelope(msg, event: Optional[Dict[str, Any]], error: Exception,
     x_attributes = (event or {}).get("x_attributes") or {}
     key = msg.key().decode("utf-8", errors="replace") if msg.key() else None
     return {
+        "failure_id": deterministic_failure_id(msg.topic(), msg.partition(), msg.offset()),
         "original_topic": msg.topic(), "original_partition": msg.partition(),
         "original_offset": msg.offset(), "original_event_id": (event or {}).get("event_id"),
         "business_key": key, "failure_reason": str(error), "error_type": type(error).__name__,
@@ -465,10 +498,13 @@ def failure_envelope(msg, event: Optional[Dict[str, Any]], error: Exception,
     }
 
 
-def publish_failure(producer: Producer, topic: str, envelope: Dict[str, Any]) -> bool:
+def publish_failure(producer: Producer, topic: str, envelope: Dict[str, Any],
+                    key: Optional[str] = None, headers: Optional[Dict[str, str]] = None) -> bool:
     result = {"called": False, "error": None}
-    producer.produce(topic, key=envelope.get("business_key"),
+    metadata_key = envelope.get("business_key") if key is None else key
+    producer.produce(topic, key=metadata_key,
                      value=json.dumps(envelope, separators=(",", ":")),
+                     headers=headers,
                      callback=lambda error, _message: result.update(called=True, error=error))
     remaining = producer.flush(30)
     return remaining == 0 and result["called"] and result["error"] is None
@@ -485,8 +521,22 @@ def should_send_to_dlq(error: Exception, attempt: int) -> bool:
 
 
 def publish_dlq_then_commit(producer, consumer, msg, envelope: Dict[str, Any]) -> bool:
-    """Advance a poison record only after Kafka acknowledges its final DLQ copy."""
-    if not publish_failure(producer, Settings.KAFKA_DLQ_TOPIC, envelope):
+    """Advance a poison record only after Kafka acknowledges its final DLQ copy.
+
+    The DLQ record is keyed by the deterministic failure identity
+    ``<original_topic>:<original_partition>:<original_offset>`` so re-processing the
+    same source record (e.g. after a Kafka replay of an uncommitted offset) always
+    produces the same DLQ key and the same ``x-failure-id`` header.
+
+    This is at-least-once publication: a deterministic key does not by itself give
+    physical exactly-once delivery on a ``cleanup.policy=delete`` topic.  Duplicate
+    DLQ envelopes for the same source record remain identifiable via ``failure_id``
+    and replay tooling is duplicate-safe.
+    """
+    failure_id = envelope.get("failure_id")
+    if not publish_failure(producer, Settings.KAFKA_DLQ_TOPIC, envelope,
+                           key=failure_id,
+                           headers={"x-failure-id": failure_id}):
         return False
     consumer.commit(msg, asynchronous=False)
     return True
@@ -497,6 +547,66 @@ def store_then_commit(consumer, msg, event: Dict[str, Any], timestamp: datetime)
     key = store_event_to_s3(event, msg.topic(), msg.partition(), msg.offset(), timestamp)
     consumer.commit(msg, asynchronous=False)
     return key
+
+
+def process_message(consumer, failure_producer, avro_deserializer, msg) -> str:
+    """Process one source record: deserialize, store/boundary-retry, and commit.
+
+    Returns ``"ok"`` when Raw storage succeeded durably and the source offset was
+    committed, or ``"dlq"`` when the record was published to ``payment-events.dlq``
+    and the source offset was then committed.
+
+    Raises :class:`DlqPublishFailedError` when a permanent failure can be neither
+    stored durably nor DLQ'd durably.  In that case the source offset is NOT
+    committed, later offsets in the partition are NOT processed, and the consumer
+    fails-stop so Docker restart policy restarts it and Kafka replays the
+    uncommitted record (offset invariant: the source offset advances only after Raw
+    storage OR DLQ publication succeeds durably).
+    """
+    event = None
+    first_failure = datetime.now(pytz.UTC).isoformat()
+    for attempt in range(Settings.MAX_PROCESSING_RETRIES + 1):
+        try:
+            if event is None:
+                try:
+                    event = avro_deserializer(
+                        msg.value(), SerializationContext(msg.topic(), MessageField.VALUE)
+                    )
+                except Exception as exc:
+                    raise PermanentProcessingError(str(exc)) from exc
+
+            timestamp_data = msg.timestamp()
+            if timestamp_data and timestamp_data[1] is not None and timestamp_data[1] >= 0:
+                timestamp = datetime.fromtimestamp(timestamp_data[1] / 1000, pytz.UTC)
+            else:
+                # A stable epoch fallback keeps object identity deterministic
+                # even for legacy records that have no Kafka timestamp.
+                timestamp = datetime.fromtimestamp(0, pytz.UTC)
+
+            store_then_commit(consumer, msg, event, timestamp)
+            return "ok"
+        except Exception as exc:
+            if not should_send_to_dlq(exc, attempt):
+                envelope = failure_envelope(msg, event, exc, attempt + 1, first_failure)
+                publish_failure(failure_producer, Settings.KAFKA_RETRY_TOPIC, envelope)
+                time.sleep(retry_delay(attempt + 1))
+                continue
+
+            envelope = failure_envelope(msg, event, exc, attempt, first_failure)
+            try:
+                published = publish_dlq_then_commit(failure_producer, consumer, msg, envelope)
+            except Exception as dlq_exc:
+                # The DLQ producer itself raised (e.g. no such topic with
+                # auto-create disabled).  Fail-stop with the same invariant.
+                raise DlqPublishFailedError(envelope) from dlq_exc
+            if published:
+                logger.error(json.dumps({"service": "payment-consumer-events",
+                                         "event": "sent_to_dlq", **envelope}, default=str))
+                return "dlq"
+            # DLQ acknowledged nothing: do NOT commit, do NOT continue to later
+            # offsets.  Fail the consumer; Docker restarts it and Kafka replays
+            # this uncommitted source record.
+            raise DlqPublishFailedError(envelope) from exc
 
 # ------------------------------------------------------------------------------
 # Main Consumer
@@ -583,60 +693,46 @@ def main():
     error_count = 0
     
     try:
-        while True:
-            msg = consumer.poll(1.0)
-            
-            if msg is None:
-                continue
-                
-            if msg.error():
-                if msg.error().code() == KafkaError._PARTITION_EOF:
-                    logger.debug(f"End of partition: {msg.topic()} [{msg.partition()}]")
-                else:
-                    logger.error(f"❌ Kafka error: {msg.error()}")
-                continue
-            
-            event = None
-            first_failure = datetime.now(pytz.UTC).isoformat()
-            for attempt in range(Settings.MAX_PROCESSING_RETRIES + 1):
-                try:
-                    if event is None:
-                        try:
-                            event = avro_deserializer(
-                                msg.value(), SerializationContext(msg.topic(), MessageField.VALUE)
-                            )
-                        except Exception as exc:
-                            raise PermanentProcessingError(str(exc)) from exc
+        try:
+            while True:
+                msg = consumer.poll(1.0)
 
-                    timestamp_data = msg.timestamp()
-                    if timestamp_data and timestamp_data[1] is not None and timestamp_data[1] >= 0:
-                        timestamp = datetime.fromtimestamp(timestamp_data[1] / 1000, pytz.UTC)
+                if msg is None:
+                    continue
+
+                if msg.error():
+                    if msg.error().code() == KafkaError._PARTITION_EOF:
+                        logger.debug(f"End of partition: {msg.topic()} [{msg.partition()}]")
                     else:
-                        # A stable epoch fallback keeps object identity deterministic
-                        # even for legacy records that have no Kafka timestamp.
-                        timestamp = datetime.fromtimestamp(0, pytz.UTC)
+                        logger.error(f"❌ Kafka error: {msg.error()}")
+                    continue
 
-                    store_then_commit(consumer, msg, event, timestamp)
+                outcome = process_message(consumer, failure_producer, avro_deserializer, msg)
+                if outcome == "ok":
                     processed_count += 1
                     if processed_count % 100 == 0:
                         logger.info(f"📊 Processed {processed_count} events")
-                    break
-                except Exception as exc:
-                    if not should_send_to_dlq(exc, attempt):
-                        envelope = failure_envelope(msg, event, exc, attempt + 1, first_failure)
-                        publish_failure(failure_producer, Settings.KAFKA_RETRY_TOPIC, envelope)
-                        time.sleep(retry_delay(attempt + 1))
-                        continue
+                else:
+                    error_count += 1
+        except DlqPublishFailedError as exc:
+            envelope = exc.envelope
+            logger.critical(json.dumps({
+                "service": "payment-consumer-events",
+                "event": "fail_stop_dlq_publish_failed",
+                "failure_id": envelope.get("failure_id"),
+                "original_topic": envelope.get("original_topic"),
+                "original_partition": envelope.get("original_partition"),
+                "original_offset": envelope.get("original_offset"),
+                "business_key": envelope.get("business_key"),
+            }, default=str))
+            logger.critical(
+                "🔴 FATAL: a poison record could be neither stored in Raw nor DLQ'd. "
+                "Its source offset is left uncommitted and later offsets are not "
+                "processed. The consumer now exits so Docker restarts it and Kafka "
+                "replays the uncommitted record."
+            )
+            raise SystemExit(1)
 
-                    envelope = failure_envelope(msg, event, exc, attempt, first_failure)
-                    if publish_dlq_then_commit(failure_producer, consumer, msg, envelope):
-                        error_count += 1
-                        logger.error(json.dumps({"service": "payment-consumer-events",
-                                                 "event": "sent_to_dlq", **envelope}, default=str))
-                    else:
-                        logger.error("Final DLQ publication failed; offset remains uncommitted")
-                    break
-    
     except KeyboardInterrupt:
         logger.info("🛑 Shutting down...")
     finally:
