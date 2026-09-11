@@ -305,3 +305,87 @@ scope translation, no application-side spec database, no transactional rollback
 of partial Superset publication, and deterministic (not model-driven) agent
 fallbacks. Phase 4 may add Data Quality and Insight Agents; it must continue to
 use these controlled contracts.
+
+## Agent Phase 4 data quality and insight intelligence
+
+Phase 4 extends the same Agent API and orchestrator; it does not introduce a
+second query layer or autonomous remediation path:
+
+```text
+User / future scheduler
+  -> Agent API -> Orchestrator
+       -> Data Discovery Agent
+       -> Analytics Agent
+       -> Visualization Agent
+       -> Dashboard Agent
+       -> Data Quality Agent
+       -> Insight Agent
+  -> controlled metadata / DQ / read-query tools
+  -> Trino, dbt rule metadata, and platform health
+  -> evidence-backed findings, insights, and advisory recommendations
+```
+
+The Data Quality Agent answers bounded trust questions. At image build time the
+existing dbt model YAML is copied read-only into the Agent API image. The rule
+catalogue projects dbt `not_null`, `unique`, `accepted_values`, and
+`relationships` tests into typed vendor-neutral rules while retaining the YAML
+path as provenance. Callers may also submit typed `range`, `freshness`, and
+`volume` rules through `POST /dq/check`; these are labelled `phase4_config` or
+`inferred`, never presented as dbt rules. Rules cannot contain SQL. Identifiers
+are validated against Trino metadata and generated aggregate queries still pass
+through the Phase 1 single-SELECT validator, timeout, and row limits.
+
+`dq.summary` deliberately reuses `iceberg.silver.slv_pdm_dq_results` for the
+repository's existing financial consistency, cross-domain relationship, and
+payment reconciliation rules instead of recreating that logic. `dq.profile`
+profiles at most five requested fields with aggregate row/null/distinct/min/max
+statistics. Failure samples are absent by default; the separate
+`can_view_data_quality_samples` permission exposes at most five values and all
+values are masked. Recommendations are advisory only: no source correction,
+delete/update, Kafka offset change/replay, dbt rebuild, or object-store write is
+implemented.
+
+The Insight Agent answers ranking and observed-change questions using the same
+metadata and read-query tools as Analytics. It compares only the latest two
+values of an actual discovered time field, preserves both periods and the Trino
+query ID, calculates absolute/relative movement, and can show dimension ranking
+movement. Its explainable anomaly methods are an absolute percentage-change
+threshold (20% platform monitoring default, or an explicit request threshold)
+and a population z-score flag (`abs(z) >= 2`) for cross-sectional rankings.
+These are monitoring flags, not causal models. Output uses observed/associated
+language and never invents a cause. In particular,
+`cns_pdm_executive_monthly_trend.cohort_principal_repayment_rate` is always
+warned as approval-cohort current state rather than reconstructed month-end
+portfolio history. If two actual periods or a temporal field are unavailable,
+the response returns a limitation and does not invent dates.
+
+Phase 4 permissions add `can_run_data_quality_checks`,
+`can_view_data_quality_samples`, and `can_generate_insights`; metadata,
+read-query, and row-limit permissions remain mandatory. This is a lightweight
+boundary designed for the Phase 5 Governance Agent to strengthen with data
+classification and policy enforcement without changing the result contracts.
+
+Endpoints:
+
+```text
+POST /agents/data-quality
+POST /agents/insights
+GET  /dq/rules?dataset=iceberg.silver.slv_pdm_loans
+POST /dq/check
+POST /dq/profile
+```
+
+The older Compose `dq-agent` service is retained unchanged for compatibility.
+Inspection found that it only logs connectivity settings and a periodic
+heartbeat; it has no rules, queries, findings, or remediation. It is therefore
+not a competing production path. New request/response quality work belongs to
+the Agent API; a later operational migration may remove the heartbeat service
+after its users and deployment expectations are confirmed.
+
+Known Phase 4 limits: dbt custom singular tests are documented but not compiled
+into arbitrary agent SQL; source freshness has no repository declaration to
+import; schema/volume rules require explicit configuration; monitoring is
+request/response only; anomaly detection is deliberately simple; and there is
+no causal inference, scheduler, alert delivery, remediation, PII policy engine,
+or full governance enforcement. Run focused tests with
+`python3 -m unittest tests.test_agent_phase4` in the Agent API environment.

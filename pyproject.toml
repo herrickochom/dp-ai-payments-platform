@@ -16,6 +16,7 @@ dependencies = [
     "fastavro",
     "pytz",
     "pydantic",
+    "PyYAML",
     "sqlglot",
     "trino",
     "uvicorn",

@@ -1,5 +1,13 @@
 import os
 from dataclasses import dataclass
+from pathlib import Path
+
+
+_config_file = Path(__file__).resolve()
+_repository_dbt_models = (
+    _config_file.parents[2] / "transform" / "dbt" / "models"
+    if len(_config_file.parents) > 2 else Path("/app/dbt-models")
+)
 
 
 @dataclass(frozen=True)
@@ -23,3 +31,10 @@ class Settings:
     superset_password: str | None = os.getenv("SUPERSET_PASSWORD")
     superset_database_name: str = os.getenv("SUPERSET_DATABASE_NAME", "PDM Trino")
     superset_public_url: str = os.getenv("SUPERSET_PUBLIC_URL", "http://localhost:8088")
+    dbt_models_path: str = os.getenv(
+        "DBT_MODELS_PATH",
+        str(_repository_dbt_models if _repository_dbt_models.exists() else Path("/app/dbt-models")),
+    )
+    dq_max_rules_per_request: int = int(os.getenv("DQ_MAX_RULES_PER_REQUEST", "4"))
+    dq_max_sample_rows: int = int(os.getenv("DQ_MAX_SAMPLE_ROWS", "5"))
+    insight_change_threshold: float = float(os.getenv("INSIGHT_CHANGE_THRESHOLD", "0.20"))

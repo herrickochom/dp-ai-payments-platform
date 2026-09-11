@@ -12,11 +12,15 @@ class Permissions(BaseModel):
     can_build_visualizations: bool = True
     can_build_dashboards: bool = True
     can_publish_bi_assets: bool = False
+    can_run_data_quality_checks: bool = True
+    can_view_data_quality_samples: bool = False
+    can_generate_insights: bool = True
 
 
 class AgentRequest(BaseModel):
     objective: str = Field(min_length=3, max_length=4000)
-    agent: Literal["data_discovery", "analytics", "visualization", "dashboard"] | None = None
+    agent: Literal["data_discovery", "analytics", "visualization", "dashboard",
+                   "data_quality", "insight"] | None = None
     context: dict[str, Any] = Field(default_factory=dict)
     permissions: Permissions = Field(default_factory=Permissions)
 
