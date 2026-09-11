@@ -5,7 +5,9 @@ import requests
 from pydantic import BaseModel, Field
 
 from builder_models import DashboardSpec, DataSourceSpec, VisualizationSpec
+from classification import ClassificationError, TrustedClassificationResolver
 from config import Settings
+from governance_models import DataClassification
 from models import Permissions
 
 
@@ -37,9 +39,19 @@ SUPERSET_TYPES = {"kpi": "big_number_total", "table": "table",
 
 class SupersetAdapter:
     """Replaceable REST adapter; core builder models contain no Superset fields."""
-    def __init__(self, settings: Settings, session=None):
+    def __init__(
+        self,
+        settings: Settings,
+        session=None,
+        classification_resolver: TrustedClassificationResolver | None = None,
+    ):
         self.settings = settings
         self.session = session or requests.Session()
+        self.classification_resolver = (
+            classification_resolver
+            if classification_resolver is not None
+            else TrustedClassificationResolver()
+        )
 
     def plan(self, dashboard: DashboardSpec) -> dict[str, Any]:
         self._validated(dashboard)
@@ -57,6 +69,7 @@ class SupersetAdapter:
     def publish(self, dashboard: DashboardSpec, permissions: Permissions) -> dict[str, Any]:
         if not permissions.can_publish_bi_assets:
             raise AdapterPermissionDenied("BI publishing permission is required")
+        self._validate_publication_governance(dashboard)
         if not self.settings.superset_password:
             raise AdapterError("SUPERSET_PASSWORD is required for publishing")
         plan = self.plan(dashboard)
@@ -83,6 +96,67 @@ class SupersetAdapter:
             raise AdapterError(f"Superset publication failed after {completed}: {exc}") from exc
         return {**plan, "mode": "published", "status": "completed", "artifacts": completed,
                 "dashboard_url": f"{self.settings.superset_public_url}/superset/dashboard/{dashboard_id}/"}
+
+    def _validate_publication_governance(self, dashboard: DashboardSpec) -> None:
+        """
+        Fail closed before any Superset side effect.
+
+        Superset publication registers the physical source dataset, so a
+        RESTRICTED dataset cannot be published even when a particular chart
+        happens to use only a public-looking field. Publish a governed aggregate
+        or reporting dataset instead.
+
+        Restricted projected/filter fields are also rejected explicitly.
+        """
+
+        fields_by_source: dict[str, set[str]] = {}
+        sources: dict[str, Any] = {}
+
+        for visual in dashboard.visualizations:
+            source = visual.data_source
+            sources[source.id] = source
+            fields_by_source.setdefault(source.id, set()).update(
+                encoding.field
+                for encoding in visual.encoding
+            )
+
+        for dashboard_filter in dashboard.filters:
+            fields_by_source.setdefault(
+                dashboard_filter.data_source_id,
+                set(),
+            ).add(dashboard_filter.field)
+
+        for source_id, source in sources.items():
+            try:
+                resource = self.classification_resolver.resolve_resource(
+                    source.dataset,
+                    sorted(fields_by_source.get(source_id, set())),
+                )
+            except ClassificationError as exc:
+                raise AdapterPermissionDenied(
+                    "BI publication denied because trusted data "
+                    f"classification failed for {source.dataset}: {exc}"
+                ) from exc
+
+            if resource.classification == DataClassification.RESTRICTED:
+                raise AdapterPermissionDenied(
+                    "BI publication denied for RESTRICTED dataset "
+                    f"{source.dataset}; publish a governed aggregate "
+                    "or reporting dataset instead"
+                )
+
+            restricted_fields = sorted(
+                field.field
+                for field in resource.field_classifications
+                if field.classification == DataClassification.RESTRICTED
+            )
+
+            if restricted_fields:
+                raise AdapterPermissionDenied(
+                    "BI publication denied because restricted fields are "
+                    f"present in {source.dataset}: "
+                    + ", ".join(restricted_fields)
+                )
 
     @staticmethod
     def _validated(dashboard):
