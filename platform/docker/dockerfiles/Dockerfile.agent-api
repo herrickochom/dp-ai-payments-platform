@@ -1,0 +1,13 @@
+FROM python:3.11-slim
+
+COPY services/agent-api/requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+WORKDIR /app
+COPY services/agent-api/ /app/
+
+ENV AGENT_API_PORT=7010 PYTHONUNBUFFERED=1
+EXPOSE 7010
+
+CMD ["sh", "-c", "uvicorn api:app --host 0.0.0.0 --port ${AGENT_API_PORT}"]
+

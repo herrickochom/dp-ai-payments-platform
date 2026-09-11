@@ -165,3 +165,58 @@ docker compose up -d                                    # core services
 docker compose --profile dbt run --rm duckdb build      # build the lakehouse
 docker compose --profile analytics up -d trino superset  # query and dashboards
 ```
+
+## Agent Phase 1
+
+Phase 1 adds one bounded, synchronous `agent-api` service above the lakehouse:
+
+```text
+User -> Agent API -> Orchestrator
+                       |-- Data Discovery Agent -> controlled metadata tools
+                       `-- Analytics Agent -> semantic request -> controlled query tools
+                                                        |
+                                                     Trino
+                                                        |
+                                                Iceberg / Nessie
+```
+
+Agents choose objectives and tools; tools validate permissions, SQL shape, row
+limits and timeouts before Trino executes anything. The service never consumes
+Kafka and never exposes unrestricted SQL. Data Discovery searches live Trino
+`information_schema` metadata and labels candidate joins as inferred. Analytics
+first discovers columns, emits a reusable semantic analytical request
+(datasets, dimensions, measures, filters, grouping, ordering and limit), then
+executes only a parsed, single-statement, read-only query. Evidence identifies
+the metadata objects and Trino query used; query errors are returned as
+structured failures instead of invented answers.
+
+The request permissions boundary currently supports metadata discovery,
+read-query execution and per-request row limits. It is intentionally lightweight
+so later governance can strengthen it without changing agent contracts. Model
+provider selection uses `AGENT_MODEL_PROVIDER`/`AGENT_MODEL`; Phase 1 defaults to
+`disabled`, so deterministic tools require no API key. `rag.search` is registered
+but reports `not_configured`; no vector database is introduced.
+
+```bash
+docker compose --profile agents up -d agent-api
+curl http://localhost:7010/agents
+curl http://localhost:7010/agents/health
+curl -X POST http://localhost:7010/agents/query \
+  -H 'content-type: application/json' \
+  -d '{"objective":"What tables contain PDM repayment information?"}'
+curl -X POST http://localhost:7010/agents/query \
+  -H 'content-type: application/json' \
+  -d '{"objective":"What is repayment performance by district?"}'
+```
+
+Configuration is environment-driven: `TRINO_HOST`, `TRINO_PORT`, `TRINO_USER`,
+`TRINO_CATALOG`, `TRINO_SCHEMA`, `TRINO_HTTP_SCHEME`, optional
+`TRINO_PASSWORD`, `AGENT_MAX_ROWS`, `AGENT_QUERY_TIMEOUT_SECONDS`,
+`AGENT_MAX_QUERY_LENGTH`, and `AGENT_MAX_TOOL_CALLS`. Run focused tests with
+`python3 tests/test_agent_phase1.py` or inside the built agent image.
+
+Known Phase 1 limits: routing and semantic selection are deliberately bounded;
+runtime lineage and RAG are unavailable; inferred joins are not database-backed
+foreign keys; and only discovery plus geography/repayment analytics are covered.
+Phase 2 may add Visualization and Dashboard builders against the semantic request
+contract, but those builders are not part of this phase.

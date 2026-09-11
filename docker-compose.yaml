@@ -516,6 +516,7 @@ services:
     user: "0:0"
     profiles:
       - analytics
+      - agents
       - trino
       - dbt
       - dashboard
@@ -560,6 +561,45 @@ services:
         condition: service_healthy
       nessie:
         condition: service_healthy
+
+  agent-api:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.agent-api
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-agent-api
+    profiles:
+      - analytics
+      - agents
+    environment:
+      AGENT_API_PORT: "7010"
+      TRINO_HOST: ${TRINO_HOST:-trino}
+      TRINO_PORT: ${TRINO_PORT:-8080}
+      TRINO_USER: ${AGENT_TRINO_USER:-agent-api}
+      TRINO_CATALOG: ${TRINO_CATALOG:-iceberg}
+      TRINO_SCHEMA: ${TRINO_SCHEMA:-consumption}
+      TRINO_HTTP_SCHEME: ${TRINO_HTTP_SCHEME:-http}
+      TRINO_PASSWORD: ${AGENT_TRINO_PASSWORD:-}
+      AGENT_MAX_ROWS: ${AGENT_MAX_ROWS:-1000}
+      AGENT_QUERY_TIMEOUT_SECONDS: ${AGENT_QUERY_TIMEOUT_SECONDS:-30}
+      AGENT_MAX_QUERY_LENGTH: ${AGENT_MAX_QUERY_LENGTH:-20000}
+      AGENT_MAX_TOOL_CALLS: ${AGENT_MAX_TOOL_CALLS:-20}
+      AGENT_MODEL_PROVIDER: ${AGENT_MODEL_PROVIDER:-disabled}
+      AGENT_MODEL: ${AGENT_MODEL:-}
+      AGENT_RAG_ENABLED: ${AGENT_RAG_ENABLED:-false}
+    ports:
+      - "${AGENT_API_PORT:-7010}:7010"
+    restart: unless-stopped
+    networks:
+      - data-platform-network
+    depends_on:
+      trino:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:7010/agents/health', timeout=5)"]
+      interval: 15s
+      timeout: 8s
+      retries: 5
+      start_period: 10s
 
   metabase:
     image: metabase/metabase:v0.49.10
