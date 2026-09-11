@@ -218,5 +218,50 @@ Configuration is environment-driven: `TRINO_HOST`, `TRINO_PORT`, `TRINO_USER`,
 Known Phase 1 limits: routing and semantic selection are deliberately bounded;
 runtime lineage and RAG are unavailable; inferred joins are not database-backed
 foreign keys; and only discovery plus geography/repayment analytics are covered.
-Phase 2 may add Visualization and Dashboard builders against the semantic request
-contract, but those builders are not part of this phase.
+Phase 1 itself stops at the semantic analytical request and controlled query;
+the separately bounded Phase 2 builder layer below consumes that stable contract.
+
+## Agent Phase 2 builder integration
+
+Phase 1 remains frozen. Phase 2 adds deterministic, vendor-neutral builder
+contracts after the Analytics Agent's semantic request:
+
+```text
+Analytics Agent -> SemanticAnalyticalRequest -> controlled builder tools
+  -> DataSourceSpec -> VisualizationSpec(s) -> DashboardSpec
+```
+
+The Data-Source Builder resolves the requested `catalog.schema.table` and every
+field through the existing Trino metadata tool, accepts only supported numeric
+aggregations, preserves query/semantic provenance, and labels proposed joins as
+confirmed or inferred. The Visualization Builder supports `kpi`, `table`, `bar`,
+`line`, and `scatter`; it validates field existence, roles, chart shape, sorting,
+and limits. The Dashboard Builder validates unique visualization IDs, filter
+fields, data-source dependencies, and a bounded 12-column layout.
+
+Builders are deterministic and require no LLM. They return validated definitions
+only (`persistence=returned_only`); the existing imperative Superset dashboard
+scripts remain unchanged and are a future candidate for a BI adapter behind
+these contracts. Builders cannot bypass Phase 1 metadata/read permissions, do
+not emit UI code, and do not publish dashboards automatically.
+
+Endpoints:
+
+```text
+POST /builders/data-source
+POST /builders/visualization
+POST /builders/dashboard
+POST /agents/build
+```
+
+`/agents/build` is a bounded composition workflow, not a Dashboard Agent. It
+reuses Analytics output, builds a data source, deterministically recommends a KPI,
+category/time chart, and underlying table when supported, then validates and
+returns a dashboard definition. Run Phase 2 tests with
+`python3 tests/test_agent_phase2.py`.
+
+Known limits: no builder artifact persistence, overlap detection, renderer, or
+Superset adapter is implemented; joins are validated but single-primary-dataset
+specifications are the Phase 2 execution boundary. Phase 3 may add bounded
+Visualization and Dashboard Agents plus a Superset adapter without changing the
+builder domain models.
