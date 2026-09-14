@@ -1,5 +1,7 @@
 import re
 import time
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FuturesTimeoutError
 from typing import Any, Callable
 
 import sqlglot
@@ -17,6 +19,9 @@ from governance_models import (
     PolicyDecisionType,
 )
 from models import ToolCall
+from knowledge import KnowledgeRetriever
+from knowledge_models import KnowledgeQuery
+from observability import emit
 from trino_gateway import TrinoGateway
 
 
@@ -65,6 +70,12 @@ class ToolLimitExceeded(ToolError):
     pass
 
 
+class ToolTimeout(ToolError):
+    """Raised when a tool call misses its bounded execution deadline."""
+
+    pass
+
+
 class QueryValidationError(ToolError):
     pass
 
@@ -89,6 +100,13 @@ def quote_identifier(value: str) -> str:
     return '"' + value.replace('"', '""') + '"'
 
 
+#
+# Shared bounded executor used to enforce per-tool execution deadlines.
+# A small worker pool is sufficient for the local deterministic backend.
+#
+_TOOL_EXECUTOR = ThreadPoolExecutor(max_workers=8, thread_name_prefix="agent-tool")
+
+
 class ToolRegistry:
     def __init__(
         self,
@@ -97,6 +115,9 @@ class ToolRegistry:
         governance_engine: GovernancePolicyEngine | None = None,
         governance_request: GovernanceRequest | None = None,
         classification_resolver: TrustedClassificationResolver | None = None,
+        knowledge_retriever: KnowledgeRetriever | None = None,
+        audit_store=None,
+        request_id: str | None = None,
     ):
         self.gateway = gateway
         self.settings = settings
@@ -133,10 +154,36 @@ class ToolRegistry:
             if classification_resolver is not None
             else TrustedClassificationResolver()
         )
+        self.knowledge_retriever = knowledge_retriever
+        self.audit_store = audit_store
+        self.request_id = request_id or None
 
     # ------------------------------------------------------------------
     # Controlled tool execution
     # ------------------------------------------------------------------
+
+    def _tool_timeout_seconds(self) -> float:
+        return float(getattr(self.settings, "tool_timeout_seconds", 30) or 30)
+
+    def _tool_max_retries(self) -> int:
+        return int(getattr(self.settings, "tool_max_retries", 1) or 0)
+
+    @staticmethod
+    def _is_transient(exc: BaseException) -> bool:
+        return isinstance(exc, (ToolTimeout, TimeoutError, ConnectionError, OSError))
+
+    @staticmethod
+    def _execute_bounded(function: Callable[[], Any], timeout: float) -> Any:
+        future = _TOOL_EXECUTOR.submit(function)
+        try:
+            return future.result(timeout=timeout)
+        except FuturesTimeoutError:
+            # A worker-raised timeout error has already completed; otherwise
+            # the future timed out and is still running in the pool.
+            if future.done():
+                failure = future.exception()
+                raise failure from None
+            raise ToolTimeout("tool execution exceeded the bounded deadline") from None
 
     def _call(
         self,
@@ -163,26 +210,53 @@ class ToolRegistry:
         #
         self.calls.append(record)
 
-        try:
-            result = function()
+        max_retries = self._tool_max_retries()
+        attempts = 0
 
-        except Exception as exc:
-            record.status = "failed"
+        while True:
+            attempts += 1
+            try:
+                result = self._execute_bounded(
+                    function, self._tool_timeout_seconds()
+                )
+            except Exception as exc:
+                record.status = "failed"
+                record.duration_ms = (
+                    time.monotonic() - started
+                ) * 1000
+                record.metadata = {
+                    "error_category": type(exc).__name__,
+                    "attempts": attempts,
+                }
+                emit(
+                    "tool_invoked",
+                    tool=name,
+                    request_id=self.request_id,
+                    status="failed",
+                    error_category=record.metadata["error_category"],
+                    attempts=attempts,
+                    duration_ms=round(record.duration_ms, 2),
+                )
+                if not self._is_transient(exc) or attempts > max_retries:
+                    raise
+                continue
+
+            record.status = "completed"
             record.duration_ms = (
                 time.monotonic() - started
             ) * 1000
 
-            record.metadata = {
-                "error_category": type(exc).__name__,
-            }
+            if attempts > 1:
+                record.metadata["retries"] = attempts - 1
 
-            raise
-
-        record.duration_ms = (
-            time.monotonic() - started
-        ) * 1000
-
-        return result
+            emit(
+                "tool_invoked",
+                tool=name,
+                request_id=self.request_id,
+                status="completed",
+                duration_ms=round(record.duration_ms, 2),
+            )
+            return result
 
     # ------------------------------------------------------------------
     # Metadata
@@ -371,17 +445,16 @@ class ToolRegistry:
 
     def rag_search(
         self,
-        query: str,
+        query: KnowledgeQuery,
     ):
         return self._call(
             "rag.search",
-            lambda: {
-                "status": "not_configured",
-                "results": [],
-                "warning": (
-                    "No knowledge index is configured"
-                ),
-            },
+            lambda: (
+                self.knowledge_retriever.retrieve(query, self.governance_request).model_dump(mode="json")
+                if self.knowledge_retriever is not None
+                else {"status": "not_configured", "results": [],
+                      "warning": "No knowledge index is configured"}
+            ),
         )
 
     # ------------------------------------------------------------------
@@ -520,6 +593,15 @@ class ToolRegistry:
         decision = self.evaluate_governance(
             request
         )
+
+        #
+        # Durable structured evidence for consequential policy decisions
+        # (DENY / REQUIRE_APPROVAL / MASK). Routine ALLOW decisions for
+        # internal query enforcement are not persisted at tool level; the
+        # explicit /governance endpoints persist every evaluation.
+        #
+        if self.audit_store is not None and decision.decision != PolicyDecisionType.ALLOW:
+            self.audit_store.record_decision(request, decision, self.request_id)
 
         if (
             decision.decision

@@ -1,7 +1,12 @@
 import logging
 import os
+import asyncio
+import json
+import re
+import time
+from uuid import uuid4
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from bi_adapter import (
@@ -28,6 +33,7 @@ from quality_models import (
     InsightRequest,
 )
 from tools import ToolRegistry
+from audit import JsonlAuditStore
 
 
 logging.basicConfig(
@@ -39,7 +45,9 @@ logger = logging.getLogger(__name__)
 
 settings = Settings()
 
-orchestrator = Orchestrator(settings)
+audit_store = JsonlAuditStore(settings.audit_log_path)
+
+orchestrator = Orchestrator(settings, audit_store=audit_store)
 
 governance_policy_engine = GovernancePolicyEngine()
 
@@ -51,6 +59,70 @@ app = FastAPI(
     title="DP AI Agent API",
     version="1.0.0",
 )
+
+
+@app.middleware("http")
+async def request_context(request: Request, call_next):
+    supplied = request.headers.get("x-request-id", "")
+    request_id = supplied if re.fullmatch(r"[A-Za-z0-9._:-]{1,128}", supplied) else str(uuid4())
+    request.state.request_id = request_id
+    started = time.monotonic()
+
+    #
+    # Bounded request size. A body larger than the configured ceiling is
+    # rejected before any handler runs, so oversized payloads cannot exhaust
+    # memory or hide in slow reads.
+    #
+    content_length = request.headers.get("content-length")
+    if content_length is not None and content_length.isdigit() and \
+            int(content_length) > settings.max_request_bytes:
+        return JSONResponse(status_code=413, content={"status": "payload_too_large",
+                            "request_id": request_id,
+                            "error": {"category": "RequestTooLarge",
+                                      "message": "Request body exceeds the configured size limit"}})
+
+    logger.info(json.dumps({"event": "request_received", "request_id": request_id,
+                            "method": request.method, "path": request.url.path}))
+    try:
+        response = await asyncio.wait_for(call_next(request), timeout=settings.request_timeout_seconds)
+    except asyncio.TimeoutError:
+        logger.info(json.dumps({"event": "request_timeout", "request_id": request_id}))
+        return JSONResponse(status_code=504, content={"status": "timed_out", "request_id": request_id,
+                            "error": {"category": "RequestTimeout",
+                                      "message": "Request processing exceeded the configured timeout"}})
+    except Exception:
+        logger.exception(json.dumps({"event": "request_failed", "request_id": request_id}))
+        return JSONResponse(status_code=500, content={"status": "failed", "request_id": request_id,
+                                                     "error": {"category": "InternalError",
+                                                               "message": "Request processing failed"}})
+    response.headers["x-request-id"] = request_id
+    logger.info(json.dumps({"event": "request_completed", "request_id": request_id,
+                            "status_code": response.status_code,
+                            "duration_ms": round((time.monotonic() - started) * 1000, 2)}))
+    return response
+
+
+@app.middleware("http")
+async def authentication_hook(request: Request, call_next):
+    """Optional deterministic authentication hook.
+
+    Local development runs with AGENT_AUTH_ENABLED=false (the default) and
+    passes through with a local-pilot subject hint. A real deployment sets
+    AGENT_AUTH_ENABLED=true behind an upstream gateway that resolves identity;
+    this hook then rejects requests that carry no valid subject header.
+    Authorisation itself remains the deterministic governance engine's job.
+    """
+    if settings.auth_enabled:
+        subject = request.headers.get("x-subject-id", "")
+        if not re.fullmatch(r"[A-Za-z0-9._:-]{1,128}", subject):
+            return JSONResponse(status_code=401,
+                                content={"status": "unauthorised",
+                                         "error": {"category": "AuthenticationRequired",
+                                                   "message": "A valid x-subject-id header is required"}})
+        request.state.subject_id = subject
+    else:
+        request.state.subject_id = request.headers.get("x-subject-id", "local-pilot-user")
+    return await call_next(request)
 
 
 # ---------------------------------------------------------------------------
@@ -124,6 +196,25 @@ def agents():
 # ---------------------------------------------------------------------------
 # Health
 # ---------------------------------------------------------------------------
+
+
+@app.get("/health/live")
+def liveness():
+    return {"status": "alive"}
+
+
+@app.get("/health/ready")
+def readiness():
+    try:
+        dependency = orchestrator.gateway.health()
+        if dependency.get("status") != "healthy":
+            raise RuntimeError("required analytical dependency is unhealthy")
+        return {"status": "ready", "required": {"trino": "healthy"},
+                "optional": {"rag": "enabled" if settings.rag_enabled else "not_configured"}}
+    except Exception as exc:
+        return JSONResponse(status_code=503, content={"status": "not_ready",
+                            "required": {"trino": "unavailable"},
+                            "error_category": type(exc).__name__})
 
 
 @app.get("/agents/health")
@@ -357,6 +448,7 @@ def insights(request: InsightRequest):
 @app.post("/governance/evaluate")
 def governance_evaluate(
     request: GovernanceRequest,
+    http_request: Request,
 ):
     """
     Evaluate a governance request using deterministic policy logic.
@@ -378,12 +470,16 @@ def governance_evaluate(
         decision = governance_policy_engine.evaluate(
             request
         )
+        audit_event = audit_store.record_decision(
+            request, decision, http_request.state.request_id
+        )
 
         return {
             "status": "completed",
             "decision": decision.model_dump(
                 mode="json"
             ),
+            "audit_event_id": audit_event.audit_event_id,
         }
 
     except Exception as exc:
@@ -414,6 +510,7 @@ def governance_evaluate(
 @app.post("/agents/governance")
 def governance_agent_query(
     request: GovernanceRequest,
+    http_request: Request,
 ):
     """
     Governance Agent endpoint.
@@ -431,6 +528,10 @@ def governance_agent_query(
 
         decision = response["decision"]
 
+        audit_event = audit_store.record_decision(
+            request, decision, http_request.state.request_id
+        )
+
         return {
             "status": "completed",
             "agent": response["agent"],
@@ -440,6 +541,7 @@ def governance_agent_query(
             "explanation": response[
                 "explanation"
             ],
+            "audit_event_id": audit_event.audit_event_id,
         }
 
     except Exception as exc:

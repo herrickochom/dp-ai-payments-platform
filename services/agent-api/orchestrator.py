@@ -9,6 +9,7 @@ from config import Settings
 from governance import GovernancePolicyEngine
 from governance_models import GovernanceRequest
 from models import AgentRequest, AgentResponse, StructuredError
+from observability import brief, emit
 from phase3_agents import DashboardAgent, VisualizationAgent
 from phase4_agents import DataQualityAgent, InsightAgent
 from tools import ToolError, ToolRegistry
@@ -24,9 +25,11 @@ class Orchestrator:
         settings: Settings | None = None,
         gateway=None,
         governance_engine: GovernancePolicyEngine | None = None,
+        audit_store=None,
     ):
         self.settings = settings or Settings()
         self.gateway = gateway or TrinoGateway(self.settings)
+        self.audit_store = audit_store
 
         self.governance_engine = (
             governance_engine
@@ -357,7 +360,12 @@ class Orchestrator:
             governance_request=(
                 governance_request
             ),
+            audit_store=self.audit_store,
+            request_id=response.request_id,
         )
+
+        emit("orchestration_started", request_id=response.request_id,
+             agent=identity, objective=brief(request.objective))
 
         try:
             agents = {

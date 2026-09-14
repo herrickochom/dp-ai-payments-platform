@@ -126,6 +126,30 @@ DATASET_POLICIES: dict[str, DatasetPolicy] = {
         dataset="iceberg.silver.slv_pdm_dq_results",
         classification=DataClassification.INTERNAL,
     ),
+
+    #
+    # Phase 6 technical payment lifecycle tables (PMN pain.001 / PLM pain.002
+    # technical event streams). These hold operational message lifecycle data
+    # for oversight and reconciliation. They are governed analytical inputs,
+    # not beneficiary identity sources; the platform classifies them INTERNAL
+    # like other operational silver tables.
+    #
+    "iceberg.silver.slv_pdm_payments_pmn_lifecycle_events": DatasetPolicy(
+        dataset="iceberg.silver.slv_pdm_payments_pmn_lifecycle_events",
+        classification=DataClassification.INTERNAL,
+    ),
+    "iceberg.silver.slv_pdm_payments_plm_lifecycle_events": DatasetPolicy(
+        dataset="iceberg.silver.slv_pdm_payments_plm_lifecycle_events",
+        classification=DataClassification.INTERNAL,
+    ),
+    "iceberg.silver.slv_pdm_payment_technical_events": DatasetPolicy(
+        dataset="iceberg.silver.slv_pdm_payment_technical_events",
+        classification=DataClassification.INTERNAL,
+    ),
+    "iceberg.silver.slv_pdm_payment_event_correlation": DatasetPolicy(
+        dataset="iceberg.silver.slv_pdm_payment_event_correlation",
+        classification=DataClassification.INTERNAL,
+    ),
 }
 
 

@@ -389,3 +389,31 @@ request/response only; anomaly detection is deliberately simple; and there is
 no causal inference, scheduler, alert delivery, remediation, PII policy engine,
 or full governance enforcement. Run focused tests with
 `python3 -m unittest tests.test_agent_phase4` in the Agent API environment.
+## Agent Phases 5–9: governance, RAG, orchestration, hardening
+
+Phase 5 added deterministic governance: a trusted classification registry
+(PUBLIC / INTERNAL / CONFIDENTIAL / RESTRICTED), RBAC/ABAC evaluation, field
+masking, approval requirements, and beneficiary access control. Governance
+agents explain decisions; they never make them.
+
+Phases 7–9 build on that boundary without changing agent/builder contracts:
+
+- **RAG / knowledge layer (Phase 7)** — `KnowledgeRetriever` with a
+  deterministic local backend (`LocalKnowledgeRetriever`), stable document
+  and chunk IDs, idempotent ingestion, governance-aware filtering before
+  exposure, prompt-injection redaction, real citations only, and a
+  `HybridEvidence` split between knowledge and live Trino evidence.
+- **Multi-agent orchestration (Phase 8)** — `MultiAgentOrchestrator` with a
+  fixed agent catalogue, deterministic routing, DAG dependency execution,
+  bounded steps/tools/depth/elapsed budget, loop rejection, and explicit
+  FAILED / PARTIAL / DENIED / REQUIRES_APPROVAL / COMPLETED semantics.
+- **Production hardening (Phase 9)** — fail-fast configuration, request
+  IDs, liveness/readiness endpoints, request size/timeout limits, optional
+  auth hook, tool deadlines and bounded retries, structured operational
+  events, durable payload-free audit events, and a bounded local smoke
+  suite. No agent path can drop tables, delete Kafka topics, wipe MinIO,
+  reset Nessie, or delete dashboards/datasets.
+
+See [docs/architecture/agent-platform-phases-7-9.md](docs/architecture/agent-platform-phases-7-9.md)
+for the full architecture, deployment boundaries, and known local
+limitations.
