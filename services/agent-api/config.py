@@ -38,3 +38,25 @@ class Settings:
     dq_max_rules_per_request: int = int(os.getenv("DQ_MAX_RULES_PER_REQUEST", "4"))
     dq_max_sample_rows: int = int(os.getenv("DQ_MAX_SAMPLE_ROWS", "5"))
     insight_change_threshold: float = float(os.getenv("INSIGHT_CHANGE_THRESHOLD", "0.20"))
+    audit_log_path: str = os.getenv("AGENT_AUDIT_LOG_PATH", "/tmp/dp-agent/audit.jsonl")
+    request_timeout_seconds: int = int(os.getenv("AGENT_REQUEST_TIMEOUT_SECONDS", "60"))
+    tool_timeout_seconds: int = int(os.getenv("AGENT_TOOL_TIMEOUT_SECONDS", "10"))
+    tool_max_retries: int = int(os.getenv("AGENT_TOOL_MAX_RETRIES", "1"))
+    max_request_bytes: int = int(os.getenv("AGENT_MAX_REQUEST_BYTES", "1000000"))
+    auth_enabled: bool = os.getenv("AGENT_AUTH_ENABLED", "false").lower() == "true"
+
+    def __post_init__(self):
+        if not 1 <= self.trino_port <= 65535:
+            raise ValueError("TRINO_PORT must be between 1 and 65535")
+        if self.trino_http_scheme not in {"http", "https"}:
+            raise ValueError("TRINO_HTTP_SCHEME must be http or https")
+        if self.max_rows < 1 or self.max_tool_calls < 1:
+            raise ValueError("agent limits must be positive")
+        if self.query_timeout_seconds < 1 or self.request_timeout_seconds < 1:
+            raise ValueError("timeouts must be positive")
+        if not 1 <= self.tool_timeout_seconds <= 120:
+            raise ValueError("AGENT_TOOL_TIMEOUT_SECONDS must be between 1 and 120")
+        if not 0 <= self.tool_max_retries <= 3:
+            raise ValueError("AGENT_TOOL_MAX_RETRIES must be between 0 and 3")
+        if self.max_request_bytes < 1024:
+            raise ValueError("AGENT_MAX_REQUEST_BYTES must be at least 1024")

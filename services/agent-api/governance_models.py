@@ -132,9 +132,9 @@ class PolicyDecision(BaseModel):
 
 
 class GovernanceAuditEvent(BaseModel):
-    audit_id: str
-
-    subject: str
+    audit_event_id: str
+    actor: str
+    roles: list[str] = Field(default_factory=list)
     agent: str | None = None
     tool: str | None = None
 
@@ -151,6 +151,11 @@ class GovernanceAuditEvent(BaseModel):
 
     purpose: str | None = None
     query_id: str | None = None
+    policy_reason: list[str] = Field(default_factory=list)
+    geography_scope: str | None = None
+    request_id: str | None = None
+    correlation_id: str | None = None
+    approval_reference: str | None = None
 
     timestamp: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc)
