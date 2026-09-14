@@ -67,11 +67,11 @@ class Config:
 TOPIC_MAPPINGS = {
     # ICMN
     "icmn.vpm.pain001": {"category": "icmn", "system": "vpm", "msg_type": "pain001", "description": "VPM Payment Initiation", "has_technical_attrs": False},
-    "icmn.pmn.pain001": {"category": "icmn", "system": "pmn", "msg_type": "pain001", "description": "PMN Payment Initiation", "has_technical_attrs": True},
+    "icmn.pmn.pain001": {"category": "icmn", "system": "pmn", "msg_type": "technical_payment_event", "description": "PMN Technical Payment Event", "event_family": "TECHNICAL_PAYMENT_EVENT"},
 
     # CPO
     "cpo.psn.pain002": {"category": "cpo", "system": "psn", "msg_type": "pain002", "description": "PSN Payment Status", "has_technical_attrs": False},
-    "cpo.plm.pain002": {"category": "cpo", "system": "plm", "msg_type": "pain002", "description": "PLM Payment Lifecycle", "has_technical_attrs": True},
+    "cpo.plm.pain002": {"category": "cpo", "system": "plm", "msg_type": "technical_payment_event", "description": "PLM Technical Payment Event", "event_family": "TECHNICAL_PAYMENT_EVENT"},
 
     # Wendi
     "wendi.pain001": {"category": "wendi", "system": "wendi", "msg_type": "pain001", "description": "Wendi Payment Initiation", "has_technical_attrs": False},
@@ -103,6 +103,8 @@ TOPIC_MAPPINGS = {
 }
 
 BUSINESS_KEY_FIELDS = {
+    "icmn.pmn.pain001": ("end_to_end_id", "instruction_id", "correlation_id", "transaction_id"),
+    "cpo.plm.pain002": ("end_to_end_id", "instruction_id", "correlation_id", "transaction_id"),
     "pdmis.loans": ("loan_id",),
     "pdmis.repayments": ("loan_id", "payment_id", "repayment_id"),
     "pdmis.beneficiaries": ("beneficiary_id",),
@@ -201,10 +203,11 @@ def load_avro_schema():
                 {"name": "event_id", "type": "string"},
                 {"name": "message_id", "type": "string"},
                 {"name": "event_type", "type": "string"},
+                {"name": "event_family", "type": "string", "default": "PAYMENT_BUSINESS_EVENT"},
                 {"name": "source_system", "type": "string"},
                 {"name": "source_key", "type": "string"},
-                {"name": "instructed_amount", "type": "double"},
-                {"name": "currency", "type": "string"},
+                {"name": "instructed_amount", "type": ["null", "double"], "default": null},
+                {"name": "currency", "type": ["null", "string"], "default": null},
                 {"name": "creation_date", "type": "string"},
                 {"name": "timestamp", "type": "string"},
                 {"name": "version", "type": "string"},
@@ -282,11 +285,6 @@ def parse_pain001_xml(file_path: str) -> Dict[str, Any]:
             else:
                 result[key] = "" if key not in ["instructed_amount"] else 0.0
         
-        result["x_attributes"] = {
-            element.tag.rsplit('}', 1)[-1]: element.text or ""
-            for element in root.iter()
-            if element.tag.rsplit('}', 1)[-1].startswith('x-')
-        }
         result["xml"] = {root.tag.rsplit('}', 1)[-1]: xml_to_dict(root)}
         return result
     except Exception as e:
@@ -294,7 +292,7 @@ def parse_pain001_xml(file_path: str) -> Dict[str, Any]:
         return {}
 
 def parse_pain002_xml(file_path: str) -> Dict[str, Any]:
-    """Parse PAIN.002 XML into a header, business payload and x-* attributes."""
+    """Parse PAIN.002 XML into its business header and payload."""
     try:
         tree = ET.parse(file_path)
         root = tree.getroot()
@@ -305,11 +303,6 @@ def parse_pain002_xml(file_path: str) -> Dict[str, Any]:
             element = root.find(path, ns)
             return element.text if element is not None and element.text else ""
 
-        x_attributes = {
-            element.tag.rsplit('}', 1)[-1]: element.text or ""
-            for element in root.iter()
-            if element.tag.rsplit('}', 1)[-1].startswith('x-')
-        }
         return {
             "header": {
                 "message_id": text('.//ns:GrpHdr/ns:MsgId'),
@@ -326,7 +319,6 @@ def parse_pain002_xml(file_path: str) -> Dict[str, Any]:
                 "settlement_status": text('.//ns:OrgnlPmtInfAndSts/ns:SettlementStatus'),
                 "business_date": text('.//ns:OrgnlPmtInfAndSts/ns:BusinessDate'),
             },
-            "x_attributes": x_attributes,
             "xml": {root.tag.rsplit('}', 1)[-1]: xml_to_dict(root)},
         }
     except Exception as e:
@@ -337,9 +329,115 @@ def parse_generic_xml(file_path: str) -> Dict[str, Any]:
     """Preserve an arbitrary XML document as the canonical nested JSON shape."""
     try:
         root = ET.parse(file_path).getroot()
-        return {"xml": {root.tag.rsplit('}', 1)[-1]: xml_to_dict(root)}}
+        def first(local_names):
+            return next(
+                (element for element in root.iter()
+                 if element.tag.rsplit('}', 1)[-1] in local_names),
+                None,
+            )
+
+        message = first({"MsgId"})
+        created = first({"CreDtTm"})
+        amount = first({"InstdAmt", "IntrBkSttlmAmt"})
+        return {
+            "message_id": message.text if message is not None else None,
+            "creation_date": created.text if created is not None else None,
+            "instructed_amount": (
+                float(amount.text) if amount is not None and amount.text else None
+            ),
+            "currency": amount.get("Ccy") if amount is not None else None,
+            "xml": {root.tag.rsplit('}', 1)[-1]: xml_to_dict(root)},
+        }
     except Exception as exc:
         logger.error(f"Error parsing XML {file_path}: {exc}")
+        return {}
+
+
+def parse_technical_payment_event(file_path: str) -> Dict[str, Any]:
+    """Parse the standalone technical contract without ISO namespace assumptions."""
+    try:
+        root = ET.parse(file_path).getroot()
+        if root.tag.rsplit('}', 1)[-1] != "TechnicalPaymentEvent":
+            raise ValueError("expected TechnicalPaymentEvent root")
+
+        values = {
+            child.tag.rsplit('}', 1)[-1]: (child.text or "").strip()
+            for child in root
+        }
+        required = (
+            "EventId", "MessageId", "EventFamily", "EventType", "CorrelationId",
+            "PaymentInstructionId", "EndToEndId", "TransactionId", "UETR",
+            "BusinessReference", "XTrace", "XChannel",
+            "XSourceSystem", "XTargetSystem", "XService", "XOperation",
+            "XComponent", "XNode", "XHost", "TechnicalStage", "TechnicalStatus",
+            "EventTimestamp", "ProcessingTimestamp", "XLatencyMs", "XRetryCount",
+            "XTimeoutIndicator",
+        )
+        missing = [name for name in required if not values.get(name)]
+        if missing:
+            raise ValueError(f"missing required technical fields: {', '.join(missing)}")
+        stage_required = {
+            "PMN": ("XPaymentRoute", "XOriginatingInstitution", "XIntermediaryInstitution",
+                    "XRouteDecision", "XValidationStatus", "XSubmissionStatus"),
+            "PLM": ("XProvider", "XNetwork", "XBeneficiarySa", "XWalletReference",
+                    "XProviderTransactionId", "XCreditStatus", "XAgentReference", "XCashoutStatus"),
+        }
+        missing = [name for name in stage_required.get(values["EventType"], ()) if not values.get(name)]
+        if missing:
+            raise ValueError(f"missing required {values['EventType']} fields: {', '.join(missing)}")
+
+        payload = {
+            "event_id": values["EventId"],
+            "message_id": values["MessageId"],
+            "event_family": values["EventFamily"],
+            "event_type": values["EventType"],
+            "correlation_id": values["CorrelationId"],
+            "instruction_id": values["PaymentInstructionId"],
+            "end_to_end_id": values["EndToEndId"],
+            "transaction_id": values["TransactionId"],
+            "uetr": values["UETR"],
+            "business_reference": values["BusinessReference"],
+            "x_trace": values["XTrace"],
+            "x_channel": values["XChannel"],
+            "x_source_system": values["XSourceSystem"],
+            "x_target_system": values["XTargetSystem"],
+            "x_service": values["XService"],
+            "x_operation": values["XOperation"],
+            "x_component": values["XComponent"],
+            "x_node": values["XNode"],
+            "x_host": values["XHost"],
+            "technical_stage": values["TechnicalStage"],
+            "technical_status": values["TechnicalStatus"],
+            "event_timestamp": values["EventTimestamp"],
+            "processing_timestamp": values["ProcessingTimestamp"],
+            "x_latency_ms": int(values["XLatencyMs"]),
+            "x_retry_count": int(values["XRetryCount"]),
+            "x_timeout_indicator": values["XTimeoutIndicator"].lower() == "true",
+            "x_error_code": values.get("XErrorCode") or None,
+            "x_error_category": values.get("XErrorCategory") or None,
+        }
+        if values["EventType"] == "PMN":
+            payload.update({
+                "x_payment_route": values["XPaymentRoute"],
+                "x_originating_institution": values["XOriginatingInstitution"],
+                "x_intermediary_institution": values["XIntermediaryInstitution"],
+                "x_route_decision": values["XRouteDecision"],
+                "x_validation_status": values["XValidationStatus"],
+                "x_submission_status": values["XSubmissionStatus"],
+            })
+        elif values["EventType"] == "PLM":
+            payload.update({
+                "x_provider": values["XProvider"], "x_network": values["XNetwork"],
+                "x_beneficiary_sa": values["XBeneficiarySa"],
+                "x_wallet_reference": values["XWalletReference"],
+                "x_provider_transaction_id": values["XProviderTransactionId"],
+                "x_credit_status": values["XCreditStatus"],
+                "x_agent_reference": values["XAgentReference"],
+                "x_cashout_status": values["XCashoutStatus"],
+            })
+        return {**payload, "xml": {"TechnicalPaymentEvent": xml_to_dict(root)}}
+    except (ET.ParseError, OSError, ValueError) as exc:
+        logger.error(f"Unable to parse technical payment event {file_path}: {exc}")
         return {}
 
 def detect_system_from_path(file_path: str) -> tuple:
@@ -409,8 +507,16 @@ def parse_event(file_path: str) -> Optional[Dict[str, Any]]:
         logger.warning(f"Unknown system/topic for {file_path}, skipping")
         return None
     
-    # Parse based on message type
-    if "pain001" in msg_type.lower():
+    try:
+        root_name = ET.parse(file_path).getroot().tag.rsplit('}', 1)[-1]
+    except (ET.ParseError, OSError) as exc:
+        logger.error(f"Unable to inspect XML {file_path}: {exc}")
+        return None
+
+    is_technical = root_name == "TechnicalPaymentEvent"
+    if is_technical:
+        payload = parse_technical_payment_event(file_path)
+    elif "pain001" in msg_type.lower():
         payload = parse_pain001_xml(file_path)
     elif "pain002" in msg_type.lower():
         payload = parse_pain002_xml(file_path)
@@ -427,22 +533,30 @@ def parse_event(file_path: str) -> Optional[Dict[str, Any]]:
         logger.error(f"Unable to read source XML {file_path}: {exc}")
         return None
     
-    # Build event
+    if not payload:
+        return None
+
+    payload.setdefault("source_system", system)
+
+    event_family = (
+        "TECHNICAL_PAYMENT_EVENT" if is_technical else "PAYMENT_BUSINESS_EVENT"
+    )
     event = {
-        "event_id": str(uuid.uuid4()),
+        "event_id": payload.get("event_id", str(uuid.uuid4())),
         "message_id": payload.get(
             "message_id",
             payload.get("header", {}).get(
                 "message_id", f"{system.upper()}-{msg_type}-{uuid.uuid4().hex[:8]}"
             ),
         ),
-        "event_type": msg_type,
+        "event_type": payload.get("event_type", msg_type),
+        "event_family": event_family,
         "source_system": system,
         "source_key": os.path.basename(file_path),
         "source_location": file_path,
-        "instructed_amount": payload.get("instructed_amount", 1000.00),
-        "currency": payload.get("currency", "GBP"),
-        "creation_date": payload.get("creation_date", payload.get("header", {}).get("creation_date", time.strftime("%Y-%m-%dT%H:%M:%S.000Z"))),
+        "instructed_amount": payload.get("instructed_amount"),
+        "currency": payload.get("currency"),
+        "creation_date": payload.get("event_timestamp", payload.get("creation_date", payload.get("header", {}).get("creation_date", time.strftime("%Y-%m-%dT%H:%M:%S.000Z")))),
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
         "version": "1.0.0",
         "event_data": event_data,
@@ -450,18 +564,7 @@ def parse_event(file_path: str) -> Optional[Dict[str, Any]]:
         "payload": json.dumps(payload.get("payload", payload)) if payload else None,
     }
     
-    # Add x-* attributes for technical systems
-    if TOPIC_MAPPINGS[topic]["has_technical_attrs"]:
-        event["x_attributes"] = payload.get("x_attributes", {}) | {
-            "x-correlationId": str(uuid.uuid4()),
-            "x-traceId": str(uuid.uuid4()),
-            "x-spanId": f"span-{uuid.uuid4().hex[:4]}",
-            "x-environment": os.getenv("ENVIRONMENT", "dev"),
-            "x-tenantId": f"tenant-{uuid.uuid4().hex[:4]}",
-            "x-messageType": topic,
-        }
-    else:
-        event["x_attributes"] = None
+    event["x_attributes"] = None
     
     return event
 
@@ -513,6 +616,7 @@ def parse_json_events(file_path: str) -> list[Dict[str, Any]]:
             "event_id": str(uuid.uuid4()),
             "message_id": message_id,
             "event_type": msg_type,
+            "event_family": "PAYMENT_BUSINESS_EVENT",
             "source_system": system,
             "source_key": os.path.basename(file_path),
             "source_location": file_path,

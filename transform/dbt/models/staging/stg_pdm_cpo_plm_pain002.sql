@@ -1,128 +1,82 @@
 {{ config(materialized='view') }}
 
 with raw_data as (
-
-    select
-        event_id,
-        message_id as envelope_message_id,
-        event_data,
-        parsed_event_data,
-        _kafka_metadata,
-        year,
-        month,
-        day
+    select event_id, message_id as envelope_message_id, event_family,
+           source_system as envelope_source_system, parsed_event_data,
+           _kafka_metadata, year, month, day
     from read_avro(
         's3://{{ var("s3_bucket") }}/{{ var("s3_path") }}/v2/**/topic=cpo.plm.pain002/**/*.avro',
         hive_partitioning = true
     )
-    where parsed_event_data is not null
-      and _kafka_metadata.topic = 'cpo.plm.pain002'
-
-),
-
-parsed as (
-
+    where _kafka_metadata.topic = 'cpo.plm.pain002'
+      and parsed_event_data is not null
+), parsed as (
     select
-        event_id,
-        envelope_message_id,
-
-        {{ extract_json('parsed_event_data', '$.header.message_id') }} as message_id,
-        {{ extract_json('parsed_event_data', '$.xml.Document.CstmrPmtStsRpt.GrpHdr.MsgId') }} as xml_message_id,
-        {{ extract_json('parsed_event_data', '$.xml.Document.CstmrPmtStsRpt.OrgnlGrpInfAndSts.OrgnlMsgId') }} as original_message_id,
-        {{ extract_json('parsed_event_data', '$.xml.Document.CstmrPmtStsRpt.OrgnlPmtInfAndSts.OrgnlEndToEndId') }} as end_to_end_id,
-
-        try_cast({{ extract_json('parsed_event_data', '$.header.creation_date') }} as timestamp) as creation_at,
-        try_cast({{ extract_json('parsed_event_data', '$.xml.Document.CstmrPmtStsRpt.GrpHdr.CreDtTm') }} as timestamp) as xml_creation_at,
-
-        {{ extract_json('parsed_event_data', '$.header.initiating_party') }} as initiating_party,
-        {{ extract_json('parsed_event_data', '$.header.original_message_id') }} as original_message_id_flat,
-        {{ extract_json('parsed_event_data', '$.header.original_message_type') }} as original_message_type,
-        {{ extract_json('parsed_event_data', '$.header.group_status') }} as group_status,
-        {{ extract_json('parsed_event_data', '$.payload.transaction_status') }} as transaction_status,
-
-        {{ extract_json('parsed_event_data', '$.xml.Document.CstmrPmtStsRpt.OrgnlGrpInfAndSts.GrpSts') }} as xml_group_status,
-        {{ extract_json('parsed_event_data', '$.xml.Document.CstmrPmtStsRpt.OrgnlPmtInfAndSts.TxSts') }} as xml_transaction_status,
-        {{ extract_json('parsed_event_data', '$.xml.Document.CstmrPmtStsRpt.OrgnlGrpInfAndSts.OrgnlMsgNmId') }} as original_message_name_id,
-        try_cast({{ extract_json('parsed_event_data', '$.xml.Document.CstmrPmtStsRpt.OrgnlGrpInfAndSts.OrgnlNbOfTxs') }} as integer) as original_number_of_transactions,
-        {{ extract_json('parsed_event_data', '$.xml.Document.CstmrPmtStsRpt.OrgnlPmtInfAndSts.OrgnlPmtInfId') }} as original_payment_information_id,
-        {{ extract_json('parsed_event_data', '$.xml.Document.CstmrPmtStsRpt.OrgnlPmtInfAndSts.OrgnlInstrId') }} as original_instruction_id,
-        {{ extract_json('parsed_event_data', '$.xml.Document.CstmrPmtStsRpt.OrgnlPmtInfAndSts.OrgnlTxId') }} as original_transaction_id,
-
-        coalesce(
-            nullif({{ extract_json('parsed_event_data', '$.payload.reason_code') }}, ''),
-            {{ extract_json('parsed_event_data', '$.xml.Document.CstmrPmtStsRpt.OrgnlPmtInfAndSts.StsRsnInf.Rsn.Cd') }}
-        ) as reason_code,
-
-        {{ extract_json('parsed_event_data', '$.payload.additional_info') }} as additional_info,
-
-        {{ extract_json('parsed_event_data', '$.x_attributes.x-processingStatus') }} as processing_status,
-        {{ extract_json('parsed_event_data', '$.x_attributes.x-errorCode') }} as error_code,
-        try_cast({{ extract_json('parsed_event_data', '$.x_attributes.x-retryAttempt') }} as integer) as retry_attempt,
-        {{ extract_json('parsed_event_data', '$.x_attributes.x-systemLatency') }} as system_latency,
-        try_cast(
-            regexp_extract(
-                {{ extract_json('parsed_event_data', '$.x_attributes.x-systemLatency') }},
-                '([0-9]+)',
-                1
-            ) as integer
-        ) as system_latency_ms,
-        try_cast({{ extract_json('parsed_event_data', '$.x_attributes.x-priority') }} as integer) as priority,
-        {{ extract_json('parsed_event_data', '$.x_attributes.x-correlationId') }} as correlation_id,
-        {{ extract_json('parsed_event_data', '$.x_attributes.x-traceId') }} as trace_id,
-        {{ extract_json('parsed_event_data', '$.x_attributes.x-spanId') }} as span_id,
-        {{ extract_json('parsed_event_data', '$.x_attributes.x-parentSpanId') }} as parent_span_id,
-        try_cast({{ extract_json('parsed_event_data', '$.x_attributes.x-sampled') }} as integer) as sampled,
-        {{ extract_json('parsed_event_data', '$.x_attributes.x-flags') }} as trace_flags,
-        {{ extract_json('parsed_event_data', '$.x_attributes.x-tenantId') }} as tenant_id,
-        {{ extract_json('parsed_event_data', '$.x_attributes.x-environment') }} as environment,
-        {{ extract_json('parsed_event_data', '$.x_attributes.x-version') }} as source_version,
-        {{ extract_json('parsed_event_data', '$.x_attributes.x-messageType') }} as source_message_type,
-        {{ extract_json('parsed_event_data', '$.x_attributes.x-messageVersion') }} as source_message_version,
-        {{ extract_json('parsed_event_data', '$.x_attributes.x-processingNode') }} as processing_node,
-        {{ extract_json('parsed_event_data', '$.x_attributes.x-requestId') }} as request_id,
-        try_cast({{ extract_json('parsed_event_data', '$.x_attributes.x-timestamp') }} as timestamp) as source_timestamp,
-
+        event_id, envelope_message_id, event_family,
+        {{ extract_json('parsed_event_data', '$.event_id') }} as message_id,
+        {{ extract_json('parsed_event_data', '$.event_type') }} as event_type,
+        {{ extract_json('parsed_event_data', '$.correlation_id') }} as correlation_id,
+        {{ extract_json('parsed_event_data', '$.instruction_id') }} as instruction_id,
+        {{ extract_json('parsed_event_data', '$.end_to_end_id') }} as end_to_end_id,
+        {{ extract_json('parsed_event_data', '$.transaction_id') }} as transaction_id,
+        {{ extract_json('parsed_event_data', '$.uetr') }} as uetr,
+        {{ extract_json('parsed_event_data', '$.business_reference') }} as business_reference,
+        {{ extract_json('parsed_event_data', '$.x_trace') }} as x_trace,
+        {{ extract_json('parsed_event_data', '$.x_channel') }} as x_channel,
+        {{ extract_json('parsed_event_data', '$.x_beneficiary_sa') }} as x_beneficiary_sa,
+        {{ extract_json('parsed_event_data', '$.x_source_system') }} as x_source_system,
+        {{ extract_json('parsed_event_data', '$.x_target_system') }} as x_target_system,
+        {{ extract_json('parsed_event_data', '$.x_service') }} as x_service,
+        {{ extract_json('parsed_event_data', '$.x_operation') }} as x_operation,
+        {{ extract_json('parsed_event_data', '$.x_component') }} as x_component,
+        {{ extract_json('parsed_event_data', '$.x_node') }} as x_node,
+        {{ extract_json('parsed_event_data', '$.x_host') }} as x_host,
+        {{ extract_json('parsed_event_data', '$.x_provider') }} as x_provider,
+        {{ extract_json('parsed_event_data', '$.x_network') }} as x_network,
+        {{ extract_json('parsed_event_data', '$.x_wallet_reference') }} as x_wallet_reference,
+        {{ extract_json('parsed_event_data', '$.x_provider_transaction_id') }} as x_provider_transaction_id,
+        {{ extract_json('parsed_event_data', '$.x_credit_status') }} as x_credit_status,
+        {{ extract_json('parsed_event_data', '$.x_agent_reference') }} as x_agent_reference,
+        {{ extract_json('parsed_event_data', '$.x_cashout_status') }} as x_cashout_status,
+        {{ extract_json('parsed_event_data', '$.x_component') }} as component,
+        {{ extract_json('parsed_event_data', '$.technical_stage') }} as technical_stage,
+        {{ extract_json('parsed_event_data', '$.technical_status') }} as technical_status,
+        try_cast({{ extract_json('parsed_event_data', '$.event_timestamp') }} as timestamp) as event_timestamp,
+        try_cast({{ extract_json('parsed_event_data', '$.processing_timestamp') }} as timestamp) as processing_timestamp,
+        try_cast({{ extract_json('parsed_event_data', '$.x_latency_ms') }} as bigint) as x_latency_ms,
+        try_cast({{ extract_json('parsed_event_data', '$.x_latency_ms') }} as bigint) as latency_ms,
+        {{ extract_json('parsed_event_data', '$.x_error_code') }} as x_error_code,
+        {{ extract_json('parsed_event_data', '$.x_error_category') }} as x_error_category,
+        try_cast({{ extract_json('parsed_event_data', '$.x_retry_count') }} as integer) as x_retry_count,
+        try_cast({{ extract_json('parsed_event_data', '$.x_timeout_indicator') }} as boolean) as x_timeout_indicator,
+        {{ extract_json('parsed_event_data', '$.x_error_code') }} as error_code,
+        {{ extract_json('parsed_event_data', '$.x_error_category') }} as error_category,
+        try_cast({{ extract_json('parsed_event_data', '$.x_retry_count') }} as integer) as retry_count,
+        try_cast({{ extract_json('parsed_event_data', '$.x_timeout_indicator') }} as boolean) as timeout_indicator,
         _kafka_metadata.topic as kafka_topic,
-        try_cast(_kafka_metadata.partition as integer) as kafka_partition,
-        try_cast(_kafka_metadata.offset as bigint) as kafka_offset,
+        _kafka_metadata.partition as kafka_partition,
+        _kafka_metadata.offset as kafka_offset,
         try_cast(_kafka_metadata.timestamp as timestamp) as kafka_timestamp,
         _kafka_metadata.category as category,
-
-        upper(string_split(_kafka_metadata.topic, '.')[1]) as source_system,
-        string_split(_kafka_metadata.topic, '.')[2] as source_group,
-
-        try_cast(year as integer) as year,
-        try_cast(month as integer) as month,
-        try_cast(day as integer) as day,
-
-        event_data,
-        parsed_event_data,
-
-        current_timestamp as load_timestamp,
-        'CPO_PLM_PAIN002' as record_source
-
+        envelope_source_system as source_system,
+        year, month, day, current_timestamp as load_timestamp,
+        'CPO_PLM_TECHNICAL_EVENT' as record_source
     from raw_data
-
-),
-
-deduplicated as (
-
-    select * exclude (_event_rank)
-    from (
-        select
-            parsed.*,
-            row_number() over (
-                partition by event_id
-                order by
-                    kafka_timestamp desc nulls last,
-                    kafka_offset desc nulls last,
-                    load_timestamp desc
-            ) as _event_rank
-        from parsed
-    )
-    where _event_rank = 1
-
 )
-
-select *
-from deduplicated
+select
+    event_id, envelope_message_id, event_family, message_id, event_type,
+    correlation_id, instruction_id, end_to_end_id, transaction_id, uetr,
+    business_reference, x_trace, x_channel, x_beneficiary_sa,
+    x_source_system, x_target_system, x_service, x_operation, x_component,
+    x_node, x_host, x_provider, x_network, x_wallet_reference,
+    x_provider_transaction_id, x_credit_status, x_agent_reference,
+    x_cashout_status, component, technical_stage, technical_status,
+    event_timestamp, processing_timestamp, x_latency_ms, x_error_code,
+    x_error_category, x_retry_count, x_timeout_indicator,
+    latency_ms, error_code, error_category, retry_count, timeout_indicator,
+    kafka_topic, kafka_partition, kafka_offset, kafka_timestamp, category,
+    source_system, year, month, day, load_timestamp, record_source
+from parsed
+qualify row_number() over (
+    partition by event_id order by kafka_timestamp desc nulls last, kafka_offset desc nulls last
+) = 1

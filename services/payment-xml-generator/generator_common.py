@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 import shutil
 import uuid
@@ -33,6 +34,15 @@ CAMT054_NS = "urn:iso:std:iso:20022:tech:xsd:camt.054.001.08"
 STATUS_ACSC = "ACSC"
 STATUS_PDNG = "PDNG"
 STATUS_RJCT = "RJCT"
+
+SCENARIO_SUCCESS = "SUCCESSFUL"
+SCENARIO_PENDING = "PENDING"
+SCENARIO_DELAYED = "DELAYED"
+SCENARIO_REJECTED = "REJECTED"
+SCENARIO_FAILED = "FAILED"
+SCENARIO_VALIDATION = "BENEFICIARY_VALIDATION_FAILED"
+SCENARIO_PROVIDER = "DOWNSTREAM_PROVIDER_FAILED"
+SCENARIO_AGENT = "AGENT_FINAL_MILE_FAILED"
 
 UGANDA_EAT = timezone(timedelta(hours=3))
 
@@ -292,8 +302,180 @@ def lifecycle_context(loan_id: str) -> Dict[str, str]:
     }
 
 
+def payment_scenario(loan: Mapping[str, Any]) -> str:
+    """Return a deterministic business outcome for an attempted payment."""
+    if str(loan["loan_status"]) == "DISBURSED":
+        return SCENARIO_SUCCESS
+    if str(loan["loan_status"]) != "APPROVED":
+        raise ValueError(f"{loan['loan_id']}: no payment exists for a rejected loan")
+    fields = {
+        5: SCENARIO_VALIDATION,
+        7: SCENARIO_PENDING,
+        10: SCENARIO_PROVIDER,
+        12: SCENARIO_FAILED,
+        14: SCENARIO_DELAYED,
+        15: SCENARIO_REJECTED,
+        17: SCENARIO_AGENT,
+        18: SCENARIO_PENDING,
+    }.get(loan_serial(loan) % 20, SCENARIO_PENDING)
+
+
+def scenario_status(scenario: str) -> str:
+    if scenario == SCENARIO_SUCCESS:
+        return STATUS_ACSC
+    if scenario in {SCENARIO_PENDING, SCENARIO_DELAYED}:
+        return STATUS_PDNG
+    return STATUS_RJCT
+
+
+def status_reason(scenario: str) -> Tuple[str, str]:
+    """ISO external status reason code and synthetic explanation."""
+    return {
+        SCENARIO_SUCCESS: ("ACSC", "Payment settled successfully"),
+        SCENARIO_PENDING: ("PDNG", "Payment is awaiting provider confirmation"),
+        SCENARIO_DELAYED: ("PDNG", "Payment accepted with delayed settlement"),
+        SCENARIO_REJECTED: ("MS03", "Payment rejected by the processing institution"),
+        SCENARIO_FAILED: ("AG01", "Payment transaction failed during processing"),
+        SCENARIO_VALIDATION: ("AC01", "Beneficiary account validation failed"),
+        SCENARIO_PROVIDER: ("RR04", "Downstream mobile-money provider unavailable"),
+        SCENARIO_AGENT: ("AG01", "Agent or final-mile cash-out failed"),
+    }[scenario]
+
+
+def intermediary_for_loan(loan: Mapping[str, Any]) -> Dict[str, str]:
+    """Stable PDM processing institution used across related messages."""
+    if loan_serial(loan) % 2:
+        return {"name": "Uganda Post Office", "bic": "UGPOUGKA"}
+    return {"name": "Pearl Bank Uganda", "bic": "PRBLUGKA"}
+
+
 def stable_uuid(namespace: str, value: str) -> str:
     return str(uuid.uuid5(uuid.NAMESPACE_URL, f"pdm://{namespace}/{value}"))
+
+
+def stable_uetr(namespace: str, value: str) -> str:
+    """Return a deterministic UUID with the UUIDv4 bit pattern required by UETR."""
+    raw = bytearray(hashlib.sha256(f"pdm://{namespace}/{value}".encode()).digest()[:16])
+    raw[6] = (raw[6] & 0x0F) | 0x40
+    raw[8] = (raw[8] & 0x3F) | 0x80
+    return str(uuid.UUID(bytes=bytes(raw)))
+
+
+def technical_event_fields(context: Mapping[str, Any], event_type: str) -> Dict[str, Any]:
+    """Return deterministic, source-owned observability for one payment journey."""
+    loan = context["loan"]
+    beneficiary = context["beneficiary"]
+    loan_id = str(loan["loan_id"])
+    serial = loan_serial(loan)
+    network = network_for_account(payment_account(loan, beneficiary))
+    provider = "MTN_MOMO" if network == "MTN" else "AIRTEL_MONEY"
+    intermediary = (
+        "UGANDA_POST"
+        if context["intermediary"]["name"] == "Uganda Post Office"
+        else "PEARL_BANK"
+    )
+
+    if event_type == "PMN":
+        stage, channel = "payment-routing", "BANK"
+        source, target = "BOU_PAYMENT_GATEWAY", intermediary
+        service, operation, component = "payment-routing", "route", "pmn-router"
+        node, host, hour, latency = "bou-routing-01", "pmn-01", 11, 180 + serial % 70
+    elif event_type == "PLM":
+        stage, channel = "mobile-money-credit", "MOBILE_MONEY"
+        source, target = intermediary, provider
+        service, operation, component = "mobile-money-credit", "credit", "plm-provider-adapter"
+        node, host, hour, latency = f"{network.lower()}-credit-01", "plm-01", 12, 320 + serial % 130
+    else:
+        raise ValueError(f"Unsupported technical event type: {event_type}")
+
+    scenario = str(context["scenario"])
+    status = "COMPLETED"
+    error_code = error_category = None
+    timeout = event_type == "PLM" and serial % 11 == 0
+    retries = 1 if event_type == "PLM" and serial % 7 == 0 else 0
+    if scenario in {SCENARIO_PENDING, SCENARIO_DELAYED}:
+        status = scenario
+        latency = 45_000 if scenario == SCENARIO_DELAYED else 5_000
+    elif scenario == SCENARIO_VALIDATION:
+        status, error_code, error_category = "FAILED", "AC01", "VALIDATION"
+        stage, service, operation = "payment-validation", "payment-validation", "validate"
+    elif scenario == SCENARIO_PROVIDER and event_type == "PLM":
+        status, error_code, error_category = "FAILED", "PROVIDER_UNAVAILABLE", "DOWNSTREAM_PROVIDER"
+    elif scenario == SCENARIO_AGENT and event_type == "PLM":
+        status, error_code, error_category = "FAILED", "AGENT_CASHOUT_FAILED", "FINAL_MILE"
+        stage, channel = "agent-cashout", "AGENT_NETWORK"
+        source, target = provider, "AGENT_NETWORK"
+        service, operation, component = "agent-cashout", "cashout", "plm-agent-adapter"
+    elif scenario in {SCENARIO_FAILED, SCENARIO_REJECTED}:
+        status, error_code, error_category = "FAILED", "PROCESSING_REJECTED", "PAYMENT_PROCESSING"
+    if timeout:
+        status, error_code, error_category, latency = "TIMED_OUT", "TECHNICAL_TIMEOUT", "TECHNICAL", 30_000
+    elif retries:
+        status = "RETRYING" if status == "COMPLETED" else status
+
+    occurred = datetime.fromisoformat(event_timestamp(loan, "disbursement", hour))
+    processed = occurred + timedelta(milliseconds=latency)
+    event_key = f"{loan_id}/{event_type}/{stage}"
+    fields = {
+        "EventId": stable_uuid("technical-event", event_key),
+        "MessageId": f"{event_type}-{stage.upper()}-{loan_id}",
+        "EventFamily": "TECHNICAL_PAYMENT_EVENT",
+        "EventType": event_type,
+        "CorrelationId": stable_uuid("correlation", loan_id),
+        "PaymentInstructionId": f"INSTR-{loan_id}",
+        "EndToEndId": loan_id,
+        "TransactionId": context["lifecycle"]["vpm_transaction_id"],
+        "UETR": stable_uetr("uetr-vpm", loan_id),
+        "BusinessReference": loan_id,
+        "XTrace": stable_uuid("trace", loan_id),
+        "XChannel": channel,
+        "XSourceSystem": source,
+        "XTargetSystem": target,
+        "XService": service,
+        "XOperation": operation,
+        "XComponent": component,
+        "XNode": node,
+        "XHost": host,
+        "TechnicalStage": stage,
+        "TechnicalStatus": status,
+        "EventTimestamp": occurred.isoformat(timespec="milliseconds"),
+        "ProcessingTimestamp": processed.isoformat(timespec="milliseconds"),
+        "XLatencyMs": latency,
+        "XRetryCount": retries,
+        "XTimeoutIndicator": str(timeout).lower(),
+        "XErrorCode": error_code,
+        "XErrorCategory": error_category,
+    }
+    if event_type == "PMN":
+        fields.update({
+            "XPaymentRoute": f"PDMIS>BOU_PAYMENT_GATEWAY>{intermediary}",
+            "XOriginatingInstitution": "Bank of Uganda",
+            "XIntermediaryInstitution": context["intermediary"]["name"],
+            "XRouteDecision": "REJECTED" if status == "FAILED" else "SELECTED",
+            "XValidationStatus": "FAILED" if scenario == SCENARIO_VALIDATION else "VALIDATED",
+            "XSubmissionStatus": "REJECTED" if status == "FAILED" else "ACCEPTED",
+        })
+    else:
+        credit_status = "FAILED" if scenario == SCENARIO_PROVIDER else (
+            "PENDING" if status in {"PENDING", "DELAYED", "RETRYING", "TIMED_OUT"}
+            else "CREDITED"
+        )
+        cashout_status = "FAILED" if scenario == SCENARIO_AGENT else (
+            "COMPLETED" if scenario == SCENARIO_SUCCESS else "NOT_STARTED"
+        )
+        fields.update({
+            "XProvider": "MTN Mobile Money" if network == "MTN" else "Airtel Money",
+            "XNetwork": network,
+            "XBeneficiarySa": str(beneficiary["beneficiary_id"]),
+            "XWalletReference": payment_account(loan, beneficiary),
+            "XProviderTransactionId": context["lifecycle"][
+                "mtn_transaction_id" if network == "MTN" else "airtel_transaction_id"
+            ],
+            "XCreditStatus": credit_status,
+            "XAgentReference": f"AGENT-{(serial - 1) % 50 + 1:04d}",
+            "XCashoutStatus": cashout_status,
+        })
+    return fields
 
 
 def network_for_index(index_zero_based: int) -> str:
@@ -425,13 +607,29 @@ def load_pdmis_context(count: int | None = None) -> List[Dict[str, Any]]:
             ),
         )
 
+        if str(loan["loan_status"]) == "REJECTED":
+            continue
+
+        scenario = payment_scenario(loan)
+        payment_loan = dict(loan)
+        if str(loan["loan_status"]) == "APPROVED":
+            planned = lifecycle_date(loan, "verification") + timedelta(days=1)
+            payment_loan["disbursement_date"] = planned.isoformat()
+            payment_loan["cashout_date"] = (planned + timedelta(days=1)).isoformat()
+
         contexts.append(
             {
-                "loan": loan,
+                "loan": payment_loan,
                 "beneficiary": beneficiary,
                 "sacco": sacco,
-                "status": iso_payment_status(str(loan["loan_status"])),
-                "amount": payment_amount(loan),
+                "status": scenario_status(scenario),
+                "scenario": scenario,
+                "amount": (
+                    payment_amount(loan)
+                    if disbursement_eligible(loan)
+                    else int(loan["amount_approved"])
+                ),
+                "intermediary": intermediary_for_loan(loan),
                 "lifecycle": lifecycle_context(str(loan["loan_id"])),
             }
         )
@@ -452,6 +650,11 @@ def disbursement_contexts(count: int | None = None) -> List[Dict[str, Any]]:
         for context in load_pdmis_context(count)
         if disbursement_eligible(context["loan"])
     ]
+
+
+def payment_contexts(count: int | None = None) -> List[Dict[str, Any]]:
+    """All payment attempts, including pending and unsuccessful outcomes."""
+    return load_pdmis_context(count)
 
 
 def district_coordinates(district: str) -> Tuple[float, float]:

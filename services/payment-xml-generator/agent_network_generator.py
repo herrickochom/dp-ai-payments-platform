@@ -17,7 +17,7 @@ from generator_common import (
     district_coordinates,
     event_timestamp,
     load_json,
-    disbursement_contexts,
+    payment_contexts,
     validate_no_nulls,
     validate_xml_no_empty_text,
     write_json,
@@ -164,7 +164,11 @@ def main() -> None:
     write_json(output_root / "agent_locations.json", roster["locations"])
 
     sacco_agents = agent_by_sacco(roster)
-    contexts = disbursement_contexts(args.count)
+    contexts = [
+        context
+        for context in payment_contexts(args.count)
+        if context["status"] == "ACSC"
+    ]
 
     for seq, context in enumerate(contexts, 1):
         agent_id = sacco_agents[context["loan"]["sacco_id"]]

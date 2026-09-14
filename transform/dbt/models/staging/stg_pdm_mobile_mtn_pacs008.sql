@@ -47,11 +47,11 @@ parsed as (
             '$.xml.Document.FIToFICstmrCdtTrf.GrpHdr.CtrlSum') }} as double) as control_sum,
 
         try_cast({{ extract_json('parsed_event_data',
-            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.Amt.InstdAmt._text') }} as double)
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.InstdAmt._text') }} as double)
             as instructed_amount,
 
         {{ extract_json('parsed_event_data',
-            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.Amt.InstdAmt._attributes.Ccy') }}
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.InstdAmt._attributes.Ccy') }}
             as currency,
 
         {{ extract_json('parsed_event_data',
@@ -93,7 +93,7 @@ parsed as (
             as creditor_account_issuer,
 
         {{ extract_json('parsed_event_data',
-            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.CdtrAcct.Id.Othr.SchmeNm') }}
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.CdtrAcct.Id.Othr.SchmeNm.Prtry') }}
             as creditor_account_scheme,
 
         {{ extract_json('parsed_event_data',
@@ -152,17 +152,6 @@ parsed as (
             '$.xml.Document.FIToFICstmrCdtTrf.' ~ role_path ~ '.' ~ field_path) }}
             as {{ role_alias }}_{{ field_alias }},
             {% endfor %}
-        {% endfor %}
-
-        {% set technical_fields = [
-            'correlationId', 'environment', 'flags', 'messageType', 'messageVersion',
-            'parentSpanId', 'processingNode', 'processingPriority', 'requestId', 'retryCount',
-            'sampled', 'spanId', 'tenantId', 'timeout', 'timestamp', 'traceId', 'version'
-        ] %}
-        {% for field in technical_fields %}
-        {{ extract_json('parsed_event_data',
-            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.x-' ~ field) }}
-            as transaction_x_{{ field | lower }},
         {% endfor %}
 
         'MTN' as mobile_network,

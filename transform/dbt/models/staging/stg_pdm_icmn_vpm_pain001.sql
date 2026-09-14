@@ -69,7 +69,7 @@ parsed as (
             '$.xml.Document.CstmrCdtTrfInitn.GrpHdr.CtrlSum') }} as double)
             as group_control_sum,
 
-        {{ extract_json('parsed_event_data', '$.xml.Document.CstmrCdtTrfInitn.GrpHdr.InitgPty') }}
+        {{ extract_json('parsed_event_data', '$.xml.Document.CstmrCdtTrfInitn.GrpHdr.InitgPty.Nm') }}
             as initiating_party,
 
         {{ extract_json('parsed_event_data', '$.xml.Document.CstmrCdtTrfInitn.PmtInf.PmtInfId') }}
@@ -90,7 +90,7 @@ parsed as (
             as batch_booking,
 
         try_cast({{ extract_json('parsed_event_data',
-            '$.xml.Document.CstmrCdtTrfInitn.PmtInf.ReqdExctnDt') }} as timestamp)
+            '$.xml.Document.CstmrCdtTrfInitn.PmtInf.ReqdExctnDt.Dt') }} as timestamp)
             as requested_execution_at,
 
         {{ extract_json('parsed_event_data',
@@ -117,7 +117,7 @@ parsed as (
             as creditor_account_issuer,
 
         {{ extract_json('parsed_event_data',
-            '$.xml.Document.CstmrCdtTrfInitn.PmtInf.CdtTrfTxInf.CdtrAcct.Id.Othr.SchmeNm') }}
+            '$.xml.Document.CstmrCdtTrfInitn.PmtInf.CdtTrfTxInf.CdtrAcct.Id.Othr.SchmeNm.Prtry') }}
             as creditor_account_scheme,
 
         {{ extract_json('parsed_event_data',
@@ -136,7 +136,7 @@ parsed as (
             '$.xml.Document.CstmrCdtTrfInitn.PmtInf.CdtTrfTxInf.RmtInf.Ustrd') }}
             as remittance_information,
 
-        {{ extract_json('parsed_event_data', '$.xml.Document.CstmrCdtTrfInitn.PmtInf.CdtTrfTxInf.Purp') }}
+        {{ extract_json('parsed_event_data', '$.xml.Document.CstmrCdtTrfInitn.PmtInf.CdtTrfTxInf.Purp.Prtry') }}
             as purpose_code,
 
         {{ extract_json('parsed_event_data',

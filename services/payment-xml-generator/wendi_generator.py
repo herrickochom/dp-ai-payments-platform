@@ -16,39 +16,25 @@ from generator_common import (
     PAIN002_NS,
     PDMIS_ROOT,
     STATUS_ACSC,
-    STATUS_PDNG,
     child,
     clean_directory,
     authoritative_as_of_date,
-    disbursement_contexts,
+    payment_contexts,
     event_date,
     event_timestamp,
     load_json,
+    network_for_account,
     payment_account,
-    stable_uuid,
+    stable_uetr,
+    status_reason,
     validate_no_nulls,
     validate_xml_no_empty_text,
     write_json,
     write_xml,
 )
 
-WENDI_INITIATING_PARTY = "WENDI Wallet Platform"
-
-
 def wallet_status(status: str) -> str:
-    return {
-        STATUS_ACSC: "SUCCESSFUL",
-        STATUS_PDNG: "PENDING",
-    }[status]
-
-
-def wallet_status_reason(status: str) -> tuple[str, str]:
-    """(reason code, additional info) for a wallet payment status report."""
-    if status == STATUS_ACSC:
-        return "ACSC", "Wallet credit completed successfully"
-    if status == STATUS_PDNG:
-        return "PDNG", "Wallet credit pending operator confirmation"
-    return "AC01", "Invalid wallet account"
+    return {STATUS_ACSC: "SUCCESSFUL", "PDNG": "PENDING", "RJCT": "FAILED"}[status]
 
 
 def generate_pain001(context: dict) -> bytes:
@@ -58,6 +44,7 @@ def generate_pain001(context: dict) -> bytes:
     lifecycle = context["lifecycle"]
     amount = context["amount"]
     loan_id = loan["loan_id"]
+    network = network_for_account(payment_account(loan, beneficiary))
 
     root = ET.Element("Document", xmlns=PAIN001_NS)
     init = child(root, "CstmrCdtTrfInitn")
@@ -67,7 +54,7 @@ def generate_pain001(context: dict) -> bytes:
     child(header, "CreDtTm", event_timestamp(loan, "verification", 14))
     child(header, "NbOfTxs", "1")
     child(header, "CtrlSum", amount)
-    child(header, "InitgPty", WENDI_INITIATING_PARTY)
+    child(child(header, "InitgPty"), "Nm", "Bank of Uganda")
 
     pmt_inf = child(init, "PmtInf")
     child(pmt_inf, "PmtInfId", f"WENDI-PMT-{loan_id}")
@@ -75,33 +62,41 @@ def generate_pain001(context: dict) -> bytes:
     child(pmt_inf, "BtchBookg", "false")
     child(pmt_inf, "NbOfTxs", "1")
     child(pmt_inf, "CtrlSum", amount)
-    child(pmt_inf, "ReqdExctnDt", event_date(loan, "disbursement"))
+    child(child(pmt_inf, "ReqdExctnDt"), "Dt", event_date(loan, "disbursement"))
 
     debtor = child(pmt_inf, "Dbtr")
     child(debtor, "Nm", sacco["name"])
     debtor_acct = child(pmt_inf, "DbtrAcct")
     debtor_id = child(child(debtor_acct, "Id"), "Othr")
     child(debtor_id, "Id", sacco["wendi_account"])
+    child(child(debtor_id, "SchmeNm"), "Prtry", "WENDI")
     child(debtor_id, "Issr", "WENDI")
-    child(debtor_id, "SchmeNm", "WENDI")
+    debtor_agent = child(pmt_inf, "DbtrAgt")
+    debtor_fi = child(debtor_agent, "FinInstnId")
+    child(debtor_fi, "BICFI", context["intermediary"]["bic"])
+    child(debtor_fi, "Nm", context["intermediary"]["name"])
+    child(child(pmt_inf, "UltmtDbtr"), "Nm", "Bank of Uganda")
 
     tx = child(pmt_inf, "CdtTrfTxInf")
     pmt_id = child(tx, "PmtId")
     child(pmt_id, "InstrId", f"WENDI-INSTR-{loan_id}")
     child(pmt_id, "EndToEndId", loan_id)
-    child(pmt_id, "TxId", lifecycle["wendi_tx_id"])
-    child(pmt_id, "UETR", stable_uuid("uetr-wendi", loan_id))
+    child(pmt_id, "UETR", stable_uetr("uetr-wendi", loan_id))
 
     amt = child(tx, "Amt")
     child(amt, "InstdAmt", amount, Ccy="UGX")
 
+    creditor_agent = child(tx, "CdtrAgt")
+    creditor_fi = child(creditor_agent, "FinInstnId")
+    child(creditor_fi, "BICFI", "MTNMUGKA" if network == "MTN" else "AIRUUGKA")
+    child(creditor_fi, "Nm", "MTN Mobile Money" if network == "MTN" else "Airtel Money")
     creditor = child(tx, "Cdtr")
     child(creditor, "Nm", beneficiary["name"])
     creditor_acct = child(tx, "CdtrAcct")
     creditor_id = child(child(creditor_acct, "Id"), "Othr")
     child(creditor_id, "Id", payment_account(loan, beneficiary))
-    child(creditor_id, "Issr", "MOBILE")
-    child(creditor_id, "SchmeNm", "MSISDN")
+    child(child(creditor_id, "SchmeNm"), "Prtry", "MSISDN")
+    child(creditor_id, "Issr", network)
 
     remit = child(tx, "RmtInf")
     child(remit, "Ustrd", f"PDM Loan {loan_id} - {loan['project_type']}")
@@ -135,14 +130,14 @@ def generate_pain002(context: dict) -> bytes:
     pmt = child(report, "OrgnlPmtInfAndSts")
     child(pmt, "OrgnlPmtInfId", f"WENDI-PMT-{loan_id}")
     child(pmt, "TxSts", status)
-    reason_code, reason_detail = wallet_status_reason(status)
+    reason_code, reason_detail = status_reason(context["scenario"])
     reason = child(pmt, "StsRsnInf")
     child(child(reason, "Rsn"), "Cd", reason_code)
     child(reason, "AddtlInf", reason_detail)
     child(pmt, "OrgnlInstrId", f"WENDI-INSTR-{loan_id}")
     child(pmt, "OrgnlEndToEndId", loan_id)
     child(pmt, "OrgnlTxId", lifecycle["wendi_tx_id"])
-    child(pmt, "OrgnlUETR", stable_uuid("uetr-wendi", loan_id))
+    child(pmt, "OrgnlUETR", stable_uetr("uetr-wendi", loan_id))
 
     xml = ET.tostring(root, encoding="utf-8", xml_declaration=True)
     validate_xml_no_empty_text(xml, f"Wendi PAIN002 {loan_id}")
@@ -202,8 +197,8 @@ def generate_camt053(context: dict) -> bytes:
     refs = child(tx_details, "Refs")
     child(refs, "InstrId", f"WENDI-INSTR-{loan_id}")
     child(refs, "EndToEndId", loan_id)
-    child(refs, "TxId", lifecycle["vpm_transaction_id"])
-    child(refs, "UETR", stable_uuid("uetr-vpm", loan_id))
+    child(refs, "TxId", lifecycle["wendi_tx_id"])
+    child(refs, "UETR", stable_uetr("uetr-wendi", loan_id))
     tx_amount = child(tx_details, "Amt")
     child(tx_amount, "Amt", amount, Ccy="UGX")
     child(tx_amount, "CdtDbtInd", "CRDT")
@@ -315,7 +310,7 @@ def transaction_record(context: dict, agent_id: str) -> dict:
         "currency": "UGX",
         "transaction_status": wallet_status(status),
         "wendi_transaction_id": lifecycle["wendi_tx_id"],
-        "agent_id": agent_id,
+        "agent_id": agent_id if status == STATUS_ACSC else "NOT_APPLICABLE",
         "device_id": f"DEV-{numeric:08d}",
         "ip_address": f"41.210.{numeric % 255}.{(numeric % 253) + 1}",
         "user_agent": "Walletek/2.4.1 (Android 14)",
@@ -348,7 +343,7 @@ def main() -> None:
         for directory in dirs.values():
             clean_directory(directory)
 
-    contexts = disbursement_contexts(args.count)
+    contexts = payment_contexts(args.count)
     all_loans = load_json(PDMIS_ROOT / "loans.json")
     as_of_date = authoritative_as_of_date(all_loans)
     saccos = load_json(PDMIS_ROOT / "saccos.json")

@@ -19,7 +19,7 @@ topics:
     partitions: 6
     replication: 1
     retention_ms: 604800000   # 7 days
-    description: "PMN Technical Lifecycle"
+    description: "PMN standalone TechnicalPaymentEvent (legacy topic name retained)"
 
   # ==========================================================================
   # 2. CPO Topics (Cloud Payment Orchestrator)
@@ -34,7 +34,7 @@ topics:
     partitions: 6
     replication: 1
     retention_ms: 604800000   # 7 days
-    description: "PLM Technical Lifecycle"
+    description: "PLM standalone TechnicalPaymentEvent (legacy topic name retained)"
 
   # ==========================================================================
   # 3. Wendi Topics (PostBank Digital Wallet)

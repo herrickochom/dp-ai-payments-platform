@@ -20,8 +20,8 @@ sources:
 
       - name: icmn_pmn_pain001
         description: >
-          ICMN PMN pain.001 technical lifecycle initiation.
-          Topic: icmn.pmn.pain001
+          ICMN PMN standalone TechnicalPaymentEvent.
+          Topic name is retained for compatibility: icmn.pmn.pain001
         meta:
           fixture_path: data/icmn/pmn/pain001/*.xml
           observed_leaf_fields: 112
@@ -36,8 +36,8 @@ sources:
 
       - name: cpo_plm_pain002
         description: >
-          CPO PLM pain.002 technical lifecycle status.
-          Topic: cpo.plm.pain002
+          CPO PLM standalone TechnicalPaymentEvent.
+          Topic name is retained for compatibility: cpo.plm.pain002
         meta:
           fixture_path: data/cpo/plm/pain002/*.xml
           observed_leaf_fields: 113
