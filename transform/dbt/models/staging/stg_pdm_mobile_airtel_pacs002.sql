@@ -29,11 +29,11 @@ parsed as (
             as message_id,
 
         {{ extract_json('parsed_event_data',
-            '$.xml.Document.FIToFIPmtStsRpt.TxInfAndSts.OrgnlEndToEndId.EndToEndId') }}
+            '$.xml.Document.FIToFIPmtStsRpt.TxInfAndSts.OrgnlEndToEndId') }}
             as end_to_end_id,
 
         {{ extract_json('parsed_event_data',
-            '$.xml.Document.FIToFIPmtStsRpt.TxInfAndSts.OrgnlTxId.TxId') }}
+            '$.xml.Document.FIToFIPmtStsRpt.TxInfAndSts.OrgnlTxId') }}
             as original_transaction_id,
 
         try_cast({{ extract_json('parsed_event_data',
@@ -75,17 +75,6 @@ parsed as (
         {{ extract_json('parsed_event_data',
             '$.xml.Document.FIToFIPmtStsRpt.TxInfAndSts.InstgAgt.FinInstnId.Nm') }}
             as instructing_agent_name,
-
-        {% set technical_fields = [
-            'correlationId', 'environment', 'flags', 'messageType', 'messageVersion',
-            'parentSpanId', 'processingNode', 'processingPriority', 'requestId', 'retryCount',
-            'sampled', 'spanId', 'tenantId', 'timeout', 'timestamp', 'traceId', 'version'
-        ] %}
-        {% for field in technical_fields %}
-        {{ extract_json('parsed_event_data',
-            '$.xml.Document.FIToFIPmtStsRpt.TxInfAndSts.x-' ~ field) }}
-            as transaction_x_{{ field | lower }},
-        {% endfor %}
 
         'AIRTEL' as mobile_network,
 

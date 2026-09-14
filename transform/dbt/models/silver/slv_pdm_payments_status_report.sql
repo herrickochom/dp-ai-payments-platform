@@ -7,11 +7,6 @@ with status_events as (
            kafka_timestamp, kafka_offset
     from {{ ref('br_pdm_cpo_psn_pain002') }}
     union all
-    select 'CPO_PLM', message_id, original_message_id, original_transaction_id,
-           end_to_end_id, creation_at, group_status, transaction_status,
-           reason_code, additional_info, kafka_timestamp, kafka_offset
-    from {{ ref('br_pdm_cpo_plm_pain002') }}
-    union all
     select 'WENDI', message_id, original_message_id, original_transaction_id,
            end_to_end_id, creation_at, group_status, transaction_status,
            status_reason_code, status_additional_info, kafka_timestamp, kafka_offset

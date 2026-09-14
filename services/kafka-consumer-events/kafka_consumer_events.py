@@ -178,6 +178,7 @@ PAYMENT_EVENT_AVRO_SCHEMA = avro.schema.parse("""
         {"name": "timestamp", "type": "string"},
         {"name": "source_system", "type": "string"},
         {"name": "message_type", "type": "string"},
+        {"name": "event_family", "type": "string", "default": "PAYMENT_BUSINESS_EVENT"},
         {"name": "payload", "type": {
             "type": "record",
             "name": "Payload",
@@ -219,9 +220,9 @@ def parse_topic(topic: str) -> Dict[str, str]:
     """Return canonical source-domain metadata for a configured topic."""
     topic_map = {
         "icmn.vpm.pain001": {"category": "icmn", "source_group": "icmn", "system": "vpm", "msg_type": "pain001"},
-        "icmn.pmn.pain001": {"category": "icmn", "source_group": "icmn", "system": "pmn", "msg_type": "pain001"},
+        "icmn.pmn.pain001": {"category": "icmn", "source_group": "icmn", "system": "pmn", "msg_type": "technical_payment_event"},
         "cpo.psn.pain002": {"category": "cpo", "source_group": "cpo", "system": "psn", "msg_type": "pain002"},
-        "cpo.plm.pain002": {"category": "cpo", "source_group": "cpo", "system": "plm", "msg_type": "pain002"},
+        "cpo.plm.pain002": {"category": "cpo", "source_group": "cpo", "system": "plm", "msg_type": "technical_payment_event"},
         "wendi.camt052": {"category": "wendi", "source_group": "wendi", "system": "wendi", "msg_type": "camt052"},
         "wendi.camt053": {"category": "wendi", "source_group": "wendi", "system": "wendi", "msg_type": "camt053"},
         "wendi.camt054": {"category": "wendi", "source_group": "wendi", "system": "wendi", "msg_type": "camt054"},
@@ -375,6 +376,7 @@ def store_event_to_s3(
         "timestamp": event.get("timestamp", timestamp.isoformat()),
         "source_system": event.get("source_system") or source_system,
         "message_type": event.get("message_type", topic_info['msg_type']),
+        "event_family": event.get("event_family", "PAYMENT_BUSINESS_EVENT"),
         "payload": {
             "amount": event.get("instructed_amount"),
             "currency": event.get("currency"),

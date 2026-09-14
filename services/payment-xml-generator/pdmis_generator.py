@@ -605,8 +605,8 @@ def loan_status_for_case(
     Deterministic local-development mix.
 
     Approximately:
-      85% DISBURSED
-      10% APPROVED
+      60% DISBURSED
+      35% APPROVED (payment attempts with non-final outcomes)
        5% REJECTED
 
     This is a business lifecycle status, not a fraud label.
@@ -616,7 +616,7 @@ def loan_status_for_case(
     if slot == 0:
         return "REJECTED"
 
-    if slot in {7, 14}:
+    if slot in {5, 7, 10, 12, 14, 15, 18}:
         return "APPROVED"
 
     return "DISBURSED"
@@ -1205,7 +1205,7 @@ def generate_loans(
         if status == "APPROVED":
             # A still-pending approval is necessarily recent at the observation
             # date; do not leave two-year-old approvals artificially pending.
-            approval_date = as_of_date - timedelta(days=2 + (i % 5))
+            approval_date = as_of_date - timedelta(days=10 + (i % 5))
         elif status == "DISBURSED" and approval_date + timedelta(days=8) > as_of_date:
             approval_date = as_of_date - timedelta(days=8)
 

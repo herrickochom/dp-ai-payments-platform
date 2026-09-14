@@ -116,7 +116,7 @@ models:
   # ============================================================================
 
   - name: br_pdm_cpo_plm_pain002
-    description: Source-shaped CPO PLM PAIN.002 payment status messages.
+    description: Source-shaped CPO PLM standalone technical payment events.
     columns:
       - name: event_id
         data_tests:
@@ -146,6 +146,23 @@ models:
       - name: record_source
         data_tests:
           - not_null
+
+  - name: br_pdm_payments_plm_lifecycle_events
+    description: PLM provider, wallet, agent and cash-out lifecycle contract read directly from PLM staging.
+    columns:
+      - name: event_id
+        data_tests: [not_null, unique]
+      - name: event_family
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [TECHNICAL_PAYMENT_EVENT]
+      - name: x_provider
+        description: Mobile-money provider executing the credit.
+      - name: x_provider_transaction_id
+        description: Provider-owned transaction reference.
+      - name: x_cashout_status
+        description: Final-mile cash-out state.
 
   - name: br_pdm_cpo_psn_pain002
     description: Source-shaped CPO PSN PAIN.002 payment status messages.
@@ -184,7 +201,7 @@ models:
   # ============================================================================
 
   - name: br_pdm_icmn_pmn_pain001
-    description: Source-shaped ICMN PMN PAIN.001 payment instruction messages.
+    description: Source-shaped ICMN PMN standalone technical payment events.
     columns:
       - name: event_id
         data_tests:
@@ -214,6 +231,23 @@ models:
       - name: record_source
         data_tests:
           - not_null
+
+  - name: br_pdm_payments_pmn_lifecycle_events
+    description: PMN initiation, validation, routing and orchestration lifecycle contract read directly from PMN staging.
+    columns:
+      - name: event_id
+        data_tests: [not_null, unique]
+      - name: event_family
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [TECHNICAL_PAYMENT_EVENT]
+      - name: x_payment_route
+        description: PDMIS-to-BOU-to-intermediary route.
+      - name: x_route_decision
+        description: PMN routing decision.
+      - name: x_validation_status
+        description: PMN validation state.
 
   - name: br_pdm_icmn_vpm_pain001
     description: Source-shaped ICMN VPM PAIN.001 payment instruction messages.

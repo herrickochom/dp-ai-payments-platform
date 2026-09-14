@@ -45,7 +45,7 @@ parsed as (
             '$.xml.Document.CstmrPmtStsRpt.GrpHdr.CreDtTm') }} as timestamp)
             as xml_creation_at,
 
-        {{ extract_json('parsed_event_data', '$.header.initiating_party') }} as initiating_party,
+        {{ extract_json('parsed_event_data', '$.xml.Document.CstmrPmtStsRpt.GrpHdr.InitgPty.Nm') }} as initiating_party,
         {{ extract_json('parsed_event_data', '$.header.original_message_id') }} as original_message_id_flat,
         {{ extract_json('parsed_event_data', '$.header.original_message_type') }} as original_message_type,
         {{ extract_json('parsed_event_data', '$.header.group_status') }} as group_status,

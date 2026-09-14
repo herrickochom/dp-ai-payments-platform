@@ -32,16 +32,14 @@ models:
 
   - name: stg_pdm_icmn_pmn_pain001
     description: >
-      ICMN PMN pain.001 technical lifecycle initiation with x-* attributes, from
-      topic icmn.pmn.pain001. x_message_type prefers the GrpHdr (document-level)
-      x-messageType because the producer's flattened x-attributes map collapses
-      per-level values last-write-wins ("PMN-TX"), falling back to that map and
-      then to the topic name when the attribute is absent.
+      ICMN PMN standalone TechnicalPaymentEvent records. The model name and topic
+      retain their legacy suffix for deployment compatibility; no ISO namespace
+      or ISO namespace is expected. It exposes PMN routing, validation and
+      orchestration attributes for PDMIS, Bank of Uganda and the intermediary.
     config:
       meta:
         extraction_coverage: complete
-        observed_source_leaf_fields: 112
-        repeated_field_strategy: "x-* fields are projected separately at group, payment and transaction levels"
+        observed_source_leaf_fields: 34
     columns:
       - name: event_id
         tests: [not_null, unique]
@@ -52,20 +50,31 @@ models:
       - name: end_to_end_id
         tests: [not_null]
 
-      - name: x_message_type
+      - name: event_family
         tests:
           - accepted_values:
               arguments:
                 values:
-                  - PMN
-                  - icmn.pmn.pain001
+                  - TECHNICAL_PAYMENT_EVENT
+
+      - name: technical_status
+        tests: [not_null]
+
+      - name: x_payment_route
+        description: Deterministic PDMIS-to-BOU-to-intermediary route.
+      - name: x_route_decision
+        description: PMN orchestration routing decision.
+      - name: x_validation_status
+        description: PMN beneficiary/payment validation outcome.
+      - name: x_submission_status
+        description: PMN submission acceptance outcome.
 
       - name: record_source
         tests:
           - accepted_values:
               arguments:
                 values:
-                  - ICMN_PMN_PAIN001
+                  - ICMN_PMN_TECHNICAL_EVENT
 
   - name: stg_pdm_cpo_psn_pain002
     description: >
@@ -99,13 +108,13 @@ models:
 
   - name: stg_pdm_cpo_plm_pain002
     description: >
-      CPO PLM pain.002 technical lifecycle status with x-* attributes, from
-      topic cpo.plm.pain002.
+      CPO PLM standalone TechnicalPaymentEvent records. The legacy topic name is
+      retained, but the source is not parsed or modelled as pain.002. It exposes
+      provider, wallet, agent and beneficiary-delivery attributes.
     config:
       meta:
         extraction_coverage: complete
-        observed_source_leaf_fields: 113
-        repeated_field_strategy: "x-* fields are projected separately at group, original-group and original-payment levels"
+        observed_source_leaf_fields: 36
     columns:
       - name: event_id
         tests: [not_null, unique]
@@ -113,19 +122,34 @@ models:
       - name: message_id
         tests: [not_null]
 
-      - name: transaction_status
+      - name: technical_status
         tests: [not_null]
 
+      - name: x_provider
+        description: Downstream mobile-money provider.
+      - name: x_wallet_reference
+        description: Beneficiary wallet credited by the provider.
+      - name: x_agent_reference
+        description: Deterministic final-mile agent reference.
+      - name: x_cashout_status
+        description: PLM beneficiary cash-out outcome.
+
       - name: end_to_end_id
-        description: "OrgnlEndToEndId = loan_id from the original payment instruction."
+        description: "Stable EndToEndId copied from the correlated business payment."
         tests: [not_null]
+
+      - name: event_family
+        tests:
+          - accepted_values:
+              arguments:
+                values: [TECHNICAL_PAYMENT_EVENT]
 
       - name: record_source
         tests:
           - accepted_values:
               arguments:
                 values:
-                  - CPO_PLM_PAIN002
+                  - CPO_PLM_TECHNICAL_EVENT
 
   - name: stg_pdm_wendi_camt053
     description: >

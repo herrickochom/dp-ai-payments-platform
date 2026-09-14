@@ -127,11 +127,25 @@ models:
     description: Canonical business payment-status entity.
     meta: {natural_key: [status_source, message_id], normal_form: 3NF}
   - name: slv_pdm_payments_pmn_lifecycle_events
-    description: Canonical PMN technical lifecycle event.
+    description: Canonical PMN routing, validation and orchestration lifecycle event.
     meta: {natural_key: [message_id], normal_form: 3NF}
   - name: slv_pdm_payments_plm_lifecycle_events
-    description: Canonical PLM technical lifecycle event.
+    description: Canonical PLM provider, wallet, agent and beneficiary-delivery lifecycle event.
     meta: {natural_key: [message_id], normal_form: 3NF}
+  - name: slv_pdm_payment_technical_events
+    description: Canonical technical-event stream kept separate from ISO business messages.
+    meta: {natural_key: [technical_source, event_id], normal_form: 3NF}
+  - name: slv_pdm_payment_event_correlation
+    description: Deterministic exact-key links from technical events to business payments; unmatched events remain visible.
+    meta: {natural_key: [technical_event_id], normal_form: relationship}
+    columns:
+      - name: technical_event_id
+        data_tests: [not_null, unique]
+      - name: match_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [MATCHED, UNMATCHED]
   - name: slv_pdm_payments_reconciliation
     description: Natural-key relationship between status reports and originating payment messages or transactions.
     meta: {natural_key: [status_source, status_message_id, transaction_source, transaction_id], normal_form: 3NF}
