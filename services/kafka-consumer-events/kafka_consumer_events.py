@@ -624,6 +624,7 @@ def main():
         "timestamp": self_test_now,
         "source_system": "self-test",
         "message_type": "self-test",
+        "event_family": "PAYMENT_BUSINESS_EVENT",
         "payload": {
             "amount": None,
             "currency": None,

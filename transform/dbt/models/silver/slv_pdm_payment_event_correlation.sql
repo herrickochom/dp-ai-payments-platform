@@ -1,9 +1,16 @@
 {{ config(materialized='iceberg_table') }}
 
 with technical as (
-    select * from {{ ref('slv_pdm_payment_technical_events') }}
+    select
+        event_id, technical_source, event_type, correlation_id,
+        instruction_id, end_to_end_id, transaction_id, uetr,
+        business_reference, technical_status, event_timestamp
+    from {{ ref('slv_pdm_payment_technical_events') }}
 ), business as (
-    select * from {{ ref('slv_pdm_payments_transactions') }}
+    select
+        source_system, message_id, transaction_id, uetr,
+        end_to_end_id, instruction_id
+    from {{ ref('slv_pdm_payments_transactions') }}
 ), candidates as (
     select t.event_id as technical_event_id, b.source_system as business_source_system,
            b.message_id as business_message_id, b.transaction_id as business_transaction_id,
@@ -25,7 +32,10 @@ with technical as (
     from technical t join business b
       on t.instruction_id is not null and t.instruction_id = b.instruction_id
 ), ranked as (
-    select *, row_number() over (
+    select
+        technical_event_id, business_source_system, business_message_id,
+        business_transaction_id, correlation_method, match_priority,
+        row_number() over (
         partition by technical_event_id
         order by match_priority,
                  case business_source_system
@@ -56,4 +66,3 @@ select
 from technical t
 left join ranked r
   on t.event_id = r.technical_event_id and r.match_rank = 1
-

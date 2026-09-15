@@ -308,7 +308,7 @@ def payment_scenario(loan: Mapping[str, Any]) -> str:
         return SCENARIO_SUCCESS
     if str(loan["loan_status"]) != "APPROVED":
         raise ValueError(f"{loan['loan_id']}: no payment exists for a rejected loan")
-    fields = {
+    return {
         5: SCENARIO_VALIDATION,
         7: SCENARIO_PENDING,
         10: SCENARIO_PROVIDER,
