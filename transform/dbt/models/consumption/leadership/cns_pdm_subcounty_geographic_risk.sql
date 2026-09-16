@@ -99,7 +99,7 @@ with sacco_subcounties as (
         path.district,
         path.sub_county,
         count(*) filter (where alert.identity_risk_band = 'HIGH') as high_identity_alert_count,
-        sum(alert.account_substitution_amount) as account_substitution_amount
+        sum(coalesce(alert.account_substitution_amount, 0)) as account_substitution_amount
     from {{ ref('cns_pdm_beneficiary_identity_alerts') }} alert
     join beneficiary_subcounties path
       on alert.beneficiary_sk = path.beneficiary_sk

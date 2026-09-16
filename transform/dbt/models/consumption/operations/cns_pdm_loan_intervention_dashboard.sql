@@ -1,7 +1,8 @@
-{{ config(materialized='iceberg_table', tags=['consumption', 'intervention', 'operations']) }}
+{{ config(materialized='iceberg_table', tags=['consumption', 'intervention', 'operations', 'privacy-boundary']) }}
 
--- Grain: one row per loan. Payment and AI inputs are reduced to one row per
--- loan before joining, preventing multiplication of loan financial amounts.
+-- GATE 2 PRIVACY BOUNDARY: pseudonymous by default. The canonical analytical
+-- identifier is beneficiary_token (carried on the loan fact); geography is
+-- carried at the approved coarse grain from the loan fact.
 with payment_metrics as (
     select
         loan_id,
@@ -33,15 +34,13 @@ select
     lifecycle.lifecycle_sk,
     loan.loan_sk,
     loan.loan_id,
-    beneficiary.beneficiary_id,
+    loan.beneficiary_token,
     sacco.sacco_id,
     sacco.sacco_name,
-    geography.region,
-    geography.district,
-    geography.county,
-    geography.sub_county,
-    geography.parish,
-    geography.village,
+    loan.region,
+    loan.district,
+    loan.county,
+    loan.sub_county,
     loan.project_type,
     loan.loan_status,
     loan.amount_approved as approved_amount,
@@ -111,10 +110,7 @@ select
         else 'NO_CURRENT_ACTION'
     end as recommended_operational_action
 from {{ ref('gld_fct_pdm_loans') }} loan
-left join {{ ref('gld_dim_pdm_beneficiary') }} beneficiary using (beneficiary_sk)
 left join {{ ref('gld_dim_pdm_sacco') }} sacco using (sacco_sk)
-left join {{ ref('gld_dim_pdm_geography') }} geography
-  on loan.geography_sk = geography.geography_sk
 left join {{ ref('gld_fct_pdm_payment_lifecycle') }} lifecycle using (loan_id)
 left join payment_metrics payment using (loan_id)
 left join latest_ai ai using (loan_id)

@@ -1,0 +1,149 @@
+# GATE 2 classification registry (part 2/2): quasi-identifiers, tokens, correlation IDs, layers.
+fields2:
+  - field: village
+    data_class: QUASI_IDENTIFIER
+    classification: CONFIDENTIAL
+    permitted_layers: [raw, staging, bronze, silver, gold, consumption-aggregated]
+    tokenisation: none
+    masking: aggregate-below-threshold
+    logging: metadata-only
+    consumption: aggregated-only
+  - field: parish
+    data_class: QUASI_IDENTIFIER
+    classification: CONFIDENTIAL
+    permitted_layers: [raw, staging, bronze, silver, gold, consumption-aggregated]
+    tokenisation: none
+    masking: aggregate-below-threshold
+    logging: metadata-only
+    consumption: aggregated-only
+  - field: sub_county
+    data_class: QUASI_IDENTIFIER
+    classification: INTERNAL
+    permitted_layers: [raw, staging, bronze, silver, gold, consumption]
+    tokenisation: none
+    masking: none
+    logging: metadata-only
+    consumption: allowed
+  - field: county
+    data_class: QUASI_IDENTIFIER
+    classification: INTERNAL
+    permitted_layers: [raw, staging, bronze, silver, gold, consumption]
+    tokenisation: none
+    masking: none
+    logging: metadata-only
+    consumption: allowed
+  - field: district
+    data_class: QUASI_IDENTIFIER
+    classification: INTERNAL
+    permitted_layers: [raw, staging, bronze, silver, gold, consumption]
+    tokenisation: none
+    masking: none
+    logging: metadata-only
+    consumption: allowed
+  - field: region
+    data_class: QUASI_IDENTIFIER
+    classification: INTERNAL
+    permitted_layers: [raw, staging, bronze, silver, gold, consumption]
+    tokenisation: none
+    masking: none
+    logging: metadata-only
+    consumption: allowed
+  - field: gender
+    data_class: DEMOGRAPHIC
+    classification: INTERNAL
+    permitted_layers: [raw, staging, bronze, silver, gold, consumption-aggregated]
+    tokenisation: none
+    masking: none
+    logging: metadata-only
+    consumption: aggregated-only
+  - field: beneficiary_token
+    data_class: NON_SENSITIVE
+    classification: INTERNAL
+    permitted_layers: [bronze, silver, gold, consumption]
+    tokenisation: derived-keyed-token
+    masking: none
+    logging: metadata-only
+    consumption: allowed
+  - field: nin_hashed
+    data_class: NON_SENSITIVE
+    classification: INTERNAL
+    permitted_layers: [silver, gold, consumption-investigator-only]
+    tokenisation: derived-keyed-token
+    masking: none
+    logging: metadata-only
+    consumption: investigator-only
+  - field: phone_hashed
+    data_class: NON_SENSITIVE
+    classification: INTERNAL
+    permitted_layers: [silver, gold, consumption-investigator-only]
+    tokenisation: derived-keyed-token
+    masking: none
+    logging: metadata-only
+    consumption: investigator-only
+  - field: creditor_account_hashed
+    data_class: NON_SENSITIVE
+    classification: INTERNAL
+    permitted_layers: [silver, gold, consumption-investigator-only]
+    tokenisation: derived-keyed-token
+    masking: none
+    logging: metadata-only
+    consumption: investigator-only
+  - field: correlation_id
+    data_class: OPERATIONAL
+    classification: CONFIDENTIAL
+    permitted_layers: [raw, staging, bronze, silver, gold, consumption-operational]
+    tokenisation: none-correlation-preserved
+    masking: none
+    logging: metadata-only
+    consumption: operational-only
+  - field: transaction_id
+    data_class: OPERATIONAL
+    classification: CONFIDENTIAL
+    permitted_layers: [raw, staging, bronze, silver, gold, consumption-operational]
+    tokenisation: none-correlation-preserved
+    masking: none
+    logging: metadata-only
+    consumption: operational-only
+  - field: uetr
+    data_class: OPERATIONAL
+    classification: CONFIDENTIAL
+    permitted_layers: [raw, staging, bronze, silver, gold, consumption-operational]
+    tokenisation: none-correlation-preserved
+    masking: none
+    logging: metadata-only
+    consumption: operational-only
+  - field: end_to_end_id
+    data_class: OPERATIONAL
+    classification: CONFIDENTIAL
+    permitted_layers: [raw, staging, bronze, silver, gold, consumption-operational]
+    tokenisation: none-correlation-preserved
+    masking: none
+    logging: metadata-only
+    consumption: operational-only
+  - field: instruction_id
+    data_class: OPERATIONAL
+    classification: CONFIDENTIAL
+    permitted_layers: [raw, staging, bronze, silver, gold, consumption-operational]
+    tokenisation: none-correlation-preserved
+    masking: none
+    logging: metadata-only
+    consumption: operational-only
+layers:
+  raw: {access: replay-audit-only, bi_access: false, log_protected_values: false}
+  staging: {access: restricted-parsing-only, bi_access: false, log_protected_values: false}
+  bronze: {access: controlled-operational, bi_access: false, clear_pii: convenience-prohibited}
+  silver: {access: analytical-privacy-boundary, clear_identity: vault-only}
+  gold: {access: business-ready-aggregated, direct_identifiers: prohibited}
+  consumption: {access: non-identifying-aggregated, beneficiary_identity: vault-path-only}
+tokenisation_standard:
+  algorithm: HMAC-SHA256
+  key_env: DP_TOKEN_KEY
+  key_version_env: DP_TOKEN_KEY_VERSION
+  banned: [plain-sha256-of-identifier, unsalted-hash]
+  properties: [deterministic, join-stable, key-version-recorded, rotation-documented]
+  missing_key: fail-closed
+restricted_identity:
+  design: TOKEN -> controlled-identity-resolver -> clear-identity
+  ordinary_paths_must_not_reverse_tokens: true
+  authorisation_required: true
+  auditing_required: true

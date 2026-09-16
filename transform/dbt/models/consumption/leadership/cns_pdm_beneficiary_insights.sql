@@ -1,4 +1,7 @@
-{{ config(materialized='iceberg_table', tags=['consumption', 'insights']) }}
+{{ config(materialized='iceberg_table', tags=['consumption', 'insights', 'privacy-boundary']) }}
+
+-- GATE 2 PRIVACY BOUNDARY: pseudonymous by default. The canonical analytical
+-- identifier is beneficiary_token; no clear beneficiary identifier is exposed.
 
 with loans as (
     select
@@ -24,10 +27,15 @@ select
     beneficiary.beneficiary_sk,
     beneficiary.geography_sk,
     beneficiary.special_group_sk,
-    beneficiary.beneficiary_id,
+    beneficiary.beneficiary_token,
     beneficiary.gender,
+    beneficiary.age_band,
     beneficiary.nin_verified,
     beneficiary.phone_verified,
+    beneficiary.region,
+    beneficiary.district,
+    beneficiary.county,
+    beneficiary.sub_county,
     coalesce(loans.loan_count, 0) as loan_count,
     coalesce(loans.approved_amount, 0) as approved_amount,
     coalesce(loans.disbursed_amount, 0) as disbursed_amount,
@@ -47,4 +55,4 @@ select
 from {{ ref('gld_dim_pdm_beneficiary') }} beneficiary
 left join loans using (beneficiary_sk)
 left join cashouts using (beneficiary_sk)
-where beneficiary.beneficiary_id is not null
+where beneficiary.beneficiary_token is not null

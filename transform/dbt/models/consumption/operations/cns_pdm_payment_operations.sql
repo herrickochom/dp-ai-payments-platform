@@ -1,8 +1,10 @@
-{{ config(materialized='iceberg_table', tags=['consumption', 'operations', 'payments']) }}
+{{ config(materialized='iceberg_table', tags=['consumption', 'operations', 'payments', 'privacy-boundary']) }}
 
--- Grain: one row per source-system payment transaction. The former aggregate
--- grain could not support an operational payment identifier or case follow-up.
--- Status reports are reduced to one row per original transaction before join.
+-- GATE 2 PRIVACY BOUNDARY: pseudonymous by default. The canonical analytical
+-- identifier is beneficiary_token; geography is carried at the approved coarse
+-- grain from the payment fact. Legitimate payment technical identifiers
+-- (payment/transaction ids, statuses, reconciliation state) are preserved.
+
 with reported_status as (
     select
         original_transaction_id as transaction_id,
@@ -25,14 +27,14 @@ select
     payment.transaction_id as payment_id,
     payment.transaction_id,
     payment.beneficiary_sk,
-    beneficiary.beneficiary_id,
+    payment.beneficiary_token,
     payment.loan_id,
     payment.sacco_sk,
     sacco.sacco_id,
     sacco.sacco_name,
     payment.geography_sk,
-    geography.region,
-    geography.district,
+    payment.region,
+    payment.district,
     date.calendar_date,
     payment.occurred_at,
     payment.source_system,
@@ -59,9 +61,5 @@ select
 from payments payment
 left join {{ ref('gld_dim_pdm_date') }} date
   on payment.payment_date_sk = date.date_sk
-left join {{ ref('gld_dim_pdm_beneficiary') }} beneficiary
-  on payment.beneficiary_sk = beneficiary.beneficiary_sk
 left join {{ ref('gld_dim_pdm_sacco') }} sacco
   on payment.sacco_sk = sacco.sacco_sk
-left join {{ ref('gld_dim_pdm_geography') }} geography
-  on payment.geography_sk = geography.geography_sk

@@ -10,7 +10,10 @@ models:
         description: Null only for the mandatory Unknown dimension member.
         data_tests: [unique]
   - name: gld_dim_pdm_geography
-    description: Authoritative Uganda geography dimension at region, district, county, sub-county, parish and village grain.
+    description: >-
+      Authoritative coarse analytical geography dimension at region, district,
+      county and sub-county grain. Parish and village beneficiary linkage is
+      prohibited; finer operational aggregates use SACCO/agent locations.
     columns:
       - name: geography_sk
         data_tests: [not_null, unique]
@@ -23,30 +26,35 @@ models:
       - name: sub_county_sk
         description: Stable key for the hierarchy through Sub County.
         data_tests: [not_null]
-      - name: parish_sk
-        description: Stable key for the hierarchy through Parish.
-        data_tests: [not_null]
-      - name: village_sk
-        description: Stable key for the complete hierarchy through Village.
-        data_tests: [not_null]
   - name: gld_dim_pdm_special_group
     description: PDM inclusion category dimension for women, youth, PWD and other targeted groups.
     columns:
       - name: special_group_sk
         data_tests: [not_null, unique]
   - name: gld_dim_pdm_beneficiary
-    description: Type-1 beneficiary dimension with geography and special-group surrogate keys.
+    description: >-
+      Type-1 pseudonymous beneficiary dimension keyed on the canonical
+      beneficiary_token with special-group surrogate key and approved coarse
+      geography. Clear identity, internal identifiers, household identifiers and
+      fine-grained personal geography live only in the RESTRICTED identity
+      vault; the geography_sk is the coarse (region/district/county/sub_county)
+      surrogate key shared with the coarse geography dimension.
     columns:
       - name: beneficiary_sk
         data_tests: [not_null, unique]
-      - name: geography_sk
-        data_tests:
-          - relationships:
-              arguments: {to: "ref('gld_dim_pdm_geography')", field: geography_sk}
+      - name: beneficiary_token
+        description: Null only for the mandatory Unknown dimension member.
+        data_tests: [unique]
+      - name: token_version
+        data_tests: [not_null]
       - name: special_group_sk
         data_tests:
           - relationships:
               arguments: {to: "ref('gld_dim_pdm_special_group')", field: special_group_sk}
+      - name: geography_sk
+        data_tests:
+          - relationships:
+              arguments: {to: "ref('gld_dim_pdm_geography')", field: geography_sk}
   - name: gld_dim_pdm_sacco
     description: Type-1 PDM SACCO dimension.
     columns:
@@ -61,6 +69,10 @@ models:
     columns:
       - name: agent_sk
         data_tests: [not_null, unique]
+      - name: geography_sk
+        data_tests:
+          - relationships:
+              arguments: {to: "ref('gld_dim_pdm_geography')", field: geography_sk}
   - name: gld_fct_pdm_payments
     description: Atomic accumulating payment fact at source-system and transaction grain.
     meta: {grain: [source_system, transaction_id]}
@@ -83,6 +95,10 @@ models:
         data_tests:
           - relationships:
               arguments: {to: "ref('gld_dim_pdm_agent')", field: agent_sk}
+      - name: beneficiary_token
+        data_tests:
+          - relationships:
+              arguments: {to: "ref('gld_dim_pdm_beneficiary')", field: beneficiary_token}
       - name: geography_sk
         data_tests:
           - relationships:
@@ -101,6 +117,10 @@ models:
         data_tests:
           - relationships:
               arguments: {to: "ref('gld_dim_pdm_sacco')", field: sacco_sk}
+      - name: beneficiary_token
+        data_tests:
+          - relationships:
+              arguments: {to: "ref('gld_dim_pdm_beneficiary')", field: beneficiary_token}
       - name: geography_sk
         data_tests:
           - relationships:

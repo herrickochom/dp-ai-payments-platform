@@ -1,0 +1,31 @@
+{
+  "catalogs": [
+    {"user": "platform_service", "catalog": "iceberg", "allow": "all"},
+    {"user": "restricted_identity_service", "catalog": "iceberg", "allow": "read-only"},
+    {"user": "analyst", "catalog": "iceberg", "allow": "read-only"},
+    {"user": "bi_dashboard", "catalog": "iceberg", "allow": "read-only"},
+    {"user": "agent_service", "catalog": "iceberg", "allow": "read-only"},
+    {"user": "governance_audit", "catalog": "iceberg", "allow": "read-only"},
+    {"user": "admin", "catalog": "iceberg", "allow": "all"},
+    {"user": ".*", "catalog": "system", "allow": "read-only"}
+  ],
+  "schemas": [
+    {"user": "admin", "catalog": "iceberg", "schema": ".*", "owner": true},
+    {"user": "platform_service", "catalog": "iceberg", "schema": "staging|bronze|silver|gold|consumption|silver_vault", "owner": false},
+    {"user": ".*", "catalog": "iceberg", "schema": ".*", "owner": false}
+  ],
+  "tables": [
+    {"user": "platform_service", "catalog": "iceberg", "schema": "staging|bronze|silver|gold|consumption|silver_vault", "table": ".*", "privileges": ["SELECT", "INSERT", "UPDATE", "DELETE"]},
+    {"user": "restricted_identity_service", "catalog": "iceberg", "schema": "silver_vault", "table": ".*", "privileges": ["SELECT"]},
+    {"user": "analyst", "catalog": "iceberg", "schema": "gold", "table": ".*", "privileges": ["SELECT"]},
+    {"user": "analyst", "catalog": "iceberg", "schema": "consumption", "table": "cns_pdm_payment_operations|cns_pdm_loan_intervention_dashboard|cns_pdm_ai_default_risk", "privileges": ["SELECT"]},
+    {"user": "bi_dashboard", "catalog": "iceberg", "schema": "consumption", "table": "cns_pdm_executive.*|cns_pdm_parish.*|cns_pdm_district.*|cns_pdm_geographic.*|cns_pdm_payments_daily_summary|cns_pdm_daily_operational_metrics", "privileges": ["SELECT"]},
+    {"user": "agent_service", "catalog": "iceberg", "schema": "consumption", "table": "cns_pdm_executive_overview", "privileges": ["SELECT"]},
+    {"user": "governance_audit", "catalog": "iceberg", "schema": "silver", "table": "slv_pdm_dq_results", "privileges": ["SELECT"]}
+  ],
+  "system_session_properties": [
+    {"user": "admin", "property": ".*", "allow": true},
+    {"user": "platform_service", "property": ".*", "allow": true},
+    {"user": ".*", "property": ".*", "allow": false}
+  ]
+}

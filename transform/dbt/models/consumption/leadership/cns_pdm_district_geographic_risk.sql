@@ -88,8 +88,6 @@ district_metrics as (
         avg(disbursement_peer_zscore) as avg_disbursement_peer_zscore,
         avg(repayment_peer_zscore) as avg_repayment_peer_zscore,
 
-        sum(high_identity_alert_count) as high_identity_alert_count,
-        sum(account_substitution_amount) as account_substitution_amount,
         sum(mapped_agent_count) as mapped_agent_count,
 
         avg(latitude)
@@ -102,6 +100,19 @@ district_metrics as (
     where district is not null
     group by 1
 
+),
+
+-- Identity measures are independently aggregated at coarse beneficiary district
+-- grain; unavailable parish identity placeholders are never coerced to zero.
+district_identity as (
+    select
+        lower(trim(beneficiary.district)) as district_key,
+        count(*) filter (where alert.identity_risk_band = 'HIGH') as high_identity_alert_count,
+        sum(alert.account_substitution_amount) as account_substitution_amount
+    from {{ ref('cns_pdm_beneficiary_identity_alerts') }} alert
+    join {{ ref('gld_dim_pdm_beneficiary') }} beneficiary using (beneficiary_sk)
+    where beneficiary.district is not null
+    group by 1
 )
 
 select
@@ -174,12 +185,12 @@ select
     metrics.avg_repayment_peer_zscore,
 
     coalesce(
-        metrics.high_identity_alert_count,
+        identity.high_identity_alert_count,
         0
     ) as high_identity_alert_count,
 
     coalesce(
-        metrics.account_substitution_amount,
+        identity.account_substitution_amount,
         0
     ) as account_substitution_amount,
 
@@ -195,6 +206,9 @@ from district_spine spine
 
 left join district_metrics metrics
   on spine.district_key = metrics.district_key
+
+left join district_identity identity
+  on spine.district_key = identity.district_key
 
 left join district_region_reference region
   on spine.district_key = region.district_key

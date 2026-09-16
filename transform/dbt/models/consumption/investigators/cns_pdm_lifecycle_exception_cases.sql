@@ -56,7 +56,7 @@ with base as (
 select
     lifecycle_sk,
     loan_id,
-    beneficiary_id,
+    beneficiary_token,
     sacco_id,
     region,
     district,

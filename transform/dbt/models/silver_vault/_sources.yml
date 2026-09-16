@@ -1,0 +1,16 @@
+version: 2
+
+sources:
+  - name: silver_vault
+    description: >-
+      RESTRICTED identity-vault source tables. The token-link mapping is the
+      Gate 2 beneficiary_id <-> beneficiary_token resolution artefact produced
+      by the validated bounded Python tokenisation boundary; it is RESTRICTED
+      and must never be referenced by Gold or Consumption models.
+    schema: silver_vault
+    database: lakehouse
+    tables:
+      - name: vlt_pdm_beneficiary_token_link
+        description: >-
+          RESTRICTED token-link mapping (beneficiary_id, beneficiary_key_internal,
+          token_version, beneficiary_token, is_active, generated_at).
