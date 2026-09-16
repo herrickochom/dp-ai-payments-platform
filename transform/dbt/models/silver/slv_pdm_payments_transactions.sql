@@ -1,36 +1,133 @@
 {{ config(materialized='iceberg_table') }}
 
 with transactions as (
-    select transaction_id, end_to_end_id, instruction_id, uetr, message_id,
-           cast(null as varchar) as beneficiary_id, cast(null as varchar) as sacco_id,
-           cast(null as varchar) as agent_id,
-           'ICMN_VPM' as source_system, creation_at as occurred_at,
-           instructed_amount as amount, currency, cast(null as varchar) as transaction_status
+
+    select
+        transaction_id,
+        end_to_end_id,
+        instruction_id,
+        uetr,
+        message_id,
+        cast(null as varchar) as beneficiary_id,
+        cast(null as varchar) as sacco_id,
+        cast(null as varchar) as agent_id,
+        'ICMN_VPM' as source_system,
+        creation_at as occurred_at,
+        instructed_amount as amount,
+        currency,
+        cast(null as varchar) as transaction_status
     from {{ ref('br_pdm_icmn_vpm_pain001') }}
+
     union all
-    select transaction_id, end_to_end_id, instruction_id, uetr, message_id, null, null, null,
-           'WENDI_PAIN001', creation_at, instructed_amount, currency, null
+
+    select
+        transaction_id,
+        end_to_end_id,
+        instruction_id,
+        uetr,
+        message_id,
+        null,
+        null,
+        null,
+        'WENDI_PAIN001',
+        creation_at,
+        instructed_amount,
+        currency,
+        null
     from {{ ref('br_pdm_wendi_pain001') }}
+
     union all
-    select transaction_id, end_to_end_id, null, null, message_id, null, null, null,
-           'MTN_PACS008', creation_at, instructed_amount, currency, null
+
+    select
+        transaction_id,
+        end_to_end_id,
+        null,
+        null,
+        message_id,
+        null,
+        null,
+        null,
+        'MTN_PACS008',
+        creation_at,
+        instructed_amount,
+        currency,
+        null
     from {{ ref('br_pdm_mobile_mtn_pacs008') }}
+
     union all
-    select transaction_id, end_to_end_id, null, null, message_id, null, null, null,
-           'AIRTEL_PACS008', creation_at, instructed_amount, currency, null
+
+    select
+        transaction_id,
+        end_to_end_id,
+        null,
+        null,
+        message_id,
+        null,
+        null,
+        null,
+        'AIRTEL_PACS008',
+        creation_at,
+        instructed_amount,
+        currency,
+        null
     from {{ ref('br_pdm_mobile_airtel_pacs008') }}
+
     union all
-    select coalesce(wendi_transaction_id, wallet_event_id), loan_id, null, null, null,
-           beneficiary_id, sacco_id, agent_id,
-           'WENDI_WALLET', event_timestamp, amount, currency, transaction_status
+
+    select
+        coalesce(wendi_transaction_id, wallet_event_id) as transaction_id,
+        loan_id as end_to_end_id,
+        null as instruction_id,
+        null as uetr,
+        null as message_id,
+        beneficiary_id,
+        sacco_id,
+        agent_id,
+        'WENDI_WALLET' as source_system,
+        event_timestamp as occurred_at,
+        amount,
+        currency,
+        transaction_status
     from {{ ref('br_pdm_wendi_transactions') }}
+
     union all
-    select transaction_id, loan_id, null, null, null, beneficiary_id, null,
-           agent_id, 'AGENT', transaction_timestamp, amount, 'UGX', status
+
+    select
+        transaction_id,
+        loan_id as end_to_end_id,
+        null as instruction_id,
+        null as uetr,
+        null as message_id,
+        beneficiary_id,
+        null as sacco_id,
+        agent_id,
+        'AGENT' as source_system,
+        transaction_timestamp as occurred_at,
+        amount,
+        'UGX' as currency,
+        status as transaction_status
     from {{ ref('br_pdm_agent_transactions') }}
+
+),
+
+identified_transactions as (
+
+    select
+        *,
+        coalesce(
+            transaction_id,
+            instruction_id,
+            end_to_end_id,
+            message_id
+        ) as record_identifier
+    from transactions
+
 )
-select * from transactions
-where transaction_id is not null
+
+select *
+from identified_transactions
+where record_identifier is not null
 qualify row_number() over (
-    partition by source_system, transaction_id order by occurred_at desc nulls last
+    partition by source_system, record_identifier
+    order by occurred_at desc nulls last
 ) = 1

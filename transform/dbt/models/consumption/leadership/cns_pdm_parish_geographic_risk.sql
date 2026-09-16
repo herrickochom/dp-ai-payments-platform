@@ -49,7 +49,7 @@ with agent_location_centroids as (
     select
         lower(trim(district)) as district_key,
         superset_district_iso
-    from {{ ref('uganda_superset_district_iso') }}
+    from {{ ref('uganda_district_geojson') }}
 
 ), scored as (
     select
@@ -88,12 +88,12 @@ select
         when superset_district_iso is null then 'NO DATA'
         when disbursement_peer_zscore is null
          and repayment_peer_zscore is null then 'NO DATA'
-        when abs(coalesce(disbursement_peer_zscore, 0)) >= 3
-          or coalesce(repayment_peer_zscore, 0) <= -3 then 'SEVERE'
-        when abs(coalesce(disbursement_peer_zscore, 0)) >= 2
-          or coalesce(repayment_peer_zscore, 0) <= -2 then 'HIGH'
-        when abs(coalesce(disbursement_peer_zscore, 0)) >= 1
-          or coalesce(repayment_peer_zscore, 0) <= -1 then 'MEDIUM'
+        when abs(round(coalesce(disbursement_peer_zscore, 0), 4)) >= 3
+          or round(coalesce(repayment_peer_zscore, 0), 4) <= -3 then 'SEVERE'
+        when abs(round(coalesce(disbursement_peer_zscore, 0), 4)) >= 2
+          or round(coalesce(repayment_peer_zscore, 0), 4) <= -2 then 'HIGH'
+        when abs(round(coalesce(disbursement_peer_zscore, 0), 4)) >= 1
+          or round(coalesce(repayment_peer_zscore, 0), 4) <= -1 then 'MEDIUM'
         else 'LOW'
     end as geographic_risk_band,
 
@@ -101,12 +101,12 @@ select
         when superset_district_iso is null then null
         when disbursement_peer_zscore is null
          and repayment_peer_zscore is null then null
-        when abs(coalesce(disbursement_peer_zscore, 0)) >= 3
-          or coalesce(repayment_peer_zscore, 0) <= -3 then 4
-        when abs(coalesce(disbursement_peer_zscore, 0)) >= 2
-          or coalesce(repayment_peer_zscore, 0) <= -2 then 3
-        when abs(coalesce(disbursement_peer_zscore, 0)) >= 1
-          or coalesce(repayment_peer_zscore, 0) <= -1 then 2
+        when abs(round(coalesce(disbursement_peer_zscore, 0), 4)) >= 3
+          or round(coalesce(repayment_peer_zscore, 0), 4) <= -3 then 4
+        when abs(round(coalesce(disbursement_peer_zscore, 0), 4)) >= 2
+          or round(coalesce(repayment_peer_zscore, 0), 4) <= -2 then 3
+        when abs(round(coalesce(disbursement_peer_zscore, 0), 4)) >= 1
+          or round(coalesce(repayment_peer_zscore, 0), 4) <= -1 then 2
         else 1
     end as geographic_risk_score
 from scored

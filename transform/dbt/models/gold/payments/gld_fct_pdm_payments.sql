@@ -22,7 +22,7 @@ controls as (
     from {{ ref('slv_pdm_payment_account_controls') }}
 )
 select
-    {{ gold_surrogate_key(['payment.source_system', 'payment.transaction_id']) }} as payment_sk,
+    {{ gold_surrogate_key(['payment.source_system', 'payment.record_identifier']) }} as payment_sk,
     {{ gold_surrogate_key(['cast(payment.occurred_at as date)']) }} as payment_date_sk,
     {{ gold_surrogate_key(['loan_link.beneficiary_token']) }} as beneficiary_sk,
     {{ gold_surrogate_key(['coalesce(entity.transaction_sacco_id, entity.loan_sacco_id)']) }} as sacco_sk,

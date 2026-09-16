@@ -213,17 +213,25 @@ def main() -> None:
     print(f"Predictions : {args.output}")
     print(f"Summary     : {args.summary}")
 
-    display_cols = [
-        c for c in ("beneficiary_id", "loan_id", "district")
-        if c in result.columns
-    ] + ["probability_default_90d", "ai_risk_band", "risk_rank"]
-
-    print("\nHighest-risk cases:")
-    print(
+    # Privacy-safe operational diagnostic.
+    # Do not emit beneficiary IDs, loan IDs, locations, tokens, or any other
+    # case-level identifiers to stdout/stderr because container/terminal
+    # output may be retained as operational logs or audit evidence.
+    top_risk = (
         result.sort_values(
             "probability_default_90d",
             ascending=False,
-        )[display_cols].head(10).to_string(index=False)
+        )
+        .head(10)
+    )
+
+    print("\nHighest-risk summary:")
+    print(f"Cases reviewed : {len(top_risk)}")
+    print(
+        "Risk range     : "
+        f"{top_risk['probability_default_90d'].min():.2%}"
+        " - "
+        f"{top_risk['probability_default_90d'].max():.2%}"
     )
 
 

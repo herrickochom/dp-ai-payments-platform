@@ -9,7 +9,7 @@ with district_spine as (
         trim(district) as district,
         trim(superset_district_iso) as superset_district_iso,
         lower(trim(district)) as district_key
-    from {{ ref('uganda_superset_district_iso') }}
+    from {{ ref('uganda_district_geojson') }}
 
 ),
 

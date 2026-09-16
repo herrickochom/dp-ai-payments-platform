@@ -2,7 +2,7 @@ with iso_reference as (
     select
         trim(district) as district,
         trim(superset_district_iso) as superset_district_iso
-    from {{ ref('uganda_superset_district_iso') }}
+    from {{ ref('uganda_district_geojson') }}
 ),
 geometry as (
     select

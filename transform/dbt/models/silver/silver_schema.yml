@@ -3,51 +3,63 @@ version: 2
 models:
   - name: slv_pdm_beneficiaries
     description: >-
-      Gate 2 pseudonymous canonical beneficiary analytical entity (one row per
-      beneficiary_token). Direct identifiers, the clear internal identifier,
+      Gate 2 pseudonymous canonical beneficiary analytical entity at one row
+      per beneficiary_token. Direct identifiers, the clear internal identifier,
       household identifiers and fine-grained personal geography live only in
       the RESTRICTED identity vault (silver_vault layer).
-    meta: {natural_key: [beneficiary_token], normal_form: 3NF}
     columns:
       - name: beneficiary_token
-        data_tests: [not_null, unique]
+        description: Canonical pseudonymous beneficiary natural key.
+        data_tests:
+          - not_null
+          - unique
       - name: token_version
-        data_tests: [not_null]
+        description: Version of the keyed canonical beneficiary token.
+        data_tests:
+          - not_null
       - name: special_group_code
         data_tests:
           - relationships:
               arguments:
                 to: ref('slv_pdm_special_groups')
                 field: group_code
+
   - name: slv_pdm_loan_beneficiary_links
     description: >-
-      Pseudonymous loan -> beneficiary_token linkage (Tier 3 output only; no
-      internal beneficiary identifiers). One row per loan.
+      Pseudonymous loan to beneficiary_token linkage at one row per loan.
+      Tier 3 analytical output only; no internal beneficiary identifiers.
     columns:
       - name: loan_id
-        data_tests: [not_null, unique]
+        description: Natural key for the loan-beneficiary relationship.
+        data_tests:
+          - not_null
+          - unique
       - name: beneficiary_token
         data_tests:
           - relationships:
               arguments:
                 to: ref('slv_pdm_beneficiaries')
                 field: beneficiary_token
+
   - name: slv_pdm_payment_account_controls
     description: >-
-      Payment technical control signals (creditor account issuer and account
-      substitution boolean) at source-system/transaction grain. Projects no
-      account numbers and no contact numbers.
+      Payment technical control signals at source-system and transaction
+      grain. Projects creditor account issuer and account-substitution
+      controls without account numbers or contact numbers.
     columns:
       - name: source_system
-        data_tests: [not_null]
+        data_tests:
+          - not_null
       - name: transaction_id
-        data_tests: [not_null]
+        data_tests:
+          - not_null
+
   - name: slv_pdm_payment_entity_matches
     description: >-
-      Pseudonymous cross-domain payment matching. Clear beneficiary IDs are
-      used only inside controlled Vault resolution joins and are never
-      projected; beneficiary linkage is exposed as canonical tokens.
-    meta: {natural_key: [source_system, transaction_id], normal_form: 3NF}
+      Pseudonymous cross-domain payment matching at source_system and
+      transaction_id grain. Clear beneficiary IDs are used only inside
+      controlled Vault resolution joins and are never projected;
+      beneficiary linkage is exposed as canonical tokens.
     columns:
       - name: transaction_beneficiary_token
       - name: loan_beneficiary_token
@@ -56,37 +68,68 @@ models:
         data_tests:
           - accepted_values:
               arguments:
-                values: [MATCHED, NOT_APPLICABLE, LOAN_NOT_MATCHED, BENEFICIARY_NOT_MATCHED, BENEFICIARY_MISMATCH, SACCO_NOT_MATCHED, SACCO_MISMATCH, BUSINESS_PLAN_NOT_MATCHED, AGENT_NOT_MATCHED]
+                values:
+                  - MATCHED
+                  - NOT_APPLICABLE
+                  - LOAN_NOT_MATCHED
+                  - BENEFICIARY_NOT_MATCHED
+                  - BENEFICIARY_MISMATCH
+                  - SACCO_NOT_MATCHED
+                  - SACCO_MISMATCH
+                  - BUSINESS_PLAN_NOT_MATCHED
+                  - AGENT_NOT_MATCHED
+
   - name: slv_pdm_households
-    description: Canonical household entity at one row per household_id.
-    meta: {natural_key: [household_id], normal_form: 3NF}
+    description: >-
+      Canonical household entity at one row per household_id.
     columns:
       - name: household_id
-        data_tests: [not_null, unique]
+        description: Natural key of the household entity.
+        data_tests:
+          - not_null
+          - unique
+
   - name: slv_pdm_saccos
-    description: Canonical SACCO entity at one row per sacco_id.
-    meta: {natural_key: [sacco_id], normal_form: 3NF}
+    description: >-
+      Canonical SACCO entity at one row per sacco_id.
     columns:
       - name: sacco_id
-        data_tests: [not_null, unique]
+        description: Natural key of the SACCO entity.
+        data_tests:
+          - not_null
+          - unique
+
   - name: slv_pdm_special_groups
-    description: Canonical special-group reference entity.
-    meta: {natural_key: [group_code], normal_form: 3NF}
+    description: >-
+      Canonical special-group reference entity at one row per group_code.
     columns:
       - name: group_code
-        data_tests: [not_null, unique]
+        description: Natural key of the special-group reference entity.
+        data_tests:
+          - not_null
+          - unique
+
   - name: slv_pdm_business_plans
-    description: Canonical business-plan entity linked to beneficiary and loan.
-    meta: {natural_key: [business_plan_id], normal_form: 3NF}
+    description: >-
+      Canonical business-plan entity linked to beneficiary and loan at one
+      row per business_plan_id.
     columns:
       - name: business_plan_id
-        data_tests: [not_null, unique]
+        description: Natural key of the business-plan entity.
+        data_tests:
+          - not_null
+          - unique
+
   - name: slv_pdm_loans
-    description: Canonical loan entity linked to beneficiary, SACCO and business plan.
-    meta: {natural_key: [loan_id], normal_form: 3NF}
+    description: >-
+      Canonical loan entity linked to beneficiary, SACCO and business plan
+      at one row per loan_id.
     columns:
       - name: loan_id
-        data_tests: [not_null, unique]
+        description: Natural key of the loan entity.
+        data_tests:
+          - not_null
+          - unique
       - name: sacco_id
         data_tests:
           - relationships:
@@ -99,79 +142,156 @@ models:
               arguments:
                 to: ref('slv_pdm_business_plans')
                 field: business_plan_id
+
   - name: slv_pdm_agents
-    description: Canonical agent entity at one row per agent_id.
-    meta: {natural_key: [agent_id], normal_form: 3NF}
+    description: >-
+      Canonical agent entity at one row per agent_id.
     columns:
       - name: agent_id
-        data_tests: [not_null, unique]
+        description: Natural key of the agent entity.
+        data_tests:
+          - not_null
+          - unique
+
   - name: slv_pdm_agent_locations
-    description: Agent-location relationship by agent and location type.
-    meta: {natural_key: [agent_id, location_type], normal_form: 3NF}
+    description: >-
+      Agent-location relationship at agent_id and location_type grain.
+
   - name: slv_pdm_payments_messages
-    description: Canonical cross-system payment-message envelope.
-    meta: {natural_key: [source_system, message_id], normal_form: 3NF}
+    description: >-
+      Canonical cross-system payment-message envelope at source_system and
+      message_id grain.
     columns:
       - name: message_id
-        data_tests: [not_null]
+        data_tests:
+          - not_null
+
   - name: slv_pdm_batch
-    description: Payment-information batch entity.
-    meta: {natural_key: [batch_id], normal_form: 3NF}
+    description: >-
+      Payment-information batch entity at one row per batch_id.
     columns:
       - name: batch_id
-        data_tests: [not_null, unique]
+        description: Natural key of the payment-information batch.
+        data_tests:
+          - not_null
+          - unique
+
   - name: slv_pdm_payments_transactions
-    description: Canonical transaction entity integrated across payment systems.
-    meta: {natural_key: [source_system, transaction_id], normal_form: 3NF}
+    description: >-
+      Canonical transaction entity integrated across heterogeneous payment
+      systems and message types. The natural key is source_system plus
+      record_identifier. The canonical record_identifier is selected from
+      transaction_id, instruction_id, end_to_end_id, then message_id.
     columns:
+      - name: source_system
+        description: Source payment system or message stream.
+        data_tests:
+          - not_null
+
+      - name: record_identifier
+        description: >-
+          Canonical Silver record identifier selected from transaction_id,
+          instruction_id, end_to_end_id, then message_id. Together with
+          source_system this forms the natural key across heterogeneous
+          payment message types.
+        data_tests:
+          - not_null
+
       - name: transaction_id
-        data_tests: [not_null]
+        description: >-
+          Source transaction identifier where supplied. It may legitimately
+          be null for payment initiation messages whose applicable identifier
+          is instruction_id, end_to_end_id or message_id.
+
+      - name: instruction_id
+        description: >-
+          Payment instruction identifier where supplied by the source message.
+
       - name: end_to_end_id
-        description: Lifecycle link to the PDM loan_id.
+        description: >-
+          End-to-end payment lifecycle correlation identifier and PDM loan
+          linkage where applicable.
+
+      - name: message_id
+        description: >-
+          Source payment message identifier where supplied.
+
   - name: slv_pdm_payments_accounts
-    description: Canonical payment-account entity.
-    meta: {natural_key: [account_issuer, account_id], normal_form: 3NF}
+    description: >-
+      Canonical payment-account entity at account_issuer and account_id grain.
+
   - name: slv_pdm_payments_party
-    description: Canonical payment party identified by its source account.
-    meta: {natural_key: [account_issuer, account_id], normal_form: 3NF}
+    description: >-
+      Canonical payment party identified at account_issuer and account_id
+      grain.
+
   - name: slv_pdm_payment_party_roles
-    description: Relationship assigning debtor and creditor roles within a payment message.
-    meta: {natural_key: [message_id, party_role], normal_form: 3NF}
+    description: >-
+      Relationship assigning debtor and creditor roles within a payment
+      message at message_id and party_role grain.
+
   - name: slv_pdm_payments_remittance
-    description: Payment-remittance relationship without derived calendar attributes.
-    meta: {natural_key: [message_id, remittance_type, creditor_reference], normal_form: 3NF}
+    description: >-
+      Payment-remittance relationship at message_id, remittance_type and
+      creditor_reference grain without derived calendar attributes.
+
   - name: slv_pdm_payments_status_report
-    description: Canonical business payment-status entity.
-    meta: {natural_key: [status_source, message_id], normal_form: 3NF}
+    description: >-
+      Canonical business payment-status entity at status_source and
+      message_id grain.
+
   - name: slv_pdm_payments_pmn_lifecycle_events
-    description: Canonical PMN routing, validation and orchestration lifecycle event.
-    meta: {natural_key: [message_id], normal_form: 3NF}
+    description: >-
+      Canonical PMN routing, validation and orchestration lifecycle event
+      at one row per message_id.
+
   - name: slv_pdm_payments_plm_lifecycle_events
-    description: Canonical PLM provider, wallet, agent and beneficiary-delivery lifecycle event.
-    meta: {natural_key: [message_id], normal_form: 3NF}
+    description: >-
+      Canonical PLM provider, wallet, agent and beneficiary-delivery
+      lifecycle event at one row per message_id.
+
   - name: slv_pdm_payment_technical_events
-    description: Canonical technical-event stream kept separate from ISO business messages.
-    meta: {natural_key: [technical_source, event_id], normal_form: 3NF}
+    description: >-
+      Canonical technical-event stream kept separate from ISO business
+      messages at technical_source and event_id grain.
+
   - name: slv_pdm_payment_event_correlation
-    description: Deterministic exact-key links from technical events to business payments; unmatched events remain visible.
-    meta: {natural_key: [technical_event_id], normal_form: relationship}
+    description: >-
+      Deterministic exact-key links from technical events to business
+      payments at one row per technical_event_id. Unmatched events remain
+      visible.
     columns:
       - name: technical_event_id
-        data_tests: [not_null, unique]
+        description: Natural key of the technical-event correlation.
+        data_tests:
+          - not_null
+          - unique
       - name: match_status
         data_tests:
           - accepted_values:
               arguments:
-                values: [MATCHED, UNMATCHED]
+                values:
+                  - MATCHED
+                  - UNMATCHED
+
   - name: slv_pdm_payments_reconciliation
-    description: Natural-key relationship between status reports and originating payment messages or transactions.
-    meta: {natural_key: [status_source, status_message_id, transaction_source, transaction_id], normal_form: 3NF}
+    description: >-
+      Natural-key relationship between status reports and originating
+      payment messages or transactions at status_source, status_message_id,
+      transaction_source and transaction_id grain.
+
   - name: slv_pdm_dq_results
-    description: Normalized cross-domain business-validation results, one row per canonical entity and rule.
-    meta: {natural_key: [entity_type, entity_id, rule_code], normal_form: 3NF}
+    description: >-
+      Normalized cross-domain business-validation results at entity_type,
+      entity_id and rule_code grain.
+
   - name: slv_pdm_payment_lifecycle
-    description: One-row-per-loan control view from approval through instruction, status, settlement, credit, cash-out and repayment.
-    meta: {natural_key: [loan_id], normal_form: control_view}
+    description: >-
+      One-row-per-loan control view from approval through instruction,
+      status, settlement, credit, cash-out and repayment.
     columns:
       - name: loan_id
-        data_tests: [not_null, unique]
+        description: Natural key of the payment lifecycle control view.
+        data_tests:
+          - not_null
+          - unique
