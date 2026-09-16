@@ -1,6 +1,6 @@
 # 11 - Gate 2 Final Acceptance
 
-Status: PRE-FREEZE ACCEPTANCE RECORD
+Status: GATE 2 - FROZEN
 
 Evidence date: 2026-09-16
 
@@ -10,15 +10,15 @@ Git branch:
 
 `main`
 
-Git base before final freeze commit:
+Gate 2 implementation freeze commit:
 
-`91ade6c820d2c645469d35ce755ae2147957097f`
+`ba080c74b351ce995649b2e3cd7b2d340bb2aca5`
 
 Nessie branch:
 
 `main`
 
-Current pre-freeze Nessie hash:
+Frozen Nessie data-state baseline:
 
 `ddd3b9b6bfd9db5b00ac6304d74124b249176ec0ddab1464adba8b8e69ee96ba`
 
@@ -205,9 +205,14 @@ freeze is explicitly reopened.
 
 ## Final declaration
 
-This document remains `PRE-FREEZE` until the final Git commit is created and
-its commit hash is recorded.
+The validated implementation is frozen at Git commit:
 
-After that controlled step, Gate 2 may be declared:
+`ba080c74b351ce995649b2e3cd7b2d340bb2aca5`
+
+The corresponding accepted Nessie data-state baseline is:
+
+`ddd3b9b6bfd9db5b00ac6304d74124b249176ec0ddab1464adba8b8e69ee96ba`
+
+Gate 2 status:
 
 `GATE 2 - FROZEN`
