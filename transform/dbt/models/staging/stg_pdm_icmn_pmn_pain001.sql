@@ -13,7 +13,7 @@ with raw_data as (
 ), parsed as (
     select
         event_id, envelope_message_id, event_family,
-        {{ extract_json('parsed_event_data', '$.event_id') }} as message_id,
+        {{ extract_json('parsed_event_data', '$.message_id') }} as message_id,
         {{ extract_json('parsed_event_data', '$.event_type') }} as event_type,
         {{ extract_json('parsed_event_data', '$.correlation_id') }} as correlation_id,
         {{ extract_json('parsed_event_data', '$.instruction_id') }} as instruction_id,

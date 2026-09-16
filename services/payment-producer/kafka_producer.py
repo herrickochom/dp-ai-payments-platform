@@ -336,16 +336,33 @@ def parse_generic_xml(file_path: str) -> Dict[str, Any]:
                 None,
             )
 
-        message = first({"MsgId"})
-        created = first({"CreDtTm"})
-        amount = first({"InstdAmt", "IntrBkSttlmAmt"})
+        def text_of(local_names):
+            element = first(local_names)
+            if element is None or element.text is None:
+                return None
+            value = element.text.strip()
+            return value or None
+
+        message_id = text_of({"MsgId", "MessageId"})
+        transaction_id = text_of({"transaction_id", "TransactionId", "TxId"})
+        created = text_of({"CreDtTm", "transaction_timestamp", "EventTimestamp"})
+        amount_element = first({"InstdAmt", "IntrBkSttlmAmt", "amount"})
+        amount = None
+        if amount_element is not None and amount_element.text:
+            try:
+                amount = float(amount_element.text.strip())
+            except ValueError:
+                amount = None
+
         return {
-            "message_id": message.text if message is not None else None,
-            "creation_date": created.text if created is not None else None,
-            "instructed_amount": (
-                float(amount.text) if amount is not None and amount.text else None
-            ),
-            "currency": amount.get("Ccy") if amount is not None else None,
+            "message_id": message_id,
+            "transaction_id": transaction_id,
+            "agent_id": text_of({"agent_id", "AgentId"}),
+            "loan_id": text_of({"loan_id", "LoanId"}),
+            "payment_id": text_of({"payment_id", "PaymentId"}),
+            "creation_date": created,
+            "instructed_amount": amount,
+            "currency": amount_element.get("Ccy") if amount_element is not None else None,
             "xml": {root.tag.rsplit('}', 1)[-1]: xml_to_dict(root)},
         }
     except Exception as exc:
@@ -541,14 +558,17 @@ def parse_event(file_path: str) -> Optional[Dict[str, Any]]:
     event_family = (
         "TECHNICAL_PAYMENT_EVENT" if is_technical else "PAYMENT_BUSINESS_EVENT"
     )
+    header = payload.get("header") if isinstance(payload.get("header"), dict) else {}
+    message_id = (
+        payload.get("message_id")
+        or header.get("message_id")
+        or payload.get("transaction_id")
+        or os.path.basename(file_path)
+    )
+
     event = {
-        "event_id": payload.get("event_id", str(uuid.uuid4())),
-        "message_id": payload.get(
-            "message_id",
-            payload.get("header", {}).get(
-                "message_id", f"{system.upper()}-{msg_type}-{uuid.uuid4().hex[:8]}"
-            ),
-        ),
+        "event_id": str(payload.get("event_id") or uuid.uuid4()),
+        "message_id": str(message_id),
         "event_type": payload.get("event_type", msg_type),
         "event_family": event_family,
         "source_system": system,
@@ -637,7 +657,7 @@ def parse_json_events(file_path: str) -> list[Dict[str, Any]]:
 # ------------------------------------------------------------------------------
 # Main Producer
 # ------------------------------------------------------------------------------
-def main():
+def main() -> int:
     logger.info("=" * 80)
     logger.info("🚀 Payment Event Producer")
     logger.info("=" * 80)
@@ -695,8 +715,8 @@ def main():
     logger.info(f"📄 Found {len(xml_files)} XML files and {len(json_files)} JSON files")
 
     if not xml_files and not json_files:
-        logger.warning("No supported XML/JSON source files found under DATA_ROOT.")
-        return
+        logger.error("No supported XML/JSON source files found under DATA_ROOT.")
+        return 1
     
     # Group files by topic
     files_by_topic = {}
@@ -776,8 +796,14 @@ def main():
     logger.info("📊 PRODUCTION SUMMARY")
     logger.info("=" * 80)
     logger.info(f"✅ Delivered: {delivery.succeeded} events")
-    logger.info(f"❌ Failed: {failed + delivery.failed} events")
+    total_failed = failed + delivery.failed
+    logger.info(f"❌ Failed: {total_failed} events")
     logger.info("=" * 80)
 
+    if total_failed:
+        logger.error("Producer completed with failures; returning non-zero exit status")
+        return 1
+    return 0
+
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

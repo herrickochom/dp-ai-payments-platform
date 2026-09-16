@@ -57,6 +57,8 @@ def test_population_250_unique_no_collisions(keyed_env):
     rows = build_token_links(BENEFICIARIES, version=TEST_VERSION)
     tokens = [r.beneficiary_token for r in rows]
     assert len(rows) == 250
+    assert [r.beneficiary_id for r in rows] == BENEFICIARIES
+    assert len({r.beneficiary_id for r in rows}) == 250
     assert len(set(BENEFICIARIES)) == 250
     assert len(set(tokens)) == 250
     assert all(t for t in tokens)

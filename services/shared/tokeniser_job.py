@@ -27,6 +27,7 @@ class TokenisationVersionMissing(RuntimeError):
 
 @dataclass(frozen=True)
 class TokenLinkRow:
+    beneficiary_id: str
     beneficiary_key_internal: str
     token_version: str
     beneficiary_token: str
@@ -70,6 +71,7 @@ def build_token_links(
         seen.add(canonical_id)
         rows.append(
             TokenLinkRow(
+                beneficiary_id=canonical_id,
                 beneficiary_key_internal=f"internal:{canonical_id}",
                 token_version=active_version,
                 beneficiary_token=canonical_token_for(canonical_id, version=active_version),

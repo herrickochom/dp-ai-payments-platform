@@ -109,7 +109,7 @@ with sacco_subcounties as (
     select
         lower(trim(district)) as district_key,
         superset_district_iso
-    from {{ ref('uganda_superset_district_iso') }}
+    from {{ ref('uganda_district_geojson') }}
 
 ), scored as (
     select

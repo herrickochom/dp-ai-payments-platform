@@ -129,7 +129,7 @@ services:
       - data-platform-network
 
   minio:
-    image: minio/minio:latest
+    image: quay.io/minio/minio:latest
     container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-minio
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
@@ -936,6 +936,9 @@ services:
       MINIO_BUCKET: dp-ai-payment
       RAW_ROOT: raw/v2
       NESSIE_ENDPOINT: http://nessie:19120
+      # Gate 2 restricted tokenisation boundary.
+      DP_TOKEN_KEY: ${DP_TOKEN_KEY}
+      DP_TOKEN_KEY_VERSION: ${DP_TOKEN_KEY_VERSION}
     volumes:
       - ./transform/dbt:/usr/app/dbt
       - ./data:/app/data
