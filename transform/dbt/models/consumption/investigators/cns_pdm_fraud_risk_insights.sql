@@ -1,4 +1,9 @@
-{{ config(materialized='iceberg_table', tags=['consumption', 'risk', 'investigation']) }}
+{{ config(materialized='iceberg_table', tags=['consumption', 'risk', 'investigation', 'privacy-boundary']) }}
+
+-- GATE 2 PRIVACY BOUNDARY: pseudonymous by default (beneficiary_token from the
+-- lifecycle fact; coarse geography only). Identity-theft signals come from the
+-- pseudonymous per-token signal feed; the geographic anomaly signal is now
+-- evaluated at district grain (approved coarse geography).
 
 with patterns as (
     select loan_id,
@@ -23,13 +28,12 @@ select
     lifecycle.lifecycle_sk as risk_case_sk,
     lifecycle.loan_id,
     lifecycle.beneficiary_sk,
-    beneficiary.beneficiary_id,
+    lifecycle.beneficiary_token,
     lifecycle.sacco_sk,
     sacco.sacco_id,
     lifecycle.geography_sk,
-    loan_geography.region,
-    loan_geography.district,
-    loan_geography.parish,
+    lifecycle.region,
+    lifecycle.district,
     coalesce(patterns.duplicate_payment_flag, false) as duplicate_payment_flag,
     coalesce(patterns.fragmentation_flag, false) as fragmentation_flag,
     coalesce(identity.identity_alert_count, 0) > 0 as beneficiary_identity_flag,
@@ -68,18 +72,13 @@ select
     coalesce(ai.interpretation, 'PREDICTIVE_DEFAULT_RISK_NOT_FRAUD_DETERMINATION')
         as ai_interpretation
 from {{ ref('cns_pdm_lifecycle_exceptions') }} lifecycle
-left join {{ ref('cns_pdm_beneficiary_identity_alerts') }} identity
-  on lifecycle.beneficiary_sk = identity.beneficiary_sk
-left join {{ ref('gld_dim_pdm_geography') }} loan_geography
-  on lifecycle.geography_sk = loan_geography.geography_sk
-left join {{ ref('cns_pdm_parish_geographic_risk') }} geographic
-  on loan_geography.region = geographic.region
- and loan_geography.district = geographic.district
- and loan_geography.parish = geographic.parish
+left join {{ ref('vlt_pdm_beneficiary_identity_signals') }} identity
+  on lifecycle.beneficiary_token = identity.beneficiary_token
+left join {{ ref('cns_pdm_district_geographic_risk') }} geographic
+  on lifecycle.region = geographic.region
+ and lifecycle.district = geographic.district
 left join patterns on lifecycle.loan_id = patterns.loan_id
 left join cashouts on lifecycle.loan_id = cashouts.loan_id
-left join {{ ref('gld_dim_pdm_beneficiary') }} beneficiary
-  on lifecycle.beneficiary_sk = beneficiary.beneficiary_sk
 left join {{ ref('gld_dim_pdm_sacco') }} sacco
   on lifecycle.sacco_sk = sacco.sacco_sk
 left join latest_ai ai on lifecycle.loan_id = ai.loan_id

@@ -1,12 +1,14 @@
 {{ config(materialized='iceberg_table', tags=['consumption', 'social-impact']) }}
 
+-- household_count is intentionally retired pending a privacy-safe aggregate
+-- design. No existing group-level household aggregate supports this metric.
+
 select
     special_group.special_group_sk,
     special_group.group_code,
     special_group.group_name,
     special_group.quota_percentage,
     count(distinct beneficiary.beneficiary_sk) as registered_beneficiary_count,
-    count(distinct beneficiary.household_id) as household_count,
     count(distinct loan.beneficiary_sk) as funded_beneficiary_count,
     count(distinct loan.loan_id) as funded_loan_count,
     count(distinct loan.business_plan_id) as funded_business_plan_count,

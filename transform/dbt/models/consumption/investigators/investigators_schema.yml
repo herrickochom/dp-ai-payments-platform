@@ -21,7 +21,7 @@ models:
     columns:
       - name: loan_id
         data_tests: [not_null]
-      - name: beneficiary_id
+      - name: beneficiary_token
         data_tests: [not_null]
       - name: lifecycle_stage
         data_tests:

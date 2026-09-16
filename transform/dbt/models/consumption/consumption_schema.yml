@@ -4,8 +4,9 @@ models:
   - name: cns_pdm_executive_geographic_drilldown
     description: >
       Privacy-limited executive drill source connecting the complete Uganda
-      administrative hierarchy to PDM SACCOs, beneficiaries, loans, financial
-      measures and risk. It intentionally excludes raw NIN and phone fields.
+      coarse region/district/county/sub-county hierarchy to pseudonymous
+      beneficiaries and loan measures. Direct identity and fine residence
+      geography remain restricted.
     config:
       meta:
         grain:
@@ -17,8 +18,6 @@ models:
         classification: internal
     columns:
       - name: beneficiary_sk
-        data_tests: [not_null]
-      - name: geography_sk
         data_tests: [not_null]
       - name: risk_band
         data_tests:
@@ -92,8 +91,8 @@ models:
 
   - name: cns_pdm_parish_performance
     description: >
-      Parish-level PDM loan disbursement, outstanding balance
-      and repayment performance.
+      Parish-level loan performance attributed through SACCO office location
+      (SACCO_OFFICE_ATTRIBUTION), never beneficiary residence.
     config:
       meta:
         grain:
@@ -155,23 +154,31 @@ models:
                   - REVIEW
 
   - name: cns_pdm_beneficiary_identity_alerts
-    description: >
-      Authorised investigator view of shared identity, shared phone,
-      multiple-loan and payment-account substitution indicators.
+    description: >-
+      Pseudonymous per-token identity-theft indicator feed (alert counts, risk
+      bands and booleans keyed by beneficiary_token). The clear-identity alert
+      detail has been RELOCATED to the RESTRICTED identity-vault product
+      silver_vault.vlt_pdm_beneficiary_identity_alerts.
     config:
       meta:
         grain:
-          - beneficiary_sk
+          - beneficiary_token
         audience:
           - internal audit
           - IGG
           - authorised investigators
-        classification: restricted
+        classification: internal
     columns:
-      - name: beneficiary_sk
+      - name: beneficiary_token
         data_tests:
           - not_null
           - unique
+
+      - name: account_substitution_count
+        description: Safe per-token count; no payment-account identifier is exposed.
+
+      - name: account_substitution_amount
+        description: Safe per-token aggregate amount; no payment-account identifier is exposed.
 
       - name: identity_risk_band
         data_tests:
@@ -412,12 +419,11 @@ models:
 
   - name: cns_pdm_parish_geographic_risk
     description: >
-      Parish-grain geographic risk model combining disbursement, repayment
-      and beneficiary identity indicators, with Uganda map coordinates,
-      Superset-compatible district ISO mapping and executive geographic
-      risk severity. This is the base grain of the geographic risk
-      hierarchy: district and sub-county models aggregate up from it and
-      the village model inherits down from it.
+      Parish-grain operational risk model using SACCO-office attribution for
+      disbursement and repayment plus agent/reference coordinates. It contains
+      no beneficiary-location or identity-risk attribution. District products
+      may aggregate it; the village product is independently sourced agent
+      coverage and does not inherit parish risk.
     config:
       meta:
         grain:
@@ -481,13 +487,11 @@ models:
 
       - name: high_identity_alert_count
         description: >
-          Count of HIGH beneficiary identity alerts associated with the
-          parish.
+          Intentionally NULL: beneficiary identity risk is unavailable at parish grain.
 
       - name: account_substitution_amount
         description: >
-          Total observed account-substitution amount associated with
-          beneficiary identity alerts in the parish.
+          Intentionally NULL: beneficiary account-substitution amounts are unavailable at parish grain.
 
       - name: disbursement_peer_zscore
         description: >
@@ -554,7 +558,7 @@ models:
           repayment relative to regional peers.
 
       - name: identity_risk_magnitude
-        description: Count of HIGH beneficiary identity alerts in the parish.
+        description: Intentionally NULL; identity risk is unavailable at parish grain.
 
       - name: primary_risk_driver
         description: >
@@ -669,10 +673,8 @@ models:
 
   - name: cns_pdm_village_geographic_risk
     description: >
-      Village rows inheriting parish risk (risk_grain_source =
-      PARISH_INHERITED). Preserves the full geographic drill hierarchy
-      without overstating risk granularity until village-grain performance
-      facts exist.
+      Village-level operational agent coverage only. Gate 2 makes beneficiary
+      risk and financial measures unavailable at village grain.
     config:
       meta:
         grain:
@@ -685,13 +687,13 @@ models:
     columns:
       - name: risk_grain_source
         description: >
-          PARISH_INHERITED while village risk is derived from its parish;
-          replace with a native grain when village facts become available.
+          Explicitly states that only non-beneficiary operational agent
+          coverage is represented at village grain.
         data_tests:
           - accepted_values:
               arguments:
                 values:
-                  - PARISH_INHERITED
+                  - OPERATIONAL_AGENT_COVERAGE_ONLY
 
 
   - name: cns_pdm_executive_overview
@@ -948,8 +950,9 @@ models:
 
   - name: cns_pdm_social_impact
     description: >
-      Special-group view of beneficiary reach, household reach,
-      funding delivery and repayment participation.
+      Special-group view of beneficiary reach, funding delivery and repayment
+      participation. household_count is intentionally unavailable after Gate 2
+      pending an approved privacy-safe aggregate design.
     config:
       meta:
         grain:

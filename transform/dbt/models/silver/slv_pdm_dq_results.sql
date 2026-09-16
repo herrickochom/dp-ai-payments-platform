@@ -89,16 +89,19 @@ with validation_results as (
         rule.rule_passed,
         rule.rule_detail
     from {{ ref('slv_pdm_loans') }} loan
+    left join {{ ref('slv_pdm_loan_beneficiary_links') }} loan_link
+      on loan.loan_id = loan_link.loan_id
     left join {{ ref('slv_pdm_beneficiaries') }} beneficiary
-      on loan.beneficiary_id = beneficiary.beneficiary_id
+      on loan_link.beneficiary_token = beneficiary.beneficiary_token
     left join {{ ref('slv_pdm_saccos') }} sacco
       on loan.sacco_id = sacco.sacco_id
     left join {{ ref('slv_pdm_business_plans') }} business_plan
       on loan.business_plan_id = business_plan.business_plan_id
     cross join lateral (
         values
-            ('BENEFICIARY_EXISTS', loan.beneficiary_id is not null and beneficiary.beneficiary_id is not null,
-             'Loan beneficiary must resolve to the canonical beneficiary'),
+            ('BENEFICIARY_EXISTS', loan_link.beneficiary_token is not null
+                and beneficiary.beneficiary_token is not null,
+             'Loan beneficiary must resolve through the canonical beneficiary token'),
             ('SACCO_EXISTS', loan.sacco_id is null or sacco.sacco_id is not null,
              'Loan SACCO must resolve when supplied'),
             ('BUSINESS_PLAN_EXISTS', loan.business_plan_id is null or business_plan.business_plan_id is not null,

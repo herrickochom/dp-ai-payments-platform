@@ -62,6 +62,11 @@ models:
       +materialized: table
       +schema: gold
 
+    silver_vault:
+      +database: lakehouse
+      +materialized: table
+      +schema: silver_vault
+
     consumption:
       +database: lakehouse
       +materialized: table

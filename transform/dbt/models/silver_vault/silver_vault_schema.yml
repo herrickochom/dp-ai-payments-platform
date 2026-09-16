@@ -1,0 +1,80 @@
+version: 2
+
+models:
+  - name: vlt_pdm_beneficiary_identity
+    description: >-
+      RESTRICTED identity vault: clear identity, direct identifiers, legacy
+      token provenance and approved age bands for the canonical beneficiary
+      population. Never readable by analyst/BI/agent/Gold/Consumption.
+    config:
+      meta:
+        classification: restricted
+        grain:
+          - beneficiary_id
+    columns:
+      - name: beneficiary_id
+        data_tests: [not_null, unique]
+      - name: beneficiary_token
+        data_tests: [not_null, unique]
+      - name: token_version
+        data_tests: [not_null]
+      - name: age_band
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - '18-24'
+                  - '25-34'
+                  - '35-44'
+                  - '45-54'
+                  - '55-64'
+                  - '65+'
+                  - UNKNOWN
+
+  - name: vlt_pdm_beneficiary_identity_alerts
+    description: >-
+      RESTRICTED relocated identity-alert product (shared NIN/phone, unverified
+      NIN, multiple loans, payment-account substitution) with the clear identity
+      context investigators require. Relocated from ordinary consumption.
+    config:
+      meta:
+        classification: restricted
+        grain:
+          - beneficiary_id
+    columns:
+      - name: beneficiary_sk
+        data_tests: [not_null, unique]
+      - name: identity_risk_band
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - LOW
+                  - MEDIUM
+                  - HIGH
+
+  - name: vlt_pdm_beneficiary_identity_signals
+    description: >-
+      Pseudonymous per-token identity-signal projection of the RESTRICTED
+      identity-alert product. Contains no direct identifiers; consumed by the
+      Silver privacy boundary for downstream alert signalling.
+    config:
+      meta:
+        classification: internal
+        grain:
+          - beneficiary_token
+    columns:
+      - name: beneficiary_token
+        data_tests: [not_null, unique]
+      - name: account_substitution_count
+        description: Safe per-token count with no account identifier exposed.
+      - name: account_substitution_amount
+        description: Safe per-token aggregate amount with no account identifier exposed.
+      - name: identity_risk_band
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - LOW
+                  - MEDIUM
+                  - HIGH

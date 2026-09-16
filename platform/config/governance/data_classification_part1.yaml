@@ -1,0 +1,125 @@
+# GATE 2 classification registry (part 1/2): levels, classes, direct/account/payment fields.
+# Single machine-readable source; agent governance must import this, not duplicate it.
+classifications: [PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED]
+data_classes: [DIRECT_IDENTIFIER, QUASI_IDENTIFIER, FINANCIAL_IDENTIFIER, PAYMENT_IDENTIFIER, DEMOGRAPHIC, CREDIT_RISK, OPERATIONAL, NON_SENSITIVE]
+fields:
+  - field: beneficiary_name
+    data_class: DIRECT_IDENTIFIER
+    classification: RESTRICTED
+    permitted_layers: [raw, staging, bronze-controlled, silver-identity-vault-only]
+    tokenisation: keyed-required
+    masking: full
+    logging: never
+    consumption: prohibited
+  - field: nin
+    data_class: DIRECT_IDENTIFIER
+    classification: RESTRICTED
+    permitted_layers: [raw, staging, bronze-controlled, silver-identity-vault-only]
+    tokenisation: keyed-required
+    masking: full
+    logging: never
+    consumption: prohibited
+  - field: date_of_birth
+    data_class: DIRECT_IDENTIFIER
+    classification: RESTRICTED
+    permitted_layers: [raw, staging, bronze-controlled, silver-identity-vault-only]
+    tokenisation: keyed-required
+    masking: full
+    logging: never
+    consumption: prohibited
+  - field: phone
+    data_class: DIRECT_IDENTIFIER
+    classification: RESTRICTED
+    permitted_layers: [raw, staging, bronze-controlled, silver-identity-vault-only]
+    tokenisation: keyed-required
+    masking: partial-last4
+    logging: never
+    consumption: prohibited
+  - field: alternative_phone
+    data_class: DIRECT_IDENTIFIER
+    classification: RESTRICTED
+    permitted_layers: [raw, staging, bronze-controlled, silver-identity-vault-only]
+    tokenisation: keyed-required
+    masking: partial-last4
+    logging: never
+    consumption: prohibited
+  - field: email
+    data_class: DIRECT_IDENTIFIER
+    classification: RESTRICTED
+    permitted_layers: [raw, staging, bronze-controlled, silver-identity-vault-only]
+    tokenisation: keyed-required
+    masking: partial-local
+    logging: never
+    consumption: prohibited
+  - field: beneficiary_id
+    data_class: DIRECT_IDENTIFIER
+    classification: RESTRICTED
+    permitted_layers: [raw, staging, bronze-controlled, silver-identity-vault-only]
+    tokenisation: keyed-required
+    masking: full
+    logging: never
+    consumption: prohibited-except-investigator-vault-join
+  - field: household_id
+    data_class: QUASI_IDENTIFIER
+    classification: CONFIDENTIAL
+    permitted_layers: [raw, staging, bronze, silver-tokenised, gold-tokenised]
+    tokenisation: keyed-required
+    masking: full
+    logging: never
+    consumption: aggregated-only
+  - field: x_beneficiary_sa
+    data_class: PAYMENT_IDENTIFIER
+    classification: RESTRICTED
+    permitted_layers: [raw, staging, bronze-controlled, silver-identity-vault-only]
+    tokenisation: keyed-required
+    masking: full
+    logging: never
+    consumption: prohibited
+  - field: x_wallet_reference
+    data_class: PAYMENT_IDENTIFIER
+    classification: CONFIDENTIAL
+    permitted_layers: [raw, staging, bronze, silver-tokenised]
+    tokenisation: keyed-required
+    masking: full
+    logging: never
+    consumption: prohibited
+  - field: x_provider_transaction_id
+    data_class: OPERATIONAL
+    classification: CONFIDENTIAL
+    permitted_layers: [raw, staging, bronze, silver, gold, consumption-operational]
+    tokenisation: none-correlation-preserved
+    masking: none
+    logging: metadata-only
+    consumption: operational-only
+  - field: x_agent_reference
+    data_class: OPERATIONAL
+    classification: CONFIDENTIAL
+    permitted_layers: [raw, staging, bronze, silver, gold, consumption-operational]
+    tokenisation: none-correlation-preserved
+    masking: none
+    logging: metadata-only
+    consumption: operational-only
+  - field: debtor_account_id
+    data_class: FINANCIAL_IDENTIFIER
+    classification: RESTRICTED
+    permitted_layers: [raw, staging, bronze-controlled, silver-identity-vault-only]
+    tokenisation: keyed-required
+    masking: full
+    logging: never
+    consumption: prohibited
+  - field: creditor_account_id
+    data_class: FINANCIAL_IDENTIFIER
+    classification: RESTRICTED
+    permitted_layers: [raw, staging, bronze-controlled, silver-identity-vault-only]
+    tokenisation: keyed-required
+    masking: full
+    logging: never
+    consumption: prohibited
+  - field: account_id
+    data_class: FINANCIAL_IDENTIFIER
+    classification: RESTRICTED
+    permitted_layers: [raw, staging, bronze-controlled, silver-identity-vault-only]
+    tokenisation: keyed-required
+    masking: full
+    logging: never
+    consumption: prohibited

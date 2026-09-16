@@ -1,0 +1,10 @@
+# Gate 2 production-readiness seams (additive config only; local behaviour unchanged).
+# Local: secrets via env file (never committed); TLS/KMS NOT active locally.
+# Production must set these explicitly; absence fails closed where mandatory.
+DP_TOKEN_KEY: ${DP_TOKEN_KEY:-}
+DP_TOKEN_KEY_VERSION: ${DP_TOKEN_KEY_VERSION:-v1}
+TRINO_HTTP_SCHEME_PROD: https
+TRINO_TLS_KEYSTORE: ${TRINO_KEYSTORE_PASSWORD:-}
+KMS_KEY_ID: ${KMS_KEY_ID:-}
+SECRET_MANAGER: ${SECRET_MANAGER:-unset}
+CREDENTIAL_ROTATION: documented-manual-until-KMS-lands

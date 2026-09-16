@@ -44,15 +44,12 @@ select
     lifecycle.lifecycle_sk,
     loan.loan_id,
     loan.business_plan_id,
-    beneficiary.beneficiary_id,
-    beneficiary.household_id,
+    loan.beneficiary_token,
     sacco.sacco_id,
-    geography.region,
-    geography.district,
-    geography.county,
-    geography.sub_county,
-    geography.parish,
-    geography.village,
+    loan.region,
+    loan.district,
+    loan.county,
+    loan.sub_county,
     loan.project_type,
     special_group.group_name as special_group,
     loan.loan_status,
@@ -96,13 +93,11 @@ left join {{ ref('gld_dim_pdm_beneficiary') }} beneficiary
   on loan.beneficiary_sk = beneficiary.beneficiary_sk
 left join {{ ref('gld_dim_pdm_sacco') }} sacco
   on loan.sacco_sk = sacco.sacco_sk
-left join {{ ref('gld_dim_pdm_geography') }} geography
-  on loan.geography_sk = geography.geography_sk
 left join {{ ref('gld_dim_pdm_special_group') }} special_group
   on beneficiary.special_group_sk = special_group.special_group_sk
 left join payment_summary payment using (loan_id)
-left join {{ ref('cns_pdm_beneficiary_identity_alerts') }} identity
-  on loan.beneficiary_sk = identity.beneficiary_sk
+left join {{ ref('vlt_pdm_beneficiary_identity_signals') }} identity
+  on loan.beneficiary_token = identity.beneficiary_token
 left join duplicate_summary duplicate using (loan_id)
 left join lifecycle_summary exceptions using (loan_id)
 left join {{ ref('cns_pdm_fraud_risk_insights') }} fraud using (loan_id)

@@ -1,4 +1,9 @@
-{{ config(materialized='iceberg_table', tags=['consumption', 'risk', 'payments']) }}
+{{ config(materialized='iceberg_table', tags=['consumption', 'risk', 'payments', 'privacy-boundary']) }}
+
+-- GATE 2 PRIVACY BOUNDARY: pseudonymous by default (beneficiary_token; coarse
+-- geography only). Identity-theft signals come from the pseudonymous
+-- per-token signal feed; the clear-identity correlators live only in the
+-- RESTRICTED identity vault.
 
 with entitlements as (
     select
@@ -20,13 +25,12 @@ with entitlements as (
 select
     {{ gold_surrogate_key(['entitlements.beneficiary_sk', 'entitlements.loan_id', 'entitlements.payment_date_sk', 'entitlements.currency']) }} as payment_pattern_sk,
     entitlements.beneficiary_sk,
-    beneficiary.beneficiary_id,
+    beneficiary.beneficiary_token,
     entitlements.loan_id,
     loan.sacco_sk,
     sacco.sacco_id,
-    geography.region,
-    geography.district,
-    geography.parish,
+    loan.region,
+    loan.district,
     entitlements.payment_date_sk,
     entitlements.currency,
     entitlements.instruction_count,
@@ -89,7 +93,5 @@ left join {{ ref('gld_fct_pdm_loans') }} loan using (loan_id)
 left join {{ ref('gld_dim_pdm_beneficiary') }} beneficiary
   on entitlements.beneficiary_sk = beneficiary.beneficiary_sk
 left join {{ ref('gld_dim_pdm_sacco') }} sacco using (sacco_sk)
-left join {{ ref('gld_dim_pdm_geography') }} geography
-  on loan.geography_sk = geography.geography_sk
-left join {{ ref('cns_pdm_beneficiary_identity_alerts') }} identity
-  on entitlements.beneficiary_sk = identity.beneficiary_sk
+left join {{ ref('vlt_pdm_beneficiary_identity_signals') }} identity
+  on beneficiary.beneficiary_token = identity.beneficiary_token
