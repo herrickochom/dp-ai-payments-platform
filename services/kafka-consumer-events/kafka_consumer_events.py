@@ -141,6 +141,34 @@ class DlqPublishFailedError(RuntimeError):
         self.envelope = envelope
 
 
+
+def log_processing_error(category: str, *, envelope: Optional[Dict[str, Any]] = None,
+                         error: Optional[Exception] = None, level: int = logging.ERROR) -> None:
+    """Log only operational metadata, never replay content or exception text.
+
+    The restricted failure envelope remains unchanged for Kafka publication.
+    Error classes are selected from known classes so arbitrary exception names
+    and tracebacks cannot introduce source values into ordinary logs.
+    """
+    record = {"event": category}
+    if envelope is not None:
+        for source, destination in (
+            ("original_topic", "topic"), ("original_partition", "partition"),
+            ("original_offset", "offset"), ("retry_count", "retry_count"),
+        ):
+            if source in envelope:
+                record[destination] = envelope[source]
+        record["dlq_destination"] = Settings.KAFKA_DLQ_TOPIC
+    if error is not None:
+        known_classes = (PermanentProcessingError, DlqPublishFailedError,
+                         AvroException, ClientError, BotoCoreError, OSError,
+                         ValueError, TypeError)
+        record["error_class"] = next(
+            (cls.__name__ for cls in known_classes if isinstance(error, cls)), "Exception"
+        )
+    logger.log(level, json.dumps(record, separators=(",", ":")))
+
+
 def deterministic_failure_id(topic: str, partition: int, offset: int) -> str:
     """Deterministic DLQ identity derived only from the original Kafka coordinates.
 
@@ -313,11 +341,11 @@ def serialize_to_avro(event: Dict[str, Any]) -> bytes:
         return avro_data
 
     except AvroException as exc:
-        logger.error("Avro serialization error: %s", exc)
+        log_processing_error("avro_serialization_failed", error=exc)
         raise
 
     except Exception as exc:
-        logger.exception("Unexpected error during Avro serialization: %s", exc)
+        log_processing_error("avro_serialization_failed", error=exc)
         raise
 
     finally:
@@ -325,7 +353,7 @@ def serialize_to_avro(event: Dict[str, Any]) -> bytes:
             try:
                 writer.close()
             except Exception:
-                logger.debug("Ignoring Avro writer close error", exc_info=True)
+                logger.debug("Ignoring Avro writer close error")
 
 
 
@@ -422,7 +450,7 @@ def store_event_to_s3(
         return s3_key
         
     except (ClientError, BotoCoreError, OSError) as e:
-        logger.error(f"❌ Failed to store event: {e}")
+        log_processing_error("raw_storage_failed", error=e)
         raise
     except (AvroException, TypeError, ValueError) as e:
         raise PermanentProcessingError(str(e)) from e
@@ -479,7 +507,7 @@ def store_to_dlq(
         )
         logger.warning(f"⚠️  Sent to DLQ (JSON): s3://{Settings.MINIO_BUCKET}/{s3_key}")
     except Exception as e:
-        logger.error(f"❌ Failed to store to DLQ: {e}")
+        log_processing_error("dlq_storage_failed", error=e)
 
 
 def failure_envelope(msg, event: Optional[Dict[str, Any]], error: Exception,
@@ -602,8 +630,7 @@ def process_message(consumer, failure_producer, avro_deserializer, msg) -> str:
                 # auto-create disabled).  Fail-stop with the same invariant.
                 raise DlqPublishFailedError(envelope) from dlq_exc
             if published:
-                logger.error(json.dumps({"service": "payment-consumer-events",
-                                         "event": "sent_to_dlq", **envelope}, default=str))
+                log_processing_error("sent_to_dlq", envelope=envelope, error=exc)
                 return "dlq"
             # DLQ acknowledged nothing: do NOT commit, do NOT continue to later
             # offsets.  Fail the consumer; Docker restarts it and Kafka replays
@@ -707,7 +734,7 @@ def main():
                     if msg.error().code() == KafkaError._PARTITION_EOF:
                         logger.debug(f"End of partition: {msg.topic()} [{msg.partition()}]")
                     else:
-                        logger.error(f"❌ Kafka error: {msg.error()}")
+                        log_processing_error("kafka_poll_failed")
                     continue
 
                 outcome = process_message(consumer, failure_producer, avro_deserializer, msg)
@@ -719,15 +746,8 @@ def main():
                     error_count += 1
         except DlqPublishFailedError as exc:
             envelope = exc.envelope
-            logger.critical(json.dumps({
-                "service": "payment-consumer-events",
-                "event": "fail_stop_dlq_publish_failed",
-                "failure_id": envelope.get("failure_id"),
-                "original_topic": envelope.get("original_topic"),
-                "original_partition": envelope.get("original_partition"),
-                "original_offset": envelope.get("original_offset"),
-                "business_key": envelope.get("business_key"),
-            }, default=str))
+            log_processing_error("fail_stop_dlq_publish_failed", envelope=envelope,
+                                 error=exc, level=logging.CRITICAL)
             logger.critical(
                 "🔴 FATAL: a poison record could be neither stored in Raw nor DLQ'd. "
                 "Its source offset is left uncommitted and later offsets are not "
