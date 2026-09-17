@@ -19,14 +19,13 @@ class TrinoGateway:
             "schema": self.settings.trino_schema,
             "http_scheme": self.settings.trino_http_scheme,
             "request_timeout": self.settings.query_timeout_seconds,
-            "session_properties": {
-                "query_max_execution_time": f"{self.settings.query_timeout_seconds}s"
-            },
         }
         if self.settings.trino_password:
             kwargs["auth"] = BasicAuthentication(
                 self.settings.trino_user, self.settings.trino_password
             )
+        if self.settings.trino_tls_ca:
+            kwargs["verify"] = self.settings.trino_tls_ca
         return trino.dbapi.connect(**kwargs)
 
     def execute(self, sql: str) -> tuple[list[str], list[list[Any]], str | None]:

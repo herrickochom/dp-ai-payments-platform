@@ -427,3 +427,58 @@ def test_destructive_sql_is_rejected_at_validation():
     ):
         with pytest.raises(Exception):
             validate_read_query(destructive, 10, 10000)
+
+
+def test_governance_audit_survives_store_reopen_and_appends(tmp_path):
+    """A reopened audit store must preserve and append to the existing JSONL ledger."""
+    path = tmp_path / "audit.jsonl"
+
+    request = GovernanceRequest(
+        identity=IdentityContext(
+            subject_id="persistence-test-actor",
+            roles=["programme_analyst"],
+            purpose="gate3_persistence_test",
+        ),
+        action="read",
+        resource=ResourceContext(
+            dataset="iceberg.consumption.cns_pdm_executive_overview",
+            classification=DataClassification.INTERNAL,
+        ),
+    )
+
+    decision = GovernancePolicyEngine().evaluate(request)
+
+    first_store = JsonlAuditStore(path)
+    first = first_store.record_decision(
+        request,
+        decision,
+        "gate3-persistence-1",
+    )
+
+    # Simulate reopening the persistence layer.
+    del first_store
+
+    second_store = JsonlAuditStore(path)
+    second = second_store.record_decision(
+        request,
+        decision,
+        "gate3-persistence-2",
+    )
+
+    records = [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+    assert len(records) == 2
+    assert records[0]["audit_event_id"] == first.audit_event_id
+    assert records[1]["audit_event_id"] == second.audit_event_id
+    assert records[0]["request_id"] == "gate3-persistence-1"
+    assert records[1]["request_id"] == "gate3-persistence-2"
+
+    # Audit persistence is metadata-only: analytical payload/row content
+    # must not enter the durable audit ledger.
+    for record in records:
+        assert "payload" not in record
+        assert "rows" not in record

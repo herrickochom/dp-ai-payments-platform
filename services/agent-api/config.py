@@ -19,6 +19,7 @@ class Settings:
     trino_schema: str = os.getenv("TRINO_SCHEMA", "consumption")
     trino_http_scheme: str = os.getenv("TRINO_HTTP_SCHEME", "http")
     trino_password: str | None = os.getenv("TRINO_PASSWORD")
+    trino_tls_ca: str | None = os.getenv("TRINO_TLS_CA")
     max_rows: int = int(os.getenv("AGENT_MAX_ROWS", "1000"))
     query_timeout_seconds: int = int(os.getenv("AGENT_QUERY_TIMEOUT_SECONDS", "30"))
     max_query_length: int = int(os.getenv("AGENT_MAX_QUERY_LENGTH", "20000"))

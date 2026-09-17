@@ -31,7 +31,7 @@ volumes:
   
   # Dev
   dev-logs:
-  
+  agent-audit-data:
   # Data volume for XML generator
 
 services:
@@ -573,11 +573,12 @@ services:
     environment:
       AGENT_API_PORT: "7010"
       TRINO_HOST: ${TRINO_HOST:-trino}
-      TRINO_PORT: ${TRINO_PORT:-8080}
+      TRINO_PORT: ${AGENT_TRINO_PORT:-8443}
       TRINO_USER: ${AGENT_TRINO_USER:-agent-api}
       TRINO_CATALOG: ${TRINO_CATALOG:-iceberg}
       TRINO_SCHEMA: ${TRINO_SCHEMA:-consumption}
-      TRINO_HTTP_SCHEME: ${TRINO_HTTP_SCHEME:-http}
+      TRINO_HTTP_SCHEME: ${AGENT_TRINO_HTTP_SCHEME:-https}
+      TRINO_TLS_CA: "/etc/ssl/certs/trino-public.crt"
       TRINO_PASSWORD: ${AGENT_TRINO_PASSWORD:-}
       AGENT_MAX_ROWS: ${AGENT_MAX_ROWS:-1000}
       AGENT_QUERY_TIMEOUT_SECONDS: ${AGENT_QUERY_TIMEOUT_SECONDS:-30}
@@ -595,6 +596,10 @@ services:
       SUPERSET_PASSWORD: ${SUPERSET_ADMIN_PASSWORD:-}
       SUPERSET_DATABASE_NAME: ${TRINO_DATABASE_NAME:-PDM Trino}
       SUPERSET_PUBLIC_URL: ${SUPERSET_PUBLIC_URL:-http://localhost:8088}
+      AGENT_AUDIT_LOG_PATH: "/var/lib/dp-agent/audit/audit.jsonl"
+    volumes:
+      - agent-audit-data:/var/lib/dp-agent/audit
+      - ./platform/trino/etc/trino-public.crt:/etc/ssl/certs/trino-public.crt:ro
     ports:
       - "${AGENT_API_PORT:-7010}:7010"
     restart: unless-stopped
