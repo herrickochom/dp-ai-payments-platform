@@ -1,0 +1,47 @@
+{
+  "contract_version": 1,
+  "publishing_enabled_by_default": false,
+  "generator": "services/payment-xml-generator/mdm_generator.py",
+  "records": [
+    {
+      "file": "data/mdm/golden_beneficiaries_restricted.json",
+      "topic": "mdm.beneficiary.golden.restricted",
+      "key_field": "mdm_beneficiary_id",
+      "authority": "restricted_identity"
+    },
+    {
+      "file": "data/mdm/beneficiary_identity_alerts_restricted.json",
+      "topic": "mdm.beneficiary.identity-alert.restricted",
+      "key_field": "golden_record_id",
+      "authority": "restricted_identity"
+    },
+    {
+      "file": "data/mdm/source_crosswalk.json",
+      "topic": "mdm.crosswalk.restricted",
+      "key_fields": [
+        "master_domain",
+        "source_system",
+        "source_record_id"
+      ],
+      "authority": "restricted_identity"
+    },
+    {
+      "file": "data/mdm/golden_saccos.json",
+      "topic": "mdm.sacco.golden",
+      "key_field": "mdm_sacco_id",
+      "authority": "ordinary"
+    },
+    {
+      "file": "data/mdm/golden_agents.json",
+      "topic": "mdm.agent.golden",
+      "key_field": "mdm_agent_id",
+      "authority": "ordinary"
+    },
+    {
+      "file": "data/mdm/golden_geography.json",
+      "topic": "mdm.geography.golden",
+      "key_field": "mdm_location_id",
+      "authority": "ordinary"
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-# dp-ai-payments-platform
+# dp-pdm-ai-platform
 
 Governed ISO 20022 payments lakehouse with a Parish Development Model (PDM)
 oversight domain. Kafka archives every event to an immutable Avro Raw layer;
@@ -132,10 +132,6 @@ requires an explicitly versioned contract/topic. Kafka security protocol, SASL,
 TLS CA, and Schema Registry credentials are environment-configurable; local uses
 PLAINTEXT only for convenience.
 
-`services/kafka-consumer-bronze` is intentionally not deployed because dbt owns
-Bronze through Consumption. Unused reconciliation topics were replaced by retry/
-DLQ topics. The incomplete landing-ingestion and duplicate dev producer profiles
-are retained under `future-disabled`, preventing accidental startup.
 
 ### Deployment shapes
 
@@ -155,7 +151,7 @@ Sources -> Producers -> HA managed/distributed Kafka (3+ brokers, RF=3, min ISR=
 Production must replace the local single broker, RF=1, and PLAINTEXT with an HA
 cluster or managed equivalent, RF=3, min ISR=2, replicated internal topics,
 TLS/SASL and ACLs, managed secrets, metrics/lag alerts, and durable object-store
-controls. `platform/kafka/production.env.example` records the portable client
+controls. `platform/kafka/production.env` records the portable client
 boundary without introducing any cloud-vendor SDK or endpoint.
 
 ## Run

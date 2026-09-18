@@ -1,0 +1,26 @@
+{
+  "contract_version": 1,
+  "name": "pdm_local_cdc_dormancy",
+
+  "source_api": "services.shared.cdc.activation.current_activation_summary",
+
+  "expected_shape": {
+    "cdc_capable": "list",
+    "cdc_activated": "list",
+    "allowlist_count": "integer",
+    "contract_status": "string"
+  },
+
+  "local_preflight_requirement": {
+    "cdc_capable_count": 0,
+    "cdc_activated_count": 0,
+    "allowlist_count": 0,
+    "contract_status": "fail_closed_not_activated"
+  },
+
+  "policy": {
+    "cdc_activation_allowed_by_local_deployment": false,
+    "cdc_activation_requires_separate_governed_process": true,
+    "terraform_local_preflight_must_fail_if_cdc_is_activated": true
+  }
+}

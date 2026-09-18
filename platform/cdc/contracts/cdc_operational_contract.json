@@ -1,0 +1,91 @@
+{
+  "contract_version": 1,
+  "domain": "cdc_operations",
+  "activation_default": "DENY",
+
+  "observability": {
+    "connector_state_required": true,
+    "connector_task_state_required": true,
+    "source_to_kafka_lag_required": true,
+    "heartbeat_freshness_required": true,
+    "replication_slot_activity_required": true,
+    "retained_wal_growth_required": true,
+    "connector_offset_progress_required": true,
+    "kafka_consumer_progress_required": true,
+    "raw_persistence_success_required": true,
+    "raw_persistence_failure_required": true,
+    "schema_drift_signal_required": true,
+    "quarantine_count_required": true,
+    "environment_specific_thresholds_required": true
+  },
+
+  "safe_failure_metadata": {
+    "allowed_fields": [
+      "failure_id",
+      "source_system",
+      "topic",
+      "partition",
+      "offset",
+      "failure_category",
+      "error_class",
+      "event_timestamp"
+    ],
+    "prohibited_fields": [
+      "record_key",
+      "record_key_json",
+      "business_key",
+      "before",
+      "before_json",
+      "after",
+      "after_json",
+      "payload",
+      "original_payload",
+      "original_key",
+      "source_record"
+    ],
+    "exception_text_allowed": false,
+    "traceback_allowed": false,
+    "ordinary_log_payload_allowed": false
+  },
+
+  "quarantine": {
+    "required": true,
+    "classification": "RESTRICTED",
+    "ordinary_generated_event_dlq_reuse_allowed": false,
+    "raw_source_payload_in_ordinary_dlq_allowed": false,
+    "raw_source_key_in_ordinary_dlq_allowed": false,
+    "deterministic_failure_identity_required": true,
+    "durable_before_offset_commit_required": true,
+    "quarantine_write_failure_action": "FAIL_STOP",
+    "offset_commit_on_quarantine_failure": false
+  },
+
+  "raw_replay": {
+    "deterministic_object_key_required": true,
+    "existing_object_replay_is_idempotent": true,
+    "physical_exactly_once_claim_allowed": false,
+    "content_collision_validation_required_before_production": true
+  },
+
+  "recovery": {
+    "connector_restart_runbook_required": true,
+    "task_failure_runbook_required": true,
+    "replication_slot_interruption_runbook_required": true,
+    "wal_pressure_runbook_required": true,
+    "offset_loss_runbook_required": true,
+    "schema_change_runbook_required": true,
+    "controlled_snapshot_runbook_required": true,
+    "downstream_replay_runbook_required": true,
+    "raw_reconciliation_runbook_required": true
+  },
+
+  "activation_preflight": {
+    "version_compatibility_required": true,
+    "secret_backend_required": true,
+    "database_prerequisites_required": true,
+    "observability_required": true,
+    "restricted_quarantine_required": true,
+    "recovery_runbook_required": true,
+    "content_collision_control_required": true
+  }
+}

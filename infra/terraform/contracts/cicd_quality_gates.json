@@ -1,0 +1,47 @@
+{
+  "contract_version": 1,
+  "name": "pdm_cicd_quality_gates",
+
+  "pull_request_ci": {
+    "python_tests_required": true,
+    "cdc_tests_required": true,
+    "mdm_tests_required": true,
+    "privacy_security_tests_required": true,
+    "dbt_contract_validation_required": true,
+    "terraform_fmt_check_required": true,
+    "terraform_validate_required": true,
+    "terraform_static_security_analysis_required": true,
+    "container_build_validation_required": true,
+    "sbom_generation_required": true,
+    "container_vulnerability_scan_required": true
+  },
+
+  "terraform_plan": {
+    "required_before_apply": true,
+    "artifact_retention_required": true,
+    "provider_credentials_in_plan_output_allowed": false,
+    "secret_values_in_plan_output_allowed": false
+  },
+
+  "protected_environment_cd": {
+    "human_approval_required": true,
+    "approved_plan_required": true,
+    "immutable_artifact_required": true,
+    "terraform_apply_allowed_only_after_approval": true,
+    "database_change_control_required": true,
+    "cdc_activation_change_control_required": true,
+    "airflow_deployment_control_required": true,
+    "post_deployment_acceptance_required": true
+  },
+
+  "prohibited_ci_behaviour": {
+    "terraform_apply_on_pull_request": true,
+    "terraform_destroy_on_pull_request": true,
+    "automatic_cdc_source_activation": true,
+    "kafka_offset_reset": true,
+    "raw_object_deletion": true,
+    "token_link_rematerialisation": true,
+    "unbounded_dbt_build": true,
+    "production_secret_echo": true
+  }
+}

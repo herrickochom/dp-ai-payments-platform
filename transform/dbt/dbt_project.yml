@@ -1,4 +1,4 @@
-# /home/hochom/projects/dp-ai-payments-platform/transform/dbt/dbt_project.yml
+# /home/hochom/projects/dp-pdm-ai-platform/transform/dbt/dbt_project.yml
 
 name: "pdm_platform"
 version: "1.0.0"
@@ -43,32 +43,32 @@ models:
     +materialized: table
 
     staging:
-      +database: pdm
+      +database: "{{ env_var('DBT_STAGING_DATABASE') }}"
       +materialized: view
       +schema: staging
 
     bronze:
-      +database: lakehouse
+      +database: "{{ env_var('DBT_BRONZE_DATABASE') }}"
       +materialized: table
       +schema: bronze
 
     silver:
-      +database: lakehouse
+      +database: "{{ env_var('DBT_SILVER_DATABASE') }}"
       +materialized: table
       +schema: silver
 
     gold:
-      +database: lakehouse
+      +database: "{{ env_var('DBT_GOLD_DATABASE') }}"
       +materialized: table
       +schema: gold
 
     silver_vault:
-      +database: lakehouse
+      +database: "{{ env_var('DBT_SILVER_VAULT_DATABASE') }}"
       +materialized: table
       +schema: silver_vault
 
     consumption:
-      +database: lakehouse
+      +database: "{{ env_var('DBT_CONSUMPTION_DATABASE') }}"
       +materialized: table
       +schema: consumption
 
@@ -77,6 +77,6 @@ models:
 # ------------------------------------------------------------------------------
 
 vars:
-  s3_bucket: "dp-ai-payment"
+  s3_bucket: "{{ env_var('WAREHOUSE_BUCKET') }}"
   s3_path: "raw"
-  iceberg_catalog: "pdm_catalog"
+  iceberg_catalog: "{{ env_var('ICEBERG_CATALOG') }}"

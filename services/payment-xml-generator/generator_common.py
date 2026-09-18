@@ -17,7 +17,7 @@ from xml.etree import ElementTree as ET
 PROJECT_ROOT = Path(
     os.getenv(
         "PROJECT_ROOT",
-        "/home/hochom/projects/dp-ai-payments-platform",
+        "/home/hochom/projects/dp-pdm-ai-platform",
     )
 )
 DATA_ROOT = Path(os.getenv("DATA_ROOT", str(PROJECT_ROOT / "data")))

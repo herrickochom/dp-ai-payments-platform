@@ -1,0 +1,3 @@
+environment   = "dev"
+platform_name = "dp-pdm-ai-platform"
+region        = null

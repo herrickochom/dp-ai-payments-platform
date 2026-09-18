@@ -89,7 +89,7 @@ from typing import Any, Dict, Iterable, List, Mapping, Sequence, Tuple
 PROJECT_ROOT = Path(
     os.getenv(
         "PROJECT_ROOT",
-        "/home/hochom/projects/dp-ai-payments-platform",
+        "/home/hochom/projects/dp-pdm-ai-platform",
     )
 )
 

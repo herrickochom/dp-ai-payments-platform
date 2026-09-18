@@ -1,121 +1,91 @@
-# ==============================================================================
-# DP-AI Payments Platform - Docker Compose
-# ==============================================================================
-# All services organized by processing layers with profiles:
-#   Default (no profile): Core services always start
-#   analytics: BI and analytics tools
-#   dev: Development services
-#   on-demand: Services started only when needed
-# ==============================================================================
-
-networks:
-  data-platform-network:
-    name: ${DOCKER_NETWORK:-data-platform-network}
-    driver: bridge
-
-volumes:
-  # Core
-  pgdata:
-  minio-data:
-  nessie-data:
-  kafka-data:
-  kafka-metadata:
-  redis-data:
-  
-  # Analytics
-  trino-data:
-  trino-logs:
-  metabase-data:
-  dbt-logs:
-  superset-data:
-  
-  # Dev
-  dev-logs:
-  agent-audit-data:
-  # Data volume for XML generator
+# =============================================================================
+# DP AI PAYMENTS PLATFORM
+# Docker Compose — Local Production-Semantics Environment
+# =============================================================================
+#
+# Author: Herrick OCHOM
+# Role:   Data Architect
+# Date:   18/09/2026
+#
+# Architecture:
+#   Source Systems -> Producers / CDC -> Kafka -> Raw / MinIO
+#                  -> Staging -> Bronze -> Silver -> Gold -> Consumption
+#
+# Design principles:
+#   - Kafka does not write directly to Bronze.
+#   - payment-consumer-events owns durable Kafka -> Raw ingestion.
+#   - dbt / DuckDB own Raw -> Staging -> Bronze transformation.
+#   - CDC is fail-closed and activated only for explicitly governed sources.
+#   - Optional platform capabilities are controlled through Compose profiles.
+#   - Production infrastructure provisioning is owned by Terraform / IaC.
+#
+# =============================================================================
 
 services:
 
-  # redis:
-  #   image: redis:7-alpine
-  #   container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-redis
-  #   command: ["redis-server", "--appendonly", "yes"]
-  #   volumes:
-  #     - redis-data:/data
-  #   restart: unless-stopped
-  #   networks:
-  #     - data-platform-network
-  #   healthcheck:
-  #     test: ["CMD", "redis-cli", "ping"]
-  #     interval: 5s
-  #     timeout: 3s
-  #     retries: 20
-  # ---------------------------------------------------------------------------
-  # Redis
-  # Shared caching, Celery broker/results, SQL Lab results and rate-limit store
-  # ---------------------------------------------------------------------------
+  # ------------------------------------------------------------------
+  # 01. CORE PLATFORM INFRASTRUCTURE
+  # ------------------------------------------------------------------
+  #
+  # Shared persistence and foundational platform services.
+  # PostgreSQL here is platform infrastructure and is not a CDC source.
+
   redis:
     image: redis:7-alpine
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-redis
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-redis
     command:
-      - redis-server
-      - --appendonly
-      - "yes"
-      - --appendfsync
-      - everysec
-      - --save
-      - "60"
-      - "1000"
+    - redis-server
+    - --appendonly
+    - 'yes'
+    - --appendfsync
+    - everysec
+    - --save
+    - '60'
+    - '1000'
     volumes:
-      - redis-data:/data
+    - redis-data:/data
     restart: unless-stopped
     networks:
-      - data-platform-network
+    - data-platform-network
     healthcheck:
       test:
-        - CMD
-        - redis-cli
-        - ping
+      - CMD
+      - redis-cli
+      - ping
       interval: 5s
       timeout: 3s
       retries: 20
       start_period: 5s
-
-  # ============================================================================
-  # 1. DATA STORAGE LAYER (ALWAYS START)
-  # ============================================================================
-
   postgres:
     build:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.postgresql
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-postgres
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-postgres
     environment:
       QUARKUS_CONFIG_LOCATIONS: /deployments/config/application.properties
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB:-pdm_platform}
-      # Superset is created by 20_create_superset_db.sh; keep this list
-      # disjoint so PostgreSQL initialization cannot abort on a duplicate.
       POSTGRES_MULTIPLE_DATABASES: metabase
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+    - ${POSTGRES_PORT:-5432}:5432
     volumes:
-      - pgdata:/var/lib/postgresql/data
+    - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
     networks:
-      - data-platform-network
+    - data-platform-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test:
+      - CMD-SHELL
+      - pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}
       interval: 5s
       timeout: 5s
       retries: 20
-
   postgres-healthcheck:
     build:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.postgres-healthcheck
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-postgres-healthcheck
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-postgres-healthcheck
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -123,68 +93,72 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    restart: "no"
-    command: ["bash", "-c", "sleep 10 && /healthcheck.sh"]
+    restart: 'no'
+    command:
+    - bash
+    - -c
+    - sleep 10 && /healthcheck.sh
     networks:
-      - data-platform-network
-
+    - data-platform-network
   minio:
     image: quay.io/minio/minio:latest
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-minio
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-minio
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     command: server /data --console-address ":9001"
     ports:
-      - "${MINIO_PORT:-9000}:9000"
-      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    - ${MINIO_PORT:-9000}:9000
+    - ${MINIO_CONSOLE_PORT:-9001}:9001
     volumes:
-      - minio-data:/data
+    - minio-data:/data
     depends_on:
       postgres-healthcheck:
         condition: service_completed_successfully
     restart: unless-stopped
     networks:
-      - data-platform-network
+    - data-platform-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://localhost:9000/minio/health/live
       interval: 5s
       timeout: 5s
       retries: 20
-
   minio-init-buckets:
     build:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.minio-init-mc-buckets
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-minio-init-buckets
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-minio-init-buckets
     environment:
-      MINIO_ENDPOINT: "http://minio:9000"
+      MINIO_ENDPOINT: ${S3_ENDPOINT}
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       MINIO_BUCKET: dp-ai-payment
       RAW_PREFIX: raw/v2
-      MINIO_ALIAS: "local"
+      MINIO_ALIAS: local
     depends_on:
       minio:
         condition: service_healthy
       postgres-healthcheck:
         condition: service_completed_successfully
-    restart: "no"
+    restart: 'no'
     networks:
-      - data-platform-network
-
+    - data-platform-network
   minio-init-databases:
     build:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.minio-init-mc-databases
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-minio-init-databases
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-minio-init-databases
     environment:
-      MINIO_ENDPOINT: "http://minio:9000"
+      MINIO_ENDPOINT: ${S3_ENDPOINT}
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      NESSIE_ENDPOINT: "http://nessie:19120"
+      NESSIE_ENDPOINT: ${NESSIE_ENDPOINT}
     depends_on:
       minio:
         condition: service_healthy
@@ -192,60 +166,57 @@ services:
         condition: service_healthy
       postgres-healthcheck:
         condition: service_completed_successfully
-    restart: "no"
+    restart: 'no'
     networks:
-      - data-platform-network
+    - data-platform-network
 
-  # ============================================================================
-  # 2. STREAMING LAYER (ALWAYS START)
-  # ============================================================================
+  # ------------------------------------------------------------------
+  # 02. EVENT STREAMING — KAFKA & SCHEMA REGISTRY
+  # ------------------------------------------------------------------
+  #
+  # Durable event transport and schema governance.
+  # CDC integrations also converge on Kafka when explicitly activated.
 
-  # ---------------------------------------------------------------------------
-  # KAFKA VOLUME OWNERSHIP INIT (one-shot)
-  # ---------------------------------------------------------------------------
-  # apache/kafka runs as appuser (uid 1000) and its entrypoint has no root
-  # phase, while freshly created named volumes are root-owned. This one-shot
-  # container fixes volume ownership so the broker can format and write its
-  # metadata/log dirs (prevents AccessDeniedException on bootstrap.checkpoint).
   kafka-volume-init:
     image: apache/kafka:4.3.1
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-kafka-volume-init
-    user: "0:0"
-    entrypoint: ["bash", "-c", "chown -R 1000:1000 /var/lib/kafka/data /var/lib/kafka/metadata"]
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-kafka-volume-init
+    user: 0:0
+    entrypoint:
+    - bash
+    - -c
+    - chown -R 1000:1000 /var/lib/kafka/data /var/lib/kafka/metadata
     volumes:
-      - kafka-data:/var/lib/kafka/data
-      - kafka-metadata:/var/lib/kafka/metadata
-    restart: "no"
+    - kafka-data:/var/lib/kafka/data
+    - kafka-metadata:/var/lib/kafka/metadata
+    restart: 'no'
     networks:
-      - data-platform-network
-
+    - data-platform-network
   kafka:
     build:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.kafka-broker
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-kafka
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-kafka
     environment:
-      CLUSTER_ID: "XwjubDNrR0q4Q6FLK0M7Xg"
-      KAFKA_CLUSTER_ID: "XwjubDNrR0q4Q6FLK0M7Xg"
-      KAFKA_PROCESS_ROLES: "broker,controller"
-      KAFKA_NODE_ID: "1"
-      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
-      KAFKA_LISTENERS: "INTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,EXTERNAL://0.0.0.0:9094"
-      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka:9092,EXTERNAL://${KAFKA_EXTERNAL_HOST:-localhost}:${KAFKA_EXTERNAL_PORT:-9094}"
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT"
-      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
-      KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
-      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
-      KAFKA_METADATA_LOG_DIR: "/var/lib/kafka/metadata"
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
-      KAFKA_HEAP_OPTS: "-Xmx512M"
-      # Auto-create topics disabled - we'll create manually or via init
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      CLUSTER_ID: XwjubDNrR0q4Q6FLK0M7Xg
+      KAFKA_CLUSTER_ID: XwjubDNrR0q4Q6FLK0M7Xg
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: '1'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,EXTERNAL://0.0.0.0:9094
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://${KAFKA_EXTERNAL_HOST:-localhost}:${KAFKA_EXTERNAL_PORT:-9094}
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_METADATA_LOG_DIR: /var/lib/kafka/metadata
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: '1'
+      KAFKA_HEAP_OPTS: -Xmx512M
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
     ports:
-      - "${KAFKA_EXTERNAL_PORT:-9094}:9094"
+    - ${KAFKA_EXTERNAL_PORT:-9094}:9094
     volumes:
-      - kafka-data:/var/lib/kafka/data
-      - kafka-metadata:/var/lib/kafka/metadata
+    - kafka-data:/var/lib/kafka/data
+    - kafka-metadata:/var/lib/kafka/metadata
     depends_on:
       postgres-healthcheck:
         condition: service_completed_successfully
@@ -253,115 +224,118 @@ services:
         condition: service_completed_successfully
     restart: unless-stopped
     networks:
-      - data-platform-network
+    - data-platform-network
     healthcheck:
-      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/9092"]
+      test:
+      - CMD
+      - bash
+      - -c
+      - echo > /dev/tcp/localhost/9092
       interval: 5s
       timeout: 5s
       retries: 30
-  
-  # ---------------------------------------------------------------------------
-  # KAFKA TOPIC INITIALIZATION
-  # ---------------------------------------------------------------------------
   kafka-init:
     build:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.kafka-init
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-kafka-init
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-kafka-init
     environment:
-      KAFKA_BOOTSTRAP_SERVER: "kafka:9092"
-      TOPICS_CONFIG: "/app/topics.yaml"
+      KAFKA_BOOTSTRAP_SERVER: kafka:9092
+      TOPICS_CONFIG: /app/topics.yaml
     depends_on:
       kafka:
         condition: service_healthy
-    restart: "no"  # Run once and exit
+    restart: 'no'
     networks:
-      - data-platform-network
-
+    - data-platform-network
   schema-registry:
     image: confluentinc/cp-schema-registry:7.5.0
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-schema-registry
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-schema-registry
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
       SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: PLAINTEXT
       SCHEMA_REGISTRY_LEADER_ELECTION_TYPE: static
-      SCHEMA_REGISTRY_MASTER_ELIGIBILITY: "true"
+      SCHEMA_REGISTRY_MASTER_ELIGIBILITY: 'true'
       SCHEMA_REGISTRY_KAFKASTORE_GROUP_ID: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_TOPIC: _schemas
       SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 1
-      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: "*"
-      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: "GET,POST,PUT,DELETE,OPTIONS"
+      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
+      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: GET,POST,PUT,DELETE,OPTIONS
       SCHEMA_REGISTRY_KAFKASTORE_TIMEOUT_MS: 60000
       SCHEMA_REGISTRY_KAFKASTORE_INIT_TIMEOUT_MS: 120000
-      SCHEMA_REGISTRY_DEBUG: "true"
+      SCHEMA_REGISTRY_DEBUG: 'true'
     ports:
-      - "8081:8081"
+    - 8081:8081
     depends_on:
       kafka:
         condition: service_healthy
     restart: unless-stopped
     networks:
-      - data-platform-network
+    - data-platform-network
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8081/subjects || exit 1"]
+      test:
+      - CMD-SHELL
+      - curl -f http://localhost:8081/subjects || exit 1
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 60s
-
   schema-registry-init:
     image: curlimages/curl:8.10.1
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-schema-registry-init
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-schema-registry-init
     environment:
       SCHEMA_REGISTRY_URL: http://schema-registry:8081
       SCHEMA_COMPATIBILITY: BACKWARD_TRANSITIVE
     volumes:
-      - ./platform/kafka/configure-schema-registry.sh:/configure-schema-registry.sh:ro
-    entrypoint: ["/bin/sh", "/configure-schema-registry.sh"]
+    - ./platform/kafka/configure-schema-registry.sh:/configure-schema-registry.sh:ro
+    entrypoint:
+    - /bin/sh
+    - /configure-schema-registry.sh
     depends_on:
       schema-registry:
         condition: service_healthy
-    restart: "no"
+    restart: 'no'
     networks:
-      - data-platform-network
+    - data-platform-network
 
-  # ============================================================================
-  # 3. CATALOG LAYER (ALWAYS START)
-  # ============================================================================
+  # ------------------------------------------------------------------
+  # 03. LAKEHOUSE CATALOGUE
+  # ------------------------------------------------------------------
+  #
+  # Iceberg catalogue and controlled REST integration surface.
 
   nessie:
     build:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.nessie
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-nessie
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-nessie
     environment:
+      POSTGRES_HOST: "${POSTGRES_HOST}"
+      POSTGRES_PORT: "${POSTGRES_PORT}"
+      POSTGRES_DB: "${POSTGRES_DB}"
+      NESSIE_DEFAULT_WAREHOUSE: "${NESSIE_DEFAULT_WAREHOUSE}"
+      WAREHOUSE_BUCKET: "${WAREHOUSE_BUCKET}"
+      OBJECT_STORE_REGION: "${OBJECT_STORE_REGION}"
+      S3_ENDPOINT: "${S3_ENDPOINT}"
+      S3_PATH_STYLE_ACCESS: "${S3_PATH_STYLE_ACCESS}"
+      NESSIE_S3_ACCESS_KEY: "${NESSIE_S3_ACCESS_KEY}"
+      NESSIE_S3_SECRET_KEY: "${NESSIE_S3_SECRET_KEY}"
+      NESSIE_S3_AUTH_TYPE: "${NESSIE_S3_AUTH_TYPE}"
+      NESSIE_S3_EXTERNAL_ENDPOINT: "${NESSIE_S3_EXTERNAL_ENDPOINT}"
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-
-      # Nessie Iceberg REST catalog
       NESSIE_CATALOG_DEFAULT_WAREHOUSE: payments
       NESSIE_CATALOG_WAREHOUSES_PAYMENTS_LOCATION: s3://dp-ai-payment/warehouse
-
-      # MinIO / S3-compatible object store
-      NESSIE_CATALOG_SERVICE_S3_DEFAULT_OPTIONS_REGION: eu-west-1
-      NESSIE_CATALOG_SERVICE_S3_DEFAULT_OPTIONS_ENDPOINT: http://minio:9000
-      NESSIE_CATALOG_SERVICE_S3_DEFAULT_OPTIONS_EXTERNAL_ENDPOINT: http://minio:9000
-      NESSIE_CATALOG_SERVICE_S3_DEFAULT_OPTIONS_PATH_STYLE_ACCESS: "true"
-      NESSIE_CATALOG_SERVICE_S3_DEFAULT_OPTIONS_AUTH_TYPE: STATIC
-
-      # Static credentials for Nessie via Quarkus secret resolution
-      NESSIE_CATALOG_SERVICE_S3_DEFAULT_OPTIONS_ACCESS_KEY: urn:nessie-secret:quarkus:minio
       MINIO_NAME: ${MINIO_ROOT_USER}
       MINIO_SECRET: ${MINIO_ROOT_PASSWORD}
-
     ports:
-      - "${NESSIE_PORT:-19120}:19120"
+    - ${NESSIE_PORT:-19120}:19120
     volumes:
-      - nessie-data:/var/lib/nessie
+    - nessie-data:/var/lib/nessie
     depends_on:
       postgres-healthcheck:
         condition: service_completed_successfully
@@ -369,77 +343,81 @@ services:
         condition: service_healthy
     healthcheck:
       test:
-        [
-          "CMD-SHELL",
-          "curl -fsS http://localhost:19120/api/v2/trees >/dev/null && curl -fsS 'http://localhost:19120/iceberg/v1/config?warehouse=payments' >/dev/null"
-        ]
+      - CMD-SHELL
+      - curl -fsS http://localhost:19120/api/v2/trees >/dev/null && curl -fsS 'http://localhost:19120/iceberg/v1/config?warehouse=payments'
+        >/dev/null
       interval: 5s
       timeout: 5s
       retries: 30
       start_period: 20s
     restart: unless-stopped
     networks:
-      - data-platform-network
-
-  # DuckDB currently emits Nessie's composite `main|warehouse` REST prefix
-  # without percent-encoding it. This local proxy performs that URI-safe
-  # translation; it stores no state and forwards to the Nessie catalog.
+    - data-platform-network
   nessie-rest-proxy:
     build:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.nessie-rest-proxy
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-nessie-rest-proxy
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-nessie-rest-proxy
     profiles:
-      - analytics
-      - duckdb
+    - analytics
+    - duckdb
     environment:
-      NESSIE_UPSTREAM: http://nessie:19120
+      NESSIE_UPSTREAM: ${NESSIE_ENDPOINT}
       PUBLIC_BASE: http://nessie-rest-proxy:19121
     depends_on:
       nessie:
         condition: service_healthy
     restart: unless-stopped
     networks:
-      - data-platform-network
+    - data-platform-network
 
-  # ============================================================================
-  # 4. DATA PIPELINE LAYER (ALWAYS START)
-  # ============================================================================
+  # ------------------------------------------------------------------
+  # 04. SOURCE GENERATION & GOVERNED INGESTION
+  # ------------------------------------------------------------------
+  #
+  # Governed path:
+  #   Source Systems -> Producer -> Kafka -> Raw / MinIO
+  #
+  # Kafka does not ingest directly into Bronze.
+  # The Raw consumer commits Kafka offsets only after durable handling.
 
   payment-xml-generator:
+    profiles:
+    - generate-data
     build:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.payment-xml-generator
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-payment-xml-generator
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-payment-xml-generator
     environment:
       DATA_ROOT: /app/data
-      PYTHONUNBUFFERED: "1"
+      PYTHONUNBUFFERED: '1'
     volumes:
-      - ./data:/app/data
+    - ./data:/app/data
     depends_on:
       minio:
         condition: service_healthy
       postgres-healthcheck:
         condition: service_completed_successfully
-    restart: "no"
+    restart: 'no'
     networks:
-      - data-platform-network
-    command: ["--count", "${PDM_GENERATOR_COUNT:-250}", "--clean"]
-
+    - data-platform-network
+    command:
+    - --count
+    - ${PDM_GENERATOR_COUNT:-250}
   payment-producer:
     build:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.payment-producer
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-payment-producer
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-payment-producer
     environment:
       KAFKA_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
       SCHEMA_REGISTRY_URL: http://schema-registry:8081
       DATA_ROOT: /app/data
-      PRODUCER_IDEMPOTENCE: "true"
-      PRODUCER_ACKS: "all"
+      PRODUCER_IDEMPOTENCE: 'true'
+      PRODUCER_ACKS: all
       KAFKA_SECURITY_PROTOCOL: ${KAFKA_SECURITY_PROTOCOL:-PLAINTEXT}
     volumes:
-      - ./data:/app/data:ro
+    - ./data:/app/data:ro
     depends_on:
       kafka:
         condition: service_healthy
@@ -449,18 +427,15 @@ services:
         condition: service_healthy
       schema-registry-init:
         condition: service_completed_successfully
-      payment-xml-generator:
-        condition: service_completed_successfully
-    restart: "no"
+    restart: 'no'
     networks:
-      - data-platform-network
-
+    - data-platform-network
   payment-consumer-events:
     build:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.payment-consumer-events
     environment:
-      S3_ENDPOINT: http://minio:9000
+      S3_ENDPOINT: ${S3_ENDPOINT}
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_BUCKET: dp-ai-payment
@@ -489,69 +464,77 @@ services:
         condition: service_healthy
       minio-init-buckets:
         condition: service_completed_successfully
-      payment-producer:
-        condition: service_started
     restart: unless-stopped
     networks:
-      - data-platform-network
+    - data-platform-network
     healthcheck:
-      # dbt's staging models require at least one Avro object for every source.
-      # Do not declare ingestion ready merely because the long-running consumer
-      # process has started; it may still be draining the producer's backlog.
-      test: ["CMD", "python3", "/app/raw_data_healthcheck.py"]
+      test:
+      - CMD
+      - python3
+      - /app/raw_data_healthcheck.py
       interval: 5s
       timeout: 15s
       retries: 120
       start_period: 5s
 
-  # ============================================================================
-  # 5. ANALYTICS LAYER (PROFILE: analytics)
-  # ============================================================================
+  # ------------------------------------------------------------------
+  # 05. QUERY & TRANSFORMATION
+  # ------------------------------------------------------------------
+  #
+  # Transformation path:
+  #   Raw -> Staging -> Bronze -> Silver -> Gold -> Consumption
 
   trino:
     build:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.trino-coordinator
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-trino
-    user: "0:0"
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-trino
+    user: 0:0
     profiles:
-      - analytics
-      - agents
-      - trino
-      - dbt
-      - dashboard
-      - superset
+    - analytics
+    - agents
+    - trino
+    - dbt
+    - dashboard
+    - superset
     environment:
-      JAVA_TOOL_OPTIONS: "-Xmx768M"
+      POSTGRES_HOST: "${POSTGRES_HOST}"
+      POSTGRES_PORT: "${POSTGRES_PORT}"
+      TRINO_DATABASE_NAME: "${TRINO_DATABASE_NAME}"
+      TRINO_HOST: "${TRINO_HOST}"
+      TRINO_PORT: "${TRINO_PORT}"
+      JAVA_TOOL_OPTIONS: -Xmx768M
       TRINO_CONFIG_DIR: /etc/trino
       TRINO_INTERNAL_SHARED_SECRET: ${TRINO_INTERNAL_SHARED_SECRET}
-      TRINO_KEYSTORE_PASSWORD: ${TRINO_KEYSTORE_PASSWORD:-vbfma6z}
+      TRINO_KEYSTORE_PASSWORD: ${TRINO_KEYSTORE_PASSWORD:?TRINO_KEYSTORE_PASSWORD must be supplied by environment}
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "8089:8080"
-      - "8443:8443"
+    - 8089:8080
+    - 8443:8443
     volumes:
-      # Mount configuration files individually so the catalog directory copied
-      # into the image remains available to Trino.
-      - ./platform/trino/etc/access-control.properties:/etc/trino/access-control.properties:ro
-      - ./platform/trino/etc/config.properties:/etc/trino/config.properties:ro
-      - ./platform/trino/etc/event-listeners.json:/etc/trino/event-listeners.json:ro
-      - ./platform/trino/etc/jvm.config:/etc/trino/jvm.config:ro
-      - ./platform/trino/etc/log.properties:/etc/trino/log.properties:ro
-      - ./platform/trino/etc/node.properties:/etc/trino/node.properties:ro
-      - ./platform/trino/etc/password-auth.properties:/etc/trino/password-auth.properties:ro
-      - ./platform/trino/etc/password-authenticator.properties:/etc/trino/password-authenticator.properties:ro
-      - ./platform/trino/etc/rules.json:/etc/trino/rules.json:ro
-      - ./platform/trino/etc/password.db:/etc/trino/password.db:ro
-      - ./platform/trino/etc/trino-keystore.jks:/etc/trino/trino-keystore.jks:ro
+    - ./platform/trino/etc/access-control.properties:/etc/trino/access-control.properties:ro
+    - ./platform/trino/etc/config.properties:/etc/trino/config.properties:ro
+    - ./platform/trino/etc/event-listeners.json:/etc/trino/event-listeners.json:ro
+    - ./platform/trino/etc/jvm.config:/etc/trino/jvm.config:ro
+    - ./platform/trino/etc/log.properties:/etc/trino/log.properties:ro
+    - ./platform/trino/etc/node.properties:/etc/trino/node.properties:ro
+    - ./platform/trino/etc/password-auth.properties:/etc/trino/password-auth.properties:ro
+    - ./platform/trino/etc/password-authenticator.properties:/etc/trino/password-authenticator.properties:ro
+    - ./platform/trino/etc/rules.json:/etc/trino/rules.json:ro
+    - ./platform/trino/etc/password.db:/etc/trino/password.db:ro
+    - ./platform/trino/etc/trino-keystore.jks:/etc/trino/trino-keystore.jks:ro
     restart: unless-stopped
     networks:
-      - data-platform-network
+    - data-platform-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/v1/info"]
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://localhost:8080/v1/info
       interval: 30s
       timeout: 10s
       retries: 3
@@ -561,25 +544,220 @@ services:
         condition: service_healthy
       nessie:
         condition: service_healthy
+  duckdb:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.duckdb
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-duckdb
+    profiles:
+    - analytics
+    - duckdb
+    - dbt
+    environment:
+      DBT_PROFILES_DIR: /usr/app/dbt
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_ENDPOINT: ${S3_ENDPOINT}
+      MINIO_BUCKET: dp-ai-payment
+      RAW_ROOT: raw/v2
+      NESSIE_ENDPOINT: ${NESSIE_ENDPOINT}
+    volumes:
+    - ./transform/dbt:/usr/app/dbt
+    - ./data:/app/data
+    - dbt-logs:/usr/app/dbt/logs
+    - ./tmp/duckdb:/tmp/pdm.duckdb.tmp
+    restart: 'no'
+    networks:
+    - data-platform-network
+    depends_on:
+      minio:
+        condition: service_healthy
+      nessie:
+        condition: service_healthy
+      payment-consumer-events:
+        condition: service_healthy
+    command:
+    - build
+  dbt:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.dbt
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-dbt
+    profiles:
+    - analytics
+    - dbt
+    environment:
+      DBT_PROFILES_DIR: /usr/app/dbt
+      TRINO_HOST: trino
+      TRINO_PORT: 8080
+      MINIO_ENDPOINT: ${S3_ENDPOINT}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET: dp-ai-payment
+      RAW_ROOT: raw/v2
+      NESSIE_ENDPOINT: ${NESSIE_ENDPOINT}
+      DP_TOKEN_KEY: ${DP_TOKEN_KEY}
+      DP_TOKEN_KEY_VERSION: ${DP_TOKEN_KEY_VERSION}
+    volumes:
+    - ./transform/dbt:/usr/app/dbt
+    - ./data:/app/data
+    - dbt-logs:/usr/app/dbt/logs
+    - ./tmp/duckdb:/tmp/pdm.duckdb.tmp
+    restart: 'no'
+    networks:
+    - data-platform-network
+    depends_on:
+      trino:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      nessie:
+        condition: service_healthy
+      duckdb:
+        condition: service_completed_successfully
+  dbt-docs:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.dbt-docs
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-dbt-docs
+    profiles:
+    - analytics
+    - dbt
+    environment:
+      DBT_PROFILES_DIR: /usr/app/dbt
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      NESSIE_ENDPOINT: ${NESSIE_ENDPOINT}
+    ports:
+    - 3001:3000
+    restart: unless-stopped
+    networks:
+    - data-platform-network
+    depends_on:
+      dbt:
+        condition: service_completed_successfully
+
+  # ------------------------------------------------------------------
+  # 06. MACHINE LEARNING — FEATURE ENGINEERING & INFERENCE
+  # ------------------------------------------------------------------
+  #
+  # Operational feature generation and predictive-risk scoring.
+  # Model training is intentionally excluded from the deployable runtime.
+
+  pdm-ml-features:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.pdm-ml
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-pdm-ml-features
+    profiles:
+    - ml
+    - ai
+    environment:
+      PYTHONUNBUFFERED: '1'
+      TRINO_HOST: trino
+      TRINO_PORT: '8080'
+      TRINO_CATALOG: iceberg
+      TRINO_SCHEMA: consumption
+      MINIO_ENDPOINT: ${S3_ENDPOINT}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET: dp-ai-payment
+      NESSIE_ENDPOINT: ${NESSIE_ENDPOINT}
+      PDM_ML_SAMPLE_SIZE: ${PDM_ML_SAMPLE_SIZE:-100}
+    volumes:
+    - ./services/pdm-ml:/app/pdm-ml
+    - ./data:/app/data
+    working_dir: /app/pdm-ml
+    restart: 'no'
+    networks:
+    - data-platform-network
+    depends_on:
+      trino:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      nessie:
+        condition: service_healthy
+    command:
+    - python
+    - features/build_current_default_risk_features.py
+    - --pdmis-root
+    - /app/data/pdmis
+    - --metadata
+    - /app/pdm-ml/models/pdm_default_risk_strict_early_warning_v1_metadata.json
+    - --output
+    - /app/data/pdmis_ml/default_risk_current_scoring.jsonl
+    - --summary
+    - /app/data/pdmis_ml/default_risk_current_scoring_summary.json
+  pdm-ml-scoring:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.pdm-ml
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-pdm-ml-scoring
+    profiles:
+    - ml
+    - ai
+    environment:
+      PYTHONUNBUFFERED: '1'
+      TRINO_HOST: trino
+      TRINO_PORT: '8080'
+      TRINO_CATALOG: iceberg
+      TRINO_SCHEMA: consumption
+      MINIO_ENDPOINT: ${S3_ENDPOINT}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET: dp-ai-payment
+      NESSIE_ENDPOINT: ${NESSIE_ENDPOINT}
+      PDM_ML_SAMPLE_SIZE: ${PDM_ML_SAMPLE_SIZE:-100}
+      PDM_ML_MODEL_DIR: /app/pdm-ml/models
+    volumes:
+    - ./services/pdm-ml:/app/pdm-ml
+    - ./data:/app/data
+    working_dir: /app/pdm-ml
+    restart: 'no'
+    networks:
+    - data-platform-network
+    depends_on:
+      pdm-ml-features:
+        condition: service_completed_successfully
+    command:
+    - python
+    - scoring/score_default_risk.py
+    - --model
+    - /app/pdm-ml/models/pdm_default_risk_strict_early_warning_v1.joblib
+    - --metadata
+    - /app/pdm-ml/models/pdm_default_risk_strict_early_warning_v1_metadata.json
+    - --input
+    - /app/data/pdmis_ml/default_risk_current_scoring.jsonl
+    - --output
+    - /app/data/pdmis_ml/default_risk_current_predictions.jsonl
+    - --summary
+    - /app/data/pdmis_ml/default_risk_current_predictions_summary.json
+
+  # ------------------------------------------------------------------
+  # 07. AGENTS & APPLICATION APIs
+  # ------------------------------------------------------------------
+  #
+  # Governed application and agent-facing service layer.
 
   agent-api:
     build:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.agent-api
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-agent-api
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-agent-api
     profiles:
-      - analytics
-      - agents
+    - analytics
+    - agents
     environment:
-      AGENT_API_PORT: "7010"
+      AGENT_API_PORT: '7010'
       TRINO_HOST: ${TRINO_HOST:-trino}
       TRINO_PORT: ${AGENT_TRINO_PORT:-8443}
       TRINO_USER: ${AGENT_TRINO_USER:-agent-api}
       TRINO_CATALOG: ${TRINO_CATALOG:-iceberg}
       TRINO_SCHEMA: ${TRINO_SCHEMA:-consumption}
       TRINO_HTTP_SCHEME: ${AGENT_TRINO_HTTP_SCHEME:-https}
-      TRINO_TLS_CA: "/etc/ssl/certs/trino-public.crt"
-      TRINO_PASSWORD: ${AGENT_TRINO_PASSWORD:-}
+      TRINO_TLS_CA: /etc/ssl/certs/trino-public.crt
+      TRINO_PASSWORD: ${AGENT_TRINO_PASSWORD:?AGENT_TRINO_PASSWORD must be supplied by environment}
       AGENT_MAX_ROWS: ${AGENT_MAX_ROWS:-1000}
       AGENT_QUERY_TIMEOUT_SECONDS: ${AGENT_QUERY_TIMEOUT_SECONDS:-30}
       AGENT_MAX_QUERY_LENGTH: ${AGENT_MAX_QUERY_LENGTH:-20000}
@@ -593,123 +771,112 @@ services:
       AGENT_RAG_ENABLED: ${AGENT_RAG_ENABLED:-false}
       SUPERSET_URL: ${AGENT_SUPERSET_URL:-http://superset:8088}
       SUPERSET_USERNAME: ${SUPERSET_ADMIN_USERNAME:-admin}
-      SUPERSET_PASSWORD: ${SUPERSET_ADMIN_PASSWORD:-}
+      SUPERSET_PASSWORD: ${SUPERSET_ADMIN_PASSWORD:?SUPERSET_ADMIN_PASSWORD must be supplied by environment}
       SUPERSET_DATABASE_NAME: ${TRINO_DATABASE_NAME:-PDM Trino}
       SUPERSET_PUBLIC_URL: ${SUPERSET_PUBLIC_URL:-http://localhost:8088}
-      AGENT_AUDIT_LOG_PATH: "/var/lib/dp-agent/audit/audit.jsonl"
+      AGENT_AUDIT_LOG_PATH: /var/lib/dp-agent/audit/audit.jsonl
     volumes:
-      - agent-audit-data:/var/lib/dp-agent/audit
-      - ./platform/trino/etc/trino-public.crt:/etc/ssl/certs/trino-public.crt:ro
+    - agent-audit-data:/var/lib/dp-agent/audit
+    - ./platform/trino/etc/trino-public.crt:/etc/ssl/certs/trino-public.crt:ro
     ports:
-      - "${AGENT_API_PORT:-7010}:7010"
+    - ${AGENT_API_PORT:-7010}:7010
     restart: unless-stopped
     networks:
-      - data-platform-network
+    - data-platform-network
     depends_on:
       trino:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:7010/agents/health', timeout=5)"]
+      test:
+      - CMD
+      - python3
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://localhost:7010/agents/health', timeout=5)
       interval: 15s
       timeout: 8s
       retries: 5
       start_period: 10s
 
+  # ------------------------------------------------------------------
+  # 08. BUSINESS INTELLIGENCE
+  # ------------------------------------------------------------------
+  #
+  # Consumption-facing analytics and dashboard services.
+
   metabase:
     image: metabase/metabase:v0.49.10
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-metabase
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-metabase
     profiles:
-      - analytics
-      - metabase
-      - dashboard
+    - analytics
+    - metabase
+    - dashboard
     environment:
       MB_DB_TYPE: postgres
       MB_DB_DBNAME: metabase
-      MB_DB_PORT: "5432"
+      MB_DB_PORT: '5432'
       MB_DB_USER: ${POSTGRES_USER}
       MB_DB_PASS: ${POSTGRES_PASSWORD}
       MB_DB_HOST: postgres
-
-      MB_SITE_NAME: "PDM Analytics"
+      MB_SITE_NAME: PDM Analytics
       MB_SITE_LOCALE: en
-      MB_JETTY_PORT: "3000"
+      MB_JETTY_PORT: '3000'
       JAVA_TIMEZONE: Africa/Kampala
-
       TRINO_HOST: trino
-      TRINO_PORT: "8080"
+      TRINO_PORT: '8080'
       TRINO_CATALOG: iceberg
       TRINO_SCHEMA: consumption
     ports:
-      - "${METABASE_PORT:-3000}:3000"
+    - ${METABASE_PORT:-3000}:3000
     volumes:
-      - metabase-data:/metabase-data
-      - ./platform/trino/etc/trino-truststore.jks:/etc/metabase/trino-truststore.jks:ro
-      - ./platform/metabase/plugins/starburst-4.1.0.metabase-driver.jar:/plugins/starburst-4.1.0.metabase-driver.jar:ro
+    - metabase-data:/metabase-data
+    - ./platform/trino/etc/trino-truststore.jks:/etc/metabase/trino-truststore.jks:ro
+    - ./platform/metabase/plugins/starburst-4.1.0.metabase-driver.jar:/plugins/starburst-4.1.0.metabase-driver.jar:ro
     restart: unless-stopped
     networks:
-      - data-platform-network
+    - data-platform-network
     depends_on:
       postgres:
         condition: service_healthy
       trino:
         condition: service_healthy
-
-  # ---------------------------------------------------------------------------
-  # Apache Superset 6.1 - modern BI / executive intelligence
-  # ---------------------------------------------------------------------------
-  # superset-init performs migrations, creates the initial administrator,
-  # synchronises roles/permissions, and idempotently registers the Trino
-  # connection after a clean metadata reset.
-  #
-  # The web server and worker start only after superset-init succeeds.
-  # ---------------------------------------------------------------------------
-
   superset-init:
     build:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.superset
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-superset-init
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-superset-init
     profiles:
-      - analytics
-      - superset
-      - dashboard
+    - analytics
+    - superset
+    - dashboard
     environment:
       SUPERSET_CONFIG_PATH: /app/pythonpath/superset_config.py
       SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
-      SUPERSET_LOAD_EXAMPLES: "no"
-
+      SUPERSET_LOAD_EXAMPLES: 'no'
       SUPERSET_ADMIN_USERNAME: ${SUPERSET_ADMIN_USERNAME:-admin}
       SUPERSET_ADMIN_PASSWORD: ${SUPERSET_ADMIN_PASSWORD}
       SUPERSET_ADMIN_FIRSTNAME: ${SUPERSET_ADMIN_FIRSTNAME:-PDM}
       SUPERSET_ADMIN_LASTNAME: ${SUPERSET_ADMIN_LASTNAME:-Administrator}
       SUPERSET_ADMIN_EMAIL: ${SUPERSET_ADMIN_EMAIL:-admin@pdm.local}
-
       POSTGRES_HOST: postgres
-      POSTGRES_PORT: "5432"
+      POSTGRES_PORT: '5432'
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       SUPERSET_METADATA_DB: superset
-
       REDIS_HOST: redis
-      REDIS_PORT: "6379"
-
+      REDIS_PORT: '6379'
       TRINO_HOST: trino
-      TRINO_PORT: "8080"
+      TRINO_PORT: '8080'
       TRINO_CATALOG: iceberg
       TRINO_SCHEMA: consumption
       TRINO_DATABASE_NAME: ${TRINO_DATABASE_NAME:-PDM Trino}
       TRINO_SQLALCHEMY_URI: ${TRINO_SQLALCHEMY_URI:-trino://trino@trino:8080/iceberg/consumption}
-
     volumes:
-      - ./platform/superset/superset_config.py:/app/pythonpath/superset_config.py:ro
-      - ./platform/superset:/app/platform/superset:ro
-      - superset-data:/app/superset_home
-
-    restart: "no"
-
+    - ./platform/superset/superset_config.py:/app/pythonpath/superset_config.py:ro
+    - ./platform/superset:/app/platform/superset:ro
+    - superset-data:/app/superset_home
+    restart: 'no'
     networks:
-      - data-platform-network
-
+    - data-platform-network
     depends_on:
       postgres:
         condition: service_healthy
@@ -717,620 +884,540 @@ services:
         condition: service_healthy
       trino:
         condition: service_healthy
-
     command:
-      - /bin/bash
-      - -c
-      - |
-        set -euo pipefail
-
-        echo "Running Superset metadata migrations..."
-        superset db upgrade
-
-        echo "Creating initial administrator if required..."
-        superset fab create-admin           --username "$${SUPERSET_ADMIN_USERNAME}"           --firstname "$${SUPERSET_ADMIN_FIRSTNAME}"           --lastname "$${SUPERSET_ADMIN_LASTNAME}"           --email "$${SUPERSET_ADMIN_EMAIL}"           --password "$${SUPERSET_ADMIN_PASSWORD}" || true
-
-        echo "Synchronising Superset roles and permissions..."
-        superset init
-
-        echo "Registering/updating Trino database connection..."
-        python - <<'PY'
-        import os
-
-        from superset.app import create_app
-
-        app = create_app()
-
-        with app.app_context():
-            from superset import db
-            from superset.models.core import Database
-
-            database_name = os.getenv("TRINO_DATABASE_NAME", "PDM Trino")
-            sqlalchemy_uri = os.getenv(
-                "TRINO_SQLALCHEMY_URI",
-                "trino://trino@trino:8080/iceberg/consumption",
-            )
-
-            database = (
-                db.session.query(Database)
-                .filter(Database.database_name == database_name)
-                .first()
-            )
-
-            if database is None:
-                database = Database(
-                    database_name=database_name,
-                    sqlalchemy_uri=sqlalchemy_uri,
-                    expose_in_sqllab=True,
-                    allow_ctas=False,
-                    allow_cvas=False,
-                    allow_dml=False,
-                )
-                db.session.add(database)
-                action = "Created"
-            else:
-                database.sqlalchemy_uri = sqlalchemy_uri
-                database.expose_in_sqllab = True
-                database.allow_ctas = False
-                database.allow_cvas = False
-                database.allow_dml = False
-                action = "Updated"
-
-            db.session.commit()
-
-            print(
-                f"{action} Superset Trino connection: "
-                f"id={database.id}, name={database.database_name}"
-            )
-        PY
-
-        echo "Superset initialization completed successfully."
-
+    - /bin/bash
+    - -c
+    - "set -euo pipefail\n\necho \"Running Superset metadata migrations...\"\nsuperset db upgrade\n\necho \"Creating initial\
+      \ administrator if required...\"\nsuperset fab create-admin           --username \"$${SUPERSET_ADMIN_USERNAME}\"     \
+      \      --firstname \"$${SUPERSET_ADMIN_FIRSTNAME}\"           --lastname \"$${SUPERSET_ADMIN_LASTNAME}\"           --email\
+      \ \"$${SUPERSET_ADMIN_EMAIL}\"           --password \"$${SUPERSET_ADMIN_PASSWORD}\" || true\n\necho \"Synchronising Superset\
+      \ roles and permissions...\"\nsuperset init\n\necho \"Registering/updating Trino database connection...\"\npython - <<'PY'\n\
+      import os\n\nfrom superset.app import create_app\n\napp = create_app()\n\nwith app.app_context():\n    from superset import\
+      \ db\n    from superset.models.core import Database\n\n    database_name = os.getenv(\"TRINO_DATABASE_NAME\", \"PDM Trino\"\
+      )\n    sqlalchemy_uri = os.getenv(\n        \"TRINO_SQLALCHEMY_URI\",\n        \"trino://trino@trino:8080/iceberg/consumption\"\
+      ,\n    )\n\n    database = (\n        db.session.query(Database)\n        .filter(Database.database_name == database_name)\n\
+      \        .first()\n    )\n\n    if database is None:\n        database = Database(\n            database_name=database_name,\n\
+      \            sqlalchemy_uri=sqlalchemy_uri,\n            expose_in_sqllab=True,\n            allow_ctas=False,\n     \
+      \       allow_cvas=False,\n            allow_dml=False,\n        )\n        db.session.add(database)\n        action =\
+      \ \"Created\"\n    else:\n        database.sqlalchemy_uri = sqlalchemy_uri\n        database.expose_in_sqllab = True\n\
+      \        database.allow_ctas = False\n        database.allow_cvas = False\n        database.allow_dml = False\n      \
+      \  action = \"Updated\"\n\n    db.session.commit()\n\n    print(\n        f\"{action} Superset Trino connection: \"\n\
+      \        f\"id={database.id}, name={database.database_name}\"\n    )\nPY\n\necho \"Superset initialization completed successfully.\"\
+      \n"
   superset:
     build:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.superset
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-superset
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-superset
     profiles:
-      - analytics
-      - superset
-      - dashboard
-
+    - analytics
+    - superset
+    - dashboard
     environment:
       SUPERSET_CONFIG_PATH: /app/pythonpath/superset_config.py
       SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
-      SUPERSET_LOAD_EXAMPLES: "no"
-
+      SUPERSET_LOAD_EXAMPLES: 'no'
       POSTGRES_HOST: postgres
-      POSTGRES_PORT: "5432"
+      POSTGRES_PORT: '5432'
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       SUPERSET_METADATA_DB: superset
-
       REDIS_HOST: redis
-      REDIS_PORT: "6379"
-
+      REDIS_PORT: '6379'
       TRINO_HOST: trino
-      TRINO_PORT: "8080"
+      TRINO_PORT: '8080'
       TRINO_CATALOG: iceberg
       TRINO_SCHEMA: consumption
-
       SUPERSET_WEB_WORKERS: ${SUPERSET_WEB_WORKERS:-4}
       SUPERSET_WEB_THREADS: ${SUPERSET_WEB_THREADS:-4}
       SUPERSET_WEBSERVER_TIMEOUT: ${SUPERSET_WEBSERVER_TIMEOUT:-120}
-
     ports:
-      - "${SUPERSET_PORT:-8088}:8088"
-
+    - ${SUPERSET_PORT:-8088}:8088
     volumes:
-      - ./platform/superset/superset_config.py:/app/pythonpath/superset_config.py:ro
-      - ./platform/superset:/app/platform/superset:ro
-      - ./platform/superset/dashboards/Coat-of-arms-Uganda.webp:/app/superset/static/assets/images/Coat-of-arms-Uganda.webp:ro
-      - superset-data:/app/superset_home
-
+    - ./platform/superset/superset_config.py:/app/pythonpath/superset_config.py:ro
+    - ./platform/superset:/app/platform/superset:ro
+    - ./platform/superset/dashboards/Coat-of-arms-Uganda.webp:/app/superset/static/assets/images/Coat-of-arms-Uganda.webp:ro
+    - superset-data:/app/superset_home
     restart: unless-stopped
-
     networks:
-      - data-platform-network
-
+    - data-platform-network
     depends_on:
       superset-init:
         condition: service_completed_successfully
       trino:
         condition: service_healthy
-
     command:
-      - /bin/bash
-      - -c
-      - |
-        set -euo pipefail
+    - /bin/bash
+    - -c
+    - 'set -euo pipefail
 
-        exec gunicorn           --bind 0.0.0.0:8088           --workers "$${SUPERSET_WEB_WORKERS}"           --worker-class gthread           --threads "$${SUPERSET_WEB_THREADS}"           --timeout "$${SUPERSET_WEBSERVER_TIMEOUT}"           --access-logfile -           --error-logfile -           "superset.app:create_app()"
 
+      exec gunicorn           --bind 0.0.0.0:8088           --workers "$${SUPERSET_WEB_WORKERS}"           --worker-class gthread           --threads
+      "$${SUPERSET_WEB_THREADS}"           --timeout "$${SUPERSET_WEBSERVER_TIMEOUT}"           --access-logfile -           --error-logfile
+      -           "superset.app:create_app()"
+
+      '
     healthcheck:
       test:
-        [
-          "CMD-SHELL",
-          "curl -fsS http://localhost:8088/health >/dev/null || exit 1"
-        ]
+      - CMD-SHELL
+      - curl -fsS http://localhost:8088/health >/dev/null || exit 1
       interval: 15s
       timeout: 5s
       retries: 20
       start_period: 45s
-
   superset-worker:
     build:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.superset
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-superset-worker
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-superset-worker
     profiles:
-      - analytics
-      - superset
-      - dashboard
-
+    - analytics
+    - superset
+    - dashboard
     environment:
       SUPERSET_CONFIG_PATH: /app/pythonpath/superset_config.py
       SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
-
       POSTGRES_HOST: postgres
-      POSTGRES_PORT: "5432"
+      POSTGRES_PORT: '5432'
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       SUPERSET_METADATA_DB: superset
-
       REDIS_HOST: redis
-      REDIS_PORT: "6379"
-
+      REDIS_PORT: '6379'
       TRINO_HOST: trino
-      TRINO_PORT: "8080"
+      TRINO_PORT: '8080'
       TRINO_CATALOG: iceberg
       TRINO_SCHEMA: consumption
-
       SUPERSET_CELERY_WORKERS: ${SUPERSET_CELERY_WORKERS:-2}
-
     volumes:
-      - ./platform/superset/superset_config.py:/app/pythonpath/superset_config.py:ro
-      - ./platform/superset:/app/platform/superset:ro
-      - superset-data:/app/superset_home
-
+    - ./platform/superset/superset_config.py:/app/pythonpath/superset_config.py:ro
+    - ./platform/superset:/app/platform/superset:ro
+    - superset-data:/app/superset_home
     restart: unless-stopped
-
     networks:
-      - data-platform-network
-
+    - data-platform-network
     depends_on:
       superset-init:
         condition: service_completed_successfully
       redis:
         condition: service_healthy
-
     command:
-      - /bin/bash
-      - -c
-      - |
-        set -euo pipefail
+    - /bin/bash
+    - -c
+    - 'set -euo pipefail
 
-        exec celery           --app=superset.tasks.celery_app:app           worker           -O fair           --loglevel=INFO           --concurrency="$${SUPERSET_CELERY_WORKERS}"
 
+      exec celery           --app=superset.tasks.celery_app:app           worker           -O fair           --loglevel=INFO           --concurrency="$${SUPERSET_CELERY_WORKERS}"
+
+      '
     healthcheck:
       test:
-        [
-          "CMD-SHELL",
-          "celery -A superset.tasks.celery_app:app inspect ping -d celery@$$HOSTNAME | grep -q pong"
-        ]
+      - CMD-SHELL
+      - celery -A superset.tasks.celery_app:app inspect ping -d celery@$$HOSTNAME | grep -q pong
       interval: 15s
       timeout: 20s
       retries: 5
       start_period: 30s
 
-  dbt:
-    build:
-      context: .
-      dockerfile: platform/docker/dockerfiles/Dockerfile.dbt
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-dbt
-    profiles:
-      - analytics
-      - dbt
-    environment:
-      DBT_PROFILES_DIR: /usr/app/dbt
-      TRINO_HOST: trino
-      TRINO_PORT: 8080
-      MINIO_ENDPOINT: http://minio:9000
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      MINIO_BUCKET: dp-ai-payment
-      RAW_ROOT: raw/v2
-      NESSIE_ENDPOINT: http://nessie:19120
-      # Gate 2 restricted tokenisation boundary.
-      DP_TOKEN_KEY: ${DP_TOKEN_KEY}
-      DP_TOKEN_KEY_VERSION: ${DP_TOKEN_KEY_VERSION}
-    volumes:
-      - ./transform/dbt:/usr/app/dbt
-      - ./data:/app/data
-      - dbt-logs:/usr/app/dbt/logs
-      # DuckDB derives this default spill path from /tmp/pdm.duckdb. Mounting
-      # it directly avoids reissuing SET temp_directory on every dbt connection.
-      - ./tmp/duckdb:/tmp/pdm.duckdb.tmp
-    restart: "no"
-    networks:
-      - data-platform-network
-    # Both one-shot runners execute the same dbt project against the Nessie
-    # catalog; without ordering they race and the loser fails with
-    # "Table ... already exists". duckdb builds the lakehouse first (per the
-    # README runbook), then dbt reruns the project sequentially.
-    depends_on:
-      trino:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-      nessie:
-        condition: service_healthy
-      duckdb:
-        condition: service_completed_successfully
-
-  # DuckDB is the dbt execution engine for Bronze Parquet.  It reads directly
-  # from MinIO and writes managed Iceberg tables through Nessie's REST catalog.
-  duckdb:
-    build:
-      context: .
-      dockerfile: platform/docker/dockerfiles/Dockerfile.duckdb
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-duckdb
-    profiles:
-      - analytics
-      - duckdb
-      - dbt
-    environment:
-      DBT_PROFILES_DIR: /usr/app/dbt
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      MINIO_ENDPOINT: http://minio:9000
-      MINIO_BUCKET: dp-ai-payment
-      RAW_ROOT: raw/v2
-      NESSIE_ENDPOINT: http://nessie:19120
-    volumes:
-      - ./transform/dbt:/usr/app/dbt
-      - ./data:/app/data
-      - dbt-logs:/usr/app/dbt/logs
-      # DuckDB derives this default spill path from /tmp/pdm.duckdb. Mounting
-      # it directly avoids reissuing SET temp_directory on every dbt connection.
-      - ./tmp/duckdb:/tmp/pdm.duckdb.tmp
-    restart: "no"
-    networks:
-      - data-platform-network
-    depends_on:
-      minio:
-        condition: service_healthy
-      nessie:
-        condition: service_healthy
-      payment-consumer-events:
-        condition: service_healthy
-    command: ["build"]
-
-  dbt-docs:
-    build:
-      context: .
-      dockerfile: platform/docker/dockerfiles/Dockerfile.dbt-docs
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-dbt-docs
-    profiles:
-      - analytics
-      - dbt
-    environment:
-      DBT_PROFILES_DIR: /usr/app/dbt
-      # profiles.yml resolves these via env_var() even when just parsing,
-      # so docs serve fails without them.
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      NESSIE_ENDPOINT: http://nessie:19120
-    ports:
-      - "3001:3000"
-    restart: unless-stopped
-    networks:
-      - data-platform-network
-    depends_on:
-      dbt:
-        condition: service_completed_successfully
-
-  # ============================================================================
-  # 6. DEVELOPMENT SERVICES (PROFILE: dev)
-  # ============================================================================
-
-  s3-landing-kafka-ingestion:
-    build:
-      context: .
-      dockerfile: platform/docker/dockerfiles/Dockerfile.s3-landing-kafka-ingestion
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-s3-landing-kafka-ingestion
-    profiles:
-      - future-disabled
-    environment:
-      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
-      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
-      S3_ENDPOINT: http://minio:9000
-      KAFKA_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
-    restart: unless-stopped
-    networks:
-      - data-platform-network
-    depends_on:
-      minio:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
-
-  python-transform:
-    build:
-      context: .
-      dockerfile: platform/docker/dockerfiles/Dockerfile.python-transform
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-python-transform
-    profiles:
-      - dev
-      - transform
-    environment:
-      MINIO_ENDPOINT: http://minio:9000
-      NESSIE_ENDPOINT: http://nessie:19120
-      TRINO_HOST: trino
-      TRINO_PORT: 8080
-    volumes:
-      - ./services/agents/modeling:/app/src
-    restart: unless-stopped
-    networks:
-      - data-platform-network
-    depends_on:
-      minio:
-        condition: service_healthy
-      nessie:
-        condition: service_healthy
-
-  python-api:
-    build:
-      context: .
-      dockerfile: platform/docker/dockerfiles/Dockerfile.python-api
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-python-api
-    profiles:
-      - dev
-      - api
-    environment:
-      API_PORT: 7001
-      MINIO_ENDPOINT: http://minio:9000
-      NESSIE_ENDPOINT: http://nessie:19120
-      TRINO_HOST: trino
-      TRINO_PORT: 8080
-    ports:
-      - "7001:7001"
-    volumes:
-      - ./services/payments-api:/app/src
-    restart: unless-stopped
-    networks:
-      - data-platform-network
-    depends_on:
-      minio:
-        condition: service_healthy
-      nessie:
-        condition: service_healthy
-
-  dq-agent:
-    build:
-      context: .
-      dockerfile: platform/docker/dockerfiles/Dockerfile.dq-agent
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-dq-agent
-    profiles:
-      - dev
-      - dq
-    environment:
-      MINIO_ENDPOINT: http://minio:9000
-      NESSIE_ENDPOINT: http://nessie:19120
-      TRINO_HOST: trino
-      TRINO_PORT: 8080
-      LOG_DIR: /logs
-    volumes:
-      - dev-logs:/logs
-      - ./services/agents/dq:/app/src
-    restart: unless-stopped
-    networks:
-      - data-platform-network
-    depends_on:
-      minio:
-        condition: service_healthy
-      nessie:
-        condition: service_healthy
-
-  payment-producer-dev:
-    build:
-      context: .
-      dockerfile: platform/docker/dockerfiles/Dockerfile.payment-producer
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-payment-producer-dev
-    profiles:
-      - future-disabled
-    environment:
-      S3_ENDPOINT: http://minio:9000
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      MINIO_BUCKET: dp-ai-payment
-      KAFKA_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
-      SCHEMA_REGISTRY_URL: http://schema-registry:8081
-      DATA_ROOT: /app/data
-    restart: "no"
-    networks:
-      - data-platform-network
-    depends_on:
-      kafka:
-        condition: service_healthy
-      schema-registry:
-        condition: service_healthy
-  # ============================================================================
-  # 5B. PDM AI / MACHINE LEARNING LAYER
-  # ============================================================================
+  # ------------------------------------------------------------------
+  # 09. ORCHESTRATION & CONTROL PLANE
+  # ------------------------------------------------------------------
   #
-  # Flow:
-  # dbt Gold / Consumption
-  #       -> feature engineering
-  #       -> model training
-  #       -> persisted models
-  #       -> scoring
-  #       -> risk / anomaly outputs
-  #       -> Trino / Superset dashboards
-  #
-  # Source code:
-  #   services/pdm-ml/features
-  #   services/pdm-ml/training
-  #   services/pdm-ml/models
-  #   services/pdm-ml/scoring
-  # ============================================================================
+  # Governed workflow orchestration and bounded job execution.
 
-  pdm-ml-features:
+  platform-job-runner:
+    profiles:
+    - airflow
     build:
       context: .
-      dockerfile: platform/docker/dockerfiles/Dockerfile.pdm-ml
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-pdm-ml-features
-    profiles:
-      - ml
-      - ai
+      dockerfile: platform/docker/dockerfiles/Dockerfile.platform-job-runner
     environment:
-      PYTHONUNBUFFERED: "1"
-
-      TRINO_HOST: trino
-      TRINO_PORT: "8080"
-      TRINO_CATALOG: iceberg
-      TRINO_SCHEMA: consumption
-
-      MINIO_ENDPOINT: http://minio:9000
+      DBT_DATABASE: "${DBT_DATABASE}"
+      DBT_STAGING_DATABASE: "${DBT_STAGING_DATABASE}"
+      DBT_BRONZE_DATABASE: "${DBT_BRONZE_DATABASE}"
+      DBT_SILVER_DATABASE: "${DBT_SILVER_DATABASE}"
+      DBT_SILVER_VAULT_DATABASE: "${DBT_SILVER_VAULT_DATABASE}"
+      DBT_GOLD_DATABASE: "${DBT_GOLD_DATABASE}"
+      DBT_CONSUMPTION_DATABASE: "${DBT_CONSUMPTION_DATABASE}"
+      DBT_S3_URL_STYLE: "${DBT_S3_URL_STYLE}"
+      NESSIE_ENDPOINT: "${NESSIE_ENDPOINT}"
+      WAREHOUSE_BUCKET: "${WAREHOUSE_BUCKET}"
+      ICEBERG_CATALOG: "${ICEBERG_CATALOG}"
+      PLATFORM_RUNNER_EXECUTION_ENABLED: 'true'
+      KAFKA_TOPICS: icmn.vpm.pain001,icmn.pmn.pain001,cpo.psn.pain002,cpo.plm.pain002,wendi.pain001,wendi.pain002,wendi.camt053,wendi.camt052,wendi.camt054,wendi.transactions,mobile.mtn.pacs008,mobile.mtn.pacs002,mobile.airtel.pacs008,mobile.airtel.pacs002,agent.transactions,agent.profiles,agent.locations,pdmis.beneficiaries,pdmis.loans,pdmis.repayments,pdmis.saccos,pdmis.households,pdmis.business_plans,pdmis.special_groups
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_BUCKET: dp-ai-payment
-
-      NESSIE_ENDPOINT: http://nessie:19120
-
-      PDM_ML_SAMPLE_SIZE: ${PDM_ML_SAMPLE_SIZE:-100}
-
-    volumes:
-      - ./services/pdm-ml:/app/pdm-ml
-      - ./data:/app/data
-
-    working_dir: /app/pdm-ml
-
-    restart: "no"
-
+      RAW_PREFIX: raw/v2
+      S3_ENDPOINT: ${S3_ENDPOINT}
     networks:
-      - data-platform-network
-
-    depends_on:
-      trino:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-      nessie:
-        condition: service_healthy
-
-    command:
+    - data-platform-network
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+    - /tmp
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
+    healthcheck:
+      test:
+      - CMD
       - python
-      - features/build_current_default_risk_features.py
-      - --pdmis-root
-      - /app/data/pdmis
-      - --metadata
-      - /app/pdm-ml/models/pdm_default_risk_strict_early_warning_v1_metadata.json
-      - --output
-      - /app/data/pdmis_ml/default_risk_current_scoring.jsonl
-      - --summary
-      - /app/data/pdmis_ml/default_risk_current_scoring_summary.json
-
-  pdm-ml-training:
+      - -c
+      - import urllib.request; urllib.request.urlopen( 'http://localhost:8090/health', timeout=3).read()
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+  airflow-init:
+    profiles:
+    - airflow
     build:
       context: .
-      dockerfile: platform/docker/dockerfiles/Dockerfile.pdm-ml
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-pdm-ml-training
-    profiles:
-      - ml
-      - ai
+      dockerfile: platform/docker/dockerfiles/Dockerfile.airflow
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-airflow-init
+    user: 0:0
     environment:
-      PYTHONUNBUFFERED: "1"
-
-      TRINO_HOST: trino
-      TRINO_PORT: "8080"
-      TRINO_CATALOG: iceberg
-      TRINO_SCHEMA: consumption
-
-      MINIO_ENDPOINT: http://minio:9000
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      MINIO_BUCKET: dp-ai-payment
-
-      NESSIE_ENDPOINT: http://nessie:19120
-
-      PDM_ML_SAMPLE_SIZE: ${PDM_ML_SAMPLE_SIZE:-100}
-      PDM_ML_MODEL_DIR: /app/pdm-ml/models
-
+      AIRFLOW_HOME: /opt/airflow
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
+      PYTHONPATH: /opt/airflow/job_runner
+      PLATFORM_JOB_AUDIT_PATH: /var/lib/platform-job-runner/audit.jsonl
+      PLATFORM_JOB_RUNNER_URL: http://platform-job-runner:8090
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:?AIRFLOW_FERNET_KEY is required}
+      AIRFLOW__CORE__PARALLELISM: ${AIRFLOW_PARALLELISM:-4}
+      AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG: ${AIRFLOW_MAX_ACTIVE_TASKS_PER_DAG:-2}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${AIRFLOW_DB:-airflow}
+      AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/8
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${AIRFLOW_DB:-airflow}
+      AIRFLOW__CELERY__WORKER_CONCURRENCY: ${AIRFLOW_WORKER_CONCURRENCY:-2}
+      AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_JWT_SECRET:?AIRFLOW_JWT_SECRET is required}
+      AIRFLOW__API__SECRET_KEY: ${AIRFLOW_SECRET_KEY:?AIRFLOW_SECRET_KEY is required}
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
+      AIRFLOW__LOGGING__BASE_LOG_FOLDER: /opt/airflow/logs
+      PYTHONUNBUFFERED: '1'
     volumes:
-      - ./services/pdm-ml:/app/pdm-ml
-      - ./data:/app/data
-
-    working_dir: /app/pdm-ml
-
-    restart: "no"
-
-    networks:
-      - data-platform-network
-
+    - ./orchestration/airflow/dags:/opt/airflow/dags:ro
+    - ./orchestration/airflow/plugins:/opt/airflow/plugins:ro
+    - airflow-logs:/opt/airflow/logs
+    - airflow-config:/opt/airflow/config
+    - platform-job-audit-data:/var/lib/platform-job-runner
     depends_on:
-      pdm-ml-features:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+    - data-platform-network
+    restart: 'no'
+    command:
+    - bash
+    - -c
+    - 'set -euo pipefail
+
+      install -d -o "${AIRFLOW_UID:-50000}" -g 0 -m 0755 /var/lib/platform-job-runner
+
+      chown "${AIRFLOW_UID:-50000}:0" /var/lib/platform-job-runner
+
+      chmod 0755 /var/lib/platform-job-runner
+
+      exec setpriv --reuid="${AIRFLOW_UID:-50000}" --regid=0 --clear-groups airflow db migrate
+
+      '
+  airflow-apiserver:
+    profiles:
+    - airflow
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.airflow
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-airflow-apiserver
+    user: ${AIRFLOW_UID:-50000}:0
+    environment:
+      AIRFLOW_HOME: /opt/airflow
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
+      PYTHONPATH: /opt/airflow/job_runner
+      PLATFORM_JOB_AUDIT_PATH: /var/lib/platform-job-runner/audit.jsonl
+      PLATFORM_JOB_RUNNER_URL: http://platform-job-runner:8090
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:?AIRFLOW_FERNET_KEY is required}
+      AIRFLOW__CORE__PARALLELISM: ${AIRFLOW_PARALLELISM:-4}
+      AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG: ${AIRFLOW_MAX_ACTIVE_TASKS_PER_DAG:-2}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${AIRFLOW_DB:-airflow}
+      AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/8
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${AIRFLOW_DB:-airflow}
+      AIRFLOW__CELERY__WORKER_CONCURRENCY: ${AIRFLOW_WORKER_CONCURRENCY:-2}
+      AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_JWT_SECRET:?AIRFLOW_JWT_SECRET is required}
+      AIRFLOW__API__SECRET_KEY: ${AIRFLOW_SECRET_KEY:?AIRFLOW_SECRET_KEY is required}
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
+      AIRFLOW__LOGGING__BASE_LOG_FOLDER: /opt/airflow/logs
+      PYTHONUNBUFFERED: '1'
+    volumes:
+    - ./orchestration/airflow/dags:/opt/airflow/dags:ro
+    - ./orchestration/airflow/plugins:/opt/airflow/plugins:ro
+    - airflow-logs:/opt/airflow/logs
+    - airflow-config:/opt/airflow/config
+    - platform-job-audit-data:/var/lib/platform-job-runner
+    depends_on:
+      airflow-init:
         condition: service_completed_successfully
-
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+    - data-platform-network
+    ports:
+    - ${AIRFLOW_PORT:-8085}:8080
+    restart: unless-stopped
     command:
-      - python
-      - training/train_default_risk.py
-      - --input
-      - /app/data/pdmis_ml/default_risk_training_snapshots.jsonl
-      - --model-dir
-      - /app/pdm-ml/models
-
-  pdm-ml-scoring:
+    - api-server
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - curl --fail --silent http://localhost:8080/api/v2/monitor/health >/dev/null || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+  airflow-scheduler:
+    profiles:
+    - airflow
     build:
       context: .
-      dockerfile: platform/docker/dockerfiles/Dockerfile.pdm-ml
-    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform}-pdm-ml-scoring
-    profiles:
-      - ml
-      - ai
+      dockerfile: platform/docker/dockerfiles/Dockerfile.airflow
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-airflow-scheduler
+    user: ${AIRFLOW_UID:-50000}:0
     environment:
-      PYTHONUNBUFFERED: "1"
-
-      TRINO_HOST: trino
-      TRINO_PORT: "8080"
-      TRINO_CATALOG: iceberg
-      TRINO_SCHEMA: consumption
-
-      MINIO_ENDPOINT: http://minio:9000
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      MINIO_BUCKET: dp-ai-payment
-
-      NESSIE_ENDPOINT: http://nessie:19120
-
-      PDM_ML_SAMPLE_SIZE: ${PDM_ML_SAMPLE_SIZE:-100}
-      PDM_ML_MODEL_DIR: /app/pdm-ml/models
-
+      AIRFLOW_HOME: /opt/airflow
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
+      PYTHONPATH: /opt/airflow/job_runner
+      PLATFORM_JOB_AUDIT_PATH: /var/lib/platform-job-runner/audit.jsonl
+      PLATFORM_JOB_RUNNER_URL: http://platform-job-runner:8090
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:?AIRFLOW_FERNET_KEY is required}
+      AIRFLOW__CORE__PARALLELISM: ${AIRFLOW_PARALLELISM:-4}
+      AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG: ${AIRFLOW_MAX_ACTIVE_TASKS_PER_DAG:-2}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${AIRFLOW_DB:-airflow}
+      AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/8
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${AIRFLOW_DB:-airflow}
+      AIRFLOW__CELERY__WORKER_CONCURRENCY: ${AIRFLOW_WORKER_CONCURRENCY:-2}
+      AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_JWT_SECRET:?AIRFLOW_JWT_SECRET is required}
+      AIRFLOW__API__SECRET_KEY: ${AIRFLOW_SECRET_KEY:?AIRFLOW_SECRET_KEY is required}
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
+      AIRFLOW__LOGGING__BASE_LOG_FOLDER: /opt/airflow/logs
+      PYTHONUNBUFFERED: '1'
     volumes:
-      - ./services/pdm-ml:/app/pdm-ml
-      - ./data:/app/data
-
-    working_dir: /app/pdm-ml
-
-    restart: "no"
-
-    networks:
-      - data-platform-network
-
+    - ./orchestration/airflow/dags:/opt/airflow/dags:ro
+    - ./orchestration/airflow/plugins:/opt/airflow/plugins:ro
+    - airflow-logs:/opt/airflow/logs
+    - airflow-config:/opt/airflow/config
+    - platform-job-audit-data:/var/lib/platform-job-runner
     depends_on:
-      pdm-ml-features:
+      airflow-init:
         condition: service_completed_successfully
-
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+    - data-platform-network
+    restart: unless-stopped
     command:
-      - python
-      - scoring/score_default_risk.py
-      - --model
-      - /app/pdm-ml/models/pdm_default_risk_strict_early_warning_v1.joblib
-      - --metadata
-      - /app/pdm-ml/models/pdm_default_risk_strict_early_warning_v1_metadata.json
-      - --input
-      - /app/data/pdmis_ml/default_risk_current_scoring.jsonl
-      - --output
-      - /app/data/pdmis_ml/default_risk_current_predictions.jsonl
-      - --summary
-      - /app/data/pdmis_ml/default_risk_current_predictions_summary.json
+    - scheduler
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - airflow jobs check --job-type SchedulerJob --local || exit 1
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 30s
+  airflow-dag-processor:
+    profiles:
+    - airflow
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.airflow
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-airflow-dag-processor
+    user: ${AIRFLOW_UID:-50000}:0
+    environment:
+      AIRFLOW_HOME: /opt/airflow
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
+      PYTHONPATH: /opt/airflow/job_runner
+      PLATFORM_JOB_AUDIT_PATH: /var/lib/platform-job-runner/audit.jsonl
+      PLATFORM_JOB_RUNNER_URL: http://platform-job-runner:8090
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:?AIRFLOW_FERNET_KEY is required}
+      AIRFLOW__CORE__PARALLELISM: ${AIRFLOW_PARALLELISM:-4}
+      AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG: ${AIRFLOW_MAX_ACTIVE_TASKS_PER_DAG:-2}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${AIRFLOW_DB:-airflow}
+      AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/8
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${AIRFLOW_DB:-airflow}
+      AIRFLOW__CELERY__WORKER_CONCURRENCY: ${AIRFLOW_WORKER_CONCURRENCY:-2}
+      AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_JWT_SECRET:?AIRFLOW_JWT_SECRET is required}
+      AIRFLOW__API__SECRET_KEY: ${AIRFLOW_SECRET_KEY:?AIRFLOW_SECRET_KEY is required}
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
+      AIRFLOW__LOGGING__BASE_LOG_FOLDER: /opt/airflow/logs
+      PYTHONUNBUFFERED: '1'
+    volumes:
+    - ./orchestration/airflow/dags:/opt/airflow/dags:ro
+    - ./orchestration/airflow/plugins:/opt/airflow/plugins:ro
+    - airflow-logs:/opt/airflow/logs
+    - airflow-config:/opt/airflow/config
+    - platform-job-audit-data:/var/lib/platform-job-runner
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+    - data-platform-network
+    restart: unless-stopped
+    command:
+    - dag-processor
+  airflow-worker:
+    profiles:
+    - airflow
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.airflow
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-airflow-worker
+    user: ${AIRFLOW_UID:-50000}:0
+    environment:
+      AIRFLOW_HOME: /opt/airflow
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
+      PYTHONPATH: /opt/airflow/job_runner
+      PLATFORM_JOB_AUDIT_PATH: /var/lib/platform-job-runner/audit.jsonl
+      PLATFORM_JOB_RUNNER_URL: http://platform-job-runner:8090
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:?AIRFLOW_FERNET_KEY is required}
+      AIRFLOW__CORE__PARALLELISM: ${AIRFLOW_PARALLELISM:-4}
+      AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG: ${AIRFLOW_MAX_ACTIVE_TASKS_PER_DAG:-2}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${AIRFLOW_DB:-airflow}
+      AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/8
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${AIRFLOW_DB:-airflow}
+      AIRFLOW__CELERY__WORKER_CONCURRENCY: ${AIRFLOW_WORKER_CONCURRENCY:-2}
+      AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_JWT_SECRET:?AIRFLOW_JWT_SECRET is required}
+      AIRFLOW__API__SECRET_KEY: ${AIRFLOW_SECRET_KEY:?AIRFLOW_SECRET_KEY is required}
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
+      AIRFLOW__LOGGING__BASE_LOG_FOLDER: /opt/airflow/logs
+      PYTHONUNBUFFERED: '1'
+      DUMB_INIT_SETSID: '0'
+    volumes:
+    - ./orchestration/airflow/dags:/opt/airflow/dags:ro
+    - ./orchestration/airflow/plugins:/opt/airflow/plugins:ro
+    - airflow-logs:/opt/airflow/logs
+    - airflow-config:/opt/airflow/config
+    - platform-job-audit-data:/var/lib/platform-job-runner
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+    - data-platform-network
+    restart: unless-stopped
+    command:
+    - celery
+    - worker
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - celery --app airflow.providers.celery.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}" || exit 1
+      interval: 20s
+      timeout: 10s
+      retries: 20
+      start_period: 30s
+  airflow-triggerer:
+    profiles:
+    - airflow
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.airflow
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-airflow-triggerer
+    user: ${AIRFLOW_UID:-50000}:0
+    environment:
+      AIRFLOW_HOME: /opt/airflow
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
+      PYTHONPATH: /opt/airflow/job_runner
+      PLATFORM_JOB_AUDIT_PATH: /var/lib/platform-job-runner/audit.jsonl
+      PLATFORM_JOB_RUNNER_URL: http://platform-job-runner:8090
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:?AIRFLOW_FERNET_KEY is required}
+      AIRFLOW__CORE__PARALLELISM: ${AIRFLOW_PARALLELISM:-4}
+      AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG: ${AIRFLOW_MAX_ACTIVE_TASKS_PER_DAG:-2}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${AIRFLOW_DB:-airflow}
+      AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/8
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${AIRFLOW_DB:-airflow}
+      AIRFLOW__CELERY__WORKER_CONCURRENCY: ${AIRFLOW_WORKER_CONCURRENCY:-2}
+      AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_JWT_SECRET:?AIRFLOW_JWT_SECRET is required}
+      AIRFLOW__API__SECRET_KEY: ${AIRFLOW_SECRET_KEY:?AIRFLOW_SECRET_KEY is required}
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
+      AIRFLOW__LOGGING__BASE_LOG_FOLDER: /opt/airflow/logs
+      PYTHONUNBUFFERED: '1'
+    volumes:
+    - ./orchestration/airflow/dags:/opt/airflow/dags:ro
+    - ./orchestration/airflow/plugins:/opt/airflow/plugins:ro
+    - airflow-logs:/opt/airflow/logs
+    - airflow-config:/opt/airflow/config
+    - platform-job-audit-data:/var/lib/platform-job-runner
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+    - data-platform-network
+    restart: unless-stopped
+    command:
+    - triggerer
+
+
+# ------------------------------------------------------------------
+# 10. NETWORKS
+# ------------------------------------------------------------------
+
+networks:
+  data-platform-network:
+    name: ${DOCKER_NETWORK:-data-platform-network}
+    driver: bridge
+
+
+# ------------------------------------------------------------------
+# 11. PERSISTENT VOLUMES
+# ------------------------------------------------------------------
+
+volumes:
+  pgdata: null
+  minio-data: null
+  nessie-data: null
+  kafka-data: null
+  kafka-metadata: null
+  redis-data: null
+  metabase-data: null
+  dbt-logs: null
+  superset-data: null
+  dev-logs: null
+  agent-audit-data: null
+  airflow-logs: null
+  airflow-config: null
+  platform-job-audit-data: null

@@ -1,0 +1,107 @@
+{
+  "contract_version": 2,
+  "adapter": "debezium",
+  "deployment_model": "kafka_connect",
+  "activation_default": "DENY",
+  "supported_connectors": [
+    "postgresql"
+  ],
+  "version_policy": {
+    "image_tag": "REQUIRED_EXPLICIT_PIN",
+    "latest_allowed": false,
+    "floating_major_minor_allowed": false,
+    "immutable_release_pin_required": true,
+    "compatibility_evidence_required": true,
+    "compatibility_scope": [
+      "debezium",
+      "kafka_connect",
+      "kafka_broker",
+      "postgresql"
+    ],
+    "terraform_managed": true
+  },
+  "source_requirements": {
+    "registry_entry_required": true,
+    "adapter_type": "CDC_DATABASE",
+    "mutable_database_source": true,
+    "cdc_capable": true,
+    "cdc_activated": true,
+    "explicit_allowlist_required": true
+  },
+  "database_requirements": {
+    "least_privilege_identity": true,
+    "root_identity_allowed": false,
+    "schema_allowlist_required": true,
+    "table_allowlist_required": true,
+    "logical_replication_required": true,
+    "wal_level": "logical",
+    "plugin": "pgoutput",
+    "dedicated_replication_identity_required": true,
+    "publication_required": true,
+    "publication_autocreate_allowed": false,
+    "replication_slot_required": true,
+    "replication_slot_drop_on_stop_allowed": false,
+    "wal_retention_policy_required": true,
+    "replica_identity_policy_required": true,
+    "delete_before_image_requires_replica_identity": true
+  },
+  "credential_policy": {
+    "plaintext_credentials_in_contract": false,
+    "plaintext_credentials_in_terraform": false,
+    "plaintext_credentials_in_connector_template": false,
+    "secret_reference_required": true,
+    "kafka_connect_config_provider_required": true,
+    "config_provider": "FileConfigProvider",
+    "production_secret_backend": "TERRAFORM_MANAGED",
+    "secret_material_committed_to_repository": false
+  },
+  "capture_requirements": {
+    "source_position_required": true,
+    "source_transaction_supported": true,
+    "event_timestamp_required": true,
+    "ingestion_timestamp_required": true,
+    "operation_required": true,
+    "before_after_semantics": true,
+    "delete_semantics_required": true,
+    "tombstone_handling_required": true,
+    "schema_evolution_required": true,
+    "checkpointing_required": true,
+    "deduplication_required": true,
+    "idempotency_required": true,
+    "late_event_handling_required": true,
+    "snapshot_policy_required": true,
+    "snapshot_mode_must_be_explicit": true,
+    "heartbeat_required": true,
+    "heartbeat_interval_must_be_explicit": true,
+    "transaction_metadata_required": true,
+    "publication_must_preexist": true,
+    "replication_slot_must_preexist": true
+  },
+  "routing": {
+    "transport": "kafka",
+    "raw_first": true,
+    "direct_to_bronze": false,
+    "airflow_polling": false
+  },
+  "operational_requirements": {
+    "connector_offset_persistence_required": true,
+    "schema_history_durability_required": true,
+    "replication_slot_monitoring_required": true,
+    "wal_retention_monitoring_required": true,
+    "connector_lag_monitoring_required": true,
+    "connector_failure_monitoring_required": true,
+    "heartbeat_monitoring_required": true,
+    "dlq_or_quarantine_policy_required": true,
+    "recovery_runbook_required": true
+  },
+  "activation_controls": {
+    "default": "DENY",
+    "connector_presence_does_not_activate_source": true,
+    "source_registry_activation_required": true,
+    "cdc_contract_allowlist_required": true,
+    "database_preflight_required": true,
+    "production_secret_preflight_required": true,
+    "version_compatibility_preflight_required": true,
+    "observability_preflight_required": true
+  }
+}

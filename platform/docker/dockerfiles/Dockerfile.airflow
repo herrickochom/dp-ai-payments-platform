@@ -1,0 +1,12 @@
+FROM apache/airflow:3.1.8-python3.12
+
+USER airflow
+
+RUN pip install --no-cache-dir \
+    "apache-airflow-providers-celery>=3.12,<4" \
+    "psycopg2-binary>=2.9,<3"
+
+USER root
+COPY orchestration/job_runner /opt/airflow/job_runner
+RUN chown -R airflow:0 /opt/airflow/job_runner
+USER airflow

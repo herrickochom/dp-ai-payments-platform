@@ -1,4 +1,4 @@
-# /home/hochom/projects/dp-ai-payments-platform/transform/dbt/profiles.yml
+# /home/hochom/projects/dp-pdm-ai-platform/transform/dbt/profiles.yml
 
 pdm_platform:
   target: dev
@@ -11,7 +11,7 @@ pdm_platform:
       path: "/tmp/pdm.duckdb"
 
       # Attached Nessie/Iceberg catalog alias.
-      database: lakehouse
+      database: "{{ env_var('DBT_DATABASE') }}"
 
       # Default dbt schema.
       schema: staging
@@ -43,8 +43,8 @@ pdm_platform:
 
         # MinIO / S3 configuration
         s3_region: "eu-west-1"
-        s3_endpoint: "minio:9000"
-        s3_url_style: "path"
+        s3_endpoint: "{{ env_var('S3_ENDPOINT') }}"
+        s3_url_style: "{{ env_var('DBT_S3_URL_STYLE') }}"
         s3_use_ssl: false
         s3_access_key_id: "{{ env_var('MINIO_ROOT_USER') }}"
         s3_secret_access_key: "{{ env_var('MINIO_ROOT_PASSWORD') }}"
@@ -55,8 +55,8 @@ pdm_platform:
           key_id: "{{ env_var('MINIO_ROOT_USER') }}"
           secret: "{{ env_var('MINIO_ROOT_PASSWORD') }}"
           region: "eu-west-1"
-          endpoint: "minio:9000"
-          url_style: "path"
+          endpoint: "{{ env_var('S3_ENDPOINT') }}"
+          url_style: "{{ env_var('DBT_S3_URL_STYLE') }}"
           use_ssl: false
 
       # ------------------------------------------------------------------------
@@ -68,6 +68,6 @@ pdm_platform:
           alias: lakehouse
           options:
             type: iceberg
-            endpoint: "{{ env_var('NESSIE_ENDPOINT', 'http://nessie:19120') }}/iceberg"
+            endpoint: "{{ env_var('NESSIE_ENDPOINT') }}/iceberg"
             authorization_type: none
             access_delegation_mode: none

@@ -1,0 +1,26 @@
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app/job_runner
+
+COPY orchestration/job_runner/requirements.txt /tmp/requirements.txt
+
+RUN pip install --no-cache-dir \
+    -r /tmp/requirements.txt
+
+COPY orchestration/job_runner /app/job_runner
+
+RUN useradd \
+      --uid 50001 \
+      --create-home \
+      --shell /usr/sbin/nologin \
+      platformrunner \
+    && chown -R platformrunner:platformrunner /app/job_runner
+
+USER 50001:50001
+
+EXPOSE 8090
+
+CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8090"]

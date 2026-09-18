@@ -1,0 +1,82 @@
+{
+  "contract_version": 1,
+  "name": "pdm_local_deployment_enablement",
+
+  "target": "local",
+
+  "status": "DESIGN_ONLY",
+
+  "authority": {
+    "terraform": "DEPLOYMENT_GOVERNANCE_CONTROL_PLANE",
+    "docker_compose": "LOCAL_APPLICATION_TOPOLOGY_AUTHORITY"
+  },
+
+  "deployment": {
+    "currently_enabled": false,
+    "explicit_operator_intent_required": true,
+    "preflight_required": true,
+    "compose_config_validation_required": true,
+    "terraform_validation_required": true,
+    "terraform_plan_acceptance_required": true,
+    "scope_must_be_explicit": true,
+    "implicit_all_profiles_allowed": false
+  },
+
+  "scope_policy": {
+    "default_core_scope": {
+      "defined": true,
+      "compose_profiles": [],
+      "description": "Default services from the authoritative Compose configuration."
+    },
+
+    "profile_scope": {
+      "defined": true,
+      "profile_names_must_exist_in_inventory": true,
+      "arbitrary_profile_names_allowed": false
+    },
+
+    "all_profiles_scope": {
+      "defined": false,
+      "allowed": false
+    }
+  },
+
+  "compose_actions": {
+    "config": true,
+    "ps": true,
+    "up": false,
+    "pull": false,
+    "build": false,
+    "restart": false,
+    "stop": false,
+    "down": false,
+    "rm": false
+  },
+
+  "destructive_operations": {
+    "compose_down": false,
+    "compose_down_volumes": false,
+    "volume_removal": false,
+    "network_removal": false,
+    "raw_data_removal": false,
+    "terraform_destroy": false
+  },
+
+  "data_safety": {
+    "kafka_offset_reset": false,
+    "kafka_topic_deletion": false,
+    "raw_object_deletion": false,
+    "token_link_rematerialisation": false,
+    "gate3_restore": false,
+    "cdc_activation": false,
+    "mdm_execution": false,
+    "dbt_execution": false
+  },
+
+  "future_enablement": {
+    "requires_separate_acceptance_stage": true,
+    "deploy_command_must_be_explicit": true,
+    "approved_scope_required": true,
+    "post_deployment_acceptance_required": true
+  }
+}

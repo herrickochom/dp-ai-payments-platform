@@ -1,0 +1,71 @@
+{
+  "contract_version": 1,
+  "name": "pdm_local_deployment_command",
+
+  "target": "local",
+  "scope": "core",
+
+  "authority": {
+    "terraform": "DEPLOYMENT_GOVERNANCE_CONTROL_PLANE",
+    "docker_compose": "LOCAL_APPLICATION_TOPOLOGY_AUTHORITY"
+  },
+
+  "execution": {
+    "enabled": false,
+    "design_only": true,
+    "explicit_service_list_required": true,
+    "implicit_default_up_prohibited": true,
+    "no_recreate_required": true
+  },
+
+  "command": {
+    "executable": "docker",
+    "arguments_prefix": [
+      "compose",
+      "up",
+      "-d",
+      "--no-recreate"
+    ],
+    "service_source": "compose_inventory.default_services"
+  },
+
+  "required_flags": [
+    "-d",
+    "--no-recreate"
+  ],
+
+  "prohibited_tokens": [
+    "--build",
+    "--pull",
+    "--force-recreate",
+    "--always-recreate-deps",
+    "--remove-orphans",
+    "--renew-anon-volumes",
+    "--profile",
+    "down",
+    "stop",
+    "restart",
+    "rm"
+  ],
+
+  "safety": {
+    "existing_containers_may_be_recreated": false,
+    "existing_containers_may_be_stopped": false,
+    "volumes_may_be_removed": false,
+    "images_may_be_built": false,
+    "images_may_be_pulled": false,
+    "orphans_may_be_removed": false,
+    "profiles_may_be_implicitly_enabled": false,
+    "cdc_may_be_activated": false,
+    "kafka_offsets_may_be_reset": false,
+    "raw_data_may_be_deleted": false,
+    "token_link_may_be_rematerialised": false,
+    "gate3_recovery_may_run": false
+  },
+
+  "acceptance": {
+    "command_may_be_rendered": true,
+    "command_may_be_executed": false,
+    "separate_execution_acceptance_required": true
+  }
+}

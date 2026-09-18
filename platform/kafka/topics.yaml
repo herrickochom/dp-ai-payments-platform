@@ -182,3 +182,33 @@ topics:
     replication: 1
     retention_ms: 2592000000  # 30 days
     description: "Terminal failures awaiting deliberate operator replay"
+
+# ------------------------------------------------------------------
+# MDM master-data topics
+# Source: platform/mdm/contracts/mdm_kafka_topics.json
+# Restricted topics require dedicated restricted-identity ACLs.
+# ------------------------------------------------------------------
+
+  - name: mdm.beneficiary.golden.restricted
+    partitions: 3
+    replication_factor: 1
+
+  - name: mdm.beneficiary.identity-alert.restricted
+    partitions: 3
+    replication_factor: 1
+
+  - name: mdm.crosswalk.restricted
+    partitions: 3
+    replication_factor: 1
+
+  - name: mdm.sacco.golden
+    partitions: 3
+    replication_factor: 1
+
+  - name: mdm.agent.golden
+    partitions: 3
+    replication_factor: 1
+
+  - name: mdm.geography.golden
+    partitions: 3
+    replication_factor: 1

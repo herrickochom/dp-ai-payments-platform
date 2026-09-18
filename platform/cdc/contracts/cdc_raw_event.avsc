@@ -1,0 +1,26 @@
+{
+  "type": "record",
+  "name": "CDCRawEvent",
+  "namespace": "dp.ai.payments.cdc.raw",
+  "fields": [
+    {"name": "record_type", "type": "string"},
+    {"name": "source_system", "type": "string"},
+    {"name": "source_schema", "type": ["null", "string"], "default": null},
+    {"name": "source_table", "type": ["null", "string"], "default": null},
+    {"name": "operation", "type": ["null", "string"], "default": null},
+    {"name": "operation_name", "type": ["null", "string"], "default": null},
+    {"name": "source_position", "type": ["null", "string"], "default": null},
+    {"name": "source_transaction", "type": ["null", "string"], "default": null},
+    {"name": "event_timestamp", "type": ["null", "string"], "default": null},
+    {"name": "ingestion_timestamp", "type": "string"},
+    {"name": "schema_version", "type": "string"},
+    {"name": "record_key_json", "type": "string"},
+    {"name": "before_json", "type": ["null", "string"], "default": null},
+    {"name": "after_json", "type": ["null", "string"], "default": null},
+    {"name": "snapshot_json", "type": ["null", "string"], "default": null},
+    {"name": "tombstone", "type": "boolean"},
+    {"name": "kafka_topic", "type": "string"},
+    {"name": "kafka_partition", "type": "int"},
+    {"name": "kafka_offset", "type": "long"}
+  ]
+}

@@ -321,7 +321,7 @@ Generates 150+ fields per message type with correct source system mapping:
 - mobile_networks/ : MTN, Airtel (PACS.008, .002)
 - agent_network/   : Wendi Agents (Custom XML)
 
-Output: /home/hochom/projects/dp-ai-payments-platform/data/
+Output: /home/hochom/projects/dp-pdm-ai-platform/data/
 
 Usage: python payment_xml_generator.py --count 10
 """
@@ -342,7 +342,7 @@ import logging
 # Configuration
 # ============================================================================
 
-PROJECT_ROOT = Path(os.getenv("PROJECT_ROOT", "/home/hochom/projects/dp-ai-payments-platform"))
+PROJECT_ROOT = Path(os.getenv("PROJECT_ROOT", "/home/hochom/projects/dp-pdm-ai-platform"))
 DATA_ROOT = PROJECT_ROOT / "data"
 
 # ISO 20022 Namespaces

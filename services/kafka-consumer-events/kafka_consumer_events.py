@@ -17,6 +17,16 @@ import base64
 import time
 from datetime import datetime
 from typing import Dict, Any, Optional
+from pathlib import Path
+
+from services.shared.cdc.debezium_normalizer import (
+    CDCEnvelopeError,
+    normalize_debezium_event,
+)
+from services.shared.cdc.operations import (
+    cdc_failure_metadata,
+    validate_safe_failure_metadata,
+)
 from confluent_kafka import Consumer, KafkaError, Producer
 from botocore.exceptions import ClientError, BotoCoreError
 from confluent_kafka.serialization import SerializationContext, MessageField
@@ -29,7 +39,7 @@ import pytz
 # Avro imports
 import avro.schema
 from avro.io import DatumWriter
-from avro.datafile import DataFileWriter
+from avro.datafile import DataFileReader, DataFileWriter
 
 from avro.errors import AvroException
 
@@ -49,9 +59,13 @@ class Settings:
     # MinIO
     MINIO_ENDPOINT = os.getenv("S3_ENDPOINT", "http://minio:9000")
     MINIO_ACCESS_KEY = os.getenv("MINIO_ROOT_USER", "minioadmin")
-    MINIO_SECRET_KEY = os.getenv("MINIO_ROOT_PASSWORD", "minioadmin")
+    MINIO_SECRET_KEY = os.getenv("MINIO_ROOT_PASSWORD")
     MINIO_BUCKET = os.getenv("MINIO_BUCKET", "dp-ai-payment")
     RAW_PREFIX = os.getenv("RAW_PREFIX", "raw/v2").strip("/")
+    CDC_QUARANTINE_PREFIX = os.getenv(
+        "CDC_QUARANTINE_PREFIX",
+        "restricted/cdc-quarantine/v1",
+    ).strip("/")
     
     # Kafka
     KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092")
@@ -117,6 +131,689 @@ def kafka_client_config() -> Dict[str, Any]:
                 "ssl.key.location": Settings.KAFKA_SSL_KEY_LOCATION}
     result.update({key: value for key, value in optional.items() if value})
     return result
+
+
+CDC_RAW_SCHEMA_PATH = (
+    Path(__file__).resolve().parents[2]
+    / "platform"
+    / "cdc"
+    / "contracts"
+    / "cdc_raw_event.avsc"
+)
+
+
+def activated_cdc_topic_map() -> Dict[str, str]:
+    """
+    Runtime CDC topic ownership.
+
+    Intentionally empty until a mutable database-backed source passes
+    the governed C1-F onboarding and activation controls.
+
+    No environment variable may independently activate CDC.
+    """
+    return {}
+
+
+def consumer_topics() -> list[str]:
+    """
+    Existing generated-event topics plus explicitly activated CDC topics.
+    """
+    generated = list(Settings.KAFKA_TOPICS)
+    cdc_topics = list(
+        activated_cdc_topic_map()
+    )
+
+    overlap = set(generated) & set(cdc_topics)
+
+    if overlap:
+        raise PermanentProcessingError(
+            "Generated-event and CDC topic classifications overlap: "
+            + ",".join(sorted(overlap))
+        )
+
+    return generated + cdc_topics
+
+
+def classify_ingestion_topic(
+    topic: str,
+    cdc_topics: Optional[Dict[str, str]] = None,
+) -> tuple[str, Optional[str]]:
+    """
+    Fail closed.
+
+    A topic must be either:
+      1. an existing generated-event topic, or
+      2. an explicitly activated CDC_DATABASE topic.
+    """
+    if topic in Settings.KAFKA_TOPICS:
+        return "GENERATED_EVENT", None
+
+    mapping = (
+        activated_cdc_topic_map()
+        if cdc_topics is None
+        else cdc_topics
+    )
+
+    source_system = mapping.get(topic)
+
+    if source_system:
+        return "CDC_DATABASE", source_system
+
+    raise PermanentProcessingError(
+        f"Unclassified ingestion topic: {topic}"
+    )
+
+
+def decode_cdc_key(
+    raw_key: Optional[bytes],
+) -> Any:
+    """
+    Decode a Debezium JSON key without logging or publishing its bytes.
+    """
+    if raw_key is None:
+        raise CDCEnvelopeError(
+            "CDC record key is required"
+        )
+
+    try:
+        value = json.loads(
+            raw_key.decode("utf-8")
+        )
+    except (
+        UnicodeDecodeError,
+        json.JSONDecodeError,
+    ) as exc:
+        raise CDCEnvelopeError(
+            "CDC record key is not valid JSON"
+        ) from exc
+
+    return value
+
+
+def decode_cdc_value(
+    raw_value: Optional[bytes],
+) -> Optional[Dict[str, Any]]:
+    """
+    Null Kafka values are Debezium tombstones.
+
+    They must bypass the generated PaymentEvent Avro deserialiser.
+    """
+    if raw_value is None:
+        return None
+
+    try:
+        value = json.loads(
+            raw_value.decode("utf-8")
+        )
+    except (
+        UnicodeDecodeError,
+        json.JSONDecodeError,
+    ) as exc:
+        raise CDCEnvelopeError(
+            "CDC value is not valid JSON"
+        ) from exc
+
+    if not isinstance(value, dict):
+        raise CDCEnvelopeError(
+            "CDC value must be a JSON object"
+        )
+
+    return value
+
+
+def canonical_cdc_json(value: Any) -> str:
+    return json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+
+
+def cdc_avro_record(
+    envelope: Dict[str, Any],
+    *,
+    topic: str,
+    partition: int,
+    offset: int,
+) -> Dict[str, Any]:
+    """
+    Build the canonical CDC Raw Avro record.
+
+    Database source position and Kafka transport position remain
+    deliberately separate.
+    """
+
+    def optional_json(value: Any) -> Optional[str]:
+        if value is None:
+            return None
+
+        return canonical_cdc_json(value)
+
+    source_transaction = envelope.get(
+        "source_transaction"
+    )
+
+    return {
+        "record_type": envelope["record_type"],
+        "source_system": envelope["source_system"],
+        "source_schema": envelope.get("source_schema"),
+        "source_table": envelope.get("source_table"),
+        "operation": envelope.get("operation"),
+        "operation_name": envelope.get(
+            "operation_name"
+        ),
+        "source_position": envelope.get(
+            "source_position"
+        ),
+        "source_transaction": (
+            None
+            if source_transaction is None
+            else str(source_transaction)
+        ),
+        "event_timestamp": envelope.get(
+            "event_timestamp"
+        ),
+        "ingestion_timestamp": envelope[
+            "ingestion_timestamp"
+        ],
+        "schema_version": str(
+            envelope["schema_version"]
+        ),
+        "record_key_json": canonical_cdc_json(
+            envelope["record_key"]
+        ),
+        "before_json": optional_json(
+            envelope.get("before")
+        ),
+        "after_json": optional_json(
+            envelope.get("after")
+        ),
+        "snapshot_json": optional_json(
+            envelope.get("snapshot")
+        ),
+        "tombstone": bool(
+            envelope.get("tombstone")
+        ),
+        "kafka_topic": topic,
+        "kafka_partition": partition,
+        "kafka_offset": offset,
+    }
+
+
+def serialize_cdc_to_avro(
+    record: Dict[str, Any],
+) -> bytes:
+    """
+    Serialize canonical CDC Raw data as Avro OCF.
+    """
+    schema = avro.schema.parse(
+        CDC_RAW_SCHEMA_PATH.read_text()
+    )
+
+    buffer = io.BytesIO()
+
+    writer = DataFileWriter(
+        buffer,
+        DatumWriter(),
+        schema,
+    )
+
+    try:
+        writer.append(record)
+        writer.flush()
+        payload = buffer.getvalue()
+    finally:
+        writer.close()
+
+    if payload[:4] != b"Obj\x01":
+        raise PermanentProcessingError(
+            "CDC Avro OCF magic validation failed"
+        )
+
+    return payload
+
+
+def deterministic_cdc_s3_key(
+    *,
+    source_system: str,
+    topic: str,
+    partition: int,
+    offset: int,
+    timestamp: datetime,
+) -> str:
+    """
+    Deterministic Kafka-coordinate Raw key for replay idempotency.
+    """
+    return (
+        f"{Settings.RAW_PREFIX}/cdc/"
+        f"source_system={source_system}/"
+        f"year={timestamp:%Y}/"
+        f"month={timestamp:%m}/"
+        f"day={timestamp:%d}/"
+        f"topic={topic}/"
+        f"partition={partition}/"
+        f"offset={offset}/record.avro"
+    )
+
+
+def _read_object_bytes(
+    client,
+    *,
+    bucket: str,
+    key: str,
+) -> bytes:
+    """
+    Read an existing object for replay/collision verification.
+    """
+    response = client.get_object(
+        Bucket=bucket,
+        Key=key,
+    )
+
+    body = response["Body"]
+
+    try:
+        return body.read()
+    finally:
+        close = getattr(body, "close", None)
+
+        if callable(close):
+            close()
+
+
+class CDCRawCollisionError(RuntimeError):
+    """
+    Existing deterministic CDC Raw coordinate contains different bytes.
+
+    This is an integrity failure and must never be converted into
+    quarantine-and-commit behaviour.
+    """
+
+
+class CDCQuarantineWriteFailedError(RuntimeError):
+    """
+    Permanent poison record could not be durably quarantined.
+
+    The Kafka source offset must remain uncommitted.
+    """
+
+
+def deserialize_single_cdc_avro_record(
+    payload: bytes,
+) -> Dict[str, Any]:
+    """
+    Decode exactly one canonical CDC record from Avro OCF.
+
+    Replay equality is based on the logical Avro datum rather than
+    container bytes because Avro OCF sync markers are not canonical.
+    """
+    reader = DataFileReader(
+        io.BytesIO(payload),
+        avro.io.DatumReader(),
+    )
+
+    try:
+        records = list(reader)
+    finally:
+        reader.close()
+
+    if len(records) != 1:
+        raise CDCRawCollisionError(
+            "Existing CDC Raw object does not contain "
+            "exactly one canonical record"
+        )
+
+    return records[0]
+
+
+def store_cdc_event_to_s3(
+    record: Dict[str, Any],
+    *,
+    source_system: str,
+    topic: str,
+    partition: int,
+    offset: int,
+    timestamp: datetime,
+) -> str:
+    """
+    Persist canonical CDC Raw before committing the Kafka offset.
+
+    Replays at an existing deterministic Kafka coordinate are accepted
+    only when the stored Avro bytes exactly match the candidate bytes.
+    A mismatch is a fail-closed integrity collision.
+    """
+    key = deterministic_cdc_s3_key(
+        source_system=source_system,
+        topic=topic,
+        partition=partition,
+        offset=offset,
+        timestamp=timestamp,
+    )
+
+    payload = serialize_cdc_to_avro(
+        record
+    )
+
+    client = get_minio_client()
+
+    try:
+        client.head_object(
+            Bucket=Settings.MINIO_BUCKET,
+            Key=key,
+        )
+
+        existing = _read_object_bytes(
+            client,
+            bucket=Settings.MINIO_BUCKET,
+            key=key,
+        )
+
+        try:
+            existing_record = (
+                deserialize_single_cdc_avro_record(
+                    existing
+                )
+            )
+        except CDCRawCollisionError:
+            raise
+        except Exception as exc:
+            raise CDCRawCollisionError(
+                "Existing CDC Raw object is not a "
+                "valid canonical CDC Avro record"
+            ) from exc
+
+        if existing_record != record:
+            raise CDCRawCollisionError(
+                "CDC Raw deterministic object "
+                "logical-content collision"
+            )
+
+        logger.info(
+            "CDC Raw replay verified at existing "
+            "deterministic object coordinate"
+        )
+
+        return key
+
+    except ClientError as exc:
+        code = (
+            exc.response
+            .get("Error", {})
+            .get("Code")
+        )
+
+        if code not in {
+            "404",
+            "NoSuchKey",
+            "NotFound",
+        }:
+            raise
+
+    client.put_object(
+        Bucket=Settings.MINIO_BUCKET,
+        Key=key,
+        Body=payload,
+        ContentType="application/avro",
+    )
+
+    logger.info(
+        "Stored CDC Raw event at governed "
+        "deterministic object coordinate"
+    )
+
+    return key
+
+
+def deterministic_cdc_quarantine_key(
+    *,
+    failure_id: str,
+    timestamp: datetime,
+) -> str:
+    """
+    Restricted quarantine key containing no source record identity.
+    """
+    return (
+        f"{Settings.CDC_QUARANTINE_PREFIX}/"
+        f"year={timestamp:%Y}/"
+        f"month={timestamp:%m}/"
+        f"day={timestamp:%d}/"
+        f"failure_id={failure_id}/metadata.json"
+    )
+
+
+def store_cdc_quarantine_metadata(
+    metadata: Dict[str, Any],
+    *,
+    timestamp: datetime,
+) -> str:
+    """
+    Durably persist privacy-safe CDC failure metadata.
+
+    No raw Kafka key/value, before image or after image is accepted.
+    """
+    validate_safe_failure_metadata(
+        metadata
+    )
+
+    payload = json.dumps(
+        metadata,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+
+    key = deterministic_cdc_quarantine_key(
+        failure_id=metadata["failure_id"],
+        timestamp=timestamp,
+    )
+
+    client = get_minio_client()
+
+    try:
+        client.head_object(
+            Bucket=Settings.MINIO_BUCKET,
+            Key=key,
+        )
+
+        existing = _read_object_bytes(
+            client,
+            bucket=Settings.MINIO_BUCKET,
+            key=key,
+        )
+
+        if existing != payload:
+            raise CDCQuarantineWriteFailedError(
+                "CDC quarantine deterministic "
+                "object collision"
+            )
+
+        logger.warning(
+            "CDC restricted quarantine replay "
+            "verified by failure identity"
+        )
+
+        return key
+
+    except ClientError as exc:
+        code = (
+            exc.response
+            .get("Error", {})
+            .get("Code")
+        )
+
+        if code not in {
+            "404",
+            "NoSuchKey",
+            "NotFound",
+        }:
+            raise CDCQuarantineWriteFailedError(
+                "CDC quarantine object lookup failed"
+            ) from exc
+
+    try:
+        client.put_object(
+            Bucket=Settings.MINIO_BUCKET,
+            Key=key,
+            Body=payload,
+            ContentType="application/json",
+        )
+    except (
+        ClientError,
+        BotoCoreError,
+        OSError,
+    ) as exc:
+        raise CDCQuarantineWriteFailedError(
+            "CDC quarantine persistence failed"
+        ) from exc
+
+    logger.warning(
+        "Stored restricted CDC quarantine metadata"
+    )
+
+    return key
+
+
+def quarantine_permanent_cdc_failure(
+    consumer,
+    msg,
+    *,
+    source_system: str,
+    error: BaseException,
+    ingestion_timestamp: str,
+) -> str:
+    """
+    Quarantine a permanent malformed/contract-invalid CDC record.
+
+    Only approved metadata is persisted. Source key/value and exception
+    text are deliberately excluded.
+
+    Commit occurs only after restricted quarantine persistence succeeds.
+    """
+    timestamp = datetime.fromisoformat(
+        ingestion_timestamp.replace(
+            "Z",
+            "+00:00",
+        )
+    )
+
+    metadata = cdc_failure_metadata(
+        source_system=source_system,
+        topic=msg.topic(),
+        partition=msg.partition(),
+        offset=msg.offset(),
+        failure_category="CDC_PERMANENT_RECORD_FAILURE",
+        error=error,
+        event_timestamp=ingestion_timestamp,
+    )
+
+    validate_safe_failure_metadata(
+        metadata
+    )
+
+    stored_key = store_cdc_quarantine_metadata(
+        metadata,
+        timestamp=timestamp,
+    )
+
+    consumer.commit(
+        msg,
+        asynchronous=False,
+    )
+
+    return stored_key
+
+
+def process_cdc_message(
+    consumer,
+    msg,
+    *,
+    source_system: str,
+    ingestion_timestamp: str,
+) -> str:
+    """
+    CDC durable processing boundary.
+
+    Valid record:
+      decode
+        -> normalise
+        -> canonical CDC Raw Avro
+        -> durable Raw storage / verified replay
+        -> synchronous Kafka offset commit
+
+    Permanent malformed record:
+      safe metadata
+        -> restricted durable quarantine
+        -> synchronous Kafka offset commit
+
+    Transient storage/infrastructure failure:
+      fail stop
+        -> no Kafka offset commit
+
+    Raw collision:
+      integrity fail stop
+        -> no Kafka offset commit
+
+    This branch never uses the generated-event failure envelope.
+    """
+    try:
+        key = decode_cdc_key(
+            msg.key()
+        )
+
+        value = decode_cdc_value(
+            msg.value()
+        )
+
+        envelope = normalize_debezium_event(
+            source_system=source_system,
+            key=key,
+            value=value,
+            ingestion_timestamp=ingestion_timestamp,
+        )
+
+        record = cdc_avro_record(
+            envelope,
+            topic=msg.topic(),
+            partition=msg.partition(),
+            offset=msg.offset(),
+        )
+
+    except (
+        CDCEnvelopeError,
+        ValueError,
+        TypeError,
+    ) as exc:
+        quarantine_permanent_cdc_failure(
+            consumer,
+            msg,
+            source_system=source_system,
+            error=exc,
+            ingestion_timestamp=ingestion_timestamp,
+        )
+
+        return "cdc_quarantine"
+
+    timestamp = datetime.fromisoformat(
+        ingestion_timestamp.replace(
+            "Z",
+            "+00:00",
+        )
+    )
+
+    stored_key = store_cdc_event_to_s3(
+        record,
+        source_system=source_system,
+        topic=msg.topic(),
+        partition=msg.partition(),
+        offset=msg.offset(),
+        timestamp=timestamp,
+    )
+
+    consumer.commit(
+        msg,
+        asynchronous=False,
+    )
+
+    return stored_key
 
 
 class PermanentProcessingError(Exception):
@@ -716,8 +1413,9 @@ def main():
     failure_producer = Producer(failure_producer_config)
     
     # Subscribe to all topics
-    consumer.subscribe(Settings.KAFKA_TOPICS)
-    logger.info(f"✅ Subscribed to {len(Settings.KAFKA_TOPICS)} topics")
+    subscription_topics = consumer_topics()
+    consumer.subscribe(subscription_topics)
+    logger.info(f"✅ Subscribed to {len(subscription_topics)} topics")
     
     processed_count = 0
     error_count = 0
@@ -737,7 +1435,26 @@ def main():
                         log_processing_error("kafka_poll_failed")
                     continue
 
-                outcome = process_message(consumer, failure_producer, avro_deserializer, msg)
+                mode, source_system = classify_ingestion_topic(
+                    msg.topic()
+                )
+
+                if mode == "CDC_DATABASE":
+                    outcome = process_cdc_message(
+                        consumer,
+                        msg,
+                        source_system=source_system,
+                        ingestion_timestamp=datetime.now(
+                            pytz.UTC
+                        ).isoformat(),
+                    )
+                else:
+                    outcome = process_message(
+                        consumer,
+                        failure_producer,
+                        avro_deserializer,
+                        msg,
+                    )
                 if outcome == "ok":
                     processed_count += 1
                     if processed_count % 100 == 0:

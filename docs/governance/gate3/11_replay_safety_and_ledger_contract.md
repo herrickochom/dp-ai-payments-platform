@@ -23,7 +23,7 @@ Inspected sources: `services/kafka-consumer-events/replay_dlq.py` (entire file),
 Raw storage, failure envelopes, retry/publication/commit and main-loop paths),
 `services/payment-producer/kafka_producer.py` (keys, event construction, delivery
 tracker, configuration and send/flush paths),
-`services/kafka-consumer-bronze/kafka_consumer_bronze.py` (Redis cache and commit
+`services/kafka-consumer-events/kafka_consumer_events.py` (Redis cache and commit
 paths), `platform/kafka/topics.yaml`, `platform/kafka/topic_admin.py`,
 `platform/kafka/production.env.example`, `platform/kafka/consumer-lag.sh`,
 `platform/docker/dockerfiles/Dockerfile.payment-consumer-events`,

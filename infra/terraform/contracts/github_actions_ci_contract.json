@@ -1,0 +1,79 @@
+{
+  "contract_version": 1,
+  "platform": "github_actions",
+  "repository": "herrickochom/dp-pdm-ai-platform",
+  "default_branch": "main",
+  "triggers": {
+    "pull_request": true,
+    "push_main": true,
+    "manual_dispatch": true
+  },
+  "permissions": {
+    "default": "read_only",
+    "contents": "read",
+    "actions": "read"
+  },
+  "jobs": {
+    "source_quality": {
+      "required": true,
+      "commands": [
+        "git diff --check"
+      ]
+    },
+    "terraform_governance": {
+      "required": true,
+      "terraform_version": "1.16.3",
+      "commands": [
+        "terraform -chdir=infra/terraform fmt -check -recursive",
+        "terraform -chdir=infra/terraform validate -no-color",
+        ".venv/bin/python -m pytest -q tests/terraform"
+      ]
+    },
+    "cdc_mdm_regression": {
+      "required": true,
+      "commands": [
+        ".venv/bin/python -m pytest -q tests/cdc tests/mdm"
+      ]
+    },
+    "compose_validation": {
+      "required": true,
+      "commands": [
+        "docker compose config"
+      ]
+    }
+  },
+  "prohibited_actions": {
+    "terraform_init": true,
+    "terraform_plan": true,
+    "terraform_apply": true,
+    "terraform_destroy": true,
+    "docker_compose_up": true,
+    "docker_compose_down": true,
+    "docker_build": true,
+    "cdc_activation": true,
+    "mdm_execution": true,
+    "dbt_execution": true,
+    "kafka_execution": true,
+    "raw_deletion": true,
+    "token_link_rematerialisation": true,
+    "gate3_recovery": true,
+    "cloud_resource_mutation": true,
+    "production_secrets": true
+  },
+  "artifact_policy": {
+    "retain_test_logs": true,
+    "retain_terraform_plan": false,
+    "retain_state": false
+  },
+  "production_deployment": {
+    "enabled": false
+  },
+  "dependency_policy": {
+    "runtime_requirements": "requirements.txt",
+    "ci_requirements": "requirements-ci.txt",
+    "runtime_and_ci_separated": true,
+    "pytest_runtime_dependency": false,
+    "pytest_ci_dependency": true,
+    "ci_dependency_versions_pinned": true
+  }
+}

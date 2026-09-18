@@ -97,7 +97,7 @@ from Silver beneficiary, SACCO and agent rows. The six-table hierarchy above is
 the target Gold design, introduced level by level as authoritative
 administrative codes land in the sources. County is a legal administrative
 level but no platform source currently carries a county attribute (see
-`transform/dbt/models_disabled/geography_future/README.md`), so its dimension
+`docs/architecture/future-models/pdm-county-geographic-risk.md`), so its dimension
 is defined now and populated when a county attribute lands. Sub-county is
 carried only by the SACCO source today.
 
