@@ -1,0 +1,24 @@
+{
+  "contract_version": 1,
+  "name": "pdm_mdm_master_event",
+  "required_metadata": [
+    "event_id",
+    "event_type",
+    "event_timestamp",
+    "source_system",
+    "source_entity",
+    "source_record_id",
+    "master_domain",
+    "schema_version"
+  ],
+  "event_types": [
+    "MASTER_SOURCE_OBSERVED",
+    "MASTER_SOURCE_CHANGED",
+    "MASTER_SOURCE_DEACTIVATED"
+  ],
+  "privacy": {
+    "restricted_identity_supported": true,
+    "direct_identity_to_ordinary_analytics": false,
+    "canonical_token_required_downstream": true
+  }
+}

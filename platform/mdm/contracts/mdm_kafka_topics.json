@@ -1,0 +1,62 @@
+{
+  "contract_version": 1,
+  "namespace": "mdm",
+  "topics": [
+    {
+      "topic": "mdm.beneficiary.golden.restricted",
+      "domain": "beneficiary",
+      "payload": "golden_beneficiaries_restricted",
+      "classification": "RESTRICTED_IDENTITY",
+      "ordinary_analytics_allowed": false,
+      "consumer_authority": "restricted_identity"
+    },
+    {
+      "topic": "mdm.beneficiary.identity-alert.restricted",
+      "domain": "beneficiary",
+      "payload": "beneficiary_identity_alerts_restricted",
+      "classification": "RESTRICTED_IDENTITY",
+      "ordinary_analytics_allowed": false,
+      "consumer_authority": "restricted_identity"
+    },
+    {
+      "topic": "mdm.crosswalk.restricted",
+      "domain": "crosswalk",
+      "payload": "source_crosswalk",
+      "classification": "RESTRICTED_LINKAGE",
+      "ordinary_analytics_allowed": false,
+      "consumer_authority": "restricted_identity"
+    },
+    {
+      "topic": "mdm.sacco.golden",
+      "domain": "sacco",
+      "payload": "golden_saccos",
+      "classification": "CONTROLLED_MASTER_DATA",
+      "ordinary_analytics_allowed": true,
+      "consumer_authority": "ordinary"
+    },
+    {
+      "topic": "mdm.agent.golden",
+      "domain": "agent",
+      "payload": "golden_agents",
+      "classification": "CONTROLLED_MASTER_DATA",
+      "ordinary_analytics_allowed": true,
+      "consumer_authority": "ordinary"
+    },
+    {
+      "topic": "mdm.geography.golden",
+      "domain": "geography",
+      "payload": "golden_geography",
+      "classification": "REFERENCE_DATA",
+      "ordinary_analytics_allowed": true,
+      "consumer_authority": "ordinary"
+    }
+  ],
+  "infrastructure": {
+    "local_replication_factor": 1,
+    "production_replication_factor": "TERRAFORM_MANAGED",
+    "production_acl_management": "TERRAFORM_MANAGED",
+    "production_retention": "TERRAFORM_MANAGED",
+    "production_encryption": "PLATFORM_MANAGED",
+    "restricted_topics_require_dedicated_identity": true
+  }
+}

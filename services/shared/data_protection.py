@@ -18,8 +18,8 @@ class TokenisationKeyMissing(RuntimeError):
 
 
 def _active_key() -> tuple[bytes, str]:
-    raw = os.getenv("DP_TOKEN_KEY", "")
-    if not raw.strip():
+    raw = os.getenv("DP_TOKEN_KEY")
+    if not raw or not raw.strip():
         raise TokenisationKeyMissing(
             "DP_TOKEN_KEY is not configured; tokenisation is mandatory so fail closed"
         )

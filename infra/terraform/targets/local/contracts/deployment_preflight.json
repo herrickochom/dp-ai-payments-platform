@@ -1,0 +1,70 @@
+{
+  "contract_version": 1,
+  "name": "pdm_local_deployment_preflight",
+
+  "target": "local",
+  "production": false,
+  "mutating": false,
+
+  "required_checks": {
+    "terraform_available": true,
+    "terraform_version_contract": true,
+    "terraform_format": true,
+    "terraform_validate": true,
+    "docker_available": true,
+    "docker_compose_available": true,
+    "compose_config_valid": true,
+    "compose_inventory_conformant": true,
+    "deployment_scope_valid": true,
+    "host_capacity_visible": true,
+    "current_runtime_visible": true,
+    "cdc_dormant": true,
+    "protected_operations_disabled": true
+  },
+
+  "scope_policy": {
+    "default_scope_name": "core",
+    "default_scope_uses_no_profiles": true,
+    "profile_scope_requires_inventory_membership": true,
+    "implicit_all_profiles_allowed": false
+  },
+
+  "secret_policy": {
+    "secret_values_must_not_be_printed": true,
+    "environment_variable_names_may_be_inspected": true,
+    "resolved_compose_environment_must_not_be_dumped": true
+  },
+
+  "image_policy": {
+    "mutable_image_tags_allowed_for_local_preflight": true,
+    "mutable_image_tags_allowed_for_production_promotion": false,
+    "mutable_image_tags_must_be_reported": true
+  },
+
+  "runtime_policy": {
+    "container_mutation_allowed": false,
+    "compose_up_allowed": false,
+    "compose_down_allowed": false,
+    "compose_restart_allowed": false,
+    "compose_pull_allowed": false,
+    "compose_build_allowed": false
+  },
+
+  "data_safety": {
+    "kafka_execution_allowed": false,
+    "kafka_offset_reset_allowed": false,
+    "cdc_activation_allowed": false,
+    "raw_deletion_allowed": false,
+    "database_mutation_allowed": false,
+    "dbt_execution_allowed": false,
+    "mdm_execution_allowed": false,
+    "token_link_rematerialisation_allowed": false,
+    "gate3_recovery_execution_allowed": false
+  },
+
+  "acceptance": {
+    "local_preflight_may_pass_with_reported_mutable_images": true,
+    "production_readiness_may_not_pass_with_mutable_images": true,
+    "deployment_remains_disabled_after_preflight": true
+  }
+}

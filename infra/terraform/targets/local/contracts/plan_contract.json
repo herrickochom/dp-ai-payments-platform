@@ -1,0 +1,34 @@
+{
+  "contract_version": 1,
+  "name": "pdm_local_terraform_plan",
+
+  "target": "local",
+
+  "purpose": "VALIDATE_TERRAFORM_GOVERNANCE_WITHOUT_INFRASTRUCTURE_MUTATION",
+
+  "requirements": {
+    "refresh_disabled": true,
+    "managed_resource_count": 0,
+    "resource_change_count": 0,
+    "provider_count": 0,
+    "backend_count": 0,
+    "compose_mutation_allowed": false,
+    "apply_allowed": false,
+    "destroy_allowed": false,
+    "cdc_activation_allowed": false
+  },
+
+  "plan_artifact": {
+    "temporary": true,
+    "repository_storage_allowed": false,
+    "retention_after_validation": false
+  },
+
+  "acceptance": {
+    "terraform_plan_exit_code": 0,
+    "resource_changes_must_be_zero": true,
+    "configuration_must_remain_valid": true,
+    "compose_configuration_must_remain_valid": true,
+    "runtime_infrastructure_mutation_must_be_zero": true
+  }
+}

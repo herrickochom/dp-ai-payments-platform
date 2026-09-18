@@ -1,0 +1,35 @@
+{
+  "name": "${CDC_CONNECTOR_NAME}",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+
+    "database.hostname": "${CDC_DATABASE_HOST}",
+    "database.port": "${CDC_DATABASE_PORT}",
+    "database.user": "${file:/opt/kafka/external-configuration/cdc-secrets.properties:database.user}",
+    "database.password": "${file:/opt/kafka/external-configuration/cdc-secrets.properties:database.password}",
+    "database.dbname": "${CDC_DATABASE_NAME}",
+
+    "topic.prefix": "${CDC_TOPIC_PREFIX}",
+
+    "plugin.name": "pgoutput",
+
+    "publication.name": "${CDC_PUBLICATION_NAME}",
+    "publication.autocreate.mode": "disabled",
+    "slot.name": "${CDC_REPLICATION_SLOT}",
+
+    "schema.include.list": "${CDC_SCHEMA_ALLOWLIST}",
+    "table.include.list": "${CDC_TABLE_ALLOWLIST}",
+
+    "snapshot.mode": "${CDC_SNAPSHOT_MODE}",
+
+    "tombstones.on.delete": "true",
+
+    "provide.transaction.metadata": "true",
+
+    "include.schema.changes": "true",
+
+    "heartbeat.interval.ms": "${CDC_HEARTBEAT_INTERVAL_MS}",
+
+    "errors.tolerance": "none"
+  }
+}

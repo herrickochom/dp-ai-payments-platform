@@ -1,0 +1,22 @@
+{
+  "contract_version": 1,
+  "required_fields": [
+    "master_domain",
+    "golden_record_id",
+    "source_system",
+    "source_entity",
+    "source_record_id",
+    "match_rule",
+    "match_status",
+    "valid_from",
+    "valid_to",
+    "is_current"
+  ],
+  "match_status_values": [
+    "MATCHED",
+    "AMBIGUOUS",
+    "QUARANTINED",
+    "DEACTIVATED"
+  ],
+  "restricted_for_beneficiary_identity": true
+}

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-PROJECT_NAME="dp-ai-payments-platform"
+PROJECT_NAME="dp-pdm-ai-platform"
 
 echo "=============================================================="
 echo "🧹 DP AI Payments Platform - Environment Cleanup"

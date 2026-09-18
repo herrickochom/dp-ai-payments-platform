@@ -1,5 +1,5 @@
 [project]
-name = "dp-ai-payments-platform"
+name = "dp-pdm-ai-platform"
 version = "0.1.0"
 description = "Enterprise governed ingestion + AI payments platform"
 requires-python = ">=3.10"

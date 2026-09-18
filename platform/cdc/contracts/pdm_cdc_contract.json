@@ -1,0 +1,44 @@
+{
+  "contract_version": 1,
+  "name": "pdm_cdc",
+  "adapter": "debezium",
+  "transport": "kafka",
+  "execution_model": "continuous_event_driven",
+  "airflow_polling": false,
+  "required_change_metadata": [
+    "source_system",
+    "source_schema",
+    "source_table",
+    "operation",
+    "source_position",
+    "source_transaction",
+    "event_timestamp",
+    "ingestion_timestamp",
+    "schema_version"
+  ],
+  "required_processing_controls": [
+    "checkpointing",
+    "deduplication",
+    "idempotency",
+    "delete_tombstone_handling",
+    "schema_evolution",
+    "late_event_handling"
+  ],
+  "identity_controls": {
+    "least_privilege_replication_identity": true,
+    "root_database_identity_allowed": false,
+    "direct_identity_to_ordinary_analytics_allowed": false
+  },
+  "cdc_sources": [],
+  "status": "fail_closed_not_activated",
+  "capture_mode": "continuous_event_driven",
+  "source_registry": "platform/source_registry/contracts/source_systems.json",
+  "activation_policy": {
+    "default": "DENY",
+    "explicit_allowlist_required": true,
+    "mutable_database_source_required": true,
+    "platform_database_reclassification_required": true,
+    "direct_to_bronze_allowed": false,
+    "raw_first": true
+  }
+}

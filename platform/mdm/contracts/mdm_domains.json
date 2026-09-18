@@ -1,0 +1,78 @@
+{
+  "contract_version": 1,
+  "name": "pdm_master_data",
+  "domains": [
+    {
+      "domain": "beneficiary",
+      "authority": "restricted_identity",
+      "primary_source": "pdmis",
+      "source_entity": "beneficiaries",
+      "source_key": "beneficiary_id",
+      "golden_key": "mdm_beneficiary_id",
+      "matching_attributes": [
+        "nin",
+        "name",
+        "date_of_birth",
+        "phone",
+        "alternative_phone",
+        "email"
+      ],
+      "reference_attributes": [
+        "household_id",
+        "region",
+        "district",
+        "county",
+        "sub_county",
+        "parish",
+        "village"
+      ],
+      "direct_identity": true
+    },
+    {
+      "domain": "sacco",
+      "authority": "master_data",
+      "primary_source": "pdmis",
+      "source_entity": "saccos",
+      "source_key": "sacco_id",
+      "golden_key": "mdm_sacco_id",
+      "matching_attributes": [
+        "registration_number",
+        "name",
+        "wendi_account"
+      ],
+      "direct_identity": false
+    },
+    {
+      "domain": "agent",
+      "authority": "master_data",
+      "primary_source": "agent_network",
+      "source_entity": "agent_profiles",
+      "source_key": "agent_id",
+      "golden_key": "mdm_agent_id",
+      "matching_attributes": [
+        "agent_code",
+        "registration_number",
+        "phone",
+        "name"
+      ],
+      "direct_identity": false
+    },
+    {
+      "domain": "geography",
+      "authority": "reference_data",
+      "primary_source": "pdmis",
+      "source_entity": "location_hierarchy",
+      "source_key": "location_key",
+      "golden_key": "mdm_location_id",
+      "hierarchy": [
+        "region",
+        "district",
+        "county",
+        "sub_county",
+        "parish",
+        "village"
+      ],
+      "direct_identity": false
+    }
+  ]
+}

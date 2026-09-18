@@ -1,0 +1,1802 @@
+{
+  "acceptance_policy": {
+    "ai_model_training_allowed": false,
+    "arbitrary_command_allowed": false,
+    "broad_single_job_allowed": false,
+    "docker_socket_allowed": false,
+    "downstream_on_test_failure": false,
+    "explicit_model_allowlist_required": true,
+    "fail_closed": true,
+    "kafka_offset_reset_allowed": false,
+    "lifecycle_deletion_allowed": false,
+    "live_replay_allowed": false,
+    "plus_selector_allowed": false,
+    "recovery_restore_allowed": false,
+    "runtime_graph_expansion_allowed": false,
+    "seed_mutation_allowed": false,
+    "tag_selector_allowed": false,
+    "tests_required_after_bounded_write": true,
+    "token_link_rematerialisation_allowed": false,
+    "zero_test_automatic_acceptance": false
+  },
+  "contract_name": "lakehouse_transform",
+  "contract_version": 1,
+  "external_prerequisites": [
+    {
+      "mutation_allowed": false,
+      "reference_count": 4,
+      "unique_id": "seed.pdm_platform.uganda_district_geojson"
+    },
+    {
+      "mutation_allowed": false,
+      "reference_count": 1,
+      "unique_id": "source.pdm_platform.silver_vault.vlt_pdm_beneficiary_token_link"
+    }
+  ],
+  "manifest_model_count": 125,
+  "manifest_test_count": 495,
+  "mode": "production_bounded_transform",
+  "models": [
+    {
+      "direct_test_count": 0,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_ai_default_risk",
+      "parents": [],
+      "qualified_name": "bronze.br_pdm_ai_default_risk",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_ai_default_risk"
+    },
+    {
+      "direct_test_count": 4,
+      "materialized": "view",
+      "name": "stg_pdm_agent_locations",
+      "parents": [],
+      "qualified_name": "staging.stg_pdm_agent_locations",
+      "schema": "staging",
+      "unique_id": "model.pdm_platform.stg_pdm_agent_locations"
+    },
+    {
+      "direct_test_count": 4,
+      "materialized": "view",
+      "name": "stg_pdm_agent_profiles",
+      "parents": [],
+      "qualified_name": "staging.stg_pdm_agent_profiles",
+      "schema": "staging",
+      "unique_id": "model.pdm_platform.stg_pdm_agent_profiles"
+    },
+    {
+      "direct_test_count": 6,
+      "materialized": "view",
+      "name": "stg_pdm_agent_transactions",
+      "parents": [],
+      "qualified_name": "staging.stg_pdm_agent_transactions",
+      "schema": "staging",
+      "unique_id": "model.pdm_platform.stg_pdm_agent_transactions"
+    },
+    {
+      "direct_test_count": 7,
+      "materialized": "view",
+      "name": "stg_pdm_cpo_plm_pain002",
+      "parents": [],
+      "qualified_name": "staging.stg_pdm_cpo_plm_pain002",
+      "schema": "staging",
+      "unique_id": "model.pdm_platform.stg_pdm_cpo_plm_pain002"
+    },
+    {
+      "direct_test_count": 6,
+      "materialized": "view",
+      "name": "stg_pdm_cpo_psn_pain002",
+      "parents": [],
+      "qualified_name": "staging.stg_pdm_cpo_psn_pain002",
+      "schema": "staging",
+      "unique_id": "model.pdm_platform.stg_pdm_cpo_psn_pain002"
+    },
+    {
+      "direct_test_count": 7,
+      "materialized": "view",
+      "name": "stg_pdm_icmn_pmn_pain001",
+      "parents": [],
+      "qualified_name": "staging.stg_pdm_icmn_pmn_pain001",
+      "schema": "staging",
+      "unique_id": "model.pdm_platform.stg_pdm_icmn_pmn_pain001"
+    },
+    {
+      "direct_test_count": 6,
+      "materialized": "view",
+      "name": "stg_pdm_icmn_vpm_pain001",
+      "parents": [],
+      "qualified_name": "staging.stg_pdm_icmn_vpm_pain001",
+      "schema": "staging",
+      "unique_id": "model.pdm_platform.stg_pdm_icmn_vpm_pain001"
+    },
+    {
+      "direct_test_count": 6,
+      "materialized": "view",
+      "name": "stg_pdm_mobile_airtel_pacs002",
+      "parents": [],
+      "qualified_name": "staging.stg_pdm_mobile_airtel_pacs002",
+      "schema": "staging",
+      "unique_id": "model.pdm_platform.stg_pdm_mobile_airtel_pacs002"
+    },
+    {
+      "direct_test_count": 6,
+      "materialized": "view",
+      "name": "stg_pdm_mobile_airtel_pacs008",
+      "parents": [],
+      "qualified_name": "staging.stg_pdm_mobile_airtel_pacs008",
+      "schema": "staging",
+      "unique_id": "model.pdm_platform.stg_pdm_mobile_airtel_pacs008"
+    },
+    {
+      "direct_test_count": 6,
+      "materialized": "view",
+      "name": "stg_pdm_mobile_mtn_pacs002",
+      "parents": [],
+      "qualified_name": "staging.stg_pdm_mobile_mtn_pacs002",
+      "schema": "staging",
+      "unique_id": "model.pdm_platform.stg_pdm_mobile_mtn_pacs002"
+    },
+    {
+      "direct_test_count": 6,
+      "materialized": "view",
+      "name": "stg_pdm_mobile_mtn_pacs008",
+      "parents": [],
+      "qualified_name": "staging.stg_pdm_mobile_mtn_pacs008",
+      "schema": "staging",
+      "unique_id": "model.pdm_platform.stg_pdm_mobile_mtn_pacs008"
+    },
+    {
+      "direct_test_count": 7,
+      "materialized": "view",
+      "name": "stg_pdm_pdmis_beneficiaries",
+      "parents": [],
+      "qualified_name": "staging.stg_pdm_pdmis_beneficiaries",
+      "schema": "staging",
+      "unique_id": "model.pdm_platform.stg_pdm_pdmis_beneficiaries"
+    },
+    {
+      "direct_test_count": 7,
+      "materialized": "view",
+      "name": "stg_pdm_pdmis_business_plans",
+      "parents": [],
+      "qualified_name": "staging.stg_pdm_pdmis_business_plans",
+      "schema": "staging",
+      "unique_id": "model.pdm_platform.stg_pdm_pdmis_business_plans"
+    },
+    {
+      "direct_test_count": 6,
+      "materialized": "view",
+      "name": "stg_pdm_pdmis_households",
+      "parents": [],
+      "qualified_name": "staging.stg_pdm_pdmis_households",
+      "schema": "staging",
+      "unique_id": "model.pdm_platform.stg_pdm_pdmis_households"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "view",
+      "name": "stg_pdm_pdmis_loans",
+      "parents": [],
+      "qualified_name": "staging.stg_pdm_pdmis_loans",
+      "schema": "staging",
+      "unique_id": "model.pdm_platform.stg_pdm_pdmis_loans"
+    },
+    {
+      "direct_test_count": 7,
+      "materialized": "view",
+      "name": "stg_pdm_pdmis_saccos",
+      "parents": [],
+      "qualified_name": "staging.stg_pdm_pdmis_saccos",
+      "schema": "staging",
+      "unique_id": "model.pdm_platform.stg_pdm_pdmis_saccos"
+    },
+    {
+      "direct_test_count": 7,
+      "materialized": "view",
+      "name": "stg_pdm_pdmis_special_groups",
+      "parents": [],
+      "qualified_name": "staging.stg_pdm_pdmis_special_groups",
+      "schema": "staging",
+      "unique_id": "model.pdm_platform.stg_pdm_pdmis_special_groups"
+    },
+    {
+      "direct_test_count": 5,
+      "materialized": "view",
+      "name": "stg_pdm_wendi_camt052",
+      "parents": [],
+      "qualified_name": "staging.stg_pdm_wendi_camt052",
+      "schema": "staging",
+      "unique_id": "model.pdm_platform.stg_pdm_wendi_camt052"
+    },
+    {
+      "direct_test_count": 6,
+      "materialized": "view",
+      "name": "stg_pdm_wendi_camt053",
+      "parents": [],
+      "qualified_name": "staging.stg_pdm_wendi_camt053",
+      "schema": "staging",
+      "unique_id": "model.pdm_platform.stg_pdm_wendi_camt053"
+    },
+    {
+      "direct_test_count": 6,
+      "materialized": "view",
+      "name": "stg_pdm_wendi_camt054",
+      "parents": [],
+      "qualified_name": "staging.stg_pdm_wendi_camt054",
+      "schema": "staging",
+      "unique_id": "model.pdm_platform.stg_pdm_wendi_camt054"
+    },
+    {
+      "direct_test_count": 5,
+      "materialized": "view",
+      "name": "stg_pdm_wendi_pain001",
+      "parents": [],
+      "qualified_name": "staging.stg_pdm_wendi_pain001",
+      "schema": "staging",
+      "unique_id": "model.pdm_platform.stg_pdm_wendi_pain001"
+    },
+    {
+      "direct_test_count": 5,
+      "materialized": "view",
+      "name": "stg_pdm_wendi_pain002",
+      "parents": [],
+      "qualified_name": "staging.stg_pdm_wendi_pain002",
+      "schema": "staging",
+      "unique_id": "model.pdm_platform.stg_pdm_wendi_pain002"
+    },
+    {
+      "direct_test_count": 6,
+      "materialized": "view",
+      "name": "stg_pdm_wendi_transactions",
+      "parents": [],
+      "qualified_name": "staging.stg_pdm_wendi_transactions",
+      "schema": "staging",
+      "unique_id": "model.pdm_platform.stg_pdm_wendi_transactions"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_agent_locations",
+      "parents": [
+        "model.pdm_platform.stg_pdm_agent_locations"
+      ],
+      "qualified_name": "bronze.br_pdm_agent_locations",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_agent_locations"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_agent_profiles",
+      "parents": [
+        "model.pdm_platform.stg_pdm_agent_profiles"
+      ],
+      "qualified_name": "bronze.br_pdm_agent_profiles",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_agent_profiles"
+    },
+    {
+      "direct_test_count": 10,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_agent_transactions",
+      "parents": [
+        "model.pdm_platform.stg_pdm_agent_transactions"
+      ],
+      "qualified_name": "bronze.br_pdm_agent_transactions",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_agent_transactions"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_cpo_plm_pain002",
+      "parents": [
+        "model.pdm_platform.stg_pdm_cpo_plm_pain002"
+      ],
+      "qualified_name": "bronze.br_pdm_cpo_plm_pain002",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_cpo_plm_pain002"
+    },
+    {
+      "direct_test_count": 3,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_payments_plm_lifecycle_events",
+      "parents": [
+        "model.pdm_platform.stg_pdm_cpo_plm_pain002"
+      ],
+      "qualified_name": "bronze.br_pdm_payments_plm_lifecycle_events",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_payments_plm_lifecycle_events"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_cpo_psn_pain002",
+      "parents": [
+        "model.pdm_platform.stg_pdm_cpo_psn_pain002"
+      ],
+      "qualified_name": "bronze.br_pdm_cpo_psn_pain002",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_cpo_psn_pain002"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_icmn_pmn_pain001",
+      "parents": [
+        "model.pdm_platform.stg_pdm_icmn_pmn_pain001"
+      ],
+      "qualified_name": "bronze.br_pdm_icmn_pmn_pain001",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_icmn_pmn_pain001"
+    },
+    {
+      "direct_test_count": 3,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_payments_pmn_lifecycle_events",
+      "parents": [
+        "model.pdm_platform.stg_pdm_icmn_pmn_pain001"
+      ],
+      "qualified_name": "bronze.br_pdm_payments_pmn_lifecycle_events",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_payments_pmn_lifecycle_events"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_icmn_vpm_pain001",
+      "parents": [
+        "model.pdm_platform.stg_pdm_icmn_vpm_pain001"
+      ],
+      "qualified_name": "bronze.br_pdm_icmn_vpm_pain001",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_icmn_vpm_pain001"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_mobile_airtel_pacs002",
+      "parents": [
+        "model.pdm_platform.stg_pdm_mobile_airtel_pacs002"
+      ],
+      "qualified_name": "bronze.br_pdm_mobile_airtel_pacs002",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_mobile_airtel_pacs002"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_mobile_airtel_pacs008",
+      "parents": [
+        "model.pdm_platform.stg_pdm_mobile_airtel_pacs008"
+      ],
+      "qualified_name": "bronze.br_pdm_mobile_airtel_pacs008",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_mobile_airtel_pacs008"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_mobile_mtn_pacs002",
+      "parents": [
+        "model.pdm_platform.stg_pdm_mobile_mtn_pacs002"
+      ],
+      "qualified_name": "bronze.br_pdm_mobile_mtn_pacs002",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_mobile_mtn_pacs002"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_mobile_mtn_pacs008",
+      "parents": [
+        "model.pdm_platform.stg_pdm_mobile_mtn_pacs008"
+      ],
+      "qualified_name": "bronze.br_pdm_mobile_mtn_pacs008",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_mobile_mtn_pacs008"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_pdmis_beneficiaries",
+      "parents": [
+        "model.pdm_platform.stg_pdm_pdmis_beneficiaries"
+      ],
+      "qualified_name": "bronze.br_pdm_pdmis_beneficiaries",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_pdmis_beneficiaries"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_pdmis_business_plans",
+      "parents": [
+        "model.pdm_platform.stg_pdm_pdmis_business_plans"
+      ],
+      "qualified_name": "bronze.br_pdm_pdmis_business_plans",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_pdmis_business_plans"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_pdmis_households",
+      "parents": [
+        "model.pdm_platform.stg_pdm_pdmis_households"
+      ],
+      "qualified_name": "bronze.br_pdm_pdmis_households",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_pdmis_households"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_pdmis_loans",
+      "parents": [
+        "model.pdm_platform.stg_pdm_pdmis_loans"
+      ],
+      "qualified_name": "bronze.br_pdm_pdmis_loans",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_pdmis_loans"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_pdmis_saccos",
+      "parents": [
+        "model.pdm_platform.stg_pdm_pdmis_saccos"
+      ],
+      "qualified_name": "bronze.br_pdm_pdmis_saccos",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_pdmis_saccos"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_pdmis_special_groups",
+      "parents": [
+        "model.pdm_platform.stg_pdm_pdmis_special_groups"
+      ],
+      "qualified_name": "bronze.br_pdm_pdmis_special_groups",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_pdmis_special_groups"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_wendi_camt052",
+      "parents": [
+        "model.pdm_platform.stg_pdm_wendi_camt052"
+      ],
+      "qualified_name": "bronze.br_pdm_wendi_camt052",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_wendi_camt052"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_wendi_camt053",
+      "parents": [
+        "model.pdm_platform.stg_pdm_wendi_camt053"
+      ],
+      "qualified_name": "bronze.br_pdm_wendi_camt053",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_wendi_camt053"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_wendi_camt054",
+      "parents": [
+        "model.pdm_platform.stg_pdm_wendi_camt054"
+      ],
+      "qualified_name": "bronze.br_pdm_wendi_camt054",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_wendi_camt054"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_wendi_pain001",
+      "parents": [
+        "model.pdm_platform.stg_pdm_wendi_pain001"
+      ],
+      "qualified_name": "bronze.br_pdm_wendi_pain001",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_wendi_pain001"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_wendi_pain002",
+      "parents": [
+        "model.pdm_platform.stg_pdm_wendi_pain002"
+      ],
+      "qualified_name": "bronze.br_pdm_wendi_pain002",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_wendi_pain002"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_wendi_transactions",
+      "parents": [
+        "model.pdm_platform.stg_pdm_wendi_transactions"
+      ],
+      "qualified_name": "bronze.br_pdm_wendi_transactions",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_wendi_transactions"
+    },
+    {
+      "direct_test_count": 0,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_agent_locations",
+      "parents": [
+        "model.pdm_platform.br_pdm_agent_locations"
+      ],
+      "qualified_name": "silver.slv_pdm_agent_locations",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_agent_locations"
+    },
+    {
+      "direct_test_count": 2,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_agents",
+      "parents": [
+        "model.pdm_platform.br_pdm_agent_profiles"
+      ],
+      "qualified_name": "silver.slv_pdm_agents",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_agents"
+    },
+    {
+      "direct_test_count": 0,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_payments_plm_lifecycle_events",
+      "parents": [
+        "model.pdm_platform.br_pdm_payments_plm_lifecycle_events"
+      ],
+      "qualified_name": "silver.slv_pdm_payments_plm_lifecycle_events",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_payments_plm_lifecycle_events"
+    },
+    {
+      "direct_test_count": 0,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_payments_pmn_lifecycle_events",
+      "parents": [
+        "model.pdm_platform.br_pdm_payments_pmn_lifecycle_events"
+      ],
+      "qualified_name": "silver.slv_pdm_payments_pmn_lifecycle_events",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_payments_pmn_lifecycle_events"
+    },
+    {
+      "direct_test_count": 2,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_batch",
+      "parents": [
+        "model.pdm_platform.br_pdm_icmn_vpm_pain001"
+      ],
+      "qualified_name": "silver.slv_pdm_batch",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_batch"
+    },
+    {
+      "direct_test_count": 0,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_payment_party_roles",
+      "parents": [
+        "model.pdm_platform.br_pdm_icmn_vpm_pain001"
+      ],
+      "qualified_name": "silver.slv_pdm_payment_party_roles",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_payment_party_roles"
+    },
+    {
+      "direct_test_count": 0,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_payments_accounts",
+      "parents": [
+        "model.pdm_platform.br_pdm_icmn_vpm_pain001"
+      ],
+      "qualified_name": "silver.slv_pdm_payments_accounts",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_payments_accounts"
+    },
+    {
+      "direct_test_count": 0,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_payments_party",
+      "parents": [
+        "model.pdm_platform.br_pdm_icmn_vpm_pain001"
+      ],
+      "qualified_name": "silver.slv_pdm_payments_party",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_payments_party"
+    },
+    {
+      "direct_test_count": 0,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_payments_remittance",
+      "parents": [
+        "model.pdm_platform.br_pdm_icmn_vpm_pain001"
+      ],
+      "qualified_name": "silver.slv_pdm_payments_remittance",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_payments_remittance"
+    },
+    {
+      "direct_test_count": 6,
+      "materialized": "iceberg_table",
+      "name": "vlt_pdm_beneficiary_identity",
+      "parents": [
+        "model.pdm_platform.br_pdm_pdmis_beneficiaries"
+      ],
+      "qualified_name": "silver_vault.vlt_pdm_beneficiary_identity",
+      "schema": "silver_vault",
+      "unique_id": "model.pdm_platform.vlt_pdm_beneficiary_identity"
+    },
+    {
+      "direct_test_count": 3,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_business_plans",
+      "parents": [
+        "model.pdm_platform.br_pdm_pdmis_business_plans"
+      ],
+      "qualified_name": "silver.slv_pdm_business_plans",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_business_plans"
+    },
+    {
+      "direct_test_count": 2,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_households",
+      "parents": [
+        "model.pdm_platform.br_pdm_pdmis_households"
+      ],
+      "qualified_name": "silver.slv_pdm_households",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_households"
+    },
+    {
+      "direct_test_count": 4,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_loans",
+      "parents": [
+        "model.pdm_platform.br_pdm_pdmis_loans"
+      ],
+      "qualified_name": "silver.slv_pdm_loans",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_loans"
+    },
+    {
+      "direct_test_count": 3,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_saccos",
+      "parents": [
+        "model.pdm_platform.br_pdm_pdmis_saccos"
+      ],
+      "qualified_name": "silver.slv_pdm_saccos",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_saccos"
+    },
+    {
+      "direct_test_count": 3,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_special_groups",
+      "parents": [
+        "model.pdm_platform.br_pdm_pdmis_special_groups"
+      ],
+      "qualified_name": "silver.slv_pdm_special_groups",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_special_groups"
+    },
+    {
+      "direct_test_count": 1,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_payments_messages",
+      "parents": [
+        "model.pdm_platform.br_pdm_cpo_psn_pain002",
+        "model.pdm_platform.br_pdm_icmn_vpm_pain001",
+        "model.pdm_platform.br_pdm_mobile_airtel_pacs002",
+        "model.pdm_platform.br_pdm_mobile_airtel_pacs008",
+        "model.pdm_platform.br_pdm_mobile_mtn_pacs002",
+        "model.pdm_platform.br_pdm_mobile_mtn_pacs008",
+        "model.pdm_platform.br_pdm_wendi_pain001",
+        "model.pdm_platform.br_pdm_wendi_pain002"
+      ],
+      "qualified_name": "silver.slv_pdm_payments_messages",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_payments_messages"
+    },
+    {
+      "direct_test_count": 0,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_payments_status_report",
+      "parents": [
+        "model.pdm_platform.br_pdm_cpo_psn_pain002",
+        "model.pdm_platform.br_pdm_mobile_airtel_pacs002",
+        "model.pdm_platform.br_pdm_mobile_mtn_pacs002",
+        "model.pdm_platform.br_pdm_wendi_pain002"
+      ],
+      "qualified_name": "silver.slv_pdm_payments_status_report",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_payments_status_report"
+    },
+    {
+      "direct_test_count": 2,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_payments_transactions",
+      "parents": [
+        "model.pdm_platform.br_pdm_agent_transactions",
+        "model.pdm_platform.br_pdm_icmn_vpm_pain001",
+        "model.pdm_platform.br_pdm_mobile_airtel_pacs008",
+        "model.pdm_platform.br_pdm_mobile_mtn_pacs008",
+        "model.pdm_platform.br_pdm_wendi_pain001",
+        "model.pdm_platform.br_pdm_wendi_transactions"
+      ],
+      "qualified_name": "silver.slv_pdm_payments_transactions",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_payments_transactions"
+    },
+    {
+      "direct_test_count": 5,
+      "materialized": "iceberg_table",
+      "name": "gld_dim_pdm_agent",
+      "parents": [
+        "model.pdm_platform.slv_pdm_agent_locations",
+        "model.pdm_platform.slv_pdm_agents"
+      ],
+      "qualified_name": "gold.gld_dim_pdm_agent",
+      "schema": "gold",
+      "unique_id": "model.pdm_platform.gld_dim_pdm_agent"
+    },
+    {
+      "direct_test_count": 0,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_payment_technical_events",
+      "parents": [
+        "model.pdm_platform.slv_pdm_payments_plm_lifecycle_events",
+        "model.pdm_platform.slv_pdm_payments_pmn_lifecycle_events"
+      ],
+      "qualified_name": "silver.slv_pdm_payment_technical_events",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_payment_technical_events"
+    },
+    {
+      "direct_test_count": 5,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_beneficiaries",
+      "parents": [
+        "model.pdm_platform.vlt_pdm_beneficiary_identity"
+      ],
+      "qualified_name": "silver.slv_pdm_beneficiaries",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_beneficiaries"
+    },
+    {
+      "direct_test_count": 3,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_loan_beneficiary_links",
+      "parents": [
+        "model.pdm_platform.slv_pdm_loans",
+        "model.pdm_platform.vlt_pdm_beneficiary_identity"
+      ],
+      "qualified_name": "silver.slv_pdm_loan_beneficiary_links",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_loan_beneficiary_links"
+    },
+    {
+      "direct_test_count": 5,
+      "materialized": "iceberg_table",
+      "name": "gld_dim_pdm_sacco",
+      "parents": [
+        "model.pdm_platform.slv_pdm_saccos"
+      ],
+      "qualified_name": "gold.gld_dim_pdm_sacco",
+      "schema": "gold",
+      "unique_id": "model.pdm_platform.gld_dim_pdm_sacco"
+    },
+    {
+      "direct_test_count": 3,
+      "materialized": "iceberg_table",
+      "name": "gld_dim_pdm_special_group",
+      "parents": [
+        "model.pdm_platform.slv_pdm_special_groups"
+      ],
+      "qualified_name": "gold.gld_dim_pdm_special_group",
+      "schema": "gold",
+      "unique_id": "model.pdm_platform.gld_dim_pdm_special_group"
+    },
+    {
+      "direct_test_count": 2,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_payment_lifecycle",
+      "parents": [
+        "model.pdm_platform.br_pdm_wendi_camt053",
+        "model.pdm_platform.br_pdm_wendi_camt054",
+        "model.pdm_platform.slv_pdm_loans",
+        "model.pdm_platform.slv_pdm_payments_status_report",
+        "model.pdm_platform.slv_pdm_payments_transactions"
+      ],
+      "qualified_name": "silver.slv_pdm_payment_lifecycle",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_payment_lifecycle"
+    },
+    {
+      "direct_test_count": 0,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_payments_reconciliation",
+      "parents": [
+        "model.pdm_platform.slv_pdm_payments_messages",
+        "model.pdm_platform.slv_pdm_payments_status_report",
+        "model.pdm_platform.slv_pdm_payments_transactions"
+      ],
+      "qualified_name": "silver.slv_pdm_payments_reconciliation",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_payments_reconciliation"
+    },
+    {
+      "direct_test_count": 1,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_village_geographic_risk",
+      "parents": [
+        "model.pdm_platform.gld_dim_pdm_agent",
+        "model.pdm_platform.slv_pdm_agents"
+      ],
+      "qualified_name": "consumption.cns_pdm_village_geographic_risk",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_village_geographic_risk"
+    },
+    {
+      "direct_test_count": 3,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_payment_event_correlation",
+      "parents": [
+        "model.pdm_platform.slv_pdm_payment_technical_events",
+        "model.pdm_platform.slv_pdm_payments_transactions"
+      ],
+      "qualified_name": "silver.slv_pdm_payment_event_correlation",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_payment_event_correlation"
+    },
+    {
+      "direct_test_count": 10,
+      "materialized": "iceberg_table",
+      "name": "gld_dim_pdm_beneficiary",
+      "parents": [
+        "model.pdm_platform.slv_pdm_beneficiaries"
+      ],
+      "qualified_name": "gold.gld_dim_pdm_beneficiary",
+      "schema": "gold",
+      "unique_id": "model.pdm_platform.gld_dim_pdm_beneficiary"
+    },
+    {
+      "direct_test_count": 4,
+      "materialized": "iceberg_table",
+      "name": "gld_dim_pdm_date",
+      "parents": [
+        "model.pdm_platform.slv_pdm_beneficiaries",
+        "model.pdm_platform.slv_pdm_loans",
+        "model.pdm_platform.slv_pdm_payments_transactions"
+      ],
+      "qualified_name": "gold.gld_dim_pdm_date",
+      "schema": "gold",
+      "unique_id": "model.pdm_platform.gld_dim_pdm_date"
+    },
+    {
+      "direct_test_count": 11,
+      "materialized": "iceberg_table",
+      "name": "gld_dim_pdm_geography",
+      "parents": [
+        "model.pdm_platform.slv_pdm_agents",
+        "model.pdm_platform.slv_pdm_beneficiaries",
+        "model.pdm_platform.slv_pdm_saccos"
+      ],
+      "qualified_name": "gold.gld_dim_pdm_geography",
+      "schema": "gold",
+      "unique_id": "model.pdm_platform.gld_dim_pdm_geography"
+    },
+    {
+      "direct_test_count": 0,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_ai_default_risk",
+      "parents": [
+        "model.pdm_platform.br_pdm_ai_default_risk",
+        "model.pdm_platform.slv_pdm_loan_beneficiary_links"
+      ],
+      "qualified_name": "consumption.cns_pdm_ai_default_risk",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_ai_default_risk"
+    },
+    {
+      "direct_test_count": 6,
+      "materialized": "iceberg_table",
+      "name": "gld_fct_pdm_loans",
+      "parents": [
+        "model.pdm_platform.slv_pdm_beneficiaries",
+        "model.pdm_platform.slv_pdm_loan_beneficiary_links",
+        "model.pdm_platform.slv_pdm_loans"
+      ],
+      "qualified_name": "gold.gld_fct_pdm_loans",
+      "schema": "gold",
+      "unique_id": "model.pdm_platform.gld_fct_pdm_loans"
+    },
+    {
+      "direct_test_count": 2,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_payment_account_controls",
+      "parents": [
+        "model.pdm_platform.slv_pdm_loan_beneficiary_links",
+        "model.pdm_platform.slv_pdm_payment_party_roles",
+        "model.pdm_platform.slv_pdm_payments_transactions",
+        "model.pdm_platform.vlt_pdm_beneficiary_identity"
+      ],
+      "qualified_name": "silver.slv_pdm_payment_account_controls",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_payment_account_controls"
+    },
+    {
+      "direct_test_count": 1,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_payment_entity_matches",
+      "parents": [
+        "model.pdm_platform.slv_pdm_agents",
+        "model.pdm_platform.slv_pdm_beneficiaries",
+        "model.pdm_platform.slv_pdm_business_plans",
+        "model.pdm_platform.slv_pdm_loan_beneficiary_links",
+        "model.pdm_platform.slv_pdm_loans",
+        "model.pdm_platform.slv_pdm_payments_transactions",
+        "model.pdm_platform.slv_pdm_saccos",
+        "model.pdm_platform.vlt_pdm_beneficiary_identity"
+      ],
+      "qualified_name": "silver.slv_pdm_payment_entity_matches",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_payment_entity_matches"
+    },
+    {
+      "direct_test_count": 4,
+      "materialized": "iceberg_table",
+      "name": "gld_fct_pdm_payment_lifecycle",
+      "parents": [
+        "model.pdm_platform.slv_pdm_beneficiaries",
+        "model.pdm_platform.slv_pdm_loan_beneficiary_links",
+        "model.pdm_platform.slv_pdm_payment_lifecycle"
+      ],
+      "qualified_name": "gold.gld_fct_pdm_payment_lifecycle",
+      "schema": "gold",
+      "unique_id": "model.pdm_platform.gld_fct_pdm_payment_lifecycle"
+    },
+    {
+      "direct_test_count": 0,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_district_ai_risk",
+      "parents": [
+        "model.pdm_platform.cns_pdm_ai_default_risk"
+      ],
+      "qualified_name": "consumption.cns_pdm_district_ai_risk",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_district_ai_risk"
+    },
+    {
+      "direct_test_count": 0,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_executive_ai_risk",
+      "parents": [
+        "model.pdm_platform.cns_pdm_ai_default_risk"
+      ],
+      "qualified_name": "consumption.cns_pdm_executive_ai_risk",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_executive_ai_risk"
+    },
+    {
+      "direct_test_count": 0,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_parish_performance",
+      "parents": [
+        "model.pdm_platform.gld_dim_pdm_sacco",
+        "model.pdm_platform.gld_fct_pdm_loans",
+        "model.pdm_platform.slv_pdm_saccos"
+      ],
+      "qualified_name": "consumption.cns_pdm_parish_performance",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_parish_performance"
+    },
+    {
+      "direct_test_count": 2,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_social_impact",
+      "parents": [
+        "model.pdm_platform.gld_dim_pdm_beneficiary",
+        "model.pdm_platform.gld_dim_pdm_special_group",
+        "model.pdm_platform.gld_fct_pdm_loans"
+      ],
+      "qualified_name": "consumption.cns_pdm_social_impact",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_social_impact"
+    },
+    {
+      "direct_test_count": 3,
+      "materialized": "iceberg_table",
+      "name": "vlt_pdm_beneficiary_identity_alerts",
+      "parents": [
+        "model.pdm_platform.slv_pdm_loan_beneficiary_links",
+        "model.pdm_platform.slv_pdm_loans",
+        "model.pdm_platform.slv_pdm_payment_account_controls",
+        "model.pdm_platform.slv_pdm_payment_party_roles",
+        "model.pdm_platform.slv_pdm_payments_transactions",
+        "model.pdm_platform.vlt_pdm_beneficiary_identity"
+      ],
+      "qualified_name": "silver_vault.vlt_pdm_beneficiary_identity_alerts",
+      "schema": "silver_vault",
+      "unique_id": "model.pdm_platform.vlt_pdm_beneficiary_identity_alerts"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "gld_fct_pdm_payments",
+      "parents": [
+        "model.pdm_platform.slv_pdm_agents",
+        "model.pdm_platform.slv_pdm_beneficiaries",
+        "model.pdm_platform.slv_pdm_loan_beneficiary_links",
+        "model.pdm_platform.slv_pdm_payment_account_controls",
+        "model.pdm_platform.slv_pdm_payment_entity_matches",
+        "model.pdm_platform.slv_pdm_payments_reconciliation",
+        "model.pdm_platform.slv_pdm_payments_transactions"
+      ],
+      "qualified_name": "gold.gld_fct_pdm_payments",
+      "schema": "gold",
+      "unique_id": "model.pdm_platform.gld_fct_pdm_payments"
+    },
+    {
+      "direct_test_count": 0,
+      "materialized": "iceberg_table",
+      "name": "slv_pdm_dq_results",
+      "parents": [
+        "model.pdm_platform.slv_pdm_beneficiaries",
+        "model.pdm_platform.slv_pdm_business_plans",
+        "model.pdm_platform.slv_pdm_loan_beneficiary_links",
+        "model.pdm_platform.slv_pdm_loans",
+        "model.pdm_platform.slv_pdm_payment_entity_matches",
+        "model.pdm_platform.slv_pdm_payments_reconciliation",
+        "model.pdm_platform.slv_pdm_payments_transactions",
+        "model.pdm_platform.slv_pdm_saccos"
+      ],
+      "qualified_name": "silver.slv_pdm_dq_results",
+      "schema": "silver",
+      "unique_id": "model.pdm_platform.slv_pdm_dq_results"
+    },
+    {
+      "direct_test_count": 2,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_financial_fund_flow",
+      "parents": [
+        "model.pdm_platform.gld_fct_pdm_payment_lifecycle"
+      ],
+      "qualified_name": "consumption.cns_pdm_financial_fund_flow",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_financial_fund_flow"
+    },
+    {
+      "direct_test_count": 3,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_lifecycle_exceptions",
+      "parents": [
+        "model.pdm_platform.gld_dim_pdm_sacco",
+        "model.pdm_platform.gld_fct_pdm_payment_lifecycle"
+      ],
+      "qualified_name": "consumption.cns_pdm_lifecycle_exceptions",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_lifecycle_exceptions"
+    },
+    {
+      "direct_test_count": 4,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_parish_geographic_risk",
+      "parents": [
+        "model.pdm_platform.cns_pdm_parish_performance",
+        "model.pdm_platform.gld_dim_pdm_agent",
+        "model.pdm_platform.slv_pdm_agents"
+      ],
+      "qualified_name": "consumption.cns_pdm_parish_geographic_risk",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_parish_geographic_risk"
+    },
+    {
+      "direct_test_count": 3,
+      "materialized": "iceberg_table",
+      "name": "vlt_pdm_beneficiary_identity_signals",
+      "parents": [
+        "model.pdm_platform.vlt_pdm_beneficiary_identity_alerts"
+      ],
+      "qualified_name": "silver_vault.vlt_pdm_beneficiary_identity_signals",
+      "schema": "silver_vault",
+      "unique_id": "model.pdm_platform.vlt_pdm_beneficiary_identity_signals"
+    },
+    {
+      "direct_test_count": 3,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_executive_monthly_trend",
+      "parents": [
+        "model.pdm_platform.gld_dim_pdm_date",
+        "model.pdm_platform.gld_fct_pdm_loans",
+        "model.pdm_platform.gld_fct_pdm_payments"
+      ],
+      "qualified_name": "consumption.cns_pdm_executive_monthly_trend",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_executive_monthly_trend"
+    },
+    {
+      "direct_test_count": 0,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_payment_operations",
+      "parents": [
+        "model.pdm_platform.gld_dim_pdm_date",
+        "model.pdm_platform.gld_dim_pdm_sacco",
+        "model.pdm_platform.gld_fct_pdm_payments",
+        "model.pdm_platform.slv_pdm_payments_status_report"
+      ],
+      "qualified_name": "consumption.cns_pdm_payment_operations",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_payment_operations"
+    },
+    {
+      "direct_test_count": 4,
+      "materialized": "iceberg_table",
+      "name": "gld_fct_pdm_agent_cashouts",
+      "parents": [
+        "model.pdm_platform.gld_fct_pdm_payments",
+        "model.pdm_platform.slv_pdm_agents",
+        "model.pdm_platform.slv_pdm_loans"
+      ],
+      "qualified_name": "gold.gld_fct_pdm_agent_cashouts",
+      "schema": "gold",
+      "unique_id": "model.pdm_platform.gld_fct_pdm_agent_cashouts"
+    },
+    {
+      "direct_test_count": 5,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_fund_flow_funnel",
+      "parents": [
+        "model.pdm_platform.cns_pdm_financial_fund_flow"
+      ],
+      "qualified_name": "consumption.cns_pdm_fund_flow_funnel",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_fund_flow_funnel"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_lifecycle_exception_cases",
+      "parents": [
+        "model.pdm_platform.cns_pdm_lifecycle_exceptions"
+      ],
+      "qualified_name": "consumption.cns_pdm_lifecycle_exception_cases",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_lifecycle_exception_cases"
+    },
+    {
+      "direct_test_count": 2,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_geographic_alerts",
+      "parents": [
+        "model.pdm_platform.cns_pdm_parish_geographic_risk"
+      ],
+      "qualified_name": "consumption.cns_pdm_geographic_alerts",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_geographic_alerts"
+    },
+    {
+      "direct_test_count": 0,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_geographic_coverage",
+      "parents": [
+        "model.pdm_platform.cns_pdm_parish_geographic_risk"
+      ],
+      "qualified_name": "consumption.cns_pdm_geographic_coverage",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_geographic_coverage"
+    },
+    {
+      "direct_test_count": 1,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_geographic_risk_drivers",
+      "parents": [
+        "model.pdm_platform.cns_pdm_parish_geographic_risk"
+      ],
+      "qualified_name": "consumption.cns_pdm_geographic_risk_drivers",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_geographic_risk_drivers"
+    },
+    {
+      "direct_test_count": 3,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_local_government_performance",
+      "parents": [
+        "model.pdm_platform.cns_pdm_parish_geographic_risk",
+        "model.pdm_platform.cns_pdm_parish_performance"
+      ],
+      "qualified_name": "consumption.cns_pdm_local_government_performance",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_local_government_performance"
+    },
+    {
+      "direct_test_count": 3,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_beneficiary_identity_alerts",
+      "parents": [
+        "model.pdm_platform.vlt_pdm_beneficiary_identity_signals"
+      ],
+      "qualified_name": "consumption.cns_pdm_beneficiary_identity_alerts",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_beneficiary_identity_alerts"
+    },
+    {
+      "direct_test_count": 3,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_duplicate_fragmentation_alerts",
+      "parents": [
+        "model.pdm_platform.gld_dim_pdm_beneficiary",
+        "model.pdm_platform.gld_dim_pdm_sacco",
+        "model.pdm_platform.gld_fct_pdm_loans",
+        "model.pdm_platform.gld_fct_pdm_payments",
+        "model.pdm_platform.vlt_pdm_beneficiary_identity_signals"
+      ],
+      "qualified_name": "consumption.cns_pdm_duplicate_fragmentation_alerts",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_duplicate_fragmentation_alerts"
+    },
+    {
+      "direct_test_count": 2,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_executive_geographic_drilldown",
+      "parents": [
+        "model.pdm_platform.gld_dim_pdm_beneficiary",
+        "model.pdm_platform.gld_dim_pdm_sacco",
+        "model.pdm_platform.gld_fct_pdm_loans",
+        "model.pdm_platform.vlt_pdm_beneficiary_identity_signals"
+      ],
+      "qualified_name": "consumption.cns_pdm_executive_geographic_drilldown",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_executive_geographic_drilldown"
+    },
+    {
+      "direct_test_count": 3,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_loan_intervention_dashboard",
+      "parents": [
+        "model.pdm_platform.cns_pdm_ai_default_risk",
+        "model.pdm_platform.cns_pdm_payment_operations",
+        "model.pdm_platform.gld_dim_pdm_sacco",
+        "model.pdm_platform.gld_fct_pdm_loans",
+        "model.pdm_platform.gld_fct_pdm_payment_lifecycle"
+      ],
+      "qualified_name": "consumption.cns_pdm_loan_intervention_dashboard",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_loan_intervention_dashboard"
+    },
+    {
+      "direct_test_count": 0,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_payment_reconciliation",
+      "parents": [
+        "model.pdm_platform.cns_pdm_payment_operations"
+      ],
+      "qualified_name": "consumption.cns_pdm_payment_reconciliation",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_payment_reconciliation"
+    },
+    {
+      "direct_test_count": 0,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_payments_daily_summary",
+      "parents": [
+        "model.pdm_platform.cns_pdm_payment_operations"
+      ],
+      "qualified_name": "consumption.cns_pdm_payments_daily_summary",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_payments_daily_summary"
+    },
+    {
+      "direct_test_count": 2,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_sacco_portfolio",
+      "parents": [
+        "model.pdm_platform.cns_pdm_ai_default_risk",
+        "model.pdm_platform.cns_pdm_payment_operations",
+        "model.pdm_platform.gld_dim_pdm_geography",
+        "model.pdm_platform.gld_dim_pdm_sacco",
+        "model.pdm_platform.gld_fct_pdm_loans"
+      ],
+      "qualified_name": "consumption.cns_pdm_sacco_portfolio",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_sacco_portfolio"
+    },
+    {
+      "direct_test_count": 1,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_agent_risk_indicators",
+      "parents": [
+        "model.pdm_platform.gld_dim_pdm_agent",
+        "model.pdm_platform.gld_dim_pdm_geography",
+        "model.pdm_platform.gld_fct_pdm_agent_cashouts"
+      ],
+      "qualified_name": "consumption.cns_pdm_agent_risk_indicators",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_agent_risk_indicators"
+    },
+    {
+      "direct_test_count": 3,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_beneficiary_insights",
+      "parents": [
+        "model.pdm_platform.gld_dim_pdm_beneficiary",
+        "model.pdm_platform.gld_fct_pdm_agent_cashouts",
+        "model.pdm_platform.gld_fct_pdm_loans"
+      ],
+      "qualified_name": "consumption.cns_pdm_beneficiary_insights",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_beneficiary_insights"
+    },
+    {
+      "direct_test_count": 3,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_channel_agent_performance",
+      "parents": [
+        "model.pdm_platform.gld_dim_pdm_agent",
+        "model.pdm_platform.gld_fct_pdm_agent_cashouts"
+      ],
+      "qualified_name": "consumption.cns_pdm_channel_agent_performance",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_channel_agent_performance"
+    },
+    {
+      "direct_test_count": 3,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_district_geographic_risk",
+      "parents": [
+        "model.pdm_platform.cns_pdm_beneficiary_identity_alerts",
+        "model.pdm_platform.cns_pdm_parish_geographic_risk",
+        "model.pdm_platform.gld_dim_pdm_beneficiary"
+      ],
+      "qualified_name": "consumption.cns_pdm_district_geographic_risk",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_district_geographic_risk"
+    },
+    {
+      "direct_test_count": 4,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_executive_overview",
+      "parents": [
+        "model.pdm_platform.cns_pdm_beneficiary_identity_alerts",
+        "model.pdm_platform.cns_pdm_lifecycle_exceptions",
+        "model.pdm_platform.cns_pdm_parish_geographic_risk",
+        "model.pdm_platform.gld_dim_pdm_date",
+        "model.pdm_platform.gld_fct_pdm_loans",
+        "model.pdm_platform.gld_fct_pdm_payments",
+        "model.pdm_platform.slv_pdm_loans"
+      ],
+      "qualified_name": "consumption.cns_pdm_executive_overview",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_executive_overview"
+    },
+    {
+      "direct_test_count": 0,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_daily_operational_metrics",
+      "parents": [
+        "model.pdm_platform.cns_pdm_payments_daily_summary",
+        "model.pdm_platform.gld_dim_pdm_date",
+        "model.pdm_platform.gld_fct_pdm_loans",
+        "model.pdm_platform.gld_fct_pdm_payment_lifecycle"
+      ],
+      "qualified_name": "consumption.cns_pdm_daily_operational_metrics",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_daily_operational_metrics"
+    },
+    {
+      "direct_test_count": 0,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_district_geojson_risk",
+      "parents": [
+        "model.pdm_platform.cns_pdm_district_geographic_risk"
+      ],
+      "qualified_name": "consumption.cns_pdm_district_geojson_risk",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_district_geojson_risk"
+    },
+    {
+      "direct_test_count": 0,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_executive_intervention_priorities",
+      "parents": [
+        "model.pdm_platform.cns_pdm_district_ai_risk",
+        "model.pdm_platform.cns_pdm_district_geographic_risk"
+      ],
+      "qualified_name": "consumption.cns_pdm_executive_intervention_priorities",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_executive_intervention_priorities"
+    },
+    {
+      "direct_test_count": 3,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_fraud_risk_insights",
+      "parents": [
+        "model.pdm_platform.cns_pdm_ai_default_risk",
+        "model.pdm_platform.cns_pdm_district_geographic_risk",
+        "model.pdm_platform.cns_pdm_duplicate_fragmentation_alerts",
+        "model.pdm_platform.cns_pdm_lifecycle_exceptions",
+        "model.pdm_platform.gld_dim_pdm_sacco",
+        "model.pdm_platform.gld_fct_pdm_agent_cashouts",
+        "model.pdm_platform.vlt_pdm_beneficiary_identity_signals"
+      ],
+      "qualified_name": "consumption.cns_pdm_fraud_risk_insights",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_fraud_risk_insights"
+    },
+    {
+      "direct_test_count": 1,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_geographic_risk_trend",
+      "parents": [
+        "model.pdm_platform.cns_pdm_district_geographic_risk"
+      ],
+      "qualified_name": "consumption.cns_pdm_geographic_risk_trend",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_geographic_risk_trend"
+    },
+    {
+      "direct_test_count": 4,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_subcounty_geographic_risk",
+      "parents": [
+        "model.pdm_platform.cns_pdm_beneficiary_identity_alerts",
+        "model.pdm_platform.cns_pdm_district_geographic_risk",
+        "model.pdm_platform.gld_dim_pdm_sacco",
+        "model.pdm_platform.gld_fct_pdm_loans",
+        "model.pdm_platform.slv_pdm_saccos"
+      ],
+      "qualified_name": "consumption.cns_pdm_subcounty_geographic_risk",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_subcounty_geographic_risk"
+    },
+    {
+      "direct_test_count": 2,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_end_to_end_traceability",
+      "parents": [
+        "model.pdm_platform.cns_pdm_ai_default_risk",
+        "model.pdm_platform.cns_pdm_duplicate_fragmentation_alerts",
+        "model.pdm_platform.cns_pdm_fraud_risk_insights",
+        "model.pdm_platform.cns_pdm_lifecycle_exception_cases",
+        "model.pdm_platform.gld_dim_pdm_beneficiary",
+        "model.pdm_platform.gld_dim_pdm_sacco",
+        "model.pdm_platform.gld_dim_pdm_special_group",
+        "model.pdm_platform.gld_fct_pdm_loans",
+        "model.pdm_platform.gld_fct_pdm_payment_lifecycle",
+        "model.pdm_platform.gld_fct_pdm_payments",
+        "model.pdm_platform.vlt_pdm_beneficiary_identity_signals"
+      ],
+      "qualified_name": "consumption.cns_pdm_end_to_end_traceability",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_end_to_end_traceability"
+    },
+    {
+      "direct_test_count": 2,
+      "materialized": "iceberg_table",
+      "name": "cns_pdm_geographic_risk_summary",
+      "parents": [
+        "model.pdm_platform.cns_pdm_district_geographic_risk",
+        "model.pdm_platform.cns_pdm_parish_geographic_risk",
+        "model.pdm_platform.cns_pdm_subcounty_geographic_risk"
+      ],
+      "qualified_name": "consumption.cns_pdm_geographic_risk_summary",
+      "schema": "consumption",
+      "unique_id": "model.pdm_platform.cns_pdm_geographic_risk_summary"
+    }
+  ],
+  "runtime_groups": {
+    "ordinary_analytics": {
+      "authority": "ordinary_transform",
+      "same_dbt_runtime_required": false,
+      "schemas": [
+        "silver",
+        "gold",
+        "consumption"
+      ]
+    },
+    "raw_to_bronze": {
+      "authority": "ordinary_transform",
+      "reason": "Staging models are ephemeral DuckDB views required by dependent Bronze models.",
+      "same_dbt_runtime_required": true,
+      "schemas": [
+        "staging",
+        "bronze"
+      ]
+    },
+    "restricted_identity": {
+      "authority": "restricted_identity_transform",
+      "same_dbt_runtime_required": false,
+      "schemas": [
+        "silver_vault"
+      ]
+    }
+  },
+  "security_boundaries": {
+    "silver_vault": {
+      "boundary_edges": [
+        {
+          "child": "model.pdm_platform.vlt_pdm_beneficiary_identity",
+          "parent": "model.pdm_platform.br_pdm_pdmis_beneficiaries"
+        },
+        {
+          "child": "model.pdm_platform.vlt_pdm_beneficiary_identity_alerts",
+          "parent": "model.pdm_platform.slv_pdm_loan_beneficiary_links"
+        },
+        {
+          "child": "model.pdm_platform.vlt_pdm_beneficiary_identity_alerts",
+          "parent": "model.pdm_platform.slv_pdm_loans"
+        },
+        {
+          "child": "model.pdm_platform.vlt_pdm_beneficiary_identity_alerts",
+          "parent": "model.pdm_platform.slv_pdm_payment_account_controls"
+        },
+        {
+          "child": "model.pdm_platform.vlt_pdm_beneficiary_identity_alerts",
+          "parent": "model.pdm_platform.slv_pdm_payment_party_roles"
+        },
+        {
+          "child": "model.pdm_platform.vlt_pdm_beneficiary_identity_alerts",
+          "parent": "model.pdm_platform.slv_pdm_payments_transactions"
+        },
+        {
+          "child": "model.pdm_platform.slv_pdm_beneficiaries",
+          "parent": "model.pdm_platform.vlt_pdm_beneficiary_identity"
+        },
+        {
+          "child": "model.pdm_platform.slv_pdm_loan_beneficiary_links",
+          "parent": "model.pdm_platform.vlt_pdm_beneficiary_identity"
+        },
+        {
+          "child": "model.pdm_platform.slv_pdm_payment_account_controls",
+          "parent": "model.pdm_platform.vlt_pdm_beneficiary_identity"
+        },
+        {
+          "child": "model.pdm_platform.slv_pdm_payment_entity_matches",
+          "parent": "model.pdm_platform.vlt_pdm_beneficiary_identity"
+        },
+        {
+          "child": "model.pdm_platform.cns_pdm_beneficiary_identity_alerts",
+          "parent": "model.pdm_platform.vlt_pdm_beneficiary_identity_signals"
+        },
+        {
+          "child": "model.pdm_platform.cns_pdm_duplicate_fragmentation_alerts",
+          "parent": "model.pdm_platform.vlt_pdm_beneficiary_identity_signals"
+        },
+        {
+          "child": "model.pdm_platform.cns_pdm_end_to_end_traceability",
+          "parent": "model.pdm_platform.vlt_pdm_beneficiary_identity_signals"
+        },
+        {
+          "child": "model.pdm_platform.cns_pdm_executive_geographic_drilldown",
+          "parent": "model.pdm_platform.vlt_pdm_beneficiary_identity_signals"
+        },
+        {
+          "child": "model.pdm_platform.cns_pdm_fraud_risk_insights",
+          "parent": "model.pdm_platform.vlt_pdm_beneficiary_identity_signals"
+        }
+      ],
+      "separate_authority_required": true
+    }
+  },
+  "topological_wave_count": 11,
+  "topological_waves": [
+    {
+      "models": [
+        "model.pdm_platform.br_pdm_ai_default_risk",
+        "model.pdm_platform.stg_pdm_agent_locations",
+        "model.pdm_platform.stg_pdm_agent_profiles",
+        "model.pdm_platform.stg_pdm_agent_transactions",
+        "model.pdm_platform.stg_pdm_cpo_plm_pain002",
+        "model.pdm_platform.stg_pdm_cpo_psn_pain002",
+        "model.pdm_platform.stg_pdm_icmn_pmn_pain001",
+        "model.pdm_platform.stg_pdm_icmn_vpm_pain001",
+        "model.pdm_platform.stg_pdm_mobile_airtel_pacs002",
+        "model.pdm_platform.stg_pdm_mobile_airtel_pacs008",
+        "model.pdm_platform.stg_pdm_mobile_mtn_pacs002",
+        "model.pdm_platform.stg_pdm_mobile_mtn_pacs008",
+        "model.pdm_platform.stg_pdm_pdmis_beneficiaries",
+        "model.pdm_platform.stg_pdm_pdmis_business_plans",
+        "model.pdm_platform.stg_pdm_pdmis_households",
+        "model.pdm_platform.stg_pdm_pdmis_loans",
+        "model.pdm_platform.stg_pdm_pdmis_saccos",
+        "model.pdm_platform.stg_pdm_pdmis_special_groups",
+        "model.pdm_platform.stg_pdm_wendi_camt052",
+        "model.pdm_platform.stg_pdm_wendi_camt053",
+        "model.pdm_platform.stg_pdm_wendi_camt054",
+        "model.pdm_platform.stg_pdm_wendi_pain001",
+        "model.pdm_platform.stg_pdm_wendi_pain002",
+        "model.pdm_platform.stg_pdm_wendi_transactions"
+      ],
+      "wave": 1
+    },
+    {
+      "models": [
+        "model.pdm_platform.br_pdm_agent_locations",
+        "model.pdm_platform.br_pdm_agent_profiles",
+        "model.pdm_platform.br_pdm_agent_transactions",
+        "model.pdm_platform.br_pdm_cpo_plm_pain002",
+        "model.pdm_platform.br_pdm_cpo_psn_pain002",
+        "model.pdm_platform.br_pdm_icmn_pmn_pain001",
+        "model.pdm_platform.br_pdm_icmn_vpm_pain001",
+        "model.pdm_platform.br_pdm_mobile_airtel_pacs002",
+        "model.pdm_platform.br_pdm_mobile_airtel_pacs008",
+        "model.pdm_platform.br_pdm_mobile_mtn_pacs002",
+        "model.pdm_platform.br_pdm_mobile_mtn_pacs008",
+        "model.pdm_platform.br_pdm_payments_plm_lifecycle_events",
+        "model.pdm_platform.br_pdm_payments_pmn_lifecycle_events",
+        "model.pdm_platform.br_pdm_pdmis_beneficiaries",
+        "model.pdm_platform.br_pdm_pdmis_business_plans",
+        "model.pdm_platform.br_pdm_pdmis_households",
+        "model.pdm_platform.br_pdm_pdmis_loans",
+        "model.pdm_platform.br_pdm_pdmis_saccos",
+        "model.pdm_platform.br_pdm_pdmis_special_groups",
+        "model.pdm_platform.br_pdm_wendi_camt052",
+        "model.pdm_platform.br_pdm_wendi_camt053",
+        "model.pdm_platform.br_pdm_wendi_camt054",
+        "model.pdm_platform.br_pdm_wendi_pain001",
+        "model.pdm_platform.br_pdm_wendi_pain002",
+        "model.pdm_platform.br_pdm_wendi_transactions"
+      ],
+      "wave": 2
+    },
+    {
+      "models": [
+        "model.pdm_platform.slv_pdm_agent_locations",
+        "model.pdm_platform.slv_pdm_agents",
+        "model.pdm_platform.slv_pdm_batch",
+        "model.pdm_platform.slv_pdm_business_plans",
+        "model.pdm_platform.slv_pdm_households",
+        "model.pdm_platform.slv_pdm_loans",
+        "model.pdm_platform.slv_pdm_payment_party_roles",
+        "model.pdm_platform.slv_pdm_payments_accounts",
+        "model.pdm_platform.slv_pdm_payments_messages",
+        "model.pdm_platform.slv_pdm_payments_party",
+        "model.pdm_platform.slv_pdm_payments_plm_lifecycle_events",
+        "model.pdm_platform.slv_pdm_payments_pmn_lifecycle_events",
+        "model.pdm_platform.slv_pdm_payments_remittance",
+        "model.pdm_platform.slv_pdm_payments_status_report",
+        "model.pdm_platform.slv_pdm_payments_transactions",
+        "model.pdm_platform.slv_pdm_saccos",
+        "model.pdm_platform.slv_pdm_special_groups",
+        "model.pdm_platform.vlt_pdm_beneficiary_identity"
+      ],
+      "wave": 3
+    },
+    {
+      "models": [
+        "model.pdm_platform.gld_dim_pdm_agent",
+        "model.pdm_platform.gld_dim_pdm_sacco",
+        "model.pdm_platform.gld_dim_pdm_special_group",
+        "model.pdm_platform.slv_pdm_beneficiaries",
+        "model.pdm_platform.slv_pdm_loan_beneficiary_links",
+        "model.pdm_platform.slv_pdm_payment_lifecycle",
+        "model.pdm_platform.slv_pdm_payment_technical_events",
+        "model.pdm_platform.slv_pdm_payments_reconciliation"
+      ],
+      "wave": 4
+    },
+    {
+      "models": [
+        "model.pdm_platform.cns_pdm_ai_default_risk",
+        "model.pdm_platform.cns_pdm_village_geographic_risk",
+        "model.pdm_platform.gld_dim_pdm_beneficiary",
+        "model.pdm_platform.gld_dim_pdm_date",
+        "model.pdm_platform.gld_dim_pdm_geography",
+        "model.pdm_platform.gld_fct_pdm_loans",
+        "model.pdm_platform.gld_fct_pdm_payment_lifecycle",
+        "model.pdm_platform.slv_pdm_payment_account_controls",
+        "model.pdm_platform.slv_pdm_payment_entity_matches",
+        "model.pdm_platform.slv_pdm_payment_event_correlation"
+      ],
+      "wave": 5
+    },
+    {
+      "models": [
+        "model.pdm_platform.cns_pdm_district_ai_risk",
+        "model.pdm_platform.cns_pdm_executive_ai_risk",
+        "model.pdm_platform.cns_pdm_financial_fund_flow",
+        "model.pdm_platform.cns_pdm_lifecycle_exceptions",
+        "model.pdm_platform.cns_pdm_parish_performance",
+        "model.pdm_platform.cns_pdm_social_impact",
+        "model.pdm_platform.gld_fct_pdm_payments",
+        "model.pdm_platform.slv_pdm_dq_results",
+        "model.pdm_platform.vlt_pdm_beneficiary_identity_alerts"
+      ],
+      "wave": 6
+    },
+    {
+      "models": [
+        "model.pdm_platform.cns_pdm_executive_monthly_trend",
+        "model.pdm_platform.cns_pdm_fund_flow_funnel",
+        "model.pdm_platform.cns_pdm_lifecycle_exception_cases",
+        "model.pdm_platform.cns_pdm_parish_geographic_risk",
+        "model.pdm_platform.cns_pdm_payment_operations",
+        "model.pdm_platform.gld_fct_pdm_agent_cashouts",
+        "model.pdm_platform.vlt_pdm_beneficiary_identity_signals"
+      ],
+      "wave": 7
+    },
+    {
+      "models": [
+        "model.pdm_platform.cns_pdm_agent_risk_indicators",
+        "model.pdm_platform.cns_pdm_beneficiary_identity_alerts",
+        "model.pdm_platform.cns_pdm_beneficiary_insights",
+        "model.pdm_platform.cns_pdm_channel_agent_performance",
+        "model.pdm_platform.cns_pdm_duplicate_fragmentation_alerts",
+        "model.pdm_platform.cns_pdm_executive_geographic_drilldown",
+        "model.pdm_platform.cns_pdm_geographic_alerts",
+        "model.pdm_platform.cns_pdm_geographic_coverage",
+        "model.pdm_platform.cns_pdm_geographic_risk_drivers",
+        "model.pdm_platform.cns_pdm_loan_intervention_dashboard",
+        "model.pdm_platform.cns_pdm_local_government_performance",
+        "model.pdm_platform.cns_pdm_payment_reconciliation",
+        "model.pdm_platform.cns_pdm_payments_daily_summary",
+        "model.pdm_platform.cns_pdm_sacco_portfolio"
+      ],
+      "wave": 8
+    },
+    {
+      "models": [
+        "model.pdm_platform.cns_pdm_daily_operational_metrics",
+        "model.pdm_platform.cns_pdm_district_geographic_risk",
+        "model.pdm_platform.cns_pdm_executive_overview"
+      ],
+      "wave": 9
+    },
+    {
+      "models": [
+        "model.pdm_platform.cns_pdm_district_geojson_risk",
+        "model.pdm_platform.cns_pdm_executive_intervention_priorities",
+        "model.pdm_platform.cns_pdm_fraud_risk_insights",
+        "model.pdm_platform.cns_pdm_geographic_risk_trend",
+        "model.pdm_platform.cns_pdm_subcounty_geographic_risk"
+      ],
+      "wave": 10
+    },
+    {
+      "models": [
+        "model.pdm_platform.cns_pdm_end_to_end_traceability",
+        "model.pdm_platform.cns_pdm_geographic_risk_summary"
+      ],
+      "wave": 11
+    }
+  ],
+  "zero_direct_test_models": [
+    "model.pdm_platform.br_pdm_ai_default_risk",
+    "model.pdm_platform.slv_pdm_agent_locations",
+    "model.pdm_platform.slv_pdm_payments_plm_lifecycle_events",
+    "model.pdm_platform.slv_pdm_payments_pmn_lifecycle_events",
+    "model.pdm_platform.slv_pdm_payment_party_roles",
+    "model.pdm_platform.slv_pdm_payments_accounts",
+    "model.pdm_platform.slv_pdm_payments_party",
+    "model.pdm_platform.slv_pdm_payments_remittance",
+    "model.pdm_platform.slv_pdm_payments_status_report",
+    "model.pdm_platform.slv_pdm_payment_technical_events",
+    "model.pdm_platform.slv_pdm_payments_reconciliation",
+    "model.pdm_platform.cns_pdm_ai_default_risk",
+    "model.pdm_platform.cns_pdm_district_ai_risk",
+    "model.pdm_platform.cns_pdm_executive_ai_risk",
+    "model.pdm_platform.cns_pdm_parish_performance",
+    "model.pdm_platform.slv_pdm_dq_results",
+    "model.pdm_platform.cns_pdm_payment_operations",
+    "model.pdm_platform.cns_pdm_geographic_coverage",
+    "model.pdm_platform.cns_pdm_payment_reconciliation",
+    "model.pdm_platform.cns_pdm_payments_daily_summary",
+    "model.pdm_platform.cns_pdm_daily_operational_metrics",
+    "model.pdm_platform.cns_pdm_district_geojson_risk",
+    "model.pdm_platform.cns_pdm_executive_intervention_priorities"
+  ]
+}

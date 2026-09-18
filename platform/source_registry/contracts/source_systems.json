@@ -1,0 +1,177 @@
+{
+  "contract_version": 1,
+  "registry_status": "ACTIVE",
+  "principles": {
+    "generated_event_is_not_cdc": true,
+    "platform_database_is_not_operational_source_by_default": true,
+    "cdc_requires_explicit_allowlist": true,
+    "cdc_requires_mutable_database_source": true,
+    "cdc_adapter": "debezium",
+    "cdc_transport": "kafka",
+    "raw_is_first_persistent_ingestion_layer": true,
+    "direct_cdc_to_bronze": false
+  },
+  "source_systems": [
+    {
+      "source_system": "agent_network",
+      "source_type": "SOURCE_SYSTEM_SIMULATOR",
+      "adapter_type": "GENERATED_EVENT",
+      "generator": "services/payment-xml-generator/agent_network_generator.py",
+      "data_root": "data/agent_network",
+      "entities": [
+        "locations",
+        "profiles",
+        "transactions"
+      ],
+      "kafka_topics": [
+        "agent.locations",
+        "agent.profiles",
+        "agent.transactions"
+      ],
+      "mutable_database_source": false,
+      "cdc_capable": false,
+      "cdc_activated": false,
+      "mdm_participant": true
+    },
+    {
+      "source_system": "cpo",
+      "source_type": "SOURCE_SYSTEM_SIMULATOR",
+      "adapter_type": "GENERATED_EVENT",
+      "generator": "services/payment-xml-generator/cpo_generator.py",
+      "data_root": "data/cpo",
+      "entities": [
+        "plm_pain002",
+        "psn_pain002"
+      ],
+      "kafka_topics": [
+        "cpo.plm.pain002",
+        "cpo.psn.pain002"
+      ],
+      "mutable_database_source": false,
+      "cdc_capable": false,
+      "cdc_activated": false,
+      "mdm_participant": false
+    },
+    {
+      "source_system": "icmn",
+      "source_type": "SOURCE_SYSTEM_SIMULATOR",
+      "adapter_type": "GENERATED_EVENT",
+      "generator": "services/payment-xml-generator/icmn_generator.py",
+      "data_root": "data/icmn",
+      "entities": [
+        "pmn_pain001",
+        "vpm_pain001"
+      ],
+      "kafka_topics": [
+        "icmn.pmn.pain001",
+        "icmn.vpm.pain001"
+      ],
+      "mutable_database_source": false,
+      "cdc_capable": false,
+      "cdc_activated": false,
+      "mdm_participant": false
+    },
+    {
+      "source_system": "mobile_networks",
+      "source_type": "SOURCE_SYSTEM_SIMULATOR",
+      "adapter_type": "GENERATED_EVENT",
+      "generator": "services/payment-xml-generator/mobile_networks_generator.py",
+      "data_root": "data/mobile_networks",
+      "entities": [
+        "mtn_pacs002",
+        "mtn_pacs008",
+        "airtel_pacs002",
+        "airtel_pacs008"
+      ],
+      "kafka_topics": [
+        "mobile.mtn.pacs002",
+        "mobile.mtn.pacs008",
+        "mobile.airtel.pacs002",
+        "mobile.airtel.pacs008"
+      ],
+      "mutable_database_source": false,
+      "cdc_capable": false,
+      "cdc_activated": false,
+      "mdm_participant": false
+    },
+    {
+      "source_system": "pdmis",
+      "source_type": "SOURCE_SYSTEM_SIMULATOR",
+      "adapter_type": "GENERATED_EVENT",
+      "generator": "services/payment-xml-generator/pdmis_generator.py",
+      "data_root": "data/pdmis",
+      "entities": [
+        "beneficiaries",
+        "business_plans",
+        "households",
+        "loans",
+        "repayments",
+        "saccos",
+        "special_groups"
+      ],
+      "kafka_topics": [
+        "pdmis.beneficiaries",
+        "pdmis.business_plans",
+        "pdmis.households",
+        "pdmis.loans",
+        "pdmis.repayments",
+        "pdmis.saccos",
+        "pdmis.special_groups"
+      ],
+      "mutable_database_source": false,
+      "cdc_capable": false,
+      "cdc_activated": false,
+      "mdm_participant": true
+    },
+    {
+      "source_system": "wendi",
+      "source_type": "SOURCE_SYSTEM_SIMULATOR",
+      "adapter_type": "GENERATED_EVENT",
+      "generator": "services/payment-xml-generator/wendi_generator.py",
+      "data_root": "data/wendi",
+      "entities": [
+        "camt052",
+        "camt053",
+        "camt054",
+        "pain001",
+        "pain002",
+        "transactions"
+      ],
+      "kafka_topics": [
+        "wendi.camt052",
+        "wendi.camt053",
+        "wendi.camt054",
+        "wendi.pain001",
+        "wendi.pain002",
+        "wendi.transactions"
+      ],
+      "mutable_database_source": false,
+      "cdc_capable": false,
+      "cdc_activated": false,
+      "mdm_participant": true
+    }
+  ],
+  "special_data_domains": [
+    {
+      "name": "pdmis_ml",
+      "classification": "ML_FEATURE_INPUT",
+      "operational_source_system": false,
+      "cdc_source": false
+    },
+    {
+      "name": "mdm",
+      "classification": "MASTER_DATA_DOMAIN",
+      "operational_source_system": false,
+      "cdc_source": false
+    }
+  ],
+  "platform_databases": [
+    {
+      "name": "platform_postgres",
+      "classification": "PLATFORM_INFRASTRUCTURE",
+      "operational_source_system": false,
+      "cdc_source": false,
+      "cdc_activation_prohibited_without_reclassification": true
+    }
+  ]
+}

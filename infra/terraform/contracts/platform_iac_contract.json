@@ -1,0 +1,105 @@
+{
+  "contract_version": 1,
+  "name": "pdm_platform_iac",
+  "control_plane": "terraform",
+
+  "provider_policy": {
+    "provider_selected": false,
+    "provider_assumption_allowed": false,
+    "supported_target_status": "NOT_YET_SELECTED",
+    "provider_specific_resources_allowed_before_selection": false
+  },
+
+  "environment_policy": {
+    "environment_separation_required": true,
+    "production_isolation_required": true,
+    "shared_production_state_allowed": false,
+    "protected_environment_approval_required": true
+  },
+
+  "state_policy": {
+    "remote_state_required_for_production": true,
+    "state_encryption_required": true,
+    "state_locking_required": true,
+    "state_access_least_privilege_required": true,
+    "local_production_state_allowed": false,
+    "state_contains_secret_material_policy": "PROHIBIT_WHERE_POSSIBLE"
+  },
+
+  "infrastructure_scope": {
+    "networking": true,
+    "service_identities_and_iam": true,
+    "object_storage": true,
+    "kafka": true,
+    "cdc_kafka_connect_debezium": true,
+    "database_infrastructure": true,
+    "secret_and_kms_references": true,
+    "airflow": true,
+    "observability": true,
+    "archive_and_retention": true,
+    "backup_and_disaster_recovery": true
+  },
+
+  "security_policy": {
+    "plaintext_secrets_in_source": false,
+    "plaintext_secrets_in_tfvars": false,
+    "plaintext_secrets_in_ci_logs": false,
+    "approved_secret_backend_required": true,
+    "kms_or_equivalent_required_for_production": true,
+    "least_privilege_service_identity_required": true,
+    "network_encryption_required": true,
+    "production_public_access_default": "DENY"
+  },
+
+  "kafka_policy": {
+    "topic_configuration_managed_as_code": true,
+    "acl_managed_as_code": true,
+    "retention_managed_as_code": true,
+    "replication_managed_as_code": true,
+    "tls_required_for_production": true,
+    "anonymous_access_allowed": false
+  },
+
+  "cdc_policy": {
+    "source_registry_is_activation_authority": true,
+    "explicit_source_allowlist_required": true,
+    "connector_version_pin_required": true,
+    "secret_reference_required": true,
+    "database_preflight_required": true,
+    "observability_preflight_required": true,
+    "recovery_preflight_required": true,
+    "restricted_quarantine_required": true,
+    "direct_kafka_to_bronze_allowed": false,
+    "airflow_polling_for_cdc_allowed": false,
+    "terraform_presence_activates_cdc": false
+  },
+
+  "data_platform_policy": {
+    "raw_first_ingestion_required": true,
+    "raw_storage_persistent": true,
+    "staging_ephemeral": true,
+    "bronze_persistent": true,
+    "silver_persistent": true,
+    "gold_persistent": true,
+    "consumption_persistent": true
+  },
+
+  "mdm_policy": {
+    "restricted_identity_boundary_required": true,
+    "golden_record_storage_restricted": true,
+    "source_crosswalk_storage_restricted": true,
+    "ordinary_analytics_direct_identity_allowed": false,
+    "canonical_token_boundary_required": true,
+    "token_link_rematerialisation_by_deployment_allowed": false
+  },
+
+  "deployment_policy": {
+    "immutable_artifact_required": true,
+    "plan_before_apply_required": true,
+    "plan_artifact_retention_required": true,
+    "protected_environment_approval_required": true,
+    "direct_unreviewed_production_apply_allowed": false,
+    "post_deployment_acceptance_required": true,
+    "rollback_or_recovery_procedure_required": true
+  }
+}

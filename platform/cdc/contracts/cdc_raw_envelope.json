@@ -1,0 +1,46 @@
+{
+  "contract_version": 1,
+
+  "record_type": "CDC_CHANGE_EVENT",
+
+  "required_fields": [
+    "source_system",
+    "source_schema",
+    "source_table",
+    "operation",
+    "source_position",
+    "event_timestamp",
+    "ingestion_timestamp",
+    "schema_version",
+    "record_key"
+  ],
+
+  "optional_fields": [
+    "source_transaction",
+    "before",
+    "after"
+  ],
+
+  "operations": {
+    "c": "INSERT",
+    "u": "UPDATE",
+    "d": "DELETE",
+    "r": "SNAPSHOT_READ"
+  },
+
+  "semantics": {
+    "raw_preserves_source_change": true,
+    "before_after_preserved_where_permitted": true,
+    "delete_preserved": true,
+    "tombstone_recognised": true,
+    "source_position_preserved": true,
+    "source_transaction_preserved_where_available": true,
+    "direct_to_bronze": false
+  },
+
+  "privacy": {
+    "classification_inherited_from_source": true,
+    "direct_identity_may_exist_in_restricted_raw": true,
+    "ordinary_analytics_direct_identity": false
+  }
+}

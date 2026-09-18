@@ -1,0 +1,56 @@
+{
+  "contract_version": 1,
+  "name": "pdm_local_deployment_interface",
+
+  "target": "local",
+
+  "authority": {
+    "terraform": "DEPLOYMENT_GOVERNANCE_CONTROL_PLANE",
+    "docker_compose": "LOCAL_APPLICATION_TOPOLOGY_AUTHORITY"
+  },
+
+  "compose": {
+    "authoritative_file": "docker-compose.yaml",
+    "project_root": ".",
+    "profile_aware": true,
+    "individual_resource_ownership_by_terraform": false
+  },
+
+  "modes": {
+    "inspect": {
+      "allowed": true,
+      "mutating": false
+    },
+    "validate": {
+      "allowed": true,
+      "mutating": false
+    },
+    "deploy": {
+      "allowed": false,
+      "mutating": true,
+      "requires_future_controlled_enablement": true
+    },
+    "destroy": {
+      "allowed": false,
+      "mutating": true,
+      "requires_separate_explicit_action": true
+    }
+  },
+
+  "terraform": {
+    "plan_must_be_side_effect_free": true,
+    "local_exec_provisioner_allowed": false,
+    "remote_exec_provisioner_allowed": false,
+    "null_resource_compose_execution_allowed": false,
+    "terraform_data_compose_execution_allowed": false
+  },
+
+  "protected_operations": {
+    "kafka_offset_reset": false,
+    "raw_object_deletion": false,
+    "token_link_rematerialisation": false,
+    "gate3_recovery_restore": false,
+    "cdc_implicit_activation": false,
+    "unbounded_dbt_build": false
+  }
+}

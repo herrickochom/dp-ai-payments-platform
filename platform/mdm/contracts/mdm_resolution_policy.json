@@ -1,0 +1,35 @@
+{
+  "contract_version": 1,
+  "beneficiary": {
+    "authority": "restricted_identity",
+    "deterministic_rules": [
+      {
+        "rule": "verified_nin_exact",
+        "priority": 1,
+        "automatic_match": true
+      },
+      {
+        "rule": "source_beneficiary_id_exact",
+        "priority": 2,
+        "automatic_match": true
+      }
+    ],
+    "probabilistic_matching": {
+      "enabled": false,
+      "reason": "requires separately validated matching policy"
+    },
+    "ambiguous_match_action": "QUARANTINE_FOR_REVIEW",
+    "shared_nin_action": "IDENTITY_ALERT_NOT_AUTOMATIC_MERGE"
+  },
+  "golden_record": {
+    "source_crosswalk_required": true,
+    "source_provenance_required": true,
+    "survivorship_policy_required": true,
+    "history_required": true
+  },
+  "tokenisation": {
+    "existing_token_link_reused": true,
+    "token_link_rematerialisation_allowed": false,
+    "ordinary_analytics_direct_identity_allowed": false
+  }
+}

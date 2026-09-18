@@ -1,0 +1,36 @@
+{
+  "authoritative": true,
+  "contract_version": 1,
+  "default_services": [
+    "kafka",
+    "kafka-init",
+    "kafka-volume-init",
+    "minio",
+    "minio-init-buckets",
+    "minio-init-databases",
+    "nessie",
+    "payment-consumer-events",
+    "payment-producer",
+    "postgres",
+    "postgres-healthcheck",
+    "redis",
+    "schema-registry",
+    "schema-registry-init"
+  ],
+  "name": "pdm_local_compose_inventory",
+  "profiles": [
+    "agents",
+    "ai",
+    "airflow",
+    "analytics",
+    "dashboard",
+    "dbt",
+    "duckdb",
+    "generate-data",
+    "metabase",
+    "ml",
+    "superset",
+    "trino"
+  ],
+  "source": "docker-compose.yaml"
+}
