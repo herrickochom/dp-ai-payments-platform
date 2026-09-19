@@ -87,3 +87,80 @@ def test_compose_is_validation_only():
     text = workflow()
 
     assert "docker compose config --quiet" in text
+
+
+def test_ci_actions_are_pinned_to_verified_full_commit_shas():
+    import re
+
+    text = workflow()
+
+    expected = {
+        "actions/checkout":
+            "11d5960a326750d5838078e36cf38b85af677262",
+        "actions/setup-python":
+            "a26af69be951a213d495a4c3e4e4022e16d87065",
+        "hashicorp/setup-terraform":
+            "b9cd54a3c349d3f38e8881555d616ced269862dd",
+    }
+
+    refs = re.findall(
+        r"^\s*uses:\s*([^\s#]+)",
+        text,
+        flags=re.MULTILINE,
+    )
+
+    assert len(refs) == 7
+
+    for ref in refs:
+        name, sha = ref.rsplit("@", 1)
+
+        assert name in expected
+        assert sha == expected[name]
+        assert re.fullmatch(
+            r"[0-9a-f]{40}",
+            sha,
+        )
+
+
+def test_ci_runner_is_pinned_to_ubuntu_2404():
+    text = workflow()
+
+    assert text.count(
+        "runs-on: ubuntu-24.04"
+    ) == 4
+
+    assert "ubuntu-latest" not in text
+
+
+def test_source_quality_is_event_base_aware():
+    text = workflow()
+
+    assert "fetch-depth: 0" in text
+    assert "github.event_name" in text
+
+    assert (
+        "github.event.pull_request.base.sha"
+        in text
+    )
+
+    assert "github.event.before" in text
+
+    assert (
+        'git diff --check "$base" HEAD'
+        in text
+    )
+
+    assert (
+        "git diff-tree --check --root HEAD"
+        in text
+    )
+
+
+def test_orchestration_regression_is_in_ci():
+    text = workflow()
+
+    assert (
+        "python -m pytest -q "
+        "orchestration/airflow/tests"
+        in text
+    )
