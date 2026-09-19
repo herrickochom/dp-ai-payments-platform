@@ -231,3 +231,51 @@ def test_raw_readiness_api_uses_request_request_id():
         '"request_id": command.request_id'
         not in text
     )
+
+
+def test_raw_readiness_requires_dedicated_object_store_credentials(
+    monkeypatch,
+):
+    monkeypatch.setenv("KAFKA_TOPICS", "topic-a")
+    monkeypatch.delenv(
+        "PLATFORM_RAW_READ_ACCESS_KEY",
+        raising=False,
+    )
+    monkeypatch.delenv(
+        "PLATFORM_RAW_READ_SECRET_KEY",
+        raising=False,
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="dedicated raw-read object-store credentials",
+    ):
+        raw_readiness.run_raw_readiness()
+
+
+def test_raw_readiness_does_not_use_minio_root_credentials(
+    monkeypatch,
+):
+    monkeypatch.setenv("KAFKA_TOPICS", "topic-a")
+    monkeypatch.setenv(
+        "MINIO_ROOT_USER",
+        "must-not-be-used",
+    )
+    monkeypatch.setenv(
+        "MINIO_ROOT_PASSWORD",
+        "must-not-be-used",
+    )
+    monkeypatch.delenv(
+        "PLATFORM_RAW_READ_ACCESS_KEY",
+        raising=False,
+    )
+    monkeypatch.delenv(
+        "PLATFORM_RAW_READ_SECRET_KEY",
+        raising=False,
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="dedicated raw-read object-store credentials",
+    ):
+        raw_readiness.run_raw_readiness()
