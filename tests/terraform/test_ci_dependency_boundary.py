@@ -1,13 +1,11 @@
-import json
 from pathlib import Path
+import json
 
 
 ROOT = Path(__file__).resolve().parents[2]
 
-RUNTIME = ROOT / "requirements.txt"
-CI = ROOT / "requirements-ci.txt"
+REQUIREMENTS = ROOT / "requirements.txt"
 WORKFLOW = ROOT / ".github" / "workflows" / "ci.yml"
-
 CONTRACT = (
     ROOT
     / "infra"
@@ -17,51 +15,44 @@ CONTRACT = (
 )
 
 
-def test_ci_requirements_exists():
-    assert CI.is_file()
+def test_root_requirements_exists():
+    assert REQUIREMENTS.is_file()
 
 
-def test_pytest_is_ci_only():
-    runtime = RUNTIME.read_text().lower()
-    ci = CI.read_text().lower()
+def test_single_root_requirements_contains_test_runner():
+    text = REQUIREMENTS.read_text().lower()
 
-    assert "pytest" not in runtime
-    assert "pytest==9.1.1" in ci
+    assert "pytest==9.1.1" in text
 
 
-def test_ci_dependencies_are_pinned():
-    lines = [
-        line.strip()
-        for line in CI.read_text().splitlines()
-        if line.strip()
-        and not line.strip().startswith("#")
-    ]
+def test_required_clean_runner_dependencies_are_declared():
+    text = REQUIREMENTS.read_text().lower()
 
-    assert lines
+    required = (
+        "boto3",
+        "confluent-kafka",
+        "pytz",
+        "pytest==9.1.1",
+    )
 
-    for line in lines:
-        assert "==" in line
+    for dependency in required:
+        assert dependency in text
 
 
-def test_workflow_installs_runtime_and_ci_requirements():
-    text = WORKFLOW.read_text()
+def test_workflow_uses_single_root_requirements():
+    workflow = WORKFLOW.read_text()
 
     assert (
-        text.count(
+        workflow.count(
             "python -m pip install -r requirements.txt"
         )
         == 2
     )
 
-    assert (
-        text.count(
-            "python -m pip install -r requirements-ci.txt"
-        )
-        == 2
-    )
+    assert "requirements-ci.txt" not in workflow
 
 
-def test_contract_records_dependency_boundary():
+def test_contract_records_single_dependency_authority():
     doc = json.loads(CONTRACT.read_text())
 
     policy = doc["dependency_policy"]
@@ -71,27 +62,4 @@ def test_contract_records_dependency_boundary():
         == "requirements.txt"
     )
 
-    assert (
-        policy["ci_requirements"]
-        == "requirements-ci.txt"
-    )
-
-    assert (
-        policy["runtime_and_ci_separated"]
-        is True
-    )
-
-    assert (
-        policy["pytest_runtime_dependency"]
-        is False
-    )
-
-    assert (
-        policy["pytest_ci_dependency"]
-        is True
-    )
-
-    assert (
-        policy["ci_dependency_versions_pinned"]
-        is True
-    )
+    assert "ci_requirements" not in policy

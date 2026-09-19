@@ -1,3 +1,0 @@
-# CI and governance test dependencies.
-# Runtime/application dependencies remain in requirements.txt.
-pytest==9.1.1

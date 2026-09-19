@@ -70,7 +70,6 @@
   },
   "dependency_policy": {
     "runtime_requirements": "requirements.txt",
-    "ci_requirements": "requirements-ci.txt",
     "runtime_and_ci_separated": true,
     "pytest_runtime_dependency": false,
     "pytest_ci_dependency": true,
