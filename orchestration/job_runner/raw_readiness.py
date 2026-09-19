@@ -40,8 +40,17 @@ def _client():
         "http://minio:9000",
     )
 
-    access_key = os.environ.get("MINIO_ROOT_USER")
-    secret_key = os.environ.get("MINIO_ROOT_PASSWORD")
+    access_key = os.environ.get(
+        "PLATFORM_RAW_READ_ACCESS_KEY"
+    )
+    secret_key = os.environ.get(
+        "PLATFORM_RAW_READ_SECRET_KEY"
+    )
+
+    if not access_key or not secret_key:
+        raise RuntimeError(
+            "dedicated raw-read object-store credentials are required"
+        )
 
     if not access_key or not secret_key:
         raise RuntimeError(

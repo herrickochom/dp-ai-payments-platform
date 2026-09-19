@@ -1045,8 +1045,8 @@ services:
       ICEBERG_CATALOG: "${ICEBERG_CATALOG}"
       PLATFORM_RUNNER_EXECUTION_ENABLED: 'true'
       KAFKA_TOPICS: icmn.vpm.pain001,icmn.pmn.pain001,cpo.psn.pain002,cpo.plm.pain002,wendi.pain001,wendi.pain002,wendi.camt053,wendi.camt052,wendi.camt054,wendi.transactions,mobile.mtn.pacs008,mobile.mtn.pacs002,mobile.airtel.pacs008,mobile.airtel.pacs002,agent.transactions,agent.profiles,agent.locations,pdmis.beneficiaries,pdmis.loans,pdmis.repayments,pdmis.saccos,pdmis.households,pdmis.business_plans,pdmis.special_groups
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      PLATFORM_RAW_READ_ACCESS_KEY: ${PLATFORM_RAW_READ_ACCESS_KEY:?PLATFORM_RAW_READ_ACCESS_KEY is required}
+      PLATFORM_RAW_READ_SECRET_KEY: ${PLATFORM_RAW_READ_SECRET_KEY:?PLATFORM_RAW_READ_SECRET_KEY is required}
       MINIO_BUCKET: dp-ai-payment
       RAW_PREFIX: raw/v2
       S3_ENDPOINT: ${S3_ENDPOINT}
