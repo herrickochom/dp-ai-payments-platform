@@ -1,78 +1,103 @@
 {
-  "contract_version": 1,
-  "platform": "github_actions",
-  "repository": "herrickochom/dp-pdm-ai-platform",
-  "default_branch": "main",
-  "triggers": {
-    "pull_request": true,
-    "push_main": true,
-    "manual_dispatch": true
+  "artifact_policy": {
+    "retain_state": false,
+    "retain_terraform_plan": false,
+    "retain_test_logs": true
   },
-  "permissions": {
-    "default": "read_only",
-    "contents": "read",
-    "actions": "read"
+  "contract_version": 1,
+  "default_branch": "main",
+  "dependency_policy": {
+    "ci_dependency_versions_pinned": true,
+    "pytest_ci_dependency": true,
+    "pytest_runtime_dependency": false,
+    "runtime_and_ci_separated": true,
+    "runtime_requirements": "requirements.txt"
+  },
+  "immutability_policy": {
+    "action_references": {
+      "actions/checkout": "11d5960a326750d5838078e36cf38b85af677262",
+      "actions/setup-python": "a26af69be951a213d495a4c3e4e4022e16d87065",
+      "hashicorp/setup-terraform": "b9cd54a3c349d3f38e8881555d616ced269862dd"
+    },
+    "require_full_commit_sha": true,
+    "runner": "ubuntu-24.04",
+    "runner_residual_mutability": "github_managed_patch_level"
   },
   "jobs": {
-    "source_quality": {
-      "required": true,
+    "cdc_mdm_regression": {
       "commands": [
-        "git diff --check"
-      ]
+        ".venv/bin/python -m pytest -q tests/cdc tests/mdm",
+        ".venv/bin/python -m pytest -q orchestration/airflow/tests"
+      ],
+      "required": true
+    },
+    "compose_validation": {
+      "commands": [
+        "docker compose config"
+      ],
+      "required": true
+    },
+    "source_quality": {
+      "commands": [
+        "git diff --check \"$base\" HEAD"
+      ],
+      "required": true
     },
     "terraform_governance": {
-      "required": true,
-      "terraform_version": "1.16.3",
       "commands": [
         "terraform -chdir=infra/terraform fmt -check -recursive",
         "terraform -chdir=infra/terraform validate -no-color",
         ".venv/bin/python -m pytest -q tests/terraform"
-      ]
-    },
-    "cdc_mdm_regression": {
+      ],
       "required": true,
-      "commands": [
-        ".venv/bin/python -m pytest -q tests/cdc tests/mdm"
-      ]
-    },
-    "compose_validation": {
-      "required": true,
-      "commands": [
-        "docker compose config"
-      ]
+      "terraform_version": "1.16.3"
     }
   },
-  "prohibited_actions": {
-    "terraform_init": true,
-    "terraform_plan": true,
-    "terraform_apply": true,
-    "terraform_destroy": true,
-    "docker_compose_up": true,
-    "docker_compose_down": true,
-    "docker_build": true,
-    "cdc_activation": true,
-    "mdm_execution": true,
-    "dbt_execution": true,
-    "kafka_execution": true,
-    "raw_deletion": true,
-    "token_link_rematerialisation": true,
-    "gate3_recovery": true,
-    "cloud_resource_mutation": true,
-    "production_secrets": true
+  "permissions": {
+    "actions": "read",
+    "contents": "read",
+    "default": "read_only"
   },
-  "artifact_policy": {
-    "retain_test_logs": true,
-    "retain_terraform_plan": false,
-    "retain_state": false
-  },
+  "platform": "github_actions",
   "production_deployment": {
     "enabled": false
   },
-  "dependency_policy": {
-    "runtime_requirements": "requirements.txt",
-    "runtime_and_ci_separated": true,
-    "pytest_runtime_dependency": false,
-    "pytest_ci_dependency": true,
-    "ci_dependency_versions_pinned": true
+  "prohibited_actions": {
+    "cdc_activation": true,
+    "cloud_resource_mutation": true,
+    "dbt_execution": true,
+    "docker_build": true,
+    "docker_compose_down": true,
+    "docker_compose_up": true,
+    "gate3_recovery": true,
+    "kafka_execution": true,
+    "mdm_execution": true,
+    "production_secrets": true,
+    "raw_deletion": true,
+    "terraform_apply": true,
+    "terraform_destroy": true,
+    "terraform_init": true,
+    "terraform_plan": true,
+    "token_link_rematerialisation": true
+  },
+  "regression_policy": {
+    "accepted_baseline_total": 272,
+    "cdc_mdm": "tests/cdc tests/mdm",
+    "orchestration": "orchestration/airflow/tests",
+    "terraform": "tests/terraform"
+  },
+  "repository": "herrickochom/dp-pdm-ai-platform",
+  "source_quality_policy": {
+    "change_boundary": "event_base_to_head",
+    "checkout_fetch_depth": 0,
+    "command": "git diff --check \"$base\" HEAD",
+    "pull_request_base": "github.event.pull_request.base.sha",
+    "push_base": "github.event.before",
+    "zero_base_fallback": "HEAD^_or_root_commit"
+  },
+  "triggers": {
+    "manual_dispatch": true,
+    "pull_request": true,
+    "push_main": true
   }
 }
