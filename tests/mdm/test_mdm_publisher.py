@@ -4,6 +4,8 @@ from pathlib import Path
 import pytest
 
 
+import json
+
 PATH = Path(
     "services/mdm-publisher/mdm_publisher.py"
 )
@@ -19,6 +21,75 @@ publisher = importlib.util.module_from_spec(
 
 assert SPEC.loader is not None
 SPEC.loader.exec_module(publisher)
+
+
+@pytest.fixture(autouse=True)
+def isolated_mdm_publisher_data(tmp_path, monkeypatch):
+    """Provide deterministic repository-independent MDM test inputs."""
+    registry = publisher.load_registry()
+
+    synthetic_root = tmp_path / "repository"
+
+    expected_counts = {
+        "mdm.beneficiary.golden.restricted": 244,
+        "mdm.beneficiary.identity-alert.restricted": 6,
+        "mdm.crosswalk.restricted": 364,
+        "mdm.sacco.golden": 38,
+        "mdm.agent.golden": 38,
+        "mdm.geography.golden": 38,
+    }
+
+    assert {
+        spec["topic"]
+        for spec in registry["records"]
+    } == set(expected_counts)
+
+    assert sum(expected_counts.values()) == 728
+
+    for spec in registry["records"]:
+        topic = spec["topic"]
+        count = expected_counts[topic]
+
+        output_path = synthetic_root / spec["file"]
+        output_path.parent.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        rows = []
+
+        for row_index in range(1, count + 1):
+            row = {}
+
+            if "key_field" in spec:
+                key = spec["key_field"]
+                row[key] = (
+                    f"TEST-{topic}-{row_index:04d}"
+                )
+
+            if "key_fields" in spec:
+                for key_index, key in enumerate(
+                    spec["key_fields"],
+                    start=1,
+                ):
+                    row[key] = (
+                        f"TEST-{topic}-"
+                        f"{row_index:04d}-"
+                        f"{key_index:02d}"
+                    )
+
+            rows.append(row)
+
+        output_path.write_text(
+            json.dumps(rows),
+            encoding="utf-8",
+        )
+
+    monkeypatch.setattr(
+        publisher,
+        "ROOT",
+        synthetic_root,
+    )
 
 
 def test_registry_validates():
