@@ -18,7 +18,10 @@ def load_contract(path: Path) -> tuple[dict[str, Any], str]:
 
     digest = hashlib.sha256(raw).hexdigest()
 
-    if payload.get("name") != EXPECTED_CONTRACT_NAME:
+    if "name" in payload:
+        raise ContractError("legacy transform contract name key is prohibited")
+
+    if payload.get("contract_name") != EXPECTED_CONTRACT_NAME:
         raise ContractError("unexpected transform contract name")
 
     if payload.get("mode") != EXPECTED_MODE:

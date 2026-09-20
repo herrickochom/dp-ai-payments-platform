@@ -11,13 +11,16 @@ RUN pip install --no-cache-dir \
     -r /tmp/requirements.txt
 
 COPY orchestration/job_runner /app/job_runner
+COPY orchestration/transform_runtime /app/orchestration/transform_runtime
+COPY transform/dbt /app/dbt
 
 RUN useradd \
       --uid 50001 \
       --create-home \
       --shell /usr/sbin/nologin \
       platformrunner \
-    && chown -R platformrunner:platformrunner /app/job_runner
+    && install -d -o platformrunner -g platformrunner /var/lib/platform-job-runner/work \
+    && chown -R platformrunner:platformrunner /app/job_runner /app/orchestration /app/dbt
 
 USER 50001:50001
 

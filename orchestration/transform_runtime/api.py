@@ -1,120 +1,200 @@
+"""Authenticated, fail-closed transform admission and status API."""
+import hashlib
+import json
 import os
+import urllib.error
+import urllib.request
 from pathlib import Path
-
-from fastapi import FastAPI, HTTPException
-
+from fastapi import Depends, FastAPI, HTTPException
+from .auth import require_airflow_identity, runner_headers
 from .contract import ContractError, load_contract
-from .execution_policy import (
-    ExecutionPolicyError,
-    validate_execution_unit,
-)
-from .models import TransformRequest, TransformResponse
+from .execution_plan import EXECUTION_BATCHES
+from .ledger import LedgerError, create_ledger_from_environment, model_fingerprint
+from .models import CreateRunRequest, SubmitBatchRequest, TransformResponse
+
+CONTRACT_PATH = Path(os.getenv("LAKEHOUSE_TRANSFORM_CONTRACT", "/app/contracts/lakehouse_transform.json"))
+EXECUTION_ENABLED = os.getenv("LAKEHOUSE_TRANSFORM_EXECUTION_ENABLED", "false").lower() == "true"
+ledger = create_ledger_from_environment()
+app = FastAPI(title="PDM Lakehouse Transform Runtime", version="2.0.0")
+
+def plan_digest() -> str:
+    value = {key: {"authority": batch.authority, "models": sorted(batch.model_allowlist), "prerequisites": sorted(batch.prerequisite_batches)} for key, batch in sorted(EXECUTION_BATCHES.items())}
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+def response(row: dict) -> TransformResponse:
+    return TransformResponse(transform_run_id=row["transform_run_id"], batch_execution_id=row.get("batch_execution_id"), batch_id=row.get("batch_id"), status=row["status"], accepted_at=row["accepted_at"], started_at=row.get("started_at"), finished_at=row.get("finished_at"), attempt=row.get("attempt"), test_status=row.get("test_status"), failure_class=row.get("failure_class"))
 
 
-CONTRACT_PATH = Path(
-    os.getenv(
-        "LAKEHOUSE_TRANSFORM_CONTRACT",
-        "/app/contracts/lakehouse_transform.json",
+def dispatch_to_runner(row: dict, batch) -> dict:
+    """Dispatch only server-owned immutable batch metadata to the runner."""
+    base_url = os.getenv("TRANSFORM_RUNNER_URL", "").strip().rstrip("/")
+    if not base_url:
+        raise RuntimeError("transform runner URL is unavailable")
+
+    body = json.dumps(
+        {
+            "batch_execution_id": row["batch_execution_id"],
+            "batch_id": batch.batch_id,
+            "model_fingerprint": row["model_fingerprint"],
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+
+    headers = runner_headers()
+    headers["Content-Type"] = "application/json"
+
+    request = urllib.request.Request(
+        f"{base_url}/v1/transforms",
+        data=body,
+        method="POST",
+        headers=headers,
     )
-)
 
-EXECUTION_ENABLED = (
-    os.getenv(
-        "LAKEHOUSE_TRANSFORM_EXECUTION_ENABLED",
-        "false",
-    ).lower()
-    == "true"
-)
+    try:
+        with urllib.request.urlopen(request, timeout=10) as result:
+            payload = json.loads(result.read().decode("utf-8"))
+    except (urllib.error.URLError, TimeoutError, ValueError) as exc:
+        raise RuntimeError("transform runner dispatch failed") from exc
 
-app = FastAPI(
-    title="PDM Lakehouse Transform Runtime",
-    version="1.0.0",
-)
+    if payload.get("batch_execution_id") != row["batch_execution_id"]:
+        raise RuntimeError("transform runner execution identity mismatch")
+
+    if payload.get("batch_id") != batch.batch_id:
+        raise RuntimeError("transform runner batch identity mismatch")
+
+    return payload
 
 
 @app.get("/health")
 def health() -> dict:
-    return {
-        "status": "healthy",
-        "execution_enabled": EXECUTION_ENABLED,
-    }
+    return {"status": "healthy", "execution_enabled": EXECUTION_ENABLED}
 
-
-@app.get("/v1/contract")
-def contract_metadata() -> dict:
+@app.get("/ready")
+def ready() -> dict:
     try:
         payload, digest = load_contract(CONTRACT_PATH)
-    except (
-        OSError,
-        ValueError,
-        ContractError,
-    ) as exc:
-        raise HTTPException(
-            status_code=503,
-            detail="transform contract unavailable",
-        ) from exc
+        ledger.ping() if hasattr(ledger, "ping") else ledger.connection.execute("SELECT 1").fetchone()
+        if ledger.schema_version() < 2:
+            raise LedgerError("transform ledger schema is not current")
+    except (OSError, ValueError, ContractError, LedgerError) as exc:
+        raise HTTPException(status_code=503, detail="transform runtime not ready") from exc
+    return {"status": "ready", "contract_digest": digest, "plan_digest": plan_digest(), "contract_version": payload["contract_version"], "execution_enabled": EXECUTION_ENABLED}
 
-    return {
-        "name": payload["name"],
-        "version": payload["contract_version"],
-        "mode": payload["mode"],
-        "sha256": digest,
-        "model_count": len(payload["models"]),
-        "wave_count": len(payload["topological_waves"]),
-    }
+@app.get("/v1/contract")
+def contract_metadata(_: str = Depends(require_airflow_identity)) -> dict:
+    try:
+        payload, digest = load_contract(CONTRACT_PATH)
+    except (OSError, ValueError, ContractError) as exc:
+        raise HTTPException(status_code=503, detail="transform contract unavailable") from exc
+    return {"name": payload["contract_name"], "version": payload["contract_version"], "mode": payload["mode"], "sha256": digest, "model_count": len(payload["models"]), "wave_count": len(payload["topological_waves"])}
 
+@app.post("/v1/runs", response_model=TransformResponse, status_code=202)
+def create_run(request: CreateRunRequest, caller: str = Depends(require_airflow_identity)) -> TransformResponse:
+    try:
+        payload, digest = load_contract(CONTRACT_PATH)
+        if request.contract_version != payload["contract_version"]:
+            raise ContractError("contract version mismatch")
+        return response(ledger.create_run(caller, request.idempotency_key, request.execution_mode, digest, plan_digest()))
+    except (OSError, ValueError, ContractError, LedgerError) as exc:
+        raise HTTPException(status_code=409, detail="transform run rejected") from exc
 
-@app.post(
-    "/v1/transform",
-    response_model=TransformResponse,
-)
-def transform(
-    request: TransformRequest,
-) -> TransformResponse:
+@app.post("/v1/runs/{run_id}/batches", response_model=TransformResponse, status_code=202)
+def submit_batch(run_id: str, request: SubmitBatchRequest, caller: str = Depends(require_airflow_identity)) -> TransformResponse:
+    batch = EXECUTION_BATCHES.get(request.batch_id)
+    if batch is None:
+        raise HTTPException(status_code=409, detail="transform batch rejected")
+    try:
+        row = ledger.submit_batch(run_id, caller, request.idempotency_key, batch, model_fingerprint(batch.model_allowlist))
+    except LedgerError as exc:
+        raise HTTPException(status_code=409, detail="transform batch rejected") from exc
+    if not EXECUTION_ENABLED:
+        return response(row)
 
     try:
-        payload, _ = load_contract(CONTRACT_PATH)
-
-        if (
-            request.contract_version
-            != payload["contract_version"]
-        ):
-            raise ContractError(
-                "contract version mismatch"
-            )
-
-        validate_execution_unit(
-            request.execution_unit,
-            request.execution_mode,
+        queued = ledger.transition(
+            row["batch_execution_id"],
+            "QUEUED",
         )
 
-    except (
-        OSError,
-        ValueError,
-        ContractError,
-        ExecutionPolicyError,
-    ) as exc:
+        runner_result = dispatch_to_runner(queued, batch)
+
+        runner_status = runner_result.get("status")
+
+        if runner_status == "SUCCEEDED":
+            completed = ledger.transition(
+                row["batch_execution_id"],
+                "RUNNING",
+            )
+            completed = ledger.transition(
+                row["batch_execution_id"],
+                "TESTING",
+            )
+            completed = ledger.transition(
+                row["batch_execution_id"],
+                "SUCCEEDED",
+                test_status="PASSED",
+            )
+            return response(completed)
+
+        if runner_status == "FAILED":
+            completed = ledger.transition(
+                row["batch_execution_id"],
+                "RUNNING",
+            )
+            completed = ledger.transition(
+                row["batch_execution_id"],
+                "FAILED",
+                test_status="NOT_RUN",
+                failure_class=runner_result.get("failure_class") or "DBT_BUILD_FAILED",
+            )
+            return response(completed)
+
+        if runner_status in {"CANCELLED", "ORPHANED"}:
+            completed = ledger.transition(
+                row["batch_execution_id"],
+                runner_status,
+                failure_class=runner_result.get("failure_class"),
+            )
+            return response(completed)
+
+        raise RuntimeError("runner returned unsuccessful execution")
+
+    except (RuntimeError, LedgerError) as exc:
+        try:
+            current = ledger.get_batch(
+                row["batch_execution_id"],
+                caller,
+            )
+            if current["status"] == "QUEUED":
+                ledger.transition(
+                    row["batch_execution_id"],
+                    "ORPHANED",
+                    failure_class="RUNNER_DISPATCH_FAILURE",
+                )
+        except LedgerError:
+            pass
+
         raise HTTPException(
-            status_code=409,
-            detail="transform request rejected",
+            status_code=503,
+            detail="transform execution unavailable",
         ) from exc
 
-    if not EXECUTION_ENABLED:
-        return TransformResponse(
-            accepted=False,
-            contract_name=request.contract_name,
-            contract_version=request.contract_version,
-            execution_unit=request.execution_unit,
-            execution_mode=request.execution_mode,
-            execution_enabled=False,
-            detail=(
-                "execution disabled; "
-                "production runtime is fail-closed"
-            ),
-        )
+@app.get("/v1/batches/{execution_id}", response_model=TransformResponse)
+def batch_status(execution_id: str, caller: str = Depends(require_airflow_identity)) -> TransformResponse:
+    try:
+        return response(ledger.get_batch(execution_id, caller))
+    except LedgerError as exc:
+        raise HTTPException(status_code=404, detail="batch execution not found") from exc
 
-    # Deliberately no transformation executor implementation yet.
-    raise HTTPException(
-        status_code=503,
-        detail="transform executor not implemented",
-    )
+@app.get("/v1/batches/{execution_id}/result", response_model=TransformResponse)
+def batch_result(execution_id: str, caller: str = Depends(require_airflow_identity)) -> TransformResponse:
+    return batch_status(execution_id, caller)
+
+@app.post("/v1/batches/{execution_id}/cancel", response_model=TransformResponse)
+def cancel_batch(execution_id: str, caller: str = Depends(require_airflow_identity)) -> TransformResponse:
+    try:
+        ledger.get_batch(execution_id, caller)
+        return response(ledger.transition(execution_id, "CANCELLED", failure_class="OPERATOR_CANCELLED"))
+    except LedgerError as exc:
+        raise HTTPException(status_code=409, detail="cancellation rejected") from exc

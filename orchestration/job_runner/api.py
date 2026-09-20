@@ -9,16 +9,18 @@ offset reset, or token-link materialisation.
 
 from __future__ import annotations
 
+import hmac
 import os
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
+from fastapi import FastAPI, Header, HTTPException
+from pydantic import BaseModel, ConfigDict, Field
 
 from contracts import JOBS
 from planner import plan
 from platform_preflight import run_preflight
 from raw_readiness import run_raw_readiness
 from request import JobRequest
+from transform_execution import build_transform_command, execute
 
 
 app = FastAPI(
@@ -47,6 +49,20 @@ class GeneratedSourceRequest(BaseModel):
     record_count: int = Field(ge=1, le=10000)
 
 
+class TransformBatchRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    batch_execution_id: str = Field(pattern=r"^be_[a-f0-9]{32}$")
+    batch_id: str = Field(pattern=r"^C4_[A-Z0-9_]+$")
+    model_fingerprint: str = Field(pattern=r"^[a-f0-9]{64}$")
+
+
+def require_runtime(authorization: str | None = Header(default=None)) -> None:
+    expected = os.getenv("TRANSFORM_RUNTIME_RUNNER_TOKEN", "")
+    supplied = authorization.removeprefix("Bearer ") if authorization else ""
+    if not expected or not hmac.compare_digest(expected, supplied):
+        raise HTTPException(status_code=401, detail="service authentication required")
+
+
 def execution_enabled() -> bool:
     return (
         os.getenv(
@@ -62,6 +78,88 @@ def health() -> dict:
     return {
         "status": "healthy",
         "execution_enabled": execution_enabled(),
+    }
+
+
+@app.get("/ready")
+def readiness() -> dict:
+    return {"status": "ready", "execution_enabled": execution_enabled(), "checks_are_non_mutating": True}
+
+
+@app.post("/v1/transforms")
+def transform_batch(payload: TransformBatchRequest, authorization: str | None = Header(default=None)) -> dict:
+    require_runtime(authorization)
+    try:
+        command = build_transform_command(payload.batch_id, payload.batch_execution_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail="transform policy rejected") from exc
+    if command.model_fingerprint != payload.model_fingerprint:
+        raise HTTPException(status_code=409, detail="transform policy rejected")
+    all_enabled = (
+        execution_enabled()
+        and os.getenv(
+            "PLATFORM_JOB_EXECUTION_ENABLED",
+            "false",
+        ).strip().lower() == "true"
+    )
+
+    if not all_enabled:
+        return {
+            "batch_execution_id": payload.batch_execution_id,
+            "batch_id": payload.batch_id,
+            "status": "ADMITTED",
+            "execution_enabled": False,
+        }
+
+    try:
+        result = execute(
+            command,
+            timeout_seconds=float(
+                os.getenv(
+                    "TRANSFORM_BATCH_TIMEOUT_SECONDS",
+                    "3300",
+                )
+            ),
+            termination_grace_seconds=float(
+                os.getenv(
+                    "TRANSFORM_TERMINATION_GRACE_SECONDS",
+                    "15",
+                )
+            ),
+            output_cap_bytes=int(
+                os.getenv(
+                    "TRANSFORM_OUTPUT_CAP_BYTES",
+                    "262144",
+                )
+            ),
+        )
+    except (OSError, ValueError) as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="bounded transform execution failed",
+        ) from exc
+
+    status = result.status
+
+    if status not in {
+        "SUCCEEDED",
+        "FAILED",
+        "CANCELLED",
+        "ORPHANED",
+    }:
+        raise HTTPException(
+            status_code=503,
+            detail="invalid bounded execution result",
+        )
+
+    return {
+        "batch_execution_id": payload.batch_execution_id,
+        "batch_id": payload.batch_id,
+        "status": status,
+        "return_code": result.return_code,
+        "output_truncated": result.output_truncated,
+        "failure_class": result.failure_class,
+        "execution_enabled": True,
     }
 
 

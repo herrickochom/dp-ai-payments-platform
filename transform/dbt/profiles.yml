@@ -1,14 +1,14 @@
 # /home/hochom/projects/dp-pdm-ai-platform/transform/dbt/profiles.yml
 
 pdm_platform:
-  target: dev
+  target: runtime
 
   outputs:
-    dev:
+    runtime:
       type: duckdb
 
       # Local DuckDB execution database.
-      path: "/tmp/pdm.duckdb"
+      path: "{{ env_var('DBT_DUCKDB_PATH') }}"
 
       # Attached Nessie/Iceberg catalog alias.
       database: "{{ env_var('DBT_DATABASE') }}"
@@ -46,14 +46,14 @@ pdm_platform:
         s3_endpoint: "{{ env_var('S3_ENDPOINT') }}"
         s3_url_style: "{{ env_var('DBT_S3_URL_STYLE') }}"
         s3_use_ssl: false
-        s3_access_key_id: "{{ env_var('MINIO_ROOT_USER') }}"
-        s3_secret_access_key: "{{ env_var('MINIO_ROOT_PASSWORD') }}"
+        s3_access_key_id: "{{ env_var('TRANSFORM_S3_ACCESS_KEY_ID') }}"
+        s3_secret_access_key: "{{ env_var('TRANSFORM_S3_SECRET_ACCESS_KEY') }}"
 
       secrets:
         - type: s3
           provider: config
-          key_id: "{{ env_var('MINIO_ROOT_USER') }}"
-          secret: "{{ env_var('MINIO_ROOT_PASSWORD') }}"
+          key_id: "{{ env_var('TRANSFORM_S3_ACCESS_KEY_ID') }}"
+          secret: "{{ env_var('TRANSFORM_S3_SECRET_ACCESS_KEY') }}"
           region: "eu-west-1"
           endpoint: "{{ env_var('S3_ENDPOINT') }}"
           url_style: "{{ env_var('DBT_S3_URL_STYLE') }}"
@@ -69,5 +69,6 @@ pdm_platform:
           options:
             type: iceberg
             endpoint: "{{ env_var('NESSIE_ENDPOINT') }}/iceberg"
-            authorization_type: none
+            authorization_type: bearer
+            token: "{{ env_var('NESSIE_AUTH_TOKEN') }}"
             access_delegation_mode: none
