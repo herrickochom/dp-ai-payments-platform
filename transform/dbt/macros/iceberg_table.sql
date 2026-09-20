@@ -13,11 +13,25 @@
 
   {%- if existing_relation is not none -%}
 
-    {% call statement('drop_existing_relation', auto_begin=False) %}
+    {#
+      PRODUCTION SAFETY INVARIANT
 
-      drop table if exists {{ target_relation }}
+      Replacement of a published Iceberg table is intentionally blocked.
 
-    {% endcall %}
+      DROP + CREATE is not an atomic publication operation against the
+      attached Iceberg REST catalogue. If CREATE fails after DROP, the
+      previously published relation can disappear.
+
+      A future implementation may replace this guard only after isolated
+      Nessie reference/branch execution and controlled promotion have been
+      implemented and integration-tested against the deployed catalogue.
+    #}
+
+    {{ exceptions.raise_compiler_error(
+        "Unsafe Iceberg replacement blocked for " ~ target_relation
+        ~ ". Existing published tables must not be dropped before a "
+        ~ "replacement has been safely staged and promoted."
+    ) }}
 
   {%- endif -%}
 

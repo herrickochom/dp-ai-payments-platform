@@ -1,4 +1,6 @@
-fastapi>=0.115,<1
-uvicorn>=0.34,<1
-
-boto3>=1.35,<2
+fastapi==0.115.12
+uvicorn==0.34.2
+boto3==1.38.13
+dbt-core==1.9.4
+dbt-duckdb==1.9.3
+psycopg[binary]==3.2.9
