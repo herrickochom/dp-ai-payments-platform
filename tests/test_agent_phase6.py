@@ -121,6 +121,24 @@ def beneficiary_experience(
     return "COMPLETED", None
 
 
+def _write_business_fixture(tmp_path: Path, relative_path: str) -> Path:
+    sample = tmp_path / relative_path
+    sample.parent.mkdir(parents=True, exist_ok=True)
+    sample.write_text(
+        """<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.09">
+  <CstmrCdtTrfInitn>
+    <GrpHdr>
+      <MsgId>MSG-000001</MsgId>
+    </GrpHdr>
+  </CstmrCdtTrfInitn>
+</Document>
+""",
+        encoding="utf-8",
+    )
+    return sample
+
+
 def test_business_and_technical_event_families_are_not_inferred_from_legacy_topics(tmp_path):
     technical = tmp_path / "icmn/pmn/pain001/event.xml"
     technical.parent.mkdir(parents=True)
@@ -130,14 +148,17 @@ def test_business_and_technical_event_families_are_not_inferred_from_legacy_topi
     assert parsed["event_type"] == "PMN"
     assert json.loads(parsed["parsed_event_data"])["event_type"] == "PMN"
 
-    business = next((ROOT / "data/icmn/vpm/pain001").glob("*.xml"))
+    business = _write_business_fixture(tmp_path, "icmn/vpm/pain001/vpm_0001.xml")
     assert producer.parse_event(str(business))["event_family"] == "PAYMENT_BUSINESS_EVENT"
 
 
-def test_technical_extensions_do_not_leak_into_iso_business_xml_contracts():
+def test_technical_extensions_do_not_leak_into_iso_business_xml_contracts(tmp_path):
     technical_tags = {"EventFamily", "EventType", "XPaymentRoute", "XProvider", "TechnicalStage"}
-    for directory in (ROOT / "data/icmn/vpm/pain001", ROOT / "data/cpo/psn/pain002"):
-        sample = next(directory.glob("*.xml"))
+    samples = (
+        _write_business_fixture(tmp_path, "icmn/vpm/pain001/vpm_0001.xml"),
+        _write_business_fixture(tmp_path, "cpo/psn/pain002/psn_0001.xml"),
+    )
+    for sample in samples:
         tags = {node.tag.rsplit("}", 1)[-1] for node in ET.parse(sample).iter()}
         assert technical_tags.isdisjoint(tags)
 

@@ -551,7 +551,7 @@ class PostgresTransformLedger:
 
 
 def _sqlite_schema_version(self):
-    return 2
+    return 3
 
 
 def _pg_schema_version(self):

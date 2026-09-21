@@ -25,46 +25,6 @@ def response(row: dict) -> TransformResponse:
     return TransformResponse(transform_run_id=row["transform_run_id"], batch_execution_id=row.get("batch_execution_id"), batch_id=row.get("batch_id"), status=row["status"], accepted_at=row["accepted_at"], started_at=row.get("started_at"), finished_at=row.get("finished_at"), attempt=row.get("attempt"), test_status=row.get("test_status"), failure_class=row.get("failure_class"))
 
 
-def dispatch_to_runner(row: dict, batch) -> dict:
-    """Dispatch only server-owned immutable batch metadata to the runner."""
-    base_url = os.getenv("TRANSFORM_RUNNER_URL", "").strip().rstrip("/")
-    if not base_url:
-        raise RuntimeError("transform runner URL is unavailable")
-
-    body = json.dumps(
-        {
-            "batch_execution_id": row["batch_execution_id"],
-            "batch_id": batch.batch_id,
-            "model_fingerprint": row["model_fingerprint"],
-        },
-        sort_keys=True,
-        separators=(",", ":"),
-    ).encode("utf-8")
-
-    headers = runner_headers()
-    headers["Content-Type"] = "application/json"
-
-    request = urllib.request.Request(
-        f"{base_url}/v1/transforms",
-        data=body,
-        method="POST",
-        headers=headers,
-    )
-
-    try:
-        with urllib.request.urlopen(request, timeout=10) as result:
-            payload = json.loads(result.read().decode("utf-8"))
-    except (urllib.error.URLError, TimeoutError, ValueError) as exc:
-        raise RuntimeError("transform runner dispatch failed") from exc
-
-    if payload.get("batch_execution_id") != row["batch_execution_id"]:
-        raise RuntimeError("transform runner execution identity mismatch")
-
-    if payload.get("batch_id") != batch.batch_id:
-        raise RuntimeError("transform runner batch identity mismatch")
-
-    return payload
-
 
 @app.get("/health")
 def health() -> dict:
@@ -116,65 +76,8 @@ def submit_batch(run_id: str, request: SubmitBatchRequest, caller: str = Depends
             row["batch_execution_id"],
             "QUEUED",
         )
-
-        runner_result = dispatch_to_runner(queued, batch)
-
-        runner_status = runner_result.get("status")
-
-        if runner_status == "SUCCEEDED":
-            completed = ledger.transition(
-                row["batch_execution_id"],
-                "RUNNING",
-            )
-            completed = ledger.transition(
-                row["batch_execution_id"],
-                "TESTING",
-            )
-            completed = ledger.transition(
-                row["batch_execution_id"],
-                "SUCCEEDED",
-                test_status="PASSED",
-            )
-            return response(completed)
-
-        if runner_status == "FAILED":
-            completed = ledger.transition(
-                row["batch_execution_id"],
-                "RUNNING",
-            )
-            completed = ledger.transition(
-                row["batch_execution_id"],
-                "FAILED",
-                test_status="NOT_RUN",
-                failure_class=runner_result.get("failure_class") or "DBT_BUILD_FAILED",
-            )
-            return response(completed)
-
-        if runner_status in {"CANCELLED", "ORPHANED"}:
-            completed = ledger.transition(
-                row["batch_execution_id"],
-                runner_status,
-                failure_class=runner_result.get("failure_class"),
-            )
-            return response(completed)
-
-        raise RuntimeError("runner returned unsuccessful execution")
-
-    except (RuntimeError, LedgerError) as exc:
-        try:
-            current = ledger.get_batch(
-                row["batch_execution_id"],
-                caller,
-            )
-            if current["status"] == "QUEUED":
-                ledger.transition(
-                    row["batch_execution_id"],
-                    "ORPHANED",
-                    failure_class="RUNNER_DISPATCH_FAILURE",
-                )
-        except LedgerError:
-            pass
-
+        return response(queued)
+    except LedgerError as exc:
         raise HTTPException(
             status_code=503,
             detail="transform execution unavailable",
@@ -195,6 +98,20 @@ def batch_result(execution_id: str, caller: str = Depends(require_airflow_identi
 def cancel_batch(execution_id: str, caller: str = Depends(require_airflow_identity)) -> TransformResponse:
     try:
         ledger.get_batch(execution_id, caller)
-        return response(ledger.transition(execution_id, "CANCELLED", failure_class="OPERATOR_CANCELLED"))
-    except LedgerError as exc:
-        raise HTTPException(status_code=409, detail="cancellation rejected") from exc
+
+        if not EXECUTION_ENABLED:
+            return response(
+                ledger.transition(
+                    execution_id,
+                    "CANCELLED",
+                    failure_class="OPERATOR_CANCELLED",
+                )
+            )
+
+        from .durable_queue import DurableQueueError, PostgresDurableQueue
+        return response(PostgresDurableQueue().request_cancel(execution_id))
+    except (LedgerError, DurableQueueError) as exc:
+        raise HTTPException(
+            status_code=409,
+            detail="cancellation rejected",
+        ) from exc

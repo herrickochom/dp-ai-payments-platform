@@ -46,7 +46,7 @@ def _redact(value: str) -> str:
         value = pattern.sub(r"\1\2[REDACTED]", value)
     return value
 
-def build_transform_command(batch_id: str, execution_id: str, source: Mapping[str, str] | None = None) -> TransformCommand:
+def build_transform_command(batch_id: str, execution_id: str, source: Mapping[str, str] | None = None, *, transform_run_id: str | None = None) -> TransformCommand:
     batch = EXECUTION_BATCHES.get(batch_id)
     if batch is None:
         raise ValueError("batch is not allowlisted")
@@ -96,7 +96,7 @@ def build_transform_command(batch_id: str, execution_id: str, source: Mapping[st
         "NESSIE_AUTH_TOKEN": supplied["NESSIE_AUTH_TOKEN"],
         "PATH": "/opt/dbt/bin:/usr/local/bin:/usr/bin",
         "DBT_DUCKDB_PATH": duckdb_path,
-        "DBT_NESSIE_BRANCH": f"transform_{execution_id}",
+        "DBT_NESSIE_BRANCH": (f"transform_{transform_run_id}" if transform_run_id else f"transform_{execution_id}"),
         "TRANSFORM_AUTHORITY": batch.authority,
     })
     if FORBIDDEN_ENV.intersection(environment):
