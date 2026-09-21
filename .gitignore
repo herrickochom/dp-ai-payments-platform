@@ -78,6 +78,7 @@ Thumbs.db
 # --- 8. Environment & Secrets ---
 .env
 .env.*
+!.env.example
 
 # --- 9. Local Backups ---
 *.bak

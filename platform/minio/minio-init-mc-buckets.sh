@@ -10,7 +10,4 @@ done
 echo "Creating buckets..."
 mc mb local/dp-ai-payment || true
 
-echo "Setting bucket policies..."
-mc policy set download local/dp-ai-payment
-
 echo "Buckets created successfully."

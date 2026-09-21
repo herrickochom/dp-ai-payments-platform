@@ -15,7 +15,7 @@ Requires the running compose stack.  Endpoints are overridable via env:
     KAFKA_BOOTSTRAP_SERVERS (default localhost:9094)
     SCHEMA_REGISTRY_URL     (default http://localhost:8081)
     S3_ENDPOINT             (default http://localhost:9000)
-    MINIO_ROOT_USER/_PASSWORD, MINIO_BUCKET.
+    RAW_INGEST_S3_ACCESS_KEY_ID/_SECRET_ACCESS_KEY, MINIO_BUCKET.
 
 Run:  python tests/live_red_invariant_test.py
 """
@@ -31,6 +31,7 @@ import uuid
 from pathlib import Path
 
 import boto3
+import pytest
 import requests
 from confluent_kafka import Consumer, KafkaError, Producer, TopicPartition
 from confluent_kafka.admin import AdminClient, NewTopic
@@ -43,8 +44,13 @@ ROOT = Path(__file__).resolve().parents[1]
 KAFKA = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9094")
 SR_URL = os.getenv("SCHEMA_REGISTRY_URL", "http://localhost:8081")
 MINIO = os.getenv("S3_ENDPOINT", "http://localhost:9000")
-MINIO_USER = os.getenv("MINIO_ROOT_USER", "minioadmin")
-MINIO_PASS = os.getenv("MINIO_ROOT_PASSWORD", "minioadmin")
+if __name__ != "__main__" and not all(
+    os.getenv(name)
+    for name in ("RAW_INGEST_S3_ACCESS_KEY_ID", "RAW_INGEST_S3_SECRET_ACCESS_KEY")
+):
+    pytest.skip("live RED invariant requires RAW_INGEST_S3 credentials", allow_module_level=True)
+MINIO_USER = os.environ["RAW_INGEST_S3_ACCESS_KEY_ID"]
+MINIO_PASS = os.environ["RAW_INGEST_S3_SECRET_ACCESS_KEY"]
 BUCKET = os.getenv("MINIO_BUCKET", "dp-ai-payment")
 DLQ_REAL = os.getenv("KAFKA_DLQ_TOPIC", "payment-events.dlq")
 
@@ -160,8 +166,8 @@ def consumer_env(dlq_topic):
         "KAFKA_SECURITY_PROTOCOL": "PLAINTEXT",
         "MAX_PROCESSING_RETRIES": "0",
         "S3_ENDPOINT": MINIO,
-        "MINIO_ROOT_USER": MINIO_USER,
-        "MINIO_ROOT_PASSWORD": MINIO_PASS,
+        "RAW_INGEST_S3_ACCESS_KEY_ID": MINIO_USER,
+        "RAW_INGEST_S3_SECRET_ACCESS_KEY": MINIO_PASS,
         "MINIO_BUCKET": BUCKET,
         "RAW_PREFIX": "raw/v2",
         "SCHEMA_REGISTRY_URL": SR_URL,

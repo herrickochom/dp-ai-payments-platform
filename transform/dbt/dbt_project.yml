@@ -77,6 +77,6 @@ models:
 # ------------------------------------------------------------------------------
 
 vars:
-  s3_bucket: "{{ env_var('WAREHOUSE_BUCKET') }}"
-  s3_path: "raw"
+  s3_bucket: "{{ env_var('OBJECT_STORE_BUCKET') }}"
+  s3_path: "{{ env_var('RAW_ROOT') }}"
   iceberg_catalog: "{{ env_var('ICEBERG_CATALOG') }}"

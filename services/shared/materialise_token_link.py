@@ -35,8 +35,8 @@ def require_env(name: str) -> str:
 def main() -> int:
     require_env("DP_TOKEN_KEY")
     version = require_env("DP_TOKEN_KEY_VERSION")
-    minio_user = require_env("MINIO_ROOT_USER")
-    minio_password = require_env("MINIO_ROOT_PASSWORD")
+    minio_user = require_env("RESTRICTED_TRANSFORM_S3_ACCESS_KEY_ID")
+    minio_password = require_env("RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY")
     nessie_endpoint = require_env("NESSIE_ENDPOINT")
 
     con = duckdb.connect("/tmp/pdm-token-link.duckdb")

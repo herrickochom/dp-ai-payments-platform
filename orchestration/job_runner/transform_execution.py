@@ -86,7 +86,8 @@ def build_transform_command(batch_id: str, execution_id: str, source: Mapping[st
         "S3_ENDPOINT", "DBT_S3_URL_STYLE", "DBT_DATABASE",
         "DBT_STAGING_DATABASE", "DBT_BRONZE_DATABASE", "DBT_SILVER_DATABASE",
         "DBT_SILVER_VAULT_DATABASE", "DBT_GOLD_DATABASE",
-        "DBT_CONSUMPTION_DATABASE", "WAREHOUSE_BUCKET", "ICEBERG_CATALOG",
+        "DBT_CONSUMPTION_DATABASE", "OBJECT_STORE_BUCKET", "WAREHOUSE_PREFIX",
+        "WAREHOUSE_URI", "NESSIE_WAREHOUSE", "ICEBERG_CATALOG",
         "NESSIE_ENDPOINT",
     )
     environment = {key: supplied[key] for key in passthrough if supplied.get(key)}
