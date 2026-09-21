@@ -36,6 +36,19 @@ def load_contract() -> dict:
     return json.loads(CONTRACT.read_text())
 
 
+def test_transform_contract_has_single_canonical_owner():
+    duplicate = (
+        ROOT
+        / "orchestration"
+        / "job_runner"
+        / "contracts"
+        / "lakehouse_transform.json"
+    )
+
+    assert CONTRACT.is_file()
+    assert not duplicate.exists()
+
+
 def test_execution_model_allowlists_are_exhaustive_and_disjoint():
     contract = load_contract()
 
