@@ -191,24 +191,30 @@ topics:
 
   - name: mdm.beneficiary.golden.restricted
     partitions: 3
-    replication_factor: 1
+    replication: 1
+    retention_ms: 604800000   # 7 days; local POC policy, production Terraform-managed
 
   - name: mdm.beneficiary.identity-alert.restricted
     partitions: 3
-    replication_factor: 1
+    replication: 1
+    retention_ms: 604800000   # 7 days; local POC policy, production Terraform-managed
 
   - name: mdm.crosswalk.restricted
     partitions: 3
-    replication_factor: 1
+    replication: 1
+    retention_ms: 604800000   # 7 days; local POC policy, production Terraform-managed
 
   - name: mdm.sacco.golden
     partitions: 3
-    replication_factor: 1
+    replication: 1
+    retention_ms: 604800000   # 7 days; local POC policy, production Terraform-managed
 
   - name: mdm.agent.golden
     partitions: 3
-    replication_factor: 1
+    replication: 1
+    retention_ms: 604800000   # 7 days; local POC policy, production Terraform-managed
 
   - name: mdm.geography.golden
     partitions: 3
-    replication_factor: 1
+    replication: 1
+    retention_ms: 604800000   # 7 days; local POC policy, production Terraform-managed

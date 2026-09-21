@@ -13,6 +13,7 @@ dependencies = [
     "botocore",
     "confluent-kafka",
     "fastapi",
+    "httpx2==2.13.0",
     "fastavro",
     "pytz",
     "pydantic",

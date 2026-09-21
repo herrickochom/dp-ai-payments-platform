@@ -244,7 +244,9 @@ def test_phase6_sql_contracts_have_explicit_columns_and_no_select_star():
     technical = projected_names(DBT / "silver/slv_pdm_payment_technical_events.sql")
     correlation = projected_names(DBT / "silver/slv_pdm_payment_event_correlation.sql")
     assert SHARED_FIELDS <= technical
-    assert PMN_FIELDS <= technical and PLM_FIELDS <= technical
+    assert PMN_FIELDS <= technical
+    assert (PLM_FIELDS - {"x_beneficiary_sa"}) <= technical
+    assert "x_beneficiary_sa" not in technical
     assert {
         "technical_event_id", "correlation_method", "match_status",
         "business_source_system", "business_message_id", "business_transaction_id",
