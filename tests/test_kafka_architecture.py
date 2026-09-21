@@ -101,9 +101,15 @@ class KafkaArchitectureTests(unittest.TestCase):
     def test_topic_manifest_is_authoritative_and_complete(self):
         topics = topic_admin.load_manifest(str(ROOT / "platform/kafka/topics.yaml"))
         names = {item["name"] for item in topics}
-        self.assertEqual(26, len(topics))
+        self.assertEqual(32, len(topics))
         self.assertIn("payment-events.retry", names)
         self.assertIn("payment-events.dlq", names)
+        self.assertIn("mdm.beneficiary.golden.restricted", names)
+        self.assertIn("mdm.beneficiary.identity-alert.restricted", names)
+        self.assertIn("mdm.crosswalk.restricted", names)
+        self.assertIn("mdm.sacco.golden", names)
+        self.assertIn("mdm.agent.golden", names)
+        self.assertIn("mdm.geography.golden", names)
         self.assertNotIn("reconciliation.links", names)
 
     def test_schema_changes_require_backward_transitive_compatibility(self):

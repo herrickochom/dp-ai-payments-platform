@@ -57,6 +57,7 @@
     "production_acl_management": "TERRAFORM_MANAGED",
     "production_retention": "TERRAFORM_MANAGED",
     "production_encryption": "PLATFORM_MANAGED",
-    "restricted_topics_require_dedicated_identity": true
+    "restricted_topics_require_dedicated_identity": true,
+    "local_retention_ms": 604800000
   }
 }
