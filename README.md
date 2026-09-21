@@ -21,13 +21,13 @@ for domain boundaries and status semantics.
 
 ```text
 services/
-  payments-api/            payments-ingestor/
-  kafka-consumer-events/   payment-producer/
-  payment-xml-generator/
-  agents/{dq,modeling}/    shared/            # requirements shared by services
+  agent-api/               kafka-consumer-events/
+  payment-producer/        payment-xml-generator/
+  pdm-ml/                  mdm-publisher/
+  geospatial/              shared/
 transform/dbt/             # models, macros, profiles.yml, dbt_project.yml
 platform/
-  docker/dockerfiles/      # every image definition
+  docker/dockerfiles/      # image definitions
   entrypoints/  config/
   kafka/  minio/  nessie/  postgres/  trino/  superset/  duckdb/
 contracts/
@@ -40,9 +40,11 @@ ops/
 docker-compose.yaml        # the single authoritative compose file
 ```
 
-`docker-compose.yaml` at the root is authoritative: 29 services across the
-`analytics`, `dev`, `dbt`, `duckdb`, `pdm`, `trino`, and `metabase` profiles.
-Build contexts are always the repository root, so every `COPY` in
+`docker-compose.yaml` at the root is the authoritative local deployment definition.
+It currently defines 33 services. Optional capabilities are grouped under the
+`agents`, `ai`, `airflow`, `analytics`, `dashboard`, `dbt`, `duckdb`,
+`generate-data`, `metabase`, `ml`, `superset`, and `trino` profiles. Build
+contexts are always the repository root, so every `COPY` in
 `platform/docker/dockerfiles/` is written as a repo-relative path.
 
 ## Data flow
@@ -50,10 +52,15 @@ Build contexts are always the repository root, so every `COPY` in
 ```text
 Source JSON/XML
   -> Kafka + Schema Registry
-  -> services/kafka-consumer-events        (the only Kafka consumer)
+  -> services/kafka-consumer-events        (the governed Raw consumer)
   -> s3://dp-ai-payment/raw/v2/**.avro     (immutable Avro archive)
-  -> transform/dbt br_payment_events       (Raw replay -> Bronze Iceberg)
-  -> br_* / stg_* / slv_* / gld_* / cns_*  (Iceberg via Nessie)
+  -> transform-runtime                     (durable transform control plane)
+  -> PostgreSQL execution queue
+  -> platform-job-runner                   (isolated dbt + DuckDB execution)
+  -> run-specific Nessie branch
+  -> dbt tests / governed quality checks
+  -> controlled Nessie publication
+  -> br_* / stg_* / slv_* / gld_* / cns_*  (Iceberg consumption layers)
 ```
 
 Bronze onward is Iceberg in the Nessie catalog, so tables are addressed as
@@ -372,10 +379,6 @@ GET  /dq/rules?dataset=iceberg.silver.slv_pdm_loans
 POST /dq/check
 POST /dq/profile
 ```
-
-The former `dq-agent` heartbeat was not wired into Compose or an operational
-workflow and implemented no quality checks. Request/response quality checks
-belong to the Agent API; scheduled transform checks use dbt.
 
 Known Phase 4 limits: dbt custom singular tests are documented but not compiled
 into arbitrary agent SQL; source freshness has no repository declaration to
