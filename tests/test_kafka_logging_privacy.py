@@ -127,8 +127,4 @@ def test_storage_exception_logs_metadata_only(monkeypatch, caplog):
         consumer.store_event_to_s3({}, 'pdmis.loans', 2, 17, datetime.now(timezone.utc))
     assert 'raw_storage_failed' in caplog.text
     client.put_object.assert_not_called()
-    client.head_object.side_effect = None
-    client.put_object.side_effect = ValueError(SECRET)
-    consumer.store_to_dlq({}, 'pdmis.loans', 2, 17, SECRET)
-    assert 'dlq_storage_failed' in caplog.text
     assert_private(caplog)

@@ -371,12 +371,9 @@ POST /dq/check
 POST /dq/profile
 ```
 
-The older Compose `dq-agent` service is retained unchanged for compatibility.
-Inspection found that it only logs connectivity settings and a periodic
-heartbeat; it has no rules, queries, findings, or remediation. It is therefore
-not a competing production path. New request/response quality work belongs to
-the Agent API; a later operational migration may remove the heartbeat service
-after its users and deployment expectations are confirmed.
+The former `dq-agent` heartbeat was not wired into Compose or an operational
+workflow and implemented no quality checks. Request/response quality checks
+belong to the Agent API; scheduled transform checks use dbt.
 
 Known Phase 4 limits: dbt custom singular tests are documented but not compiled
 into arbitrary agent SQL; source freshness has no repository declaration to

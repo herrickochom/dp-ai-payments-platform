@@ -1,6 +1,8 @@
-import importlib, io, sys
+import asyncio, importlib, io, sys
 from pathlib import Path
-from fastapi.testclient import TestClient
+import httpx
+import anyio.to_thread
+import pytest
 from orchestration.job_runner import transform_execution
 
 JOB_RUNNER = str(Path('orchestration/job_runner').resolve())
@@ -9,21 +11,43 @@ if JOB_RUNNER not in sys.path:
 
 EXEC='be_'+'a'*32
 
+@pytest.fixture(autouse=True)
+def working_test_threadpool(monkeypatch):
+    # The local Python 3.14/AnyIO worker queue stalls on even a trivial
+    # synchronous FastAPI route. These requests have no live/blocking work;
+    # keep the ASGI request and auth path intact while avoiding that executor.
+    async def run_sync(func, *args, **kwargs):
+        return func(*args)
+    monkeypatch.setattr(anyio.to_thread, 'run_sync', run_sync)
+
+def post(app, path, **kwargs):
+    async def request():
+        async with httpx.AsyncClient(
+            transport=httpx.ASGITransport(app=app),
+            base_url='http://testserver',
+        ) as client:
+            return await client.post(path, **kwargs)
+    loop = asyncio.new_event_loop()
+    try:
+        return loop.run_until_complete(request())
+    finally:
+        loop.close()
+
 def creds():
     return {'ML_S3_ACCESS_KEY_ID':'ml','ML_S3_SECRET_ACCESS_KEY':'secret','NESSIE_AUTH_TOKEN':'token','S3_ENDPOINT':'minio:9000','DBT_S3_URL_STYLE':'path','DBT_DATABASE':'lakehouse','DBT_STAGING_DATABASE':'staging','DBT_BRONZE_DATABASE':'bronze','DBT_SILVER_DATABASE':'silver','DBT_SILVER_VAULT_DATABASE':'silver_vault','DBT_GOLD_DATABASE':'gold','DBT_CONSUMPTION_DATABASE':'consumption','WAREHOUSE_BUCKET':'warehouse','ICEBERG_CATALOG':'nessie','NESSIE_ENDPOINT':'http://nessie:19120'}
 
 def test_runner_requires_service_auth(monkeypatch):
     monkeypatch.setenv('TRANSFORM_RUNTIME_RUNNER_TOKEN','runner-secret')
     import orchestration.job_runner.api as api
-    api=importlib.reload(api); client=TestClient(api.app)
-    r=client.post('/v1/transforms',json={'batch_execution_id':EXEC,'batch_id':'C4_ML_01','model_fingerprint':'0'*64})
+    api=importlib.reload(api)
+    r=post(api.app,'/v1/transforms',json={'batch_execution_id':EXEC,'batch_id':'C4_ML_01','model_fingerprint':'0'*64})
     assert r.status_code==401
 
 def test_runner_rejects_fingerprint_mismatch(monkeypatch):
     monkeypatch.setenv('TRANSFORM_RUNTIME_RUNNER_TOKEN','runner-secret')
     import orchestration.job_runner.api as api
-    api=importlib.reload(api); client=TestClient(api.app)
-    r=client.post('/v1/transforms',json={'batch_execution_id':EXEC,'batch_id':'C4_ML_01','model_fingerprint':'0'*64},headers={'Authorization':'Bearer runner-secret'})
+    api=importlib.reload(api)
+    r=post(api.app,'/v1/transforms',json={'batch_execution_id':EXEC,'batch_id':'C4_ML_01','model_fingerprint':'0'*64},headers={'Authorization':'Bearer runner-secret'})
     assert r.status_code==409
 
 def test_known_dbt_failure_is_not_orphaned(monkeypatch):
@@ -35,7 +59,7 @@ def test_known_dbt_failure_is_not_orphaned(monkeypatch):
     cmd=transform_execution.build_transform_command('C4_ML_01',EXEC,creds())
     monkeypatch.setattr(api,'build_transform_command',lambda *a,**k:cmd)
     monkeypatch.setattr(api,'execute',lambda *a,**k:transform_execution.ProcessResult('FAILED',2,'',False,'DBT_BUILD_FAILED'))
-    r=TestClient(api.app).post('/v1/transforms',json={'batch_execution_id':EXEC,'batch_id':'C4_ML_01','model_fingerprint':cmd.model_fingerprint},headers={'Authorization':'Bearer runner-secret'})
+    r=post(api.app,'/v1/transforms',json={'batch_execution_id':EXEC,'batch_id':'C4_ML_01','model_fingerprint':cmd.model_fingerprint},headers={'Authorization':'Bearer runner-secret'})
     assert r.status_code==200 and r.json()['status']=='FAILED'
 
 def test_timeout_is_orphaned_output_bounded_and_redacted(monkeypatch):

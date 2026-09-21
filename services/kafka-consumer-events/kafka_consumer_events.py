@@ -1152,61 +1152,6 @@ def store_event_to_s3(
     except (AvroException, TypeError, ValueError) as e:
         raise PermanentProcessingError(str(e)) from e
 
-# ------------------------------------------------------------------------------
-# Dead Letter Queue (Stored as JSON for readability)
-# ------------------------------------------------------------------------------
-def store_to_dlq(
-    event: Dict[str, Any],
-    topic: str,
-    partition: int,
-    offset: int,
-    error: str
-) -> None:
-    """
-    Store failed events to Dead Letter Queue as JSON.
-    
-    Path: bronze/invalid/{category}/year=YYYY/month=MM/day=DD/topic={topic}/partition={p}/offset={o}/{uuid}.json
-    """
-    minio_client = get_minio_client()
-    
-    topic_info = parse_topic(topic)
-    category = topic_info['category']
-    source_group = topic_info['source_group']
-    source_system = topic_info['system']
-    
-    now = datetime.now(pytz.UTC)
-    year = now.strftime("%Y")
-    month = now.strftime("%m")
-    day = now.strftime("%d")
-    
-    file_id = uuid.uuid4()
-    s3_key = (
-        f"bronze/invalid/category={category}/source_group={source_group}/source_system={source_system}/"
-        f"year={year}/month={month}/day={day}/topic={topic}/partition={partition}/offset={offset}/"
-        f"{file_id}.json"
-    )
-    
-    dlq_event = {
-        "original_topic": topic,
-        "original_partition": partition,
-        "original_offset": offset,
-        "error": error,
-        "timestamp": now.isoformat(),
-        "event": event,
-    }
-    
-    try:
-        minio_client.put_object(
-            Bucket=Settings.MINIO_BUCKET,
-            Key=s3_key,
-            Body=json.dumps(dlq_event, indent=2).encode("utf-8"),
-            ContentType="application/json",
-        )
-        logger.warning(f"⚠️  Sent to DLQ (JSON): s3://{Settings.MINIO_BUCKET}/{s3_key}")
-    except Exception as e:
-        log_processing_error("dlq_storage_failed", error=e)
-
-
 def failure_envelope(msg, event: Optional[Dict[str, Any]], error: Exception,
                      retry_count: int, first_failure: str) -> Dict[str, Any]:
     x_attributes = (event or {}).get("x_attributes") or {}
