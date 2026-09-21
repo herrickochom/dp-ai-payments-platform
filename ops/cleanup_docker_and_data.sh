@@ -28,7 +28,6 @@ LOG_DIRS=(
   "backend/data/ingestion/logs"
   "backend/scripts/logs"
   "backend/trino/logs"
-  "backend/spark/logs"
 )
 
 for dir in "${LOG_DIRS[@]}"; do
