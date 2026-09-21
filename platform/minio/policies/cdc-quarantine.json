@@ -1,0 +1,25 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ListQuarantinePrefix",
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket"],
+      "Resource": ["arn:aws:s3:::dp-ai-payment"],
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "restricted/cdc-quarantine/v1",
+            "restricted/cdc-quarantine/v1/*"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "ReadAndWriteQuarantineMetadata",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:PutObject"],
+      "Resource": ["arn:aws:s3:::dp-ai-payment/restricted/cdc-quarantine/v1/*"]
+    }
+  ]
+}

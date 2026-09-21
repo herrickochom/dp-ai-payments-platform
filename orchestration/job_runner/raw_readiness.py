@@ -72,15 +72,12 @@ def _client():
 def run_raw_readiness() -> dict:
     """Inspect Raw object metadata without reading object payloads."""
 
-    bucket = os.environ.get(
-        "MINIO_BUCKET",
-        "dp-ai-payment",
-    )
-
-    raw_prefix = os.environ.get(
-        "RAW_PREFIX",
-        "raw/v2",
-    ).strip("/")
+    bucket = os.environ.get("OBJECT_STORE_BUCKET", "dp-ai-payment")
+    raw_root = os.environ.get("RAW_ROOT", "raw")
+    raw_version = os.environ.get("RAW_VERSION", "v2")
+    raw_prefix = os.environ.get("RAW_PREFIX", f"{raw_root}/{raw_version}")
+    if raw_prefix != f"{raw_root}/{raw_version}":
+        raise ValueError("RAW_PREFIX must equal RAW_ROOT + '/' + RAW_VERSION")
 
     topics = _topics_from_env()
     client = _client()

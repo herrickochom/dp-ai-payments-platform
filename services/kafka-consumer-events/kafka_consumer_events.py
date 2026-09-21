@@ -58,8 +58,6 @@ logger = logging.getLogger(__name__)
 class Settings:
     # MinIO
     MINIO_ENDPOINT = os.getenv("S3_ENDPOINT", "http://minio:9000")
-    MINIO_ACCESS_KEY = os.getenv("MINIO_ROOT_USER", "minioadmin")
-    MINIO_SECRET_KEY = os.getenv("MINIO_ROOT_PASSWORD")
     MINIO_BUCKET = os.getenv("MINIO_BUCKET", "dp-ai-payment")
     RAW_PREFIX = os.getenv("RAW_PREFIX", "raw/v2").strip("/")
     CDC_QUARANTINE_PREFIX = os.getenv(
@@ -606,7 +604,7 @@ def store_cdc_quarantine_metadata(
         timestamp=timestamp,
     )
 
-    client = get_minio_client()
+    client = get_cdc_quarantine_client()
 
     try:
         client.head_object(
@@ -985,12 +983,32 @@ def parse_topic(topic: str) -> Dict[str, str]:
 # MinIO Client
 # ------------------------------------------------------------------------------
 def get_minio_client():
-    """Get MinIO/S3 client"""
+    """Get the Raw-ingest S3 client."""
+    access_key = os.getenv("RAW_INGEST_S3_ACCESS_KEY_ID", "").strip()
+    secret_key = os.getenv("RAW_INGEST_S3_SECRET_ACCESS_KEY", "").strip()
+    if not access_key or not secret_key:
+        raise RuntimeError("RAW_INGEST_S3_ACCESS_KEY_ID and RAW_INGEST_S3_SECRET_ACCESS_KEY are required")
     return boto3.client(
         "s3",
         endpoint_url=Settings.MINIO_ENDPOINT,
-        aws_access_key_id=Settings.MINIO_ACCESS_KEY,
-        aws_secret_access_key=Settings.MINIO_SECRET_KEY,
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
+        config=BotoConfig(signature_version="s3v4"),
+        verify=False,
+    )
+
+
+def get_cdc_quarantine_client():
+    """Get the restricted CDC quarantine S3 client."""
+    access_key = os.getenv("CDC_QUARANTINE_S3_ACCESS_KEY_ID", "").strip()
+    secret_key = os.getenv("CDC_QUARANTINE_S3_SECRET_ACCESS_KEY", "").strip()
+    if not access_key or not secret_key:
+        raise RuntimeError("CDC_QUARANTINE_S3_ACCESS_KEY_ID and CDC_QUARANTINE_S3_SECRET_ACCESS_KEY are required")
+    return boto3.client(
+        "s3",
+        endpoint_url=Settings.MINIO_ENDPOINT,
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
         config=BotoConfig(signature_version="s3v4"),
         verify=False,
     )

@@ -489,7 +489,7 @@ def test_quarantine_object_contains_safe_metadata_only(
 
     monkeypatch.setattr(
         module,
-        "get_minio_client",
+        "get_cdc_quarantine_client",
         lambda: client,
     )
 
@@ -538,7 +538,7 @@ def test_quarantine_storage_failure_is_fail_stop(
 
     monkeypatch.setattr(
         module,
-        "get_minio_client",
+        "get_cdc_quarantine_client",
         lambda: FailingObjectClient(),
     )
 

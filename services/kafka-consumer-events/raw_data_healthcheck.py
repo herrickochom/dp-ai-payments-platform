@@ -11,11 +11,15 @@ from botocore.client import Config as BotoConfig
 def main() -> int:
     topics = [topic.strip() for topic in os.environ["KAFKA_TOPICS"].split(",") if topic.strip()]
     raw_prefix = os.getenv("RAW_PREFIX", "raw/v2").strip("/")
+    access_key = os.getenv("RAW_INGEST_S3_ACCESS_KEY_ID", "").strip()
+    secret_key = os.getenv("RAW_INGEST_S3_SECRET_ACCESS_KEY", "").strip()
+    if not access_key or not secret_key:
+        raise RuntimeError("RAW_INGEST_S3_ACCESS_KEY_ID and RAW_INGEST_S3_SECRET_ACCESS_KEY are required")
     client = boto3.client(
         "s3",
         endpoint_url=os.getenv("S3_ENDPOINT", "http://minio:9000"),
-        aws_access_key_id=os.environ["MINIO_ROOT_USER"],
-        aws_secret_access_key=os.environ["MINIO_ROOT_PASSWORD"],
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
         config=BotoConfig(signature_version="s3v4"),
         region_name="us-east-1",
     )

@@ -9,8 +9,8 @@ from botocore.client import Config
 
 def main():
     endpoint = os.environ.get('MINIO_ENDPOINT', 'http://minio:9000')
-    access_key = os.environ.get('MINIO_ROOT_USER', 'minioadmin')
-    secret_key = os.environ.get('MINIO_ROOT_PASSWORD', 'minioadmin')
+    access_key = os.environ['MINIO_ROOT_USER']
+    secret_key = os.environ['MINIO_ROOT_PASSWORD']
     
     s3 = boto3.client(
         's3',

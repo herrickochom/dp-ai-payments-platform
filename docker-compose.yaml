@@ -138,8 +138,11 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
-      MINIO_BUCKET: dp-ai-payment
-      RAW_PREFIX: raw/v2
+      OBJECT_STORE_BUCKET: "${OBJECT_STORE_BUCKET:-dp-ai-payment}"
+      MINIO_BUCKET: "${OBJECT_STORE_BUCKET:-dp-ai-payment}"
+      RAW_ROOT: "${RAW_ROOT:-raw}"
+      RAW_VERSION: "${RAW_VERSION:-v2}"
+      RAW_PREFIX: "${RAW_PREFIX:-raw/v2}"
       MINIO_ALIAS: local
     depends_on:
       minio:
@@ -315,8 +318,10 @@ services:
       POSTGRES_HOST: "${POSTGRES_HOST}"
       POSTGRES_PORT: "${POSTGRES_PORT}"
       POSTGRES_DB: "${POSTGRES_DB}"
-      NESSIE_DEFAULT_WAREHOUSE: "${NESSIE_DEFAULT_WAREHOUSE}"
-      WAREHOUSE_BUCKET: "${WAREHOUSE_BUCKET}"
+      NESSIE_WAREHOUSE: "${NESSIE_WAREHOUSE:-payments}"
+      OBJECT_STORE_BUCKET: "${OBJECT_STORE_BUCKET:-dp-ai-payment}"
+      WAREHOUSE_PREFIX: "${WAREHOUSE_PREFIX:-warehouse}"
+      WAREHOUSE_URI: "${WAREHOUSE_URI:-s3://dp-ai-payment/warehouse}"
       OBJECT_STORE_REGION: "${OBJECT_STORE_REGION}"
       S3_ENDPOINT: "${S3_ENDPOINT}"
       S3_PATH_STYLE_ACCESS: "${S3_PATH_STYLE_ACCESS}"
@@ -326,12 +331,8 @@ services:
       NESSIE_S3_EXTERNAL_ENDPOINT: "${NESSIE_S3_EXTERNAL_ENDPOINT}"
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      NESSIE_CATALOG_DEFAULT_WAREHOUSE: payments
-      NESSIE_CATALOG_WAREHOUSES_PAYMENTS_LOCATION: s3://dp-ai-payment/warehouse
-      MINIO_NAME: ${MINIO_ROOT_USER}
-      MINIO_SECRET: ${MINIO_ROOT_PASSWORD}
+      NESSIE_CATALOG_DEFAULT_WAREHOUSE: "${NESSIE_WAREHOUSE:-payments}"
+      NESSIE_CATALOG_WAREHOUSES_PAYMENTS_LOCATION: "${WAREHOUSE_URI:-s3://dp-ai-payment/warehouse}"
     ports:
     - ${NESSIE_PORT:-19120}:19120
     volumes:
@@ -436,10 +437,15 @@ services:
       dockerfile: platform/docker/dockerfiles/Dockerfile.payment-consumer-events
     environment:
       S3_ENDPOINT: ${S3_ENDPOINT}
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      MINIO_BUCKET: dp-ai-payment
-      RAW_PREFIX: raw/v2
+      RAW_INGEST_S3_ACCESS_KEY_ID: ${RAW_INGEST_S3_ACCESS_KEY_ID:?RAW_INGEST_S3_ACCESS_KEY_ID is required}
+      RAW_INGEST_S3_SECRET_ACCESS_KEY: ${RAW_INGEST_S3_SECRET_ACCESS_KEY:?RAW_INGEST_S3_SECRET_ACCESS_KEY is required}
+      CDC_QUARANTINE_S3_ACCESS_KEY_ID: ${CDC_QUARANTINE_S3_ACCESS_KEY_ID:?CDC_QUARANTINE_S3_ACCESS_KEY_ID is required}
+      CDC_QUARANTINE_S3_SECRET_ACCESS_KEY: ${CDC_QUARANTINE_S3_SECRET_ACCESS_KEY:?CDC_QUARANTINE_S3_SECRET_ACCESS_KEY is required}
+      OBJECT_STORE_BUCKET: "${OBJECT_STORE_BUCKET:-dp-ai-payment}"
+      MINIO_BUCKET: "${OBJECT_STORE_BUCKET:-dp-ai-payment}"
+      RAW_ROOT: "${RAW_ROOT:-raw}"
+      RAW_VERSION: "${RAW_VERSION:-v2}"
+      RAW_PREFIX: "${RAW_PREFIX:-raw/v2}"
       KAFKA_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
       KAFKA_GROUP_ID: payment-events-consumer
       KAFKA_RETRY_TOPIC: payment-events.retry
@@ -469,9 +475,8 @@ services:
     - data-platform-network
     healthcheck:
       test:
-      - CMD
-      - python3
-      - /app/raw_data_healthcheck.py
+      - CMD-SHELL
+      - env -u CDC_QUARANTINE_S3_ACCESS_KEY_ID -u CDC_QUARANTINE_S3_SECRET_ACCESS_KEY python3 /app/raw_data_healthcheck.py
       interval: 5s
       timeout: 15s
       retries: 120
@@ -507,8 +512,8 @@ services:
       TRINO_CONFIG_DIR: /etc/trino
       TRINO_INTERNAL_SHARED_SECRET: ${TRINO_INTERNAL_SHARED_SECRET}
       TRINO_KEYSTORE_PASSWORD: ${TRINO_KEYSTORE_PASSWORD:?TRINO_KEYSTORE_PASSWORD must be supplied by environment}
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      TRINO_S3_ACCESS_KEY_ID: ${TRINO_S3_ACCESS_KEY_ID:?TRINO_S3_ACCESS_KEY_ID is required}
+      TRINO_S3_SECRET_ACCESS_KEY: ${TRINO_S3_SECRET_ACCESS_KEY:?TRINO_S3_SECRET_ACCESS_KEY is required}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
@@ -565,10 +570,6 @@ services:
       TRINO_PORT: '8080'
       TRINO_CATALOG: iceberg
       TRINO_SCHEMA: consumption
-      MINIO_ENDPOINT: ${S3_ENDPOINT}
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      MINIO_BUCKET: dp-ai-payment
       NESSIE_ENDPOINT: ${NESSIE_ENDPOINT}
       PDM_ML_SAMPLE_SIZE: ${PDM_ML_SAMPLE_SIZE:-100}
     volumes:
@@ -610,10 +611,6 @@ services:
       TRINO_PORT: '8080'
       TRINO_CATALOG: iceberg
       TRINO_SCHEMA: consumption
-      MINIO_ENDPOINT: ${S3_ENDPOINT}
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      MINIO_BUCKET: dp-ai-payment
       NESSIE_ENDPOINT: ${NESSIE_ENDPOINT}
       PDM_ML_SAMPLE_SIZE: ${PDM_ML_SAMPLE_SIZE:-100}
       PDM_ML_MODEL_DIR: /app/pdm-ml/models
@@ -1001,7 +998,10 @@ services:
       DBT_CONSUMPTION_DATABASE: "${DBT_CONSUMPTION_DATABASE}"
       DBT_S3_URL_STYLE: "${DBT_S3_URL_STYLE}"
       NESSIE_ENDPOINT: "${NESSIE_ENDPOINT}"
-      WAREHOUSE_BUCKET: "${WAREHOUSE_BUCKET}"
+      OBJECT_STORE_BUCKET: "${OBJECT_STORE_BUCKET:-dp-ai-payment}"
+      WAREHOUSE_PREFIX: "${WAREHOUSE_PREFIX:-warehouse}"
+      WAREHOUSE_URI: "${WAREHOUSE_URI:-s3://dp-ai-payment/warehouse}"
+      NESSIE_WAREHOUSE: "${NESSIE_WAREHOUSE:-payments}"
       ICEBERG_CATALOG: "${ICEBERG_CATALOG}"
       PLATFORM_RUNNER_EXECUTION_ENABLED: 'false'
       PLATFORM_JOB_EXECUTION_ENABLED: 'false'
@@ -1017,8 +1017,11 @@ services:
       KAFKA_TOPICS: icmn.vpm.pain001,icmn.pmn.pain001,cpo.psn.pain002,cpo.plm.pain002,wendi.pain001,wendi.pain002,wendi.camt053,wendi.camt052,wendi.camt054,wendi.transactions,mobile.mtn.pacs008,mobile.mtn.pacs002,mobile.airtel.pacs008,mobile.airtel.pacs002,agent.transactions,agent.profiles,agent.locations,pdmis.beneficiaries,pdmis.loans,pdmis.repayments,pdmis.saccos,pdmis.households,pdmis.business_plans,pdmis.special_groups
       PLATFORM_RAW_READ_ACCESS_KEY: ${PLATFORM_RAW_READ_ACCESS_KEY:?PLATFORM_RAW_READ_ACCESS_KEY is required}
       PLATFORM_RAW_READ_SECRET_KEY: ${PLATFORM_RAW_READ_SECRET_KEY:?PLATFORM_RAW_READ_SECRET_KEY is required}
-      MINIO_BUCKET: dp-ai-payment
-      RAW_PREFIX: raw/v2
+      OBJECT_STORE_BUCKET: "${OBJECT_STORE_BUCKET:-dp-ai-payment}"
+      MINIO_BUCKET: "${OBJECT_STORE_BUCKET:-dp-ai-payment}"
+      RAW_ROOT: "${RAW_ROOT:-raw}"
+      RAW_VERSION: "${RAW_VERSION:-v2}"
+      RAW_PREFIX: "${RAW_PREFIX:-raw/v2}"
       S3_ENDPOINT: ${S3_ENDPOINT}
     volumes:
     - ./data/pdmis_ml:/app/data/pdmis_ml:ro
