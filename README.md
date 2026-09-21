@@ -158,7 +158,9 @@ boundary without introducing any cloud-vendor SDK or endpoint.
 
 ```bash
 docker compose up -d                                    # core services
-docker compose --profile dbt run --rm duckdb build      # build the lakehouse
+# Lakehouse transforms are not run directly through a standalone dbt/DuckDB
+# Compose service. Production transforms are submitted through the governed
+# transform runtime and executed by platform-job-runner.
 docker compose --profile analytics up -d trino superset  # query and dashboards
 ```
 
