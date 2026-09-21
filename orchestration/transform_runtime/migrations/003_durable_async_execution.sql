@@ -1,0 +1,4 @@
+ALTER TABLE batch_executions ADD COLUMN IF NOT EXISTS lease_owner text, ADD COLUMN IF NOT EXISTS lease_token text, ADD COLUMN IF NOT EXISTS lease_expires_at timestamptz, ADD COLUMN IF NOT EXISTS cancel_requested_at timestamptz, ADD COLUMN IF NOT EXISTS nessie_branch text, ADD COLUMN IF NOT EXISTS nessie_base_ref text, ADD COLUMN IF NOT EXISTS nessie_base_hash text, ADD COLUMN IF NOT EXISTS nessie_source_hash text, ADD COLUMN IF NOT EXISTS publication_status text;
+CREATE INDEX IF NOT EXISTS batch_execution_claimable ON batch_executions(status,accepted_at) WHERE status='QUEUED';
+CREATE INDEX IF NOT EXISTS batch_execution_lease_reconcile ON batch_executions(lease_expires_at) WHERE status IN ('RUNNING','TESTING');
+INSERT INTO transform_schema_version(version) VALUES (3) ON CONFLICT(version) DO NOTHING;

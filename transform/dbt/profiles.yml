@@ -68,7 +68,7 @@ pdm_platform:
           alias: lakehouse
           options:
             type: iceberg
-            endpoint: "{{ env_var('NESSIE_ENDPOINT') }}/iceberg"
+            endpoint: "{{ env_var('NESSIE_ENDPOINT') }}/iceberg/{{ env_var('DBT_NESSIE_BRANCH') }}"
             authorization_type: bearer
             token: "{{ env_var('NESSIE_AUTH_TOKEN') }}"
             access_delegation_mode: none
