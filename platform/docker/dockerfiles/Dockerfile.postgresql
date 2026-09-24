@@ -1,4 +1,4 @@
-FROM postgres:15-alpine
+FROM postgres:16.15-alpine
 
 # Install healthcheck dependencies
 RUN apk add --no-cache curl

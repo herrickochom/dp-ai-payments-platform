@@ -1,0 +1,28 @@
+{
+  "name": "pdm-mdm-sacco-postgres",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "pdm-source-postgres",
+    "database.port": "5432",
+    "database.user": "${file:/opt/kafka/external-configuration/cdc-secrets.properties:database.user}",
+    "database.password": "${file:/opt/kafka/external-configuration/cdc-secrets.properties:database.password}",
+    "database.dbname": "${PDM_SOURCE_DB}",
+    "topic.prefix": "cdc.pdm_mdm",
+    "plugin.name": "pgoutput",
+    "publication.name": "pdm_mdm_ordinary_pub",
+    "publication.autocreate.mode": "disabled",
+    "slot.name": "pdm_mdm_ordinary_slot",
+    "schema.include.list": "mdm",
+    "table.include.list": "mdm.sacco_master_sources",
+    "snapshot.mode": "initial",
+    "tombstones.on.delete": "true",
+    "provide.transaction.metadata": "true",
+    "include.schema.changes": "false",
+    "heartbeat.interval.ms": "10000",
+    "errors.tolerance": "none",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "false",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false"
+  }
+}

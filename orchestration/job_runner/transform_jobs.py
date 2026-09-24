@@ -5,8 +5,10 @@ import os
 import time
 import urllib.request
 
+from services.shared.security.secret_provider import require_secret
+
 def _request(method: str, path: str, payload: dict | None = None) -> dict:
-    token = os.environ["TRANSFORM_RUNTIME_AIRFLOW_TOKEN"]
+    token = require_secret("TRANSFORM_RUNTIME_AIRFLOW_TOKEN")
     body = json.dumps(payload).encode() if payload is not None else None
     request = urllib.request.Request(os.getenv("TRANSFORM_RUNTIME_URL", "http://transform-runtime:8089").rstrip("/") + path, data=body, method=method, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"})
     with urllib.request.urlopen(request, timeout=10) as response:

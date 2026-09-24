@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from fastapi.testclient import TestClient
+from agent_asgi_client import LocalClient
 
 ROOT = Path(__file__).resolve().parents[1]
 SERVICE = ROOT / "services" / "agent-api"
@@ -124,7 +124,7 @@ class ApiTests(unittest.TestCase):
     def setUpClass(cls):
         import api
         api.orchestrator = Orchestrator(Settings(), FakeGateway())
-        cls.client = TestClient(api.app)
+        cls.client = LocalClient(api.app)
     def test_agents_endpoint(self):
         identities = {item["id"] for item in self.client.get("/agents").json()["agents"]}
         self.assertTrue({"data_discovery", "analytics"}.issubset(identities))

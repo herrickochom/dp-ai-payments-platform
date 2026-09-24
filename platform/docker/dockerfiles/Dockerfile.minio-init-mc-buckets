@@ -1,4 +1,5 @@
-FROM quay.io/minio/mc:latest
+ARG MINIO_MC_IMAGE=quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z
+FROM ${MINIO_MC_IMAGE}
 
 COPY platform/minio/minio-init-mc-buckets.sh /app/init.sh
 RUN chmod +x /app/init.sh

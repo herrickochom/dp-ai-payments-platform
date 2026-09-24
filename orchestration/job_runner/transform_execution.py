@@ -9,6 +9,12 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Mapping
+from urllib.parse import urlsplit
+from services.shared.security.runtime_security import (
+    validate_nessie_security,
+    validate_object_store_security,
+)
+from services.shared.security.secret_provider import resolve_secret
 
 try:
     from orchestration.transform_runtime.execution_plan import EXECUTION_BATCHES, PROTECTED_EXTERNAL_PREREQUISITES
@@ -17,11 +23,12 @@ except ImportError:
 
 REDACTIONS = (re.compile(r"(?i)(password|secret|token|access_key)(\s*[=:]\s*)\S+"),)
 AUTHORITY_ENV = {
-    "ordinary_transform": frozenset({"ORDINARY_S3_ACCESS_KEY_ID", "ORDINARY_S3_SECRET_ACCESS_KEY", "NESSIE_AUTH_TOKEN"}),
-    "restricted_identity_transform": frozenset({"RESTRICTED_S3_ACCESS_KEY_ID", "RESTRICTED_S3_SECRET_ACCESS_KEY", "NESSIE_AUTH_TOKEN"}),
-    "ml_prediction_transform": frozenset({"ML_S3_ACCESS_KEY_ID", "ML_S3_SECRET_ACCESS_KEY", "NESSIE_AUTH_TOKEN"}),
+    "ordinary_transform": frozenset({"ORDINARY_S3_ACCESS_KEY_ID", "ORDINARY_S3_SECRET_ACCESS_KEY", "NESSIE_TRANSFORM_TOKEN"}),
+    "restricted_identity_transform": frozenset({"RESTRICTED_S3_ACCESS_KEY_ID", "RESTRICTED_S3_SECRET_ACCESS_KEY", "NESSIE_TRANSFORM_TOKEN"}),
+    "ml_prediction_transform": frozenset({"ML_S3_ACCESS_KEY_ID", "ML_S3_SECRET_ACCESS_KEY", "NESSIE_TRANSFORM_TOKEN"}),
 }
 FORBIDDEN_ENV = frozenset({"MINIO_ROOT_USER", "MINIO_ROOT_PASSWORD", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"})
+AUTHORITY_SECRET_NAMES = frozenset().union(*AUTHORITY_ENV.values())
 ML_INPUT = Path("/app/data/pdmis_ml/default_risk_current_predictions.jsonl")
 
 @dataclass(frozen=True)
@@ -46,6 +53,19 @@ def _redact(value: str) -> str:
         value = pattern.sub(r"\1\2[REDACTED]", value)
     return value
 
+def _ambient_environment() -> dict[str, str]:
+    """Ambient configuration with authority credentials resolved provider-first.
+
+    Only names already authorised by AUTHORITY_ENV are resolved, and no secret
+    provider configuration is copied into the child environment.
+    """
+    environment = dict(os.environ)
+    for name in sorted(AUTHORITY_SECRET_NAMES):
+        value = resolve_secret(name)
+        if value is not None:
+            environment[name] = value
+    return environment
+
 def build_transform_command(batch_id: str, execution_id: str, source: Mapping[str, str] | None = None, *, transform_run_id: str | None = None) -> TransformCommand:
     batch = EXECUTION_BATCHES.get(batch_id)
     if batch is None:
@@ -57,6 +77,8 @@ def build_transform_command(batch_id: str, execution_id: str, source: Mapping[st
         raise ValueError("invalid execution identity")
     work = Path(os.getenv("TRANSFORM_WORK_ROOT", "/var/lib/platform-job-runner/work")) / execution_id
     duckdb_path = str(work / "runtime.duckdb")
+    dbt_log_path = str(work / "logs")
+    dbt_target_path = str(work / "target")
     names = tuple(model.rsplit(".", 1)[-1] for model in sorted(batch.model_allowlist))
     argv = (
         os.getenv("DBT_EXECUTABLE", "/opt/dbt/bin/dbt"),
@@ -70,11 +92,39 @@ def build_transform_command(batch_id: str, execution_id: str, source: Mapping[st
         "--select",
         *names,
     )
-    supplied = source or os.environ
+    supplied = source or _ambient_environment()
     required_authority = AUTHORITY_ENV[batch.authority]
     missing = sorted(key for key in required_authority if not supplied.get(key))
     if missing:
         raise ValueError("required transform authority credentials are unavailable")
+
+    object_store_required = (
+        "S3_ENDPOINT", "S3_USE_SSL", "OBJECT_STORE_REGION",
+        "OBJECT_STORE_BUCKET", "RAW_ROOT", "RAW_VERSION", "RAW_PREFIX",
+        "WAREHOUSE_PREFIX", "WAREHOUSE_URI", "DBT_S3_URL_STYLE",
+    )
+    missing_storage = sorted(key for key in object_store_required if not supplied.get(key))
+    if missing_storage:
+        raise ValueError("required object-store configuration is unavailable: " + ", ".join(missing_storage))
+    validated_s3_endpoint, _, _ = validate_object_store_security(
+        supplied["S3_ENDPOINT"],
+        use_ssl=supplied["S3_USE_SSL"],
+        ca_bundle=supplied.get("S3_CA_BUNDLE"),
+    )
+    duckdb_s3_endpoint = urlsplit(validated_s3_endpoint).netloc
+    if not duckdb_s3_endpoint:
+        raise ValueError("validated S3 endpoint has no network location")
+
+    if supplied["RAW_PREFIX"] != f'{supplied["RAW_ROOT"]}/{supplied["RAW_VERSION"]}':
+        raise ValueError("RAW_PREFIX must equal RAW_ROOT + '/' + RAW_VERSION")
+    if supplied["WAREHOUSE_URI"] != f's3://{supplied["OBJECT_STORE_BUCKET"]}/{supplied["WAREHOUSE_PREFIX"]}':
+        raise ValueError("WAREHOUSE_URI must use the configured bucket and prefix")
+
+    validate_nessie_security(
+        supplied.get("NESSIE_ENDPOINT", ""),
+        auth_mode=os.getenv("NESSIE_AUTH_MODE", "bearer"),
+        token=supplied["NESSIE_TRANSFORM_TOKEN"],
+    )
 
     access_key_name, secret_key_name = {
         "ordinary_transform": ("ORDINARY_S3_ACCESS_KEY_ID", "ORDINARY_S3_SECRET_ACCESS_KEY"),
@@ -83,10 +133,12 @@ def build_transform_command(batch_id: str, execution_id: str, source: Mapping[st
     }[batch.authority]
 
     passthrough = (
-        "S3_ENDPOINT", "DBT_S3_URL_STYLE", "DBT_DATABASE",
+        "S3_ENDPOINT", "S3_USE_SSL", "S3_CA_BUNDLE", "OBJECT_STORE_REGION",
+        "S3_PATH_STYLE_ACCESS", "DBT_S3_URL_STYLE", "DBT_DATABASE",
         "DBT_STAGING_DATABASE", "DBT_BRONZE_DATABASE", "DBT_SILVER_DATABASE",
         "DBT_SILVER_VAULT_DATABASE", "DBT_GOLD_DATABASE",
-        "DBT_CONSUMPTION_DATABASE", "OBJECT_STORE_BUCKET", "WAREHOUSE_PREFIX",
+        "DBT_CONSUMPTION_DATABASE", "OBJECT_STORE_BUCKET", "RAW_ROOT",
+        "RAW_VERSION", "RAW_PREFIX", "WAREHOUSE_PREFIX",
         "WAREHOUSE_URI", "NESSIE_WAREHOUSE", "ICEBERG_CATALOG",
         "NESSIE_ENDPOINT",
     )
@@ -94,9 +146,12 @@ def build_transform_command(batch_id: str, execution_id: str, source: Mapping[st
     environment.update({
         "TRANSFORM_S3_ACCESS_KEY_ID": supplied[access_key_name],
         "TRANSFORM_S3_SECRET_ACCESS_KEY": supplied[secret_key_name],
-        "NESSIE_AUTH_TOKEN": supplied["NESSIE_AUTH_TOKEN"],
+        "NESSIE_TRANSFORM_TOKEN": supplied["NESSIE_TRANSFORM_TOKEN"],
         "PATH": "/opt/dbt/bin:/usr/local/bin:/usr/bin",
         "DBT_DUCKDB_PATH": duckdb_path,
+        "DBT_LOG_PATH": dbt_log_path,
+        "DBT_TARGET_PATH": dbt_target_path,
+        "DUCKDB_S3_ENDPOINT": duckdb_s3_endpoint,
         "DBT_NESSIE_BRANCH": (f"transform_{transform_run_id}" if transform_run_id else f"transform_{execution_id}"),
         "TRANSFORM_AUTHORITY": batch.authority,
     })

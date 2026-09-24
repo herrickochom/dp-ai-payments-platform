@@ -207,8 +207,13 @@ def test_current_source_estate_remains_non_cdc():
     registry = load(REGISTRY)
 
     for source in registry["source_systems"]:
-        assert source["adapter_type"] == "GENERATED_EVENT"
-        assert source["mutable_database_source"] is False
+        if source["source_system"] == "pdm_mdm":
+            assert source["adapter_type"] == "CDC_DATABASE"
+            assert source["mutable_database_source"] is True
+            assert source["cdc_configuration_status"] == "CONFIGURED_PENDING_VERSION_AND_GOVERNANCE_APPROVAL"
+        else:
+            assert source["adapter_type"] == "GENERATED_EVENT"
+            assert source["mutable_database_source"] is False
         assert source["cdc_capable"] is False
         assert source["cdc_activated"] is False
 

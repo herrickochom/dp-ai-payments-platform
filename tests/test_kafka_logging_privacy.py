@@ -79,6 +79,8 @@ def test_acknowledged_dlq_logs_metadata_and_preserves_replay(monkeypatch, caplog
 
 @pytest.mark.parametrize('raises', [False, True])
 def test_failed_dlq_fail_stop_logs_no_business_key(monkeypatch, caplog, raises):
+    for name, value in {"OBJECT_STORE_BUCKET": "dp-ai-payment", "RAW_ROOT": "raw", "RAW_VERSION": "v2", "RAW_PREFIX": "raw/v2"}.items():
+        monkeypatch.setenv(name, value)
     caplog.set_level(logging.DEBUG, logger=consumer.logger.name)
     msg, client, producer = message(), Mock(), Mock()
     msg.error.return_value = None
@@ -119,6 +121,8 @@ def test_serialization_exception_text_and_traceback_not_logged(monkeypatch, capl
 
 
 def test_storage_exception_logs_metadata_only(monkeypatch, caplog):
+    for name, value in {"OBJECT_STORE_BUCKET": "dp-ai-payment", "RAW_ROOT": "raw", "RAW_VERSION": "v2", "RAW_PREFIX": "raw/v2"}.items():
+        monkeypatch.setenv(name, value)
     caplog.set_level(logging.DEBUG, logger=consumer.logger.name)
     client = Mock()
     client.head_object.side_effect = OSError(SECRET)

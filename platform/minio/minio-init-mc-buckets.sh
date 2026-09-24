@@ -8,6 +8,6 @@ until mc alias set local "${MINIO_ENDPOINT}" "${MINIO_ROOT_USER}" "${MINIO_ROOT_
 done
 
 echo "Creating buckets..."
-mc mb local/dp-ai-payment || true
+mc mb "local/${OBJECT_STORE_BUCKET:?OBJECT_STORE_BUCKET is required}" || true
 
 echo "Buckets created successfully."

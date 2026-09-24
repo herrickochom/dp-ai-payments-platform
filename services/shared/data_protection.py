@@ -12,17 +12,31 @@ import os
 import re
 from dataclasses import dataclass
 
+from services.shared.security.secret_provider import SecretUnavailable, require_secret
+
 
 class TokenisationKeyMissing(RuntimeError):
     """Raised when mandatory keyed tokenisation has no key: fail closed."""
 
 
+MISSING_KEY_MESSAGE = (
+    "DP_TOKEN_KEY is not configured; tokenisation is mandatory so fail closed"
+)
+
+
+def _required_token_key() -> str:
+    """Resolve the mandatory tokenisation key without ever echoing its value."""
+    try:
+        raw = require_secret("DP_TOKEN_KEY")
+    except SecretUnavailable as exc:
+        raise TokenisationKeyMissing(MISSING_KEY_MESSAGE) from exc
+    if not raw.strip():
+        raise TokenisationKeyMissing(MISSING_KEY_MESSAGE)
+    return raw
+
+
 def _active_key() -> tuple[bytes, str]:
-    raw = os.getenv("DP_TOKEN_KEY")
-    if not raw or not raw.strip():
-        raise TokenisationKeyMissing(
-            "DP_TOKEN_KEY is not configured; tokenisation is mandatory so fail closed"
-        )
+    raw = _required_token_key()
     version = os.getenv("DP_TOKEN_KEY_VERSION", "v1")
     return raw.encode("utf-8"), version
 

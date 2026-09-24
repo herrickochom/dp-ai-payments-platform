@@ -1,4 +1,5 @@
-FROM trinodb/trino:latest
+ARG TRINO_BASE_IMAGE
+FROM ${TRINO_BASE_IMAGE}
 
 # Copy custom configurations
 COPY platform/trino/etc /etc/trino/

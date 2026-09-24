@@ -34,7 +34,7 @@ def post(app, path, **kwargs):
         loop.close()
 
 def creds():
-    return {'ML_S3_ACCESS_KEY_ID':'ml','ML_S3_SECRET_ACCESS_KEY':'secret','NESSIE_AUTH_TOKEN':'token','S3_ENDPOINT':'minio:9000','DBT_S3_URL_STYLE':'path','DBT_DATABASE':'lakehouse','DBT_STAGING_DATABASE':'staging','DBT_BRONZE_DATABASE':'bronze','DBT_SILVER_DATABASE':'silver','DBT_SILVER_VAULT_DATABASE':'silver_vault','DBT_GOLD_DATABASE':'gold','DBT_CONSUMPTION_DATABASE':'consumption','WAREHOUSE_BUCKET':'warehouse','ICEBERG_CATALOG':'nessie','NESSIE_ENDPOINT':'http://nessie:19120'}
+    return {'ML_S3_ACCESS_KEY_ID':'ml','ML_S3_SECRET_ACCESS_KEY':'secret','NESSIE_TRANSFORM_TOKEN':'token','S3_ENDPOINT':'http://minio:9000','S3_USE_SSL':'false','OBJECT_STORE_REGION':'us-east-1','OBJECT_STORE_BUCKET':'dp-ai-payment','RAW_ROOT':'raw','RAW_VERSION':'v2','RAW_PREFIX':'raw/v2','WAREHOUSE_PREFIX':'warehouse','WAREHOUSE_URI':'s3://dp-ai-payment/warehouse','S3_PATH_STYLE_ACCESS':'true','DBT_S3_URL_STYLE':'path','DBT_DATABASE':'lakehouse','DBT_STAGING_DATABASE':'staging','DBT_BRONZE_DATABASE':'bronze','DBT_SILVER_DATABASE':'silver','DBT_SILVER_VAULT_DATABASE':'silver_vault','DBT_GOLD_DATABASE':'gold','DBT_CONSUMPTION_DATABASE':'consumption','WAREHOUSE_BUCKET':'warehouse','ICEBERG_CATALOG':'nessie','NESSIE_ENDPOINT':'http://nessie:19120'}
 
 def test_runner_requires_service_auth(monkeypatch):
     monkeypatch.setenv('TRANSFORM_RUNTIME_RUNNER_TOKEN','runner-secret')
@@ -116,7 +116,7 @@ def test_child_environment_maps_only_selected_authority_credentials():
     env=cmd.environment
     assert env['TRANSFORM_S3_ACCESS_KEY_ID']=='ml'
     assert env['TRANSFORM_S3_SECRET_ACCESS_KEY']=='secret'
-    assert env['NESSIE_AUTH_TOKEN']=='token'
+    assert env['NESSIE_TRANSFORM_TOKEN']=='token'
     for forbidden in ('ML_S3_ACCESS_KEY_ID','ML_S3_SECRET_ACCESS_KEY','ORDINARY_S3_ACCESS_KEY_ID','ORDINARY_S3_SECRET_ACCESS_KEY','RESTRICTED_S3_ACCESS_KEY_ID','RESTRICTED_S3_SECRET_ACCESS_KEY','MINIO_ROOT_USER','MINIO_ROOT_PASSWORD','PLATFORM_RAW_READ_ACCESS_KEY','PLATFORM_RAW_READ_SECRET_KEY','AWS_ACCESS_KEY_ID','AWS_SECRET_ACCESS_KEY'):
         assert forbidden not in env
 

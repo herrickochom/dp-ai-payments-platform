@@ -3,12 +3,14 @@ import pytest
 from orchestration.job_runner import transform_execution
 from orchestration.transform_runtime.nessie_publication import NessiePublisher,NessieNotFound,NessieConflict,branch_for_run
 RUN='tr_'+'b'*32; EXEC='be_'+'a'*32
-def creds(): return {'ML_S3_ACCESS_KEY_ID':'ml','ML_S3_SECRET_ACCESS_KEY':'secret','NESSIE_AUTH_TOKEN':'token','S3_ENDPOINT':'minio:9000','DBT_S3_URL_STYLE':'path','DBT_DATABASE':'lakehouse','NESSIE_ENDPOINT':'http://nessie:19120'}
+def creds(): return {'ML_S3_ACCESS_KEY_ID':'ml','ML_S3_SECRET_ACCESS_KEY':'secret','NESSIE_TRANSFORM_TOKEN':'token','S3_ENDPOINT':'http://minio:9000','S3_USE_SSL':'false','OBJECT_STORE_REGION':'us-east-1','OBJECT_STORE_BUCKET':'dp-ai-payment','RAW_ROOT':'raw','RAW_VERSION':'v2','RAW_PREFIX':'raw/v2','WAREHOUSE_PREFIX':'warehouse','WAREHOUSE_URI':'s3://dp-ai-payment/warehouse','S3_PATH_STYLE_ACCESS':'true','DBT_S3_URL_STYLE':'path','DBT_DATABASE':'lakehouse','NESSIE_ENDPOINT':'http://nessie:19120'}
 
 def test_run_scoped_nessie_reference_is_consumed():
     c=transform_execution.build_transform_command('C4_ML_01',EXEC,creds(),transform_run_id=RUN)
     assert c.environment['DBT_NESSIE_BRANCH']==branch_for_run(RUN)
-    assert "/iceberg/{{ env_var('DBT_NESSIE_BRANCH') }}" in Path('transform/dbt/profiles.yml').read_text()
+    plugin=Path('orchestration/job_runner/nessie_iceberg_plugin.py').read_text()
+    assert 'iceberg/{branch}' in plugin
+    assert 'AS {_CATALOG_ALIAS}' in plugin
 
 def test_no_sync_dispatch_and_queue_is_fenced():
     assert 'dispatch_to_runner' not in Path('orchestration/transform_runtime/api.py').read_text()

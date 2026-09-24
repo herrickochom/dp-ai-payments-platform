@@ -17,14 +17,15 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 from typing import Any
 
 
 HERE = Path(__file__).resolve().parent
-PROJECT_ROOT = HERE.parents[1]
+PROJECT_ROOT = HERE.parents[1] if len(HERE.parents) > 1 else HERE
 
-DATA_ROOT = PROJECT_ROOT / "data"
+DATA_ROOT = Path(os.environ.get("DATA_ROOT", PROJECT_ROOT / "data"))
 PDMIS_ROOT = DATA_ROOT / "pdmis"
 AGENT_ROOT = DATA_ROOT / "agent_network"
 MDM_ROOT = DATA_ROOT / "mdm"
@@ -222,6 +223,8 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Validate source availability without writing data.",
     )
+    parser.add_argument("--target", choices=("postgres", "json"),
+                        help="Explicit MDM persistence target")
 
     return parser.parse_args()
 
@@ -239,17 +242,23 @@ def main() -> None:
         print("MDM_SOURCE_VALIDATION=PASS")
         return
 
-    generate()
+    if args.target is None:
+        raise SystemExit("Select --target postgres or --target json")
 
-
-if __name__ == "__main__":
-    main()
+    datasets = build_resolved_mdm()
+    if args.target == "json":
+        for name, rows in datasets.items():
+            write_json(f"{name}.json", rows)
+    else:
+        from services.shared.mdm.postgres_store import persist_mdm
+        persist_mdm(datasets)
+        print("MDM_POSTGRES_MATERIALISATION=PASS")
 
 # ------------------------------------------------------------------
 # Controlled MDM resolution/materialisation
 # ------------------------------------------------------------------
 
-def materialise_resolved_mdm() -> None:
+def build_resolved_mdm() -> dict[str, list[dict[str, Any]]]:
     """
     Materialise synthetic MDM fixtures.
 
@@ -406,52 +415,25 @@ def materialise_resolved_mdm() -> None:
         "mdm_location_id",
     )
 
-    write_json(
-        "beneficiary_master_sources.json",
-        beneficiary_rows,
-    )
+    return {
+        "beneficiary_master_sources": beneficiary_rows,
+        "sacco_master_sources": sacco_rows,
+        "agent_master_sources": agent_rows,
+        "geography_master_sources": geography_rows,
+        "golden_beneficiaries_restricted": golden_beneficiaries,
+        "golden_saccos": golden_saccos,
+        "golden_agents": golden_agents,
+        "golden_geography": golden_geography,
+        "source_crosswalk": crosswalk,
+        "beneficiary_identity_alerts_restricted": identity_alerts,
+    }
 
-    write_json(
-        "sacco_master_sources.json",
-        sacco_rows,
-    )
 
-    write_json(
-        "agent_master_sources.json",
-        agent_rows,
-    )
+def materialise_resolved_mdm() -> None:
+    """Retain the explicit legacy JSON export entry point."""
+    for name, rows in build_resolved_mdm().items():
+        write_json(f"{name}.json", rows)
 
-    write_json(
-        "geography_master_sources.json",
-        geography_rows,
-    )
 
-    write_json(
-        "golden_beneficiaries_restricted.json",
-        golden_beneficiaries,
-    )
-
-    write_json(
-        "golden_saccos.json",
-        golden_saccos,
-    )
-
-    write_json(
-        "golden_agents.json",
-        golden_agents,
-    )
-
-    write_json(
-        "golden_geography.json",
-        golden_geography,
-    )
-
-    write_json(
-        "source_crosswalk.json",
-        crosswalk,
-    )
-
-    write_json(
-        "beneficiary_identity_alerts_restricted.json",
-        identity_alerts,
-    )
+if __name__ == "__main__":
+    main()

@@ -15,6 +15,7 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 # COPY services/payment-xml-generator/generate_all_sources.py /app/generate_all_sources.py
 
 COPY services/payment-xml-generator/ /app/
+COPY services/shared/mdm/ /app/services/shared/mdm/
 
 ENV PYTHONUNBUFFERED=1
 ENV DATA_ROOT=/app/data

@@ -2,7 +2,7 @@ import sys
 import unittest
 from pathlib import Path
 
-from fastapi.testclient import TestClient
+from agent_asgi_client import LocalClient
 from pydantic import ValidationError
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -167,7 +167,7 @@ class IntegrationTests(unittest.TestCase):
     def test_phase1_and_builder_api_compatibility(self):
         import api
         api.orchestrator = self.orchestrator
-        client = TestClient(api.app)
+        client = LocalClient(api.app)
         self.assertEqual(200, client.post("/agents/query", json={
             "objective": "What tables contain repayment information?"}).status_code)
         response = client.post("/agents/build", json={

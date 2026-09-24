@@ -1,0 +1,23 @@
+ARG MINIO_MC_IMAGE=quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z
+
+FROM ${MINIO_MC_IMAGE} AS minio_mc
+
+FROM python:3.13-slim
+
+COPY --from=minio_mc /usr/bin/mc /usr/local/bin/mc
+
+WORKDIR /app
+
+COPY platform/minio/provision_object_store_identities.py /app/platform/minio/provision_object_store_identities.py
+COPY platform/minio/policies /app/platform/minio/policies
+COPY services/shared/security /app/services/shared/security
+
+RUN touch /app/platform/__init__.py \
+    && touch /app/platform/minio/__init__.py \
+    && touch /app/services/__init__.py \
+    && touch /app/services/shared/__init__.py
+
+ENV PYTHONPATH=/app
+
+ENTRYPOINT ["python3", "/app/platform/minio/provision_object_store_identities.py"]
+CMD ["--apply"]

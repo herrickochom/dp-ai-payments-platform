@@ -8,6 +8,10 @@ from dataclasses import asdict, dataclass
 import boto3
 from botocore.client import Config as BotoConfig
 
+from services.shared.security.runtime_security import (
+    validate_object_store_security,
+)
+
 
 @dataclass(frozen=True)
 class TopicReadiness:
@@ -35,11 +39,6 @@ def _topics_from_env() -> tuple[str, ...]:
 
 
 def _client():
-    endpoint = os.environ.get(
-        "S3_ENDPOINT",
-        "http://minio:9000",
-    )
-
     access_key = os.environ.get(
         "PLATFORM_RAW_READ_ACCESS_KEY"
     )
@@ -52,30 +51,56 @@ def _client():
             "dedicated raw-read object-store credentials are required"
         )
 
-    if not access_key or not secret_key:
-        raise RuntimeError(
-            "MinIO credentials are required"
-        )
+    endpoint = os.environ.get("S3_ENDPOINT", "").strip()
+    use_ssl = os.environ.get("S3_USE_SSL", "").strip()
+    ca_bundle = os.environ.get("S3_CA_BUNDLE", "").strip()
+    region = os.environ.get("OBJECT_STORE_REGION", "").strip()
 
-    return boto3.client(
-        "s3",
-        endpoint_url=endpoint,
-        aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key,
-        config=BotoConfig(
+    if not endpoint:
+        raise RuntimeError("S3_ENDPOINT is required")
+    if not use_ssl:
+        raise RuntimeError("S3_USE_SSL is required")
+    if not region:
+        raise RuntimeError("OBJECT_STORE_REGION is required")
+
+    endpoint, _, ca_bundle = validate_object_store_security(
+        endpoint,
+        use_ssl=use_ssl,
+        ca_bundle=ca_bundle,
+    )
+
+    client_kwargs = {
+        "endpoint_url": endpoint,
+        "aws_access_key_id": access_key,
+        "aws_secret_access_key": secret_key,
+        "config": BotoConfig(
             signature_version="s3v4",
         ),
-        region_name="us-east-1",
-    )
+        "region_name": region,
+    }
+
+    if ca_bundle:
+        client_kwargs["verify"] = ca_bundle
+
+    return boto3.client("s3", **client_kwargs)
 
 
 def run_raw_readiness() -> dict:
     """Inspect Raw object metadata without reading object payloads."""
 
-    bucket = os.environ.get("OBJECT_STORE_BUCKET", "dp-ai-payment")
-    raw_root = os.environ.get("RAW_ROOT", "raw")
-    raw_version = os.environ.get("RAW_VERSION", "v2")
-    raw_prefix = os.environ.get("RAW_PREFIX", f"{raw_root}/{raw_version}")
+    bucket = os.environ.get("OBJECT_STORE_BUCKET", "").strip()
+    raw_root = os.environ.get("RAW_ROOT", "").strip()
+    raw_version = os.environ.get("RAW_VERSION", "").strip()
+    raw_prefix = os.environ.get("RAW_PREFIX", "").strip()
+
+    if not bucket:
+        raise RuntimeError("OBJECT_STORE_BUCKET is required")
+    if not raw_root:
+        raise RuntimeError("RAW_ROOT is required")
+    if not raw_version:
+        raise RuntimeError("RAW_VERSION is required")
+    if not raw_prefix:
+        raise RuntimeError("RAW_PREFIX is required")
     if raw_prefix != f"{raw_root}/{raw_version}":
         raise ValueError("RAW_PREFIX must equal RAW_ROOT + '/' + RAW_VERSION")
 

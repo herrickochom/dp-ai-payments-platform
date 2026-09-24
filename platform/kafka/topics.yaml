@@ -168,6 +168,13 @@ topics:
     retention_ms: 604800000
     description: "Special Group Reference Data"
 
+  # Configured ordinary CDC topic; connector and Raw subscription remain dormant.
+  - name: cdc.pdm_mdm.mdm.sacco_master_sources
+    partitions: 4
+    replication: 1
+    retention_ms: 604800000
+    description: "PDM MDM SACCO source changes (Debezium JSON)"
+
   # ==========================================================================
   # 7. Shared operational failure topics
   # ==========================================================================

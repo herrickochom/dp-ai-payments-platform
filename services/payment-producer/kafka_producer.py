@@ -15,6 +15,12 @@ import time
 import uuid
 import json
 from pathlib import Path
+
+from services.shared.security.runtime_security import (
+    validate_kafka_security,
+    validate_schema_registry_security,
+)
+from services.shared.security.secret_provider import resolve_secret
 from typing import Dict, Any, Optional
 from confluent_kafka import SerializingProducer, KafkaError
 from confluent_kafka.serialization import StringSerializer, SerializationContext, MessageField
@@ -55,11 +61,18 @@ class Config:
     KAFKA_SECURITY_PROTOCOL = os.getenv("KAFKA_SECURITY_PROTOCOL", "PLAINTEXT")
     KAFKA_SASL_MECHANISM = os.getenv("KAFKA_SASL_MECHANISM")
     KAFKA_SASL_USERNAME = os.getenv("KAFKA_SASL_USERNAME")
-    KAFKA_SASL_PASSWORD = os.getenv("KAFKA_SASL_PASSWORD")
+    KAFKA_SASL_PASSWORD = resolve_secret("KAFKA_SASL_PASSWORD")
     KAFKA_SSL_CA_LOCATION = os.getenv("KAFKA_SSL_CA_LOCATION")
     KAFKA_SSL_CERTIFICATE_LOCATION = os.getenv("KAFKA_SSL_CERTIFICATE_LOCATION")
     KAFKA_SSL_KEY_LOCATION = os.getenv("KAFKA_SSL_KEY_LOCATION")
-    SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO = os.getenv("SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO")
+    SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO = resolve_secret("SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO")
+    SCHEMA_REGISTRY_AUTH_REQUIRED = (
+        os.getenv("SCHEMA_REGISTRY_AUTH_REQUIRED", "false")
+        .strip()
+        .lower()
+        == "true"
+    )
+
 
 # ------------------------------------------------------------------------------
 # Topic to System Mapping
@@ -671,6 +684,19 @@ def main() -> int:
     avro_schema = load_avro_schema()
     logger.info("✅ Avro schema loaded")
     
+    validate_kafka_security(
+        security_protocol=Config.KAFKA_SECURITY_PROTOCOL,
+        ssl_ca_location=Config.KAFKA_SSL_CA_LOCATION,
+        sasl_mechanism=Config.KAFKA_SASL_MECHANISM,
+        sasl_username=Config.KAFKA_SASL_USERNAME,
+        sasl_password=Config.KAFKA_SASL_PASSWORD,
+    )
+    validate_schema_registry_security(
+        Config.SCHEMA_REGISTRY_URL,
+        authentication_required=Config.SCHEMA_REGISTRY_AUTH_REQUIRED,
+        authentication_material=Config.SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO,
+    )
+
     # Initialize Schema Registry
     sr_config = {"url": Config.SCHEMA_REGISTRY_URL}
     if Config.SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO:

@@ -18,9 +18,8 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - agent.locations
+              values:
+                - agent.locations
 
       - name: kafka_partition
         data_tests:
@@ -50,9 +49,8 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - agent.profiles
+              values:
+                - agent.profiles
 
       - name: kafka_partition
         data_tests:
@@ -91,9 +89,8 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - agent.transactions
+              values:
+                - agent.transactions
 
       - name: kafka_partition
         data_tests:
@@ -127,9 +124,8 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - cpo.plm.pain002
+              values:
+                - cpo.plm.pain002
 
       - name: kafka_partition
         data_tests:
@@ -155,8 +151,7 @@ models:
       - name: event_family
         data_tests:
           - accepted_values:
-              arguments:
-                values: [TECHNICAL_PAYMENT_EVENT]
+              values: [TECHNICAL_PAYMENT_EVENT]
       - name: x_provider
         description: Mobile-money provider executing the credit.
       - name: x_provider_transaction_id
@@ -176,9 +171,8 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - cpo.psn.pain002
+              values:
+                - cpo.psn.pain002
 
       - name: kafka_partition
         data_tests:
@@ -212,9 +206,8 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - icmn.pmn.pain001
+              values:
+                - icmn.pmn.pain001
 
       - name: kafka_partition
         data_tests:
@@ -240,8 +233,7 @@ models:
       - name: event_family
         data_tests:
           - accepted_values:
-              arguments:
-                values: [TECHNICAL_PAYMENT_EVENT]
+              values: [TECHNICAL_PAYMENT_EVENT]
       - name: x_payment_route
         description: PDMIS-to-BOU-to-intermediary route.
       - name: x_route_decision
@@ -261,9 +253,8 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - icmn.vpm.pain001
+              values:
+                - icmn.vpm.pain001
 
       - name: kafka_partition
         data_tests:
@@ -295,9 +286,8 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - mobile.airtel.pacs002
+              values:
+                - mobile.airtel.pacs002
 
       - name: kafka_partition
         data_tests: [not_null]
@@ -321,9 +311,8 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - mobile.airtel.pacs008
+              values:
+                - mobile.airtel.pacs008
 
       - name: kafka_partition
         data_tests: [not_null]
@@ -347,9 +336,8 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - mobile.mtn.pacs002
+              values:
+                - mobile.mtn.pacs002
 
       - name: kafka_partition
         data_tests: [not_null]
@@ -373,9 +361,8 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - mobile.mtn.pacs008
+              values:
+                - mobile.mtn.pacs008
 
       - name: kafka_partition
         data_tests: [not_null]
@@ -403,9 +390,8 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - pdmis.beneficiaries
+              values:
+                - pdmis.beneficiaries
 
       - name: kafka_partition
         data_tests: [not_null]
@@ -429,9 +415,8 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - pdmis.business_plans
+              values:
+                - pdmis.business_plans
 
       - name: kafka_partition
         data_tests: [not_null]
@@ -455,9 +440,8 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - pdmis.households
+              values:
+                - pdmis.households
 
       - name: kafka_partition
         data_tests: [not_null]
@@ -481,9 +465,8 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - pdmis.loans
+              values:
+                - pdmis.loans
 
       - name: kafka_partition
         data_tests: [not_null]
@@ -507,9 +490,8 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - pdmis.saccos
+              values:
+                - pdmis.saccos
 
       - name: kafka_partition
         data_tests: [not_null]
@@ -533,9 +515,8 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - pdmis.special_groups
+              values:
+                - pdmis.special_groups
 
       - name: kafka_partition
         data_tests: [not_null]
@@ -563,9 +544,8 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - wendi.camt052
+              values:
+                - wendi.camt052
 
       - name: kafka_partition
         data_tests: [not_null]
@@ -589,9 +569,8 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - wendi.camt053
+              values:
+                - wendi.camt053
 
       - name: kafka_partition
         data_tests: [not_null]
@@ -615,9 +594,8 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - wendi.camt054
+              values:
+                - wendi.camt054
 
       - name: kafka_partition
         data_tests: [not_null]
@@ -641,9 +619,8 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - wendi.pain001
+              values:
+                - wendi.pain001
 
       - name: kafka_partition
         data_tests: [not_null]
@@ -667,9 +644,8 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - wendi.pain002
+              values:
+                - wendi.pain002
 
       - name: kafka_partition
         data_tests: [not_null]
@@ -693,9 +669,8 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - wendi.transactions
+              values:
+                - wendi.transactions
 
       - name: kafka_partition
         data_tests: [not_null]

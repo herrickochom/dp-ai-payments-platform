@@ -10,8 +10,9 @@ pdm_platform:
       # Local DuckDB execution database.
       path: "{{ env_var('DBT_DUCKDB_PATH') }}"
 
-      # Attached Nessie/Iceberg catalog alias.
-      database: "{{ env_var('DBT_DATABASE') }}"
+      # Required extensions are baked into this immutable image directory.
+      config_options:
+        extension_directory: /opt/duckdb/extensions
 
       # Default dbt schema.
       schema: staging
@@ -28,6 +29,18 @@ pdm_platform:
         - avro
         - iceberg
 
+      # dbt-duckdb 1.9.3 cannot express authenticated Iceberg REST ATTACH
+      # options. This controlled connection plugin creates a temporary bearer
+      # secret and attaches the execution-scoped Nessie reference as lakehouse.
+      # module_paths is the explicit packaging/import design: the dbt child
+      # process starts with a minimal environment (no cwd on sys.path), so the
+      # plugin directory is added via dbt-duckdb's supported credential rather
+      # than runtime sys.path mutation inside the plugin.
+      module_paths:
+        - /app/job_runner
+      plugins:
+        - module: nessie_iceberg_plugin
+
       # ------------------------------------------------------------------------
       # DuckDB runtime / memory configuration
       # ------------------------------------------------------------------------
@@ -42,10 +55,11 @@ pdm_platform:
         # services mount the swap volume at DuckDB's default path instead.
 
         # MinIO / S3 configuration
-        s3_region: "eu-west-1"
-        s3_endpoint: "{{ env_var('S3_ENDPOINT') }}"
+        s3_region: "{{ env_var('OBJECT_STORE_REGION') }}"
+        s3_endpoint: "{{ env_var('DUCKDB_S3_ENDPOINT') }}"
         s3_url_style: "{{ env_var('DBT_S3_URL_STYLE') }}"
-        s3_use_ssl: false
+        s3_use_ssl: "{{ env_var('S3_USE_SSL') | lower }}"
+        ca_cert_file: "{{ env_var('S3_CA_BUNDLE', '') }}"
         s3_access_key_id: "{{ env_var('TRANSFORM_S3_ACCESS_KEY_ID') }}"
         s3_secret_access_key: "{{ env_var('TRANSFORM_S3_SECRET_ACCESS_KEY') }}"
 
@@ -54,21 +68,7 @@ pdm_platform:
           provider: config
           key_id: "{{ env_var('TRANSFORM_S3_ACCESS_KEY_ID') }}"
           secret: "{{ env_var('TRANSFORM_S3_SECRET_ACCESS_KEY') }}"
-          region: "eu-west-1"
-          endpoint: "{{ env_var('S3_ENDPOINT') }}"
+          region: "{{ env_var('OBJECT_STORE_REGION') }}"
+          endpoint: "{{ env_var('DUCKDB_S3_ENDPOINT') }}"
           url_style: "{{ env_var('DBT_S3_URL_STYLE') }}"
-          use_ssl: false
-
-      # ------------------------------------------------------------------------
-      # Nessie Iceberg REST catalog
-      # ------------------------------------------------------------------------
-
-      attach:
-        - path: payments
-          alias: lakehouse
-          options:
-            type: iceberg
-            endpoint: "{{ env_var('NESSIE_ENDPOINT') }}/iceberg/{{ env_var('DBT_NESSIE_BRANCH') }}"
-            authorization_type: bearer
-            token: "{{ env_var('NESSIE_AUTH_TOKEN') }}"
-            access_delegation_mode: none
+          use_ssl: "{{ env_var('S3_USE_SSL') | lower }}"

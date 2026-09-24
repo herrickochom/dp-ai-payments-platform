@@ -15,6 +15,20 @@ sys.path.insert(
 import raw_readiness
 
 
+@pytest.fixture(autouse=True)
+def _object_store_environment(monkeypatch):
+    """Provide the explicit local object-store contract for readiness tests."""
+    monkeypatch.setenv("OBJECT_STORE_BUCKET", "dp-ai-payment")
+    monkeypatch.setenv("OBJECT_STORE_REGION", "us-east-1")
+    monkeypatch.setenv("RAW_ROOT", "raw")
+    monkeypatch.setenv("RAW_VERSION", "v2")
+    monkeypatch.setenv("RAW_PREFIX", "raw/v2")
+    monkeypatch.setenv("S3_ENDPOINT", "http://minio:9000")
+    monkeypatch.setenv("S3_USE_SSL", "false")
+    monkeypatch.setenv("S3_CA_BUNDLE", "")
+
+
+
 def _page(*keys):
     return {
         "Contents": [

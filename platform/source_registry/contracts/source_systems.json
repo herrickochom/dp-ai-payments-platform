@@ -149,6 +149,20 @@
       "cdc_capable": false,
       "cdc_activated": false,
       "mdm_participant": true
+    },
+    {
+      "source_system": "pdm_mdm",
+      "source_type": "OPERATIONAL_DATABASE",
+      "adapter_type": "CDC_DATABASE",
+      "generator": "services/payment-xml-generator/mdm_generator.py",
+      "data_root": "pdm-source-postgres",
+      "entities": ["sacco_master_sources"],
+      "kafka_topics": ["cdc.pdm_mdm.mdm.sacco_master_sources"],
+      "mutable_database_source": true,
+      "cdc_capable": false,
+      "cdc_activated": false,
+      "cdc_configuration_status": "CONFIGURED_PENDING_VERSION_AND_GOVERNANCE_APPROVAL",
+      "mdm_participant": true
     }
   ],
   "special_data_domains": [

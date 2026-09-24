@@ -1,0 +1,21 @@
+{
+  "contract_version": 1,
+  "source_system": "pdm_mdm",
+  "status": "configured_not_activated",
+  "connector_name": "pdm-mdm-sacco-postgres",
+  "publication_name": "pdm_mdm_ordinary_pub",
+  "slot_name": "pdm_mdm_ordinary_slot",
+  "topic_prefix": "cdc.pdm_mdm",
+  "topic": "cdc.pdm_mdm.mdm.sacco_master_sources",
+  "schema_include_list": ["mdm"],
+  "table_include_list": ["mdm.sacco_master_sources"],
+  "snapshot_mode": "initial",
+  "tombstones_on_delete": true,
+  "value_format": "debezium_json",
+  "restricted_tables_excluded": [
+    "mdm.beneficiary_master_sources",
+    "mdm.golden_beneficiaries_restricted",
+    "mdm.beneficiary_identity_alerts_restricted",
+    "mdm.source_crosswalk"
+  ]
+}

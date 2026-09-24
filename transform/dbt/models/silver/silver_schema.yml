@@ -20,9 +20,8 @@ models:
       - name: special_group_code
         data_tests:
           - relationships:
-              arguments:
-                to: ref('slv_pdm_special_groups')
-                field: group_code
+              to: ref('slv_pdm_special_groups')
+              field: group_code
 
   - name: slv_pdm_loan_beneficiary_links
     description: >-
@@ -37,9 +36,8 @@ models:
       - name: beneficiary_token
         data_tests:
           - relationships:
-              arguments:
-                to: ref('slv_pdm_beneficiaries')
-                field: beneficiary_token
+              to: ref('slv_pdm_beneficiaries')
+              field: beneficiary_token
 
   - name: slv_pdm_payment_account_controls
     description: >-
@@ -67,17 +65,16 @@ models:
       - name: entity_match_status
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - MATCHED
-                  - NOT_APPLICABLE
-                  - LOAN_NOT_MATCHED
-                  - BENEFICIARY_NOT_MATCHED
-                  - BENEFICIARY_MISMATCH
-                  - SACCO_NOT_MATCHED
-                  - SACCO_MISMATCH
-                  - BUSINESS_PLAN_NOT_MATCHED
-                  - AGENT_NOT_MATCHED
+              values:
+                - MATCHED
+                - NOT_APPLICABLE
+                - LOAN_NOT_MATCHED
+                - BENEFICIARY_NOT_MATCHED
+                - BENEFICIARY_MISMATCH
+                - SACCO_NOT_MATCHED
+                - SACCO_MISMATCH
+                - BUSINESS_PLAN_NOT_MATCHED
+                - AGENT_NOT_MATCHED
 
   - name: slv_pdm_households
     description: >-
@@ -133,15 +130,13 @@ models:
       - name: sacco_id
         data_tests:
           - relationships:
-              arguments:
-                to: ref('slv_pdm_saccos')
-                field: sacco_id
+              to: ref('slv_pdm_saccos')
+              field: sacco_id
       - name: business_plan_id
         data_tests:
           - relationships:
-              arguments:
-                to: ref('slv_pdm_business_plans')
-                field: business_plan_id
+              to: ref('slv_pdm_business_plans')
+              field: business_plan_id
 
   - name: slv_pdm_agents
     description: >-
@@ -269,10 +264,9 @@ models:
       - name: match_status
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - MATCHED
-                  - UNMATCHED
+              values:
+                - MATCHED
+                - UNMATCHED
 
   - name: slv_pdm_payments_reconciliation
     description: >-

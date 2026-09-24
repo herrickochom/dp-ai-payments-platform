@@ -4,7 +4,7 @@ import time
 from pathlib import Path
 
 import pytest
-from fastapi.testclient import TestClient
+from agent_asgi_client import LocalClient
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "services/agent-api"))
@@ -90,7 +90,7 @@ def test_configuration_fails_fast_for_invalid_critical_values():
 
 def test_liveness_readiness_and_request_correlation(monkeypatch):
     monkeypatch.setattr(api.orchestrator, "gateway", HealthyGateway())
-    client = TestClient(api.app)
+    client = LocalClient(api.app)
     assert client.get("/health/live").json() == {"status": "alive"}
     ready = client.get("/health/ready", headers={"x-request-id": "smoke-123"})
     assert ready.status_code == 200 and ready.headers["x-request-id"] == "smoke-123"
@@ -182,7 +182,7 @@ def test_non_transient_failures_and_tool_limits_are_not_retried():
 
 def test_oversized_request_body_is_rejected_before_handlers(monkeypatch):
     monkeypatch.setattr(api, "settings", Settings(max_request_bytes=1024))
-    client = TestClient(api.app)
+    client = LocalClient(api.app)
     response = client.post("/health/live", content=b"x" * 4096)
     assert response.status_code == 413
     assert response.json()["error"]["category"] == "RequestTooLarge"
@@ -190,7 +190,7 @@ def test_oversized_request_body_is_rejected_before_handlers(monkeypatch):
 
 def test_optional_auth_hook_blocks_anonymous_when_enabled(monkeypatch):
     monkeypatch.setattr(api, "settings", Settings(auth_enabled=True))
-    client = TestClient(api.app)
+    client = LocalClient(api.app)
     denied = client.get("/health/live")
     assert denied.status_code == 401
     allowed = client.get("/health/live", headers={"x-subject-id": "analyst-1"})
@@ -205,7 +205,7 @@ def test_request_timeout_returns_504_without_stack_trace(monkeypatch):
 
     monkeypatch.setattr(api, "settings", Settings(request_timeout_seconds=1,
                                                   tool_timeout_seconds=10))
-    client = TestClient(api.app)
+    client = LocalClient(api.app)
     response = client.get("/health/slow")
     assert response.status_code == 504
     assert response.json()["error"]["category"] == "RequestTimeout"

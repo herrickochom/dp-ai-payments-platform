@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import Mock
 
-from fastapi.testclient import TestClient
+from agent_asgi_client import LocalClient
 
 ROOT = Path(__file__).resolve().parents[1]
 SERVICE = ROOT / "services" / "agent-api"
@@ -138,7 +138,7 @@ class Phase3ApiTests(unittest.TestCase):
     def setUpClass(cls):
         import api
         api.orchestrator = Orchestrator(Settings(), Gateway())
-        cls.client = TestClient(api.app)
+        cls.client = LocalClient(api.app)
     def test_visualize_and_dashboard_dry_run(self):
         self.assertEqual(200, self.client.post("/agents/visualize", json={
             "objective": "Visualize repayment performance by district"}).status_code)
