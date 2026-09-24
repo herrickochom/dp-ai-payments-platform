@@ -21,15 +21,14 @@ models:
       - name: age_band
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - '18-24'
-                  - '25-34'
-                  - '35-44'
-                  - '45-54'
-                  - '55-64'
-                  - '65+'
-                  - UNKNOWN
+              values:
+                - '18-24'
+                - '25-34'
+                - '35-44'
+                - '45-54'
+                - '55-64'
+                - '65+'
+                - UNKNOWN
 
   - name: vlt_pdm_beneficiary_identity_alerts
     description: >-
@@ -47,11 +46,10 @@ models:
       - name: identity_risk_band
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - LOW
-                  - MEDIUM
-                  - HIGH
+              values:
+                - LOW
+                - MEDIUM
+                - HIGH
 
   - name: vlt_pdm_beneficiary_identity_signals
     description: >-
@@ -73,8 +71,7 @@ models:
       - name: identity_risk_band
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - LOW
-                  - MEDIUM
-                  - HIGH
+              values:
+                - LOW
+                - MEDIUM
+                - HIGH

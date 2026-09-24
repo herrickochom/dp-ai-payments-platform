@@ -26,10 +26,19 @@ def test_raw_consumer_uses_dedicated_credentials():
     for text in (block, consumer, health):
         assert "MINIO_ROOT_" not in text
         assert "minioadmin" not in text
-        assert "RAW_INGEST_S3_ACCESS_KEY_ID" in text
-        assert "RAW_INGEST_S3_SECRET_ACCESS_KEY" in text
+    # Consumer runtime still uses RAW_INGEST for write authority.
+    assert "RAW_INGEST_S3_ACCESS_KEY_ID" in consumer
+    assert "RAW_INGEST_S3_SECRET_ACCESS_KEY" in consumer
+    assert "RAW_INGEST_S3_ACCESS_KEY_ID" in block
+    assert "RAW_INGEST_S3_SECRET_ACCESS_KEY" in block
     assert ":?RAW_INGEST_S3_ACCESS_KEY_ID is required" in block
     assert ":?RAW_INGEST_S3_SECRET_ACCESS_KEY is required" in block
+    # Healthcheck uses least-privilege PLATFORM_RAW_READ for read-only checks.
+    assert "PLATFORM_RAW_READ_ACCESS_KEY" in health
+    assert "PLATFORM_RAW_READ_SECRET_KEY" in health
+    assert "require_secret" in health
+    assert "RAW_INGEST_S3_ACCESS_KEY_ID" not in health
+    assert "RAW_INGEST_S3_SECRET_ACCESS_KEY" not in health
     for name in ("CDC_QUARANTINE_S3_ACCESS_KEY_ID", "CDC_QUARANTINE_S3_SECRET_ACCESS_KEY"):
         assert f"{name}: ${{{name}:?{name} is required}}" in block
         assert name in consumer
@@ -78,7 +87,15 @@ def test_root_credentials_remain_in_admin_code_and_boundary_guard_only():
         name for name in re.findall(r"(?m)^  ([\w-]+):$", COMPOSE)
         if "MINIO_ROOT_" in service(name)
     }
-    assert root_services == {"minio", "minio-init-buckets", "minio-init-databases"}
+    # minio-init-iam joins minio and the two legacy init jobs as an
+    # authorised administrative holder: it is the one-shot bootstrap that
+    # reconciles the eight least-privilege service identities. The set
+    # equality stays narrow: any ordinary application/runtime service
+    # referencing MINIO_ROOT_ would join this set and fail the assertion.
+    assert root_services == {"minio", "minio-init-buckets", "minio-init-databases", "minio-init-iam"}
+    iam = service("minio-init-iam")
+    assert "restart: 'no'" in iam
+    assert "Dockerfile.minio-init-iam" in iam
     runtime = (ROOT / "orchestration/job_runner/transform_execution.py").read_text()
     assert '"MINIO_ROOT_USER"' in runtime and '"MINIO_ROOT_PASSWORD"' in runtime
     assert '"AWS_ACCESS_KEY_ID"' in runtime and '"AWS_SECRET_ACCESS_KEY"' in runtime
@@ -88,13 +105,13 @@ def test_root_credentials_remain_in_admin_code_and_boundary_guard_only():
         assert "minioadmin" not in text
     bootstrap = (ROOT / "platform/minio/init_databases.py").read_text()
     assert "os.environ['MINIO_ROOT_USER']" in bootstrap
-    assert "os.environ['MINIO_ROOT_PASSWORD']" in bootstrap
+    assert "require_secret('MINIO_ROOT_PASSWORD')" in bootstrap
     assert "minioadmin" not in bootstrap
 
 
 def test_bucket_bootstrap_never_grants_public_access():
     script = (ROOT / "platform/minio/minio-init-mc-buckets.sh").read_text().lower()
-    assert "local/dp-ai-payment" in script
+    assert "local/${object_store_bucket:?object_store_bucket is required}" in script
     assert not re.search(r"\bmc\s+(?:anonymous|policy)\s+set\b", script)
     assert not re.search(r"\b(public|anonymous|download)\b", script)
 
@@ -132,12 +149,23 @@ def test_transform_child_receives_only_selected_authority(authority, source_keys
         "MINIO_ROOT_PASSWORD": "root-secret",
         "AWS_ACCESS_KEY_ID": "global-id",
         "AWS_SECRET_ACCESS_KEY": "global-secret",
-        "NESSIE_AUTH_TOKEN": "catalog-token",
+        "S3_ENDPOINT": "https://object-store.example.test",
+        "S3_USE_SSL": "true",
+        "OBJECT_STORE_REGION": "eu-central-2",
+        "OBJECT_STORE_BUCKET": "dp-ai-payment",
+        "RAW_ROOT": "raw",
+        "RAW_VERSION": "v2",
+        "RAW_PREFIX": "raw/v2",
+        "WAREHOUSE_PREFIX": "warehouse",
+        "WAREHOUSE_URI": "s3://dp-ai-payment/warehouse",
+        "DBT_S3_URL_STYLE": "path",
+        "NESSIE_ENDPOINT": "https://nessie.example.test",
+        "NESSIE_TRANSFORM_TOKEN": "catalog-token",
     }
     command = build_transform_command(batch.batch_id, "be_" + "a" * 32, source)
     assert command.environment["TRANSFORM_S3_ACCESS_KEY_ID"] == source[source_keys[0]]
     assert command.environment["TRANSFORM_S3_SECRET_ACCESS_KEY"] == source[source_keys[1]]
-    for name in source.keys() - {"NESSIE_AUTH_TOKEN"}:
+    for name in source.keys() - {"NESSIE_TRANSFORM_TOKEN", *('S3_ENDPOINT', 'S3_USE_SSL', 'OBJECT_STORE_REGION', 'OBJECT_STORE_BUCKET', 'RAW_ROOT', 'RAW_VERSION', 'RAW_PREFIX', 'WAREHOUSE_PREFIX', 'WAREHOUSE_URI', 'DBT_S3_URL_STYLE', 'NESSIE_ENDPOINT')}:
         assert name not in command.environment
 
 

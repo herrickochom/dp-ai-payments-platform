@@ -19,6 +19,14 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 from pathlib import Path
 
+from services.shared.security.runtime_security import (
+    validate_kafka_security,
+    validate_object_store_security,
+    validate_schema_registry_security,
+)
+
+from services.shared.security.secret_provider import resolve_secret
+
 from services.shared.cdc.debezium_normalizer import (
     CDCEnvelopeError,
     normalize_debezium_event,
@@ -56,15 +64,12 @@ logger = logging.getLogger(__name__)
 # Settings
 # ------------------------------------------------------------------------------
 class Settings:
-    # MinIO
-    MINIO_ENDPOINT = os.getenv("S3_ENDPOINT", "http://minio:9000")
-    MINIO_BUCKET = os.getenv("MINIO_BUCKET", "dp-ai-payment")
-    RAW_PREFIX = os.getenv("RAW_PREFIX", "raw/v2").strip("/")
     CDC_QUARANTINE_PREFIX = os.getenv(
         "CDC_QUARANTINE_PREFIX",
         "restricted/cdc-quarantine/v1",
     ).strip("/")
-    
+
+
     # Kafka
     KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092")
     KAFKA_TOPICS = os.getenv("KAFKA_TOPICS", "").split(",") if os.getenv("KAFKA_TOPICS") else [
@@ -109,14 +114,39 @@ class Settings:
     KAFKA_SECURITY_PROTOCOL = os.getenv("KAFKA_SECURITY_PROTOCOL", "PLAINTEXT")
     KAFKA_SASL_MECHANISM = os.getenv("KAFKA_SASL_MECHANISM")
     KAFKA_SASL_USERNAME = os.getenv("KAFKA_SASL_USERNAME")
-    KAFKA_SASL_PASSWORD = os.getenv("KAFKA_SASL_PASSWORD")
+    KAFKA_SASL_PASSWORD = resolve_secret("KAFKA_SASL_PASSWORD")
     KAFKA_SSL_CA_LOCATION = os.getenv("KAFKA_SSL_CA_LOCATION")
     KAFKA_SSL_CERTIFICATE_LOCATION = os.getenv("KAFKA_SSL_CERTIFICATE_LOCATION")
     KAFKA_SSL_KEY_LOCATION = os.getenv("KAFKA_SSL_KEY_LOCATION")
     
     # Schema Registry
     SCHEMA_REGISTRY_URL = os.getenv("SCHEMA_REGISTRY_URL", "http://schema-registry:8081")
-    SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO = os.getenv("SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO")
+    SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO = resolve_secret("SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO")
+    SCHEMA_REGISTRY_AUTH_REQUIRED = (
+        os.getenv("SCHEMA_REGISTRY_AUTH_REQUIRED", "false")
+        .strip()
+        .lower()
+        == "true"
+    )
+
+def _required_object_store_env(name: str) -> str:
+    value = os.getenv(name, "").strip()
+    if not value:
+        raise RuntimeError(f"{name} is required")
+    return value
+
+
+def _object_store_bucket() -> str:
+    return _required_object_store_env("OBJECT_STORE_BUCKET")
+
+
+def _raw_prefix() -> str:
+    root = _required_object_store_env("RAW_ROOT").strip("/")
+    version = _required_object_store_env("RAW_VERSION").strip("/")
+    prefix = _required_object_store_env("RAW_PREFIX").strip("/")
+    if prefix != f"{root}/{version}":
+        raise ValueError("RAW_PREFIX must equal RAW_ROOT + '/' + RAW_VERSION")
+    return prefix
 
 
 def kafka_client_config() -> Dict[str, Any]:
@@ -131,8 +161,15 @@ def kafka_client_config() -> Dict[str, Any]:
     return result
 
 
-CDC_RAW_SCHEMA_PATH = (
-    Path(__file__).resolve().parents[2]
+# One authoritative CDC Raw schema: platform/cdc/contracts/cdc_raw_event.avsc.
+# Source-tree runs (tests, tooling) resolve that canonical repository file.
+# The container flattens this module to /app/consumer.py, so the image copy
+# path cannot be derived relatively; Dockerfile.payment-consumer-events
+# declares the build-time copy explicitly via CDC_RAW_SCHEMA_PATH. The `or`
+# keeps the repository fallback lazy so the image never evaluates it.
+CDC_RAW_SCHEMA_PATH = Path(
+    os.environ.get("CDC_RAW_SCHEMA_PATH")
+    or Path(__file__).resolve().parents[2]
     / "platform"
     / "cdc"
     / "contracts"
@@ -383,7 +420,7 @@ def deterministic_cdc_s3_key(
     Deterministic Kafka-coordinate Raw key for replay idempotency.
     """
     return (
-        f"{Settings.RAW_PREFIX}/cdc/"
+        f"{_raw_prefix()}/cdc/"
         f"source_system={source_system}/"
         f"year={timestamp:%Y}/"
         f"month={timestamp:%m}/"
@@ -496,13 +533,13 @@ def store_cdc_event_to_s3(
 
     try:
         client.head_object(
-            Bucket=Settings.MINIO_BUCKET,
+            Bucket=_object_store_bucket(),
             Key=key,
         )
 
         existing = _read_object_bytes(
             client,
-            bucket=Settings.MINIO_BUCKET,
+            bucket=_object_store_bucket(),
             key=key,
         )
 
@@ -548,7 +585,7 @@ def store_cdc_event_to_s3(
             raise
 
     client.put_object(
-        Bucket=Settings.MINIO_BUCKET,
+        Bucket=_object_store_bucket(),
         Key=key,
         Body=payload,
         ContentType="application/avro",
@@ -608,13 +645,13 @@ def store_cdc_quarantine_metadata(
 
     try:
         client.head_object(
-            Bucket=Settings.MINIO_BUCKET,
+            Bucket=_object_store_bucket(),
             Key=key,
         )
 
         existing = _read_object_bytes(
             client,
-            bucket=Settings.MINIO_BUCKET,
+            bucket=_object_store_bucket(),
             key=key,
         )
 
@@ -649,7 +686,7 @@ def store_cdc_quarantine_metadata(
 
     try:
         client.put_object(
-            Bucket=Settings.MINIO_BUCKET,
+            Bucket=_object_store_bucket(),
             Key=key,
             Body=payload,
             ContentType="application/json",
@@ -881,7 +918,7 @@ def deterministic_failure_id(topic: str, partition: int, offset: int) -> str:
 def deterministic_s3_key(topic: str, partition: int, offset: int, timestamp: datetime) -> str:
     info = parse_topic(topic)
     return (
-        f"{Settings.RAW_PREFIX}/category={info['category']}/source_group={info['source_group']}/"
+        f"{_raw_prefix()}/category={info['category']}/source_group={info['source_group']}/"
         f"source_system={info['system']}/year={timestamp:%Y}/month={timestamp:%m}/day={timestamp:%d}/"
         f"topic={topic}/partition={partition}/offset={offset}/record.avro"
     )
@@ -982,19 +1019,51 @@ def parse_topic(topic: str) -> Dict[str, str]:
 # ------------------------------------------------------------------------------
 # MinIO Client
 # ------------------------------------------------------------------------------
+def _object_store_transport():
+    """Validate and return the selected object-store transport."""
+    endpoint = _required_object_store_env("S3_ENDPOINT")
+    use_ssl = _required_object_store_env("S3_USE_SSL")
+    ca_bundle = os.getenv("S3_CA_BUNDLE", "")
+
+    return validate_object_store_security(
+        endpoint,
+        use_ssl=use_ssl,
+        ca_bundle=ca_bundle,
+    )
+
+
+def _s3_client(*, access_key: str, secret_key: str):
+    """Construct an S3 client after transport validation."""
+    endpoint, _, ca_bundle = _object_store_transport()
+    region = _required_object_store_env("OBJECT_STORE_REGION")
+
+    kwargs = {
+        "endpoint_url": endpoint,
+        "region_name": region,
+        "aws_access_key_id": access_key,
+        "aws_secret_access_key": secret_key,
+        "config": BotoConfig(signature_version="s3v4"),
+    }
+
+    if ca_bundle:
+        kwargs["verify"] = ca_bundle
+
+    return boto3.client("s3", **kwargs)
+
+
 def get_minio_client():
     """Get the Raw-ingest S3 client."""
     access_key = os.getenv("RAW_INGEST_S3_ACCESS_KEY_ID", "").strip()
     secret_key = os.getenv("RAW_INGEST_S3_SECRET_ACCESS_KEY", "").strip()
     if not access_key or not secret_key:
-        raise RuntimeError("RAW_INGEST_S3_ACCESS_KEY_ID and RAW_INGEST_S3_SECRET_ACCESS_KEY are required")
-    return boto3.client(
-        "s3",
-        endpoint_url=Settings.MINIO_ENDPOINT,
-        aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key,
-        config=BotoConfig(signature_version="s3v4"),
-        verify=False,
+        raise RuntimeError(
+            "RAW_INGEST_S3_ACCESS_KEY_ID and "
+            "RAW_INGEST_S3_SECRET_ACCESS_KEY are required"
+        )
+
+    return _s3_client(
+        access_key=access_key,
+        secret_key=secret_key,
     )
 
 
@@ -1003,14 +1072,14 @@ def get_cdc_quarantine_client():
     access_key = os.getenv("CDC_QUARANTINE_S3_ACCESS_KEY_ID", "").strip()
     secret_key = os.getenv("CDC_QUARANTINE_S3_SECRET_ACCESS_KEY", "").strip()
     if not access_key or not secret_key:
-        raise RuntimeError("CDC_QUARANTINE_S3_ACCESS_KEY_ID and CDC_QUARANTINE_S3_SECRET_ACCESS_KEY are required")
-    return boto3.client(
-        "s3",
-        endpoint_url=Settings.MINIO_ENDPOINT,
-        aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key,
-        config=BotoConfig(signature_version="s3v4"),
-        verify=False,
+        raise RuntimeError(
+            "CDC_QUARANTINE_S3_ACCESS_KEY_ID and "
+            "CDC_QUARANTINE_S3_SECRET_ACCESS_KEY are required"
+        )
+
+    return _s3_client(
+        access_key=access_key,
+        secret_key=secret_key,
     )
 
 # ------------------------------------------------------------------------------
@@ -1143,9 +1212,9 @@ def store_event_to_s3(
     
     try:
         try:
-            minio_client.head_object(Bucket=Settings.MINIO_BUCKET, Key=s3_key)
+            minio_client.head_object(Bucket=_object_store_bucket(), Key=s3_key)
             logger.info("Raw object already exists; replay is idempotent: s3://%s/%s",
-                        Settings.MINIO_BUCKET, s3_key)
+                        _object_store_bucket(), s3_key)
             return s3_key
         except ClientError as exc:
             if exc.response.get("Error", {}).get("Code") not in {"404", "NoSuchKey", "NotFound"}:
@@ -1155,13 +1224,13 @@ def store_event_to_s3(
         
         # Store in MinIO
         minio_client.put_object(
-            Bucket=Settings.MINIO_BUCKET,
+            Bucket=_object_store_bucket(),
             Key=s3_key,
             Body=avro_data,
             ContentType="application/avro",
         )
         
-        logger.info(f"✅ Stored (Avro): s3://{Settings.MINIO_BUCKET}/{s3_key}")
+        logger.info(f"✅ Stored (Avro): s3://{_object_store_bucket()}/{s3_key}")
         return s3_key
         
     except (ClientError, BotoCoreError, OSError) as e:
@@ -1343,11 +1412,24 @@ def main():
     logger.info("=" * 80)
     logger.info(f"📋 Topics: {', '.join(Settings.KAFKA_TOPICS)}")
     logger.info(f"📦 Consumer Group: {Settings.KAFKA_GROUP_ID}")
-    logger.info(f"🪣 MinIO Bucket: {Settings.MINIO_BUCKET}")
+    logger.info(f"🪣 MinIO Bucket: {_object_store_bucket()}")
     logger.info(f"📡 Schema Registry: {Settings.SCHEMA_REGISTRY_URL}")
     logger.info("📄 Storage Format: AVRO OCF (JSON fallback on serialization/storage failure)")
     logger.info("=" * 80)
     
+    validate_kafka_security(
+        security_protocol=Settings.KAFKA_SECURITY_PROTOCOL,
+        ssl_ca_location=Settings.KAFKA_SSL_CA_LOCATION,
+        sasl_mechanism=Settings.KAFKA_SASL_MECHANISM,
+        sasl_username=Settings.KAFKA_SASL_USERNAME,
+        sasl_password=Settings.KAFKA_SASL_PASSWORD,
+    )
+    validate_schema_registry_security(
+        Settings.SCHEMA_REGISTRY_URL,
+        authentication_required=Settings.SCHEMA_REGISTRY_AUTH_REQUIRED,
+        authentication_material=Settings.SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO,
+    )
+
     # Initialize Schema Registry client
     sr_config = {"url": Settings.SCHEMA_REGISTRY_URL}
     if Settings.SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO:

@@ -22,11 +22,10 @@ models:
       - name: risk_band
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - LOW
-                  - MEDIUM
-                  - HIGH
+              values:
+                - LOW
+                - MEDIUM
+                - HIGH
 
   - name: cns_pdm_executive_monthly_trend
     description: >
@@ -59,9 +58,8 @@ models:
           month-end portfolio history.
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - APPROVAL_COHORT_CURRENT_STATE
+              values:
+                - APPROVAL_COHORT_CURRENT_STATE
 
       - name: is_flagged_non_historical
         description: >
@@ -121,11 +119,10 @@ models:
       - name: risk_band
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - LOW
-                  - MEDIUM
-                  - HIGH
+              values:
+                - LOW
+                - MEDIUM
+                - HIGH
 
   - name: cns_pdm_beneficiary_insights
     description: >
@@ -148,10 +145,9 @@ models:
       - name: oversight_status
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - STANDARD
-                  - REVIEW
+              values:
+                - STANDARD
+                - REVIEW
 
   - name: cns_pdm_beneficiary_identity_alerts
     description: >-
@@ -183,11 +179,10 @@ models:
       - name: identity_risk_band
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - LOW
-                  - MEDIUM
-                  - HIGH
+              values:
+                - LOW
+                - MEDIUM
+                - HIGH
 
   - name: cns_pdm_lifecycle_exceptions
     description: >
@@ -211,11 +206,10 @@ models:
       - name: intervention_priority
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - LOW
-                  - MEDIUM
-                  - HIGH
+              values:
+                - LOW
+                - MEDIUM
+                - HIGH
 
   - name: cns_pdm_duplicate_fragmentation_alerts
     description: >
@@ -241,11 +235,10 @@ models:
       - name: payment_pattern_risk_band
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - LOW
-                  - MEDIUM
-                  - HIGH
+              values:
+                - LOW
+                - MEDIUM
+                - HIGH
 
   - name: cns_pdm_district_geographic_risk
     description: >
@@ -274,10 +267,9 @@ models:
           otherwise UNMAPPED.
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - MAPPED
-                  - UNMAPPED
+              values:
+                - MAPPED
+                - UNMAPPED
 
       - name: geographic_risk_band
         description: >
@@ -286,13 +278,12 @@ models:
           district ISO mapping.
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - LOW
-                  - MEDIUM
-                  - HIGH
-                  - SEVERE
-                  - NO DATA
+              values:
+                - LOW
+                - MEDIUM
+                - HIGH
+                - SEVERE
+                - NO DATA
 
       - name: geographic_risk_score
         description: >
@@ -300,12 +291,11 @@ models:
           and 4 is SEVERE. NULL is intentionally used for NO DATA.
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - 1
-                  - 2
-                  - 3
-                  - 4
+              values:
+                - 1
+                - 2
+                - 3
+                - 4
 
       - name: high_identity_alert_count
         description: >
@@ -361,13 +351,12 @@ models:
           model, without district ISO gating.
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - LOW
-                  - MEDIUM
-                  - HIGH
-                  - SEVERE
-                  - NO DATA
+              values:
+                - LOW
+                - MEDIUM
+                - HIGH
+                - SEVERE
+                - NO DATA
 
       - name: geographic_risk_score
         description: >
@@ -375,12 +364,11 @@ models:
           SEVERE. NULL is intentionally used for NO DATA.
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - 1
-                  - 2
-                  - 3
-                  - 4
+              values:
+                - 1
+                - 2
+                - 3
+                - 4
 
   - name: cns_pdm_geographic_risk_summary
     description: >
@@ -452,10 +440,9 @@ models:
           otherwise UNMAPPED.
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - MAPPED
-                  - UNMAPPED
+              values:
+                - MAPPED
+                - UNMAPPED
 
       - name: latitude
         description: >
@@ -479,11 +466,10 @@ models:
           neither source is available.
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - AGENT_GPS
-                  - REFERENCE
-                  - UNMAPPED
+              values:
+                - AGENT_GPS
+                - REFERENCE
+                - UNMAPPED
 
       - name: high_identity_alert_count
         description: >
@@ -510,13 +496,12 @@ models:
           geographic risk value is available.
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - LOW
-                  - MEDIUM
-                  - HIGH
-                  - SEVERE
-                  - NO DATA
+              values:
+                - LOW
+                - MEDIUM
+                - HIGH
+                - SEVERE
+                - NO DATA
 
       - name: geographic_risk_score
         description: >
@@ -524,12 +509,11 @@ models:
           4 is SEVERE. NULL is intentionally used for NO DATA.
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - 1
-                  - 2
-                  - 3
-                  - 4
+              values:
+                - 1
+                - 2
+                - 3
+                - 4
 
   - name: cns_pdm_geographic_risk_drivers
     description: >
@@ -567,13 +551,12 @@ models:
           signal is available.
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - IDENTITY
-                  - REPAYMENT
-                  - DISBURSEMENT
-                  - NONE
-                  - NO DATA
+              values:
+                - IDENTITY
+                - REPAYMENT
+                - DISBURSEMENT
+                - NONE
+                - NO DATA
 
 
   - name: cns_pdm_geographic_risk_trend
@@ -645,13 +628,12 @@ models:
         description: 1 for SEVERE through 4 for LOW; 5 for NO DATA.
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - 1
-                  - 2
-                  - 3
-                  - 4
-                  - 5
+              values:
+                - 1
+                - 2
+                - 3
+                - 4
+                - 5
 
       - name: alert_type
         description: >
@@ -660,16 +642,15 @@ models:
           disbursement outliers, NO_DATA or MONITOR.
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - REPEATED_HIGH_IDENTITY_ALERTS
-                  - SEVERE_REPAYMENT_UNDERPERFORMANCE
-                  - SEVERE_DISBURSEMENT_OUTLIER
-                  - IDENTITY_ALERT
-                  - HIGH_REPAYMENT_UNDERPERFORMANCE
-                  - HIGH_DISBURSEMENT_OUTLIER
-                  - NO_DATA
-                  - MONITOR
+              values:
+                - REPEATED_HIGH_IDENTITY_ALERTS
+                - SEVERE_REPAYMENT_UNDERPERFORMANCE
+                - SEVERE_DISBURSEMENT_OUTLIER
+                - IDENTITY_ALERT
+                - HIGH_REPAYMENT_UNDERPERFORMANCE
+                - HIGH_DISBURSEMENT_OUTLIER
+                - NO_DATA
+                - MONITOR
 
   - name: cns_pdm_village_geographic_risk
     description: >
@@ -691,9 +672,8 @@ models:
           coverage is represented at village grain.
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - OPERATIONAL_AGENT_COVERAGE_ONLY
+              values:
+                - OPERATIONAL_AGENT_COVERAGE_ONLY
 
 
   - name: cns_pdm_executive_overview
@@ -741,9 +721,8 @@ models:
           population is nationally representative.
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - LIMITED_SAMPLE
+              values:
+                - LIMITED_SAMPLE
 
   - name: cns_pdm_loan_intervention_dashboard
     description: >
@@ -764,10 +743,9 @@ models:
       - name: intervention_status
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - PROGRESSING
-                  - REQUIRES_INTERVENTION
+              values:
+                - PROGRESSING
+                - REQUIRES_INTERVENTION
 
   - name: cns_pdm_local_government_performance
     description: >
@@ -791,11 +769,10 @@ models:
       - name: local_performance_status
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - ON_TRACK
-                  - AT_RISK
-                  - CRITICAL
+              values:
+                - ON_TRACK
+                - AT_RISK
+                - CRITICAL
 
   - name: cns_pdm_financial_fund_flow
     description: >
@@ -886,11 +863,10 @@ models:
       - name: risk_band
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - LOW
-                  - MEDIUM
-                  - HIGH
+              values:
+                - LOW
+                - MEDIUM
+                - HIGH
 
   - name: cns_pdm_payment_operations
     description: >
@@ -942,11 +918,10 @@ models:
       - name: channel_risk_band
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - LOW
-                  - MEDIUM
-                  - HIGH
+              values:
+                - LOW
+                - MEDIUM
+                - HIGH
 
   - name: cns_pdm_social_impact
     description: >

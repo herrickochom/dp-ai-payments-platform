@@ -79,16 +79,14 @@ models:
       - name: special_group_sk
         data_tests:
           - relationships:
-              arguments:
-                to: "ref('gld_dim_pdm_special_group')"
-                field: special_group_sk
+              to: "ref('gld_dim_pdm_special_group')"
+              field: special_group_sk
 
       - name: geography_sk
         data_tests:
           - relationships:
-              arguments:
-                to: "ref('gld_dim_pdm_geography')"
-                field: geography_sk
+              to: "ref('gld_dim_pdm_geography')"
+              field: geography_sk
 
   - name: gld_dim_pdm_sacco
     description: Type-1 PDM SACCO dimension.
@@ -101,9 +99,8 @@ models:
       - name: geography_sk
         data_tests:
           - relationships:
-              arguments:
-                to: "ref('gld_dim_pdm_geography')"
-                field: geography_sk
+              to: "ref('gld_dim_pdm_geography')"
+              field: geography_sk
 
   - name: gld_dim_pdm_agent
     description: >-
@@ -117,9 +114,8 @@ models:
       - name: geography_sk
         data_tests:
           - relationships:
-              arguments:
-                to: "ref('gld_dim_pdm_geography')"
-                field: geography_sk
+              to: "ref('gld_dim_pdm_geography')"
+              field: geography_sk
 
   - name: gld_fct_pdm_payments
     description: >-
@@ -136,44 +132,38 @@ models:
       - name: payment_date_sk
         data_tests:
           - relationships:
-              arguments:
-                to: "ref('gld_dim_pdm_date')"
-                field: date_sk
+              to: "ref('gld_dim_pdm_date')"
+              field: date_sk
 
       - name: beneficiary_sk
         data_tests:
           - relationships:
-              arguments:
-                to: "ref('gld_dim_pdm_beneficiary')"
-                field: beneficiary_sk
+              to: "ref('gld_dim_pdm_beneficiary')"
+              field: beneficiary_sk
 
       - name: sacco_sk
         data_tests:
           - relationships:
-              arguments:
-                to: "ref('gld_dim_pdm_sacco')"
-                field: sacco_sk
+              to: "ref('gld_dim_pdm_sacco')"
+              field: sacco_sk
 
       - name: agent_sk
         data_tests:
           - relationships:
-              arguments:
-                to: "ref('gld_dim_pdm_agent')"
-                field: agent_sk
+              to: "ref('gld_dim_pdm_agent')"
+              field: agent_sk
 
       - name: beneficiary_token
         data_tests:
           - relationships:
-              arguments:
-                to: "ref('gld_dim_pdm_beneficiary')"
-                field: beneficiary_token
+              to: "ref('gld_dim_pdm_beneficiary')"
+              field: beneficiary_token
 
       - name: geography_sk
         data_tests:
           - relationships:
-              arguments:
-                to: "ref('gld_dim_pdm_geography')"
-                field: geography_sk
+              to: "ref('gld_dim_pdm_geography')"
+              field: geography_sk
 
   - name: gld_fct_pdm_loans
     description: >-
@@ -188,30 +178,26 @@ models:
       - name: beneficiary_sk
         data_tests:
           - relationships:
-              arguments:
-                to: "ref('gld_dim_pdm_beneficiary')"
-                field: beneficiary_sk
+              to: "ref('gld_dim_pdm_beneficiary')"
+              field: beneficiary_sk
 
       - name: sacco_sk
         data_tests:
           - relationships:
-              arguments:
-                to: "ref('gld_dim_pdm_sacco')"
-                field: sacco_sk
+              to: "ref('gld_dim_pdm_sacco')"
+              field: sacco_sk
 
       - name: beneficiary_token
         data_tests:
           - relationships:
-              arguments:
-                to: "ref('gld_dim_pdm_beneficiary')"
-                field: beneficiary_token
+              to: "ref('gld_dim_pdm_beneficiary')"
+              field: beneficiary_token
 
       - name: geography_sk
         data_tests:
           - relationships:
-              arguments:
-                to: "ref('gld_dim_pdm_geography')"
-                field: geography_sk
+              to: "ref('gld_dim_pdm_geography')"
+              field: geography_sk
 
   - name: gld_fct_pdm_agent_cashouts
     description: >-
@@ -225,16 +211,14 @@ models:
       - name: beneficiary_sk
         data_tests:
           - relationships:
-              arguments:
-                to: "ref('gld_dim_pdm_beneficiary')"
-                field: beneficiary_sk
+              to: "ref('gld_dim_pdm_beneficiary')"
+              field: beneficiary_sk
 
       - name: agent_sk
         data_tests:
           - relationships:
-              arguments:
-                to: "ref('gld_dim_pdm_agent')"
-                field: agent_sk
+              to: "ref('gld_dim_pdm_agent')"
+              field: agent_sk
 
   - name: gld_fct_pdm_payment_lifecycle
     description: >-

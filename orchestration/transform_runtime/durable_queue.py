@@ -1,21 +1,29 @@
 """PostgreSQL durable queue with DB-time fenced leases. ORPHANED is never requeued."""
 from __future__ import annotations
-import json, os
+import json
 from contextlib import contextmanager
 from uuid import uuid4
+
+from services.shared.security.secret_provider import SecretUnavailable, require_secret
 
 TERMINAL={"SUCCEEDED","FAILED","CANCELLED","ORPHANED"}
 ACTIVE={"RUNNING","TESTING"}
 class DurableQueueError(RuntimeError): pass
 class LeaseLost(DurableQueueError): pass
 
+def application_database_url():
+    """Resolve the ledger application URL; an absent source yields an empty value."""
+    try: return require_secret("TRANSFORM_LEDGER_APP_DATABASE_URL")
+    except SecretUnavailable: return ""
+
 class PostgresDurableQueue:
     def __init__(self,url=None):
-        url=(url or os.getenv("TRANSFORM_LEDGER_DATABASE_URL","")).strip()
-        if not url: raise DurableQueueError("TRANSFORM_LEDGER_DATABASE_URL is required")
+        url=(url or application_database_url()).strip()
+        if not url: raise DurableQueueError("TRANSFORM_LEDGER_APP_DATABASE_URL is required")
         import psycopg
         from psycopg.rows import dict_row
-        self.url=url.replace("postgresql+psycopg://","postgresql://",1)
+        from orchestration.transform_runtime.postgres_connection import validate_database_url
+        self.url=validate_database_url(url)
         self.psycopg=psycopg; self.dict_row=dict_row
 
     @contextmanager

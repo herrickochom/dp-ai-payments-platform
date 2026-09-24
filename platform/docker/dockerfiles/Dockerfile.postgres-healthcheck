@@ -1,4 +1,4 @@
-FROM postgres:15-alpine
+FROM postgres:16.15-alpine
 
 # Copy healthcheck script
 COPY platform/postgres/healthchecks/healthcheck.sh /healthcheck.sh

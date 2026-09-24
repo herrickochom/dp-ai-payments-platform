@@ -2,16 +2,24 @@ FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
 
 WORKDIR /app/job_runner
 
 COPY orchestration/job_runner/requirements.txt /tmp/requirements.txt
 
 RUN pip install --no-cache-dir \
-    -r /tmp/requirements.txt
+    -r /tmp/requirements.txt \
+    && install -d -m 0755 /opt/duckdb/extensions \
+    && python -c "import duckdb; connection = duckdb.connect(':memory:', config={'extension_directory': '/opt/duckdb/extensions'}); [connection.install_extension(name) for name in ('httpfs', 'avro', 'iceberg')]" \
+    && install -d -m 0755 /opt/dbt/bin \
+    && ln -s /usr/local/bin/dbt /opt/dbt/bin/dbt
 
 COPY orchestration/job_runner /app/job_runner
 COPY orchestration/transform_runtime /app/orchestration/transform_runtime
+COPY services/shared/security/__init__.py /app/services/shared/security/__init__.py
+COPY services/shared/security/secret_provider.py /app/services/shared/security/secret_provider.py
+COPY services/shared/security/runtime_security.py /app/services/shared/security/runtime_security.py
 COPY transform/dbt /app/dbt
 
 RUN useradd \

@@ -1,10 +1,12 @@
 import importlib.util
+import os
 import json
 import sys
 import tempfile
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -105,11 +107,12 @@ class PaymentEventSeparationTests(unittest.TestCase):
 
     def test_raw_identity_is_unchanged_for_technical_topic(self):
         stamp = datetime(2026, 9, 12, tzinfo=timezone.utc)
-        self.assertEqual(
-            "raw/v2/category=icmn/source_group=icmn/source_system=pmn/"
-            "year=2026/month=09/day=12/topic=icmn.pmn.pain001/partition=2/offset=7/record.avro",
-            consumer.deterministic_s3_key("icmn.pmn.pain001", 2, 7, stamp),
-        )
+        with patch.dict(os.environ, {"RAW_ROOT": "raw", "RAW_VERSION": "v2", "RAW_PREFIX": "raw/v2"}):
+            self.assertEqual(
+                "raw/v2/category=icmn/source_group=icmn/source_system=pmn/"
+                "year=2026/month=09/day=12/topic=icmn.pmn.pain001/partition=2/offset=7/record.avro",
+                consumer.deterministic_s3_key("icmn.pmn.pain001", 2, 7, stamp),
+            )
 
     def test_dbt_keeps_technical_events_out_of_iso_message_models(self):
         messages = (ROOT / "transform/dbt/models/silver/slv_pdm_payments_messages.sql").read_text()

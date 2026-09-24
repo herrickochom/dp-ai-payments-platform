@@ -5,12 +5,30 @@ from trino.auth import BasicAuthentication
 
 from config import Settings
 
+from services.shared.security.runtime_security import (
+    is_production_security_mode,
+    validate_trino_security,
+)
+
 
 class TrinoGateway:
     def __init__(self, settings: Settings):
         self.settings = settings
 
     def _connection(self):
+        validate_trino_security(
+            scheme=self.settings.trino_http_scheme,
+        )
+
+        if (
+            is_production_security_mode()
+            and not self.settings.trino_tls_ca
+        ):
+            raise ValueError(
+                "TRINO_TLS_CA is required when "
+                "DP_SECURITY_MODE=production"
+            )
+
         kwargs: dict[str, Any] = {
             "host": self.settings.trino_host,
             "port": self.settings.trino_port,

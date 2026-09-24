@@ -5,6 +5,8 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 
 WORKDIR /app
 COPY services/agent-api/ /app/
+COPY services/shared/security/__init__.py /app/services/shared/security/__init__.py
+COPY services/shared/security/runtime_security.py /app/services/shared/security/runtime_security.py
 COPY transform/dbt/models/ /app/dbt-models/
 
 ENV AGENT_API_PORT=7010 PYTHONUNBUFFERED=1

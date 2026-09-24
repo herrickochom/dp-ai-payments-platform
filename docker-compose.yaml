@@ -1,35 +1,4 @@
-# =============================================================================
-# DP AI PAYMENTS PLATFORM
-# Docker Compose — Local Production-Semantics Environment
-# =============================================================================
-#
-# Author: Herrick OCHOM
-# Role:   Data Architect
-# Date:   18/09/2026
-#
-# Architecture:
-#   Source Systems -> Producers / CDC -> Kafka -> Raw / MinIO
-#                  -> Staging -> Bronze -> Silver -> Gold -> Consumption
-#
-# Design principles:
-#   - Kafka does not write directly to Bronze.
-#   - payment-consumer-events owns durable Kafka -> Raw ingestion.
-#   - dbt / DuckDB own Raw -> Staging -> Bronze transformation.
-#   - CDC is fail-closed and activated only for explicitly governed sources.
-#   - Optional platform capabilities are controlled through Compose profiles.
-#   - Production infrastructure provisioning is owned by Terraform / IaC.
-#
-# =============================================================================
-
 services:
-
-  # ------------------------------------------------------------------
-  # 01. CORE PLATFORM INFRASTRUCTURE
-  # ------------------------------------------------------------------
-  #
-  # Shared persistence and foundational platform services.
-  # PostgreSQL here is platform infrastructure and is not a CDC source.
-
   redis:
     image: redis:7-alpine
     container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-redis
@@ -100,18 +69,85 @@ services:
     - sleep 10 && /healthcheck.sh
     networks:
     - data-platform-network
+  pgadmin:
+    image: dpage/pgadmin4:9.18
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-pgadmin
+    profiles:
+    - pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-}
+      PGADMIN_DISABLE_POSTFIX: '1'
+    entrypoint:
+    - /bin/sh
+    - -ec
+    - ': "$${PGADMIN_DEFAULT_EMAIL:?PGADMIN_DEFAULT_EMAIL is required}"; : "$${PGADMIN_DEFAULT_PASSWORD:?PGADMIN_DEFAULT_PASSWORD
+      is required}"; exec /entrypoint.sh'
+    ports:
+    - 127.0.0.1:${PGADMIN_PORT:-5050}:80
+    volumes:
+    - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+    - data-platform-network
+  pdm-source-postgres:
+    image: postgres:16.15-alpine
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-pdm-source-postgres
+    profiles:
+    - cdc
+    environment:
+      POSTGRES_DB: ${PDM_SOURCE_DB:-}
+      POSTGRES_USER: ${PDM_SOURCE_USER:-}
+      POSTGRES_PASSWORD: ${PDM_SOURCE_PASSWORD:-}
+      PDM_CDC_USER: ${PDM_CDC_USER:-}
+      PDM_CDC_PASSWORD: ${PDM_CDC_PASSWORD:-}
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    entrypoint:
+    - /bin/sh
+    - /pdm-source-entrypoint.sh
+    command:
+    - postgres
+    - -c
+    - wal_level=logical
+    - -c
+    - max_replication_slots=4
+    - -c
+    - max_wal_senders=4
+    - -c
+    - max_slot_wal_keep_size=1024MB
+    volumes:
+    - pdm-source-pgdata:/var/lib/postgresql/data
+    - ./platform/pdm-source-postgres/pdm-source-entrypoint.sh:/pdm-source-entrypoint.sh:ro
+    - ./platform/pdm-source-postgres/initdb:/docker-entrypoint-initdb.d:ro
+    ports:
+    - 127.0.0.1:${PDM_SOURCE_PORT:-5433}:5432
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+    networks:
+    - data-platform-network
   minio:
-    image: quay.io/minio/minio:latest
+    image: ${MINIO_SERVER_IMAGE:-quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z}
     container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-minio
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-    command: server /data --console-address ":9001"
+      MINIO_CERT_DIR: ${MINIO_CERT_DIR:-}
+    command: server /data --console-address ":9001" ${MINIO_CERT_DIR:+--certs-dir /certs}
     ports:
     - ${MINIO_PORT:-9000}:9000
     - ${MINIO_CONSOLE_PORT:-9001}:9001
     volumes:
     - minio-data:/data
+    - ${MINIO_CERT_DIR:-/etc/minio/certs}:/certs:ro
     depends_on:
       postgres-healthcheck:
         condition: service_completed_successfully
@@ -131,6 +167,8 @@ services:
     build:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.minio-init-mc-buckets
+      args:
+        MINIO_MC_IMAGE: ${MINIO_MC_IMAGE:-quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z}
     container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-minio-init-buckets
     environment:
       MINIO_ENDPOINT: ${S3_ENDPOINT}
@@ -138,11 +176,11 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
-      OBJECT_STORE_BUCKET: "${OBJECT_STORE_BUCKET:-dp-ai-payment}"
-      MINIO_BUCKET: "${OBJECT_STORE_BUCKET:-dp-ai-payment}"
-      RAW_ROOT: "${RAW_ROOT:-raw}"
-      RAW_VERSION: "${RAW_VERSION:-v2}"
-      RAW_PREFIX: "${RAW_PREFIX:-raw/v2}"
+      OBJECT_STORE_BUCKET: ${OBJECT_STORE_BUCKET:?OBJECT_STORE_BUCKET is required}
+      MINIO_BUCKET: ${OBJECT_STORE_BUCKET:?OBJECT_STORE_BUCKET is required}
+      RAW_ROOT: ${RAW_ROOT:?RAW_ROOT is required}
+      RAW_VERSION: ${RAW_VERSION:?RAW_VERSION is required}
+      RAW_PREFIX: ${RAW_PREFIX:?RAW_PREFIX is required}
       MINIO_ALIAS: local
     depends_on:
       minio:
@@ -158,10 +196,17 @@ services:
       dockerfile: platform/docker/dockerfiles/Dockerfile.minio-init-mc-databases
     container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-minio-init-databases
     environment:
+      DP_SECRET_SOURCE: ${DP_SECRET_SOURCE:-}
+      DP_SECRET_DIR: ${DP_SECRET_DIR:-}
       MINIO_ENDPOINT: ${S3_ENDPOINT}
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       NESSIE_ENDPOINT: ${NESSIE_ENDPOINT}
+      S3_ENDPOINT: ${S3_ENDPOINT:?S3_ENDPOINT is required}
+      S3_USE_SSL: ${S3_USE_SSL:?S3_USE_SSL is required}
+      S3_CA_BUNDLE: ${S3_CA_BUNDLE}
+      OBJECT_STORE_REGION: ${OBJECT_STORE_REGION:?OBJECT_STORE_REGION is required}
+      OBJECT_STORE_BUCKET: ${OBJECT_STORE_BUCKET:?OBJECT_STORE_BUCKET is required}
     depends_on:
       minio:
         condition: service_healthy
@@ -172,14 +217,6 @@ services:
     restart: 'no'
     networks:
     - data-platform-network
-
-  # ------------------------------------------------------------------
-  # 02. EVENT STREAMING — KAFKA & SCHEMA REGISTRY
-  # ------------------------------------------------------------------
-  #
-  # Durable event transport and schema governance.
-  # CDC integrations also converge on Kafka when explicitly activated.
-
   kafka-volume-init:
     image: apache/kafka:4.3.1
     container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-kafka-volume-init
@@ -245,6 +282,13 @@ services:
     environment:
       KAFKA_BOOTSTRAP_SERVER: kafka:9092
       TOPICS_CONFIG: /app/topics.yaml
+      KAFKA_SECURITY_PROTOCOL: ${KAFKA_SECURITY_PROTOCOL:-PLAINTEXT}
+      KAFKA_SASL_MECHANISM: ${KAFKA_SASL_MECHANISM:-}
+      KAFKA_SASL_USERNAME: ${KAFKA_SASL_USERNAME:-}
+      KAFKA_SASL_PASSWORD: ${KAFKA_SASL_PASSWORD:-}
+      KAFKA_SSL_CA_LOCATION: ${KAFKA_SSL_CA_LOCATION:-}
+      KAFKA_SSL_CERTIFICATE_LOCATION: ${KAFKA_SSL_CERTIFICATE_LOCATION:-}
+      KAFKA_SSL_KEY_LOCATION: ${KAFKA_SSL_KEY_LOCATION:-}
     depends_on:
       kafka:
         condition: service_healthy
@@ -289,9 +333,13 @@ services:
     image: curlimages/curl:8.10.1
     container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-schema-registry-init
     environment:
-      SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      SCHEMA_REGISTRY_URL: ${SCHEMA_REGISTRY_URL:-http://schema-registry:8081}
+      SCHEMA_REGISTRY_AUTH_REQUIRED: ${SCHEMA_REGISTRY_AUTH_REQUIRED:-false}
+      SCHEMA_REGISTRY_HTTPS_CA: ${SCHEMA_REGISTRY_HTTPS_CA:-}
+      SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: ${SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO:-}
       SCHEMA_COMPATIBILITY: BACKWARD_TRANSITIVE
     volumes:
+    - ${SCHEMA_REGISTRY_CERT_DIR:-/etc/schema-registry/certs}:/etc/schema-registry/certs:ro
     - ./platform/kafka/configure-schema-registry.sh:/configure-schema-registry.sh:ro
     entrypoint:
     - /bin/sh
@@ -302,51 +350,85 @@ services:
     restart: 'no'
     networks:
     - data-platform-network
-
-  # ------------------------------------------------------------------
-  # 03. LAKEHOUSE CATALOGUE
-  # ------------------------------------------------------------------
-  #
-  # Iceberg catalogue and controlled REST integration surface.
-
+  kafka-ui:
+    image: ghcr.io/kafbat/kafka-ui:v1.5.0
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-kafka-ui
+    profiles:
+    - kafka-ui
+    environment:
+      AUTH_TYPE: LOGIN_FORM
+      SPRING_SECURITY_USER_NAME: ${KAFKA_UI_USERNAME:-}
+      SPRING_SECURITY_USER_PASSWORD: ${KAFKA_UI_PASSWORD:-}
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: ${SCHEMA_REGISTRY_URL:-http://schema-registry:8081}
+      KAFKA_CLUSTERS_0_READONLY: 'true'
+      MCP_ENABLED: 'false'
+      DYNAMIC_CONFIG_ENABLED: 'false'
+    command:
+    - /bin/sh
+    - -ec
+    - ': "$${SPRING_SECURITY_USER_NAME:?KAFKA_UI_USERNAME is required}"; : "$${SPRING_SECURITY_USER_PASSWORD:?KAFKA_UI_PASSWORD
+      is required}"; exec java --add-opens java.rmi/javax.rmi.ssl=ALL-UNNAMED -jar /api.jar'
+    ports:
+    - 127.0.0.1:${KAFKA_UI_PORT:-8086}:8080
+    depends_on:
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+    - data-platform-network
   nessie:
     build:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.nessie
     container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-nessie
     environment:
-      POSTGRES_HOST: "${POSTGRES_HOST}"
-      POSTGRES_PORT: "${POSTGRES_PORT}"
-      POSTGRES_DB: "${POSTGRES_DB}"
-      NESSIE_WAREHOUSE: "${NESSIE_WAREHOUSE:-payments}"
-      OBJECT_STORE_BUCKET: "${OBJECT_STORE_BUCKET:-dp-ai-payment}"
-      WAREHOUSE_PREFIX: "${WAREHOUSE_PREFIX:-warehouse}"
-      WAREHOUSE_URI: "${WAREHOUSE_URI:-s3://dp-ai-payment/warehouse}"
-      OBJECT_STORE_REGION: "${OBJECT_STORE_REGION}"
-      S3_ENDPOINT: "${S3_ENDPOINT}"
-      S3_PATH_STYLE_ACCESS: "${S3_PATH_STYLE_ACCESS}"
-      NESSIE_S3_ACCESS_KEY: "${NESSIE_S3_ACCESS_KEY}"
-      NESSIE_S3_SECRET_KEY: "${NESSIE_S3_SECRET_KEY}"
-      NESSIE_S3_AUTH_TYPE: "${NESSIE_S3_AUTH_TYPE}"
-      NESSIE_S3_EXTERNAL_ENDPOINT: "${NESSIE_S3_EXTERNAL_ENDPOINT}"
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_DB: ${POSTGRES_DB}
+      NESSIE_WAREHOUSE: ${NESSIE_WAREHOUSE:?NESSIE_WAREHOUSE is required}
+      OBJECT_STORE_BUCKET: ${OBJECT_STORE_BUCKET:?OBJECT_STORE_BUCKET is required}
+      WAREHOUSE_PREFIX: ${WAREHOUSE_PREFIX:?WAREHOUSE_PREFIX is required}
+      WAREHOUSE_URI: ${WAREHOUSE_URI:?WAREHOUSE_URI is required}
+      OBJECT_STORE_REGION: ${OBJECT_STORE_REGION:?OBJECT_STORE_REGION is required}
+      S3_ENDPOINT: ${S3_ENDPOINT:?S3_ENDPOINT is required}
+      S3_PATH_STYLE_ACCESS: ${S3_PATH_STYLE_ACCESS:?S3_PATH_STYLE_ACCESS is required}
+      NESSIE_S3_ACCESS_KEY: ${NESSIE_S3_ACCESS_KEY}
+      NESSIE_S3_SECRET_KEY: ${NESSIE_S3_SECRET_KEY}
+      NESSIE_S3_AUTH_TYPE: ${NESSIE_S3_AUTH_TYPE}
+      NESSIE_S3_EXTERNAL_ENDPOINT: ${NESSIE_S3_EXTERNAL_ENDPOINT}
+      NESSIE_SERVER_AUTHENTICATION_ENABLED: ${NESSIE_AUTHENTICATION_ENABLED:?NESSIE_AUTHENTICATION_ENABLED is required}
+      QUARKUS_OIDC_AUTH_SERVER_URL: ${NESSIE_OIDC_ISSUER_URL:?NESSIE_OIDC_ISSUER_URL is required}
+      QUARKUS_OIDC_CLIENT_ID: ${NESSIE_OIDC_CLIENT_ID:?NESSIE_OIDC_CLIENT_ID is required}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      NESSIE_CATALOG_DEFAULT_WAREHOUSE: "${NESSIE_WAREHOUSE:-payments}"
-      NESSIE_CATALOG_WAREHOUSES_PAYMENTS_LOCATION: "${WAREHOUSE_URI:-s3://dp-ai-payment/warehouse}"
+      NESSIE_CATALOG_DEFAULT_WAREHOUSE: ${NESSIE_WAREHOUSE:?NESSIE_WAREHOUSE is required}
+      NESSIE_CATALOG_WAREHOUSES_PAYMENTS_LOCATION: ${WAREHOUSE_URI:?WAREHOUSE_URI is required}
+      NESSIE_HTTPS_PORT: ${NESSIE_HTTPS_PORT:-19121}
+      NESSIE_SSL_KEYSTORE_FILE: ${NESSIE_SSL_KEYSTORE_FILE:-/etc/nessie/certs/nessie.keystore.jks}
+      NESSIE_SSL_KEYSTORE_PASSWORD: ${NESSIE_SSL_KEYSTORE_PASSWORD:-}
+      NESSIE_SSL_TRUSTSTORE_FILE: ${NESSIE_SSL_TRUSTSTORE_FILE:-/etc/nessie/certs/nessie.truststore.jks}
+      NESSIE_SSL_TRUSTSTORE_PASSWORD: ${NESSIE_SSL_TRUSTSTORE_PASSWORD:-}
     ports:
     - ${NESSIE_PORT:-19120}:19120
+    - ${NESSIE_HTTPS_PORT:-19121}:19121
     volumes:
     - nessie-data:/var/lib/nessie
+    - ${NESSIE_CERT_DIR:-/etc/nessie/certs}:/etc/nessie/certs:ro
     depends_on:
       postgres-healthcheck:
         condition: service_completed_successfully
       minio:
         condition: service_healthy
+      minio-init-iam:
+        condition: service_completed_successfully
     healthcheck:
       test:
       - CMD-SHELL
-      - curl -fsS http://localhost:19120/api/v2/trees >/dev/null && curl -fsS 'http://localhost:19120/iceberg/v1/config?warehouse=payments'
-        >/dev/null
+      - curl -fsS http://localhost:9000/q/health/ready >/dev/null
       interval: 5s
       timeout: 5s
       retries: 30
@@ -371,17 +453,6 @@ services:
     restart: unless-stopped
     networks:
     - data-platform-network
-
-  # ------------------------------------------------------------------
-  # 04. SOURCE GENERATION & GOVERNED INGESTION
-  # ------------------------------------------------------------------
-  #
-  # Governed path:
-  #   Source Systems -> Producer -> Kafka -> Raw / MinIO
-  #
-  # Kafka does not ingest directly into Bronze.
-  # The Raw consumer commits Kafka offsets only after durable handling.
-
   payment-xml-generator:
     profiles:
     - generate-data
@@ -411,12 +482,22 @@ services:
       dockerfile: platform/docker/dockerfiles/Dockerfile.payment-producer
     container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-payment-producer
     environment:
-      KAFKA_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
-      SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-PLAINTEXT://kafka:9092}
+      SCHEMA_REGISTRY_URL: ${SCHEMA_REGISTRY_URL:-http://schema-registry:8081}
+      SCHEMA_REGISTRY_AUTH_REQUIRED: ${SCHEMA_REGISTRY_AUTH_REQUIRED:-false}
+      SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: ${SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO:-}
       DATA_ROOT: /app/data
       PRODUCER_IDEMPOTENCE: 'true'
       PRODUCER_ACKS: all
       KAFKA_SECURITY_PROTOCOL: ${KAFKA_SECURITY_PROTOCOL:-PLAINTEXT}
+      KAFKA_SASL_MECHANISM: ${KAFKA_SASL_MECHANISM:-}
+      KAFKA_SASL_USERNAME: ${KAFKA_SASL_USERNAME:-}
+      KAFKA_SASL_PASSWORD: ${KAFKA_SASL_PASSWORD:-}
+      KAFKA_SSL_CA_LOCATION: ${KAFKA_SSL_CA_LOCATION:-}
+      KAFKA_SSL_CERTIFICATE_LOCATION: ${KAFKA_SSL_CERTIFICATE_LOCATION:-}
+      KAFKA_SSL_KEY_LOCATION: ${KAFKA_SSL_KEY_LOCATION:-}
+      DP_SECRET_SOURCE: ${DP_SECRET_SOURCE:-}
+      DP_SECRET_DIR: ${DP_SECRET_DIR:-}
     volumes:
     - ./data:/app/data:ro
     depends_on:
@@ -436,17 +517,22 @@ services:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.payment-consumer-events
     environment:
-      S3_ENDPOINT: ${S3_ENDPOINT}
+      S3_ENDPOINT: ${S3_ENDPOINT:?S3_ENDPOINT is required}
+      S3_USE_SSL: ${S3_USE_SSL:?S3_USE_SSL is required}
+      S3_CA_BUNDLE: ${S3_CA_BUNDLE}
+      OBJECT_STORE_REGION: ${OBJECT_STORE_REGION:?OBJECT_STORE_REGION is required}
       RAW_INGEST_S3_ACCESS_KEY_ID: ${RAW_INGEST_S3_ACCESS_KEY_ID:?RAW_INGEST_S3_ACCESS_KEY_ID is required}
       RAW_INGEST_S3_SECRET_ACCESS_KEY: ${RAW_INGEST_S3_SECRET_ACCESS_KEY:?RAW_INGEST_S3_SECRET_ACCESS_KEY is required}
       CDC_QUARANTINE_S3_ACCESS_KEY_ID: ${CDC_QUARANTINE_S3_ACCESS_KEY_ID:?CDC_QUARANTINE_S3_ACCESS_KEY_ID is required}
       CDC_QUARANTINE_S3_SECRET_ACCESS_KEY: ${CDC_QUARANTINE_S3_SECRET_ACCESS_KEY:?CDC_QUARANTINE_S3_SECRET_ACCESS_KEY is required}
-      OBJECT_STORE_BUCKET: "${OBJECT_STORE_BUCKET:-dp-ai-payment}"
-      MINIO_BUCKET: "${OBJECT_STORE_BUCKET:-dp-ai-payment}"
-      RAW_ROOT: "${RAW_ROOT:-raw}"
-      RAW_VERSION: "${RAW_VERSION:-v2}"
-      RAW_PREFIX: "${RAW_PREFIX:-raw/v2}"
-      KAFKA_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
+      PLATFORM_RAW_READ_ACCESS_KEY: ${PLATFORM_RAW_READ_ACCESS_KEY:?PLATFORM_RAW_READ_ACCESS_KEY is required}
+      PLATFORM_RAW_READ_SECRET_KEY: ${PLATFORM_RAW_READ_SECRET_KEY:?PLATFORM_RAW_READ_SECRET_KEY is required}
+      OBJECT_STORE_BUCKET: ${OBJECT_STORE_BUCKET:?OBJECT_STORE_BUCKET is required}
+      MINIO_BUCKET: ${OBJECT_STORE_BUCKET:?OBJECT_STORE_BUCKET is required}
+      RAW_ROOT: ${RAW_ROOT:?RAW_ROOT is required}
+      RAW_VERSION: ${RAW_VERSION:?RAW_VERSION is required}
+      RAW_PREFIX: ${RAW_PREFIX:?RAW_PREFIX is required}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-PLAINTEXT://kafka:9092}
       KAFKA_GROUP_ID: payment-events-consumer
       KAFKA_RETRY_TOPIC: payment-events.retry
       KAFKA_DLQ_TOPIC: payment-events.dlq
@@ -455,7 +541,17 @@ services:
       RETRY_BACKOFF_MULTIPLIER: ${RETRY_BACKOFF_MULTIPLIER:-2}
       RETRY_MAX_DELAY_SECONDS: ${RETRY_MAX_DELAY_SECONDS:-30}
       KAFKA_SECURITY_PROTOCOL: ${KAFKA_SECURITY_PROTOCOL:-PLAINTEXT}
-      SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      KAFKA_SASL_MECHANISM: ${KAFKA_SASL_MECHANISM:-}
+      KAFKA_SASL_USERNAME: ${KAFKA_SASL_USERNAME:-}
+      KAFKA_SASL_PASSWORD: ${KAFKA_SASL_PASSWORD:-}
+      KAFKA_SSL_CA_LOCATION: ${KAFKA_SSL_CA_LOCATION:-}
+      KAFKA_SSL_CERTIFICATE_LOCATION: ${KAFKA_SSL_CERTIFICATE_LOCATION:-}
+      KAFKA_SSL_KEY_LOCATION: ${KAFKA_SSL_KEY_LOCATION:-}
+      SCHEMA_REGISTRY_URL: ${SCHEMA_REGISTRY_URL:-http://schema-registry:8081}
+      SCHEMA_REGISTRY_AUTH_REQUIRED: ${SCHEMA_REGISTRY_AUTH_REQUIRED:-false}
+      SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: ${SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO:-}
+      DP_SECRET_SOURCE: ${DP_SECRET_SOURCE:-}
+      DP_SECRET_DIR: ${DP_SECRET_DIR:-}
       KAFKA_TOPICS: icmn.vpm.pain001,icmn.pmn.pain001,cpo.psn.pain002,cpo.plm.pain002,wendi.pain001,wendi.pain002,wendi.camt053,wendi.camt052,wendi.camt054,wendi.transactions,mobile.mtn.pacs008,mobile.mtn.pacs002,mobile.airtel.pacs008,mobile.airtel.pacs002,agent.transactions,agent.profiles,agent.locations,pdmis.beneficiaries,pdmis.loans,pdmis.repayments,pdmis.saccos,pdmis.households,pdmis.business_plans,pdmis.special_groups
     depends_on:
       kafka:
@@ -481,18 +577,12 @@ services:
       timeout: 15s
       retries: 120
       start_period: 5s
-
-  # ------------------------------------------------------------------
-  # 05. QUERY & TRANSFORMATION
-  # ------------------------------------------------------------------
-  #
-  # Transformation path:
-  #   Raw -> Staging -> Bronze -> Silver -> Gold -> Consumption
-
   trino:
     build:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.trino-coordinator
+      args:
+        TRINO_BASE_IMAGE: ${TRINO_BASE_IMAGE:?TRINO_BASE_IMAGE must be pinned}
     container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-trino
     user: 0:0
     profiles:
@@ -503,17 +593,23 @@ services:
     - dashboard
     - superset
     environment:
-      POSTGRES_HOST: "${POSTGRES_HOST}"
-      POSTGRES_PORT: "${POSTGRES_PORT}"
-      TRINO_DATABASE_NAME: "${TRINO_DATABASE_NAME}"
-      TRINO_HOST: "${TRINO_HOST}"
-      TRINO_PORT: "${TRINO_PORT}"
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      TRINO_DATABASE_NAME: ${TRINO_DATABASE_NAME}
+      TRINO_HOST: ${TRINO_HOST}
+      TRINO_PORT: ${TRINO_PORT}
       JAVA_TOOL_OPTIONS: -Xmx768M
       TRINO_CONFIG_DIR: /etc/trino
       TRINO_INTERNAL_SHARED_SECRET: ${TRINO_INTERNAL_SHARED_SECRET}
       TRINO_KEYSTORE_PASSWORD: ${TRINO_KEYSTORE_PASSWORD:?TRINO_KEYSTORE_PASSWORD must be supplied by environment}
       TRINO_S3_ACCESS_KEY_ID: ${TRINO_S3_ACCESS_KEY_ID:?TRINO_S3_ACCESS_KEY_ID is required}
       TRINO_S3_SECRET_ACCESS_KEY: ${TRINO_S3_SECRET_ACCESS_KEY:?TRINO_S3_SECRET_ACCESS_KEY is required}
+      NESSIE_TRINO_ENDPOINT: ${NESSIE_TRINO_ENDPOINT:?NESSIE_TRINO_ENDPOINT is required}
+      S3_ENDPOINT: ${S3_ENDPOINT:?S3_ENDPOINT is required}
+      OBJECT_STORE_REGION: ${OBJECT_STORE_REGION:?OBJECT_STORE_REGION is required}
+      S3_PATH_STYLE_ACCESS: ${S3_PATH_STYLE_ACCESS:?S3_PATH_STYLE_ACCESS is required}
+      NESSIE_WAREHOUSE: ${NESSIE_WAREHOUSE:?NESSIE_WAREHOUSE is required}
+      NESSIE_TRINO_READ_TOKEN: ${NESSIE_TRINO_READ_TOKEN:?NESSIE_TRINO_READ_TOKEN is required}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
@@ -549,13 +645,6 @@ services:
         condition: service_healthy
       nessie:
         condition: service_healthy
-  # ------------------------------------------------------------------
-  # 06. MACHINE LEARNING — FEATURE ENGINEERING & INFERENCE
-  # ------------------------------------------------------------------
-  #
-  # Operational feature generation and predictive-risk scoring.
-  # Model training is intentionally excluded from the deployable runtime.
-
   pdm-ml-features:
     build:
       context: .
@@ -637,13 +726,6 @@ services:
     - /app/data/pdmis_ml/default_risk_current_predictions.jsonl
     - --summary
     - /app/data/pdmis_ml/default_risk_current_predictions_summary.json
-
-  # ------------------------------------------------------------------
-  # 07. AGENTS & APPLICATION APIs
-  # ------------------------------------------------------------------
-  #
-  # Governed application and agent-facing service layer.
-
   agent-api:
     build:
       context: .
@@ -653,6 +735,8 @@ services:
     - analytics
     - agents
     environment:
+      DP_SECRET_SOURCE: ${DP_SECRET_SOURCE:-}
+      DP_SECRET_DIR: ${DP_SECRET_DIR:-}
       AGENT_API_PORT: '7010'
       TRINO_HOST: ${TRINO_HOST:-trino}
       TRINO_PORT: ${AGENT_TRINO_PORT:-8443}
@@ -700,13 +784,6 @@ services:
       timeout: 8s
       retries: 5
       start_period: 10s
-
-  # ------------------------------------------------------------------
-  # 08. BUSINESS INTELLIGENCE
-  # ------------------------------------------------------------------
-  #
-  # Consumption-facing analytics and dashboard services.
-
   metabase:
     image: metabase/metabase:v0.49.10
     container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-metabase
@@ -792,22 +869,22 @@ services:
     - /bin/bash
     - -c
     - "set -euo pipefail\n\necho \"Running Superset metadata migrations...\"\nsuperset db upgrade\n\necho \"Creating initial\
-      \ administrator if required...\"\nsuperset fab create-admin           --username \"$${SUPERSET_ADMIN_USERNAME}\"     \
-      \      --firstname \"$${SUPERSET_ADMIN_FIRSTNAME}\"           --lastname \"$${SUPERSET_ADMIN_LASTNAME}\"           --email\
-      \ \"$${SUPERSET_ADMIN_EMAIL}\"           --password \"$${SUPERSET_ADMIN_PASSWORD}\" || true\n\necho \"Synchronising Superset\
-      \ roles and permissions...\"\nsuperset init\n\necho \"Registering/updating Trino database connection...\"\npython - <<'PY'\n\
-      import os\n\nfrom superset.app import create_app\n\napp = create_app()\n\nwith app.app_context():\n    from superset import\
-      \ db\n    from superset.models.core import Database\n\n    database_name = os.getenv(\"TRINO_DATABASE_NAME\", \"PDM Trino\"\
-      )\n    sqlalchemy_uri = os.getenv(\n        \"TRINO_SQLALCHEMY_URI\",\n        \"trino://trino@trino:8080/iceberg/consumption\"\
+      \ administrator if required...\"\nsuperset fab create-admin           --username \"$${SUPERSET_ADMIN_USERNAME}\"   \
+      \        --firstname \"$${SUPERSET_ADMIN_FIRSTNAME}\"           --lastname \"$${SUPERSET_ADMIN_LASTNAME}\"         \
+      \  --email \"$${SUPERSET_ADMIN_EMAIL}\"           --password \"$${SUPERSET_ADMIN_PASSWORD}\" || true\n\necho \"Synchronising\
+      \ Superset roles and permissions...\"\nsuperset init\n\necho \"Registering/updating Trino database connection...\"\n\
+      python - <<'PY'\nimport os\n\nfrom superset.app import create_app\n\napp = create_app()\n\nwith app.app_context():\n\
+      \    from superset import db\n    from superset.models.core import Database\n\n    database_name = os.getenv(\"TRINO_DATABASE_NAME\"\
+      , \"PDM Trino\")\n    sqlalchemy_uri = os.getenv(\n        \"TRINO_SQLALCHEMY_URI\",\n        \"trino://trino@trino:8080/iceberg/consumption\"\
       ,\n    )\n\n    database = (\n        db.session.query(Database)\n        .filter(Database.database_name == database_name)\n\
       \        .first()\n    )\n\n    if database is None:\n        database = Database(\n            database_name=database_name,\n\
-      \            sqlalchemy_uri=sqlalchemy_uri,\n            expose_in_sqllab=True,\n            allow_ctas=False,\n     \
-      \       allow_cvas=False,\n            allow_dml=False,\n        )\n        db.session.add(database)\n        action =\
-      \ \"Created\"\n    else:\n        database.sqlalchemy_uri = sqlalchemy_uri\n        database.expose_in_sqllab = True\n\
-      \        database.allow_ctas = False\n        database.allow_cvas = False\n        database.allow_dml = False\n      \
-      \  action = \"Updated\"\n\n    db.session.commit()\n\n    print(\n        f\"{action} Superset Trino connection: \"\n\
-      \        f\"id={database.id}, name={database.database_name}\"\n    )\nPY\n\necho \"Superset initialization completed successfully.\"\
-      \n"
+      \            sqlalchemy_uri=sqlalchemy_uri,\n            expose_in_sqllab=True,\n            allow_ctas=False,\n   \
+      \         allow_cvas=False,\n            allow_dml=False,\n        )\n        db.session.add(database)\n        action\
+      \ = \"Created\"\n    else:\n        database.sqlalchemy_uri = sqlalchemy_uri\n        database.expose_in_sqllab = True\n\
+      \        database.allow_ctas = False\n        database.allow_cvas = False\n        database.allow_dml = False\n    \
+      \    action = \"Updated\"\n\n    db.session.commit()\n\n    print(\n        f\"{action} Superset Trino connection: \"\
+      \n        f\"id={database.id}, name={database.database_name}\"\n    )\nPY\n\necho \"Superset initialization completed\
+      \ successfully.\"\n"
   superset:
     build:
       context: .
@@ -856,9 +933,9 @@ services:
     - 'set -euo pipefail
 
 
-      exec gunicorn           --bind 0.0.0.0:8088           --workers "$${SUPERSET_WEB_WORKERS}"           --worker-class gthread           --threads
-      "$${SUPERSET_WEB_THREADS}"           --timeout "$${SUPERSET_WEBSERVER_TIMEOUT}"           --access-logfile -           --error-logfile
-      -           "superset.app:create_app()"
+      exec gunicorn           --bind 0.0.0.0:8088           --workers "$${SUPERSET_WEB_WORKERS}"           --worker-class
+      gthread           --threads "$${SUPERSET_WEB_THREADS}"           --timeout "$${SUPERSET_WEBSERVER_TIMEOUT}"           --access-logfile
+      -           --error-logfile -           "superset.app:create_app()"
 
       '
     healthcheck:
@@ -922,13 +999,6 @@ services:
       timeout: 20s
       retries: 5
       start_period: 30s
-
-  # ------------------------------------------------------------------
-  # 09. ORCHESTRATION & CONTROL PLANE
-  # ------------------------------------------------------------------
-  #
-  # Governed workflow orchestration and bounded job execution.
-
   transform-ledger-migrate:
     profiles:
     - airflow
@@ -936,20 +1006,28 @@ services:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.platform-job-runner
     working_dir: /app
-    command: ["python", "-m", "orchestration.transform_runtime.migrate"]
+    command:
+    - python
+    - -m
+    - orchestration.transform_runtime.migrate
     environment:
-      TRANSFORM_LEDGER_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      DP_SECRET_SOURCE: ${DP_SECRET_SOURCE:-}
+      DP_SECRET_DIR: ${DP_SECRET_DIR:-}
+      TRANSFORM_LEDGER_MIGRATION_DATABASE_URL: ${TRANSFORM_LEDGER_MIGRATION_DATABASE_URL:?TRANSFORM_LEDGER_MIGRATION_DATABASE_URL
+        is required}
     depends_on:
       postgres:
         condition: service_healthy
     networks:
     - data-platform-network
     read_only: true
-    tmpfs: [/tmp]
-    security_opt: [no-new-privileges:true]
-    cap_drop: [ALL]
+    tmpfs:
+    - /tmp
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
     restart: 'no'
-
   transform-runtime:
     profiles:
     - airflow
@@ -957,15 +1035,23 @@ services:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.platform-job-runner
     working_dir: /app
-    command: ["uvicorn", "orchestration.transform_runtime.api:app", "--host", "0.0.0.0", "--port", "8089"]
+    command:
+    - uvicorn
+    - orchestration.transform_runtime.api:app
+    - --host
+    - 0.0.0.0
+    - --port
+    - '8089'
     environment:
+      DP_SECRET_SOURCE: ${DP_SECRET_SOURCE:-}
+      DP_SECRET_DIR: ${DP_SECRET_DIR:-}
       LAKEHOUSE_TRANSFORM_EXECUTION_ENABLED: 'false'
       LAKEHOUSE_TRANSFORM_CONTRACT: /app/orchestration/transform_runtime/contracts/lakehouse_transform.json
       TRANSFORM_RUNTIME_AIRFLOW_TOKEN: ${TRANSFORM_RUNTIME_AIRFLOW_TOKEN:?TRANSFORM_RUNTIME_AIRFLOW_TOKEN is required}
       TRANSFORM_RUNTIME_RUNNER_TOKEN: ${TRANSFORM_RUNTIME_RUNNER_TOKEN:?TRANSFORM_RUNTIME_RUNNER_TOKEN is required}
-      TRANSFORM_LEDGER_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      NESSIE_ENDPOINT: "${NESSIE_ENDPOINT}"
-      NESSIE_AUTH_TOKEN: ${NESSIE_AUTH_TOKEN:?NESSIE_AUTH_TOKEN is required}
+      TRANSFORM_LEDGER_APP_DATABASE_URL: ${TRANSFORM_LEDGER_APP_DATABASE_URL:?TRANSFORM_LEDGER_APP_DATABASE_URL is required}
+      NESSIE_ENDPOINT: ${NESSIE_ENDPOINT}
+      NESSIE_PUBLICATION_TOKEN: ${NESSIE_PUBLICATION_TOKEN:?NESSIE_PUBLICATION_TOKEN is required}
       TRANSFORM_RUNNER_URL: http://platform-job-runner:8090
     depends_on:
       transform-ledger-migrate:
@@ -973,15 +1059,21 @@ services:
     networks:
     - data-platform-network
     read_only: true
-    tmpfs: [/tmp]
-    security_opt: [no-new-privileges:true]
-    cap_drop: [ALL]
+    tmpfs:
+    - /tmp
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8089/health', timeout=3).read()"]
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://localhost:8089/health', timeout=3).read()
       interval: 10s
       timeout: 5s
       retries: 5
-
   platform-job-runner:
     profiles:
     - airflow
@@ -989,40 +1081,46 @@ services:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.platform-job-runner
     environment:
-      DBT_DATABASE: "${DBT_DATABASE}"
-      DBT_STAGING_DATABASE: "${DBT_STAGING_DATABASE}"
-      DBT_BRONZE_DATABASE: "${DBT_BRONZE_DATABASE}"
-      DBT_SILVER_DATABASE: "${DBT_SILVER_DATABASE}"
-      DBT_SILVER_VAULT_DATABASE: "${DBT_SILVER_VAULT_DATABASE}"
-      DBT_GOLD_DATABASE: "${DBT_GOLD_DATABASE}"
-      DBT_CONSUMPTION_DATABASE: "${DBT_CONSUMPTION_DATABASE}"
-      DBT_S3_URL_STYLE: "${DBT_S3_URL_STYLE}"
-      NESSIE_ENDPOINT: "${NESSIE_ENDPOINT}"
-      OBJECT_STORE_BUCKET: "${OBJECT_STORE_BUCKET:-dp-ai-payment}"
-      WAREHOUSE_PREFIX: "${WAREHOUSE_PREFIX:-warehouse}"
-      WAREHOUSE_URI: "${WAREHOUSE_URI:-s3://dp-ai-payment/warehouse}"
-      NESSIE_WAREHOUSE: "${NESSIE_WAREHOUSE:-payments}"
-      ICEBERG_CATALOG: "${ICEBERG_CATALOG}"
+      DP_SECRET_SOURCE: ${DP_SECRET_SOURCE:-}
+      DP_SECRET_DIR: ${DP_SECRET_DIR:-}
+      DBT_DATABASE: ${DBT_DATABASE}
+      DBT_STAGING_DATABASE: ${DBT_STAGING_DATABASE}
+      DBT_BRONZE_DATABASE: ${DBT_BRONZE_DATABASE}
+      DBT_SILVER_DATABASE: ${DBT_SILVER_DATABASE}
+      DBT_SILVER_VAULT_DATABASE: ${DBT_SILVER_VAULT_DATABASE}
+      DBT_GOLD_DATABASE: ${DBT_GOLD_DATABASE}
+      DBT_CONSUMPTION_DATABASE: ${DBT_CONSUMPTION_DATABASE}
+      DBT_S3_URL_STYLE: ${DBT_S3_URL_STYLE}
+      NESSIE_ENDPOINT: ${NESSIE_ENDPOINT}
+      OBJECT_STORE_BUCKET: ${OBJECT_STORE_BUCKET:?OBJECT_STORE_BUCKET is required}
+      WAREHOUSE_PREFIX: ${WAREHOUSE_PREFIX:?WAREHOUSE_PREFIX is required}
+      WAREHOUSE_URI: ${WAREHOUSE_URI:?WAREHOUSE_URI is required}
+      NESSIE_WAREHOUSE: ${NESSIE_WAREHOUSE:?NESSIE_WAREHOUSE is required}
+      ICEBERG_CATALOG: ${ICEBERG_CATALOG}
       PLATFORM_RUNNER_EXECUTION_ENABLED: 'false'
       PLATFORM_JOB_EXECUTION_ENABLED: 'false'
       TRANSFORM_RUNTIME_RUNNER_TOKEN: ${TRANSFORM_RUNTIME_RUNNER_TOKEN:?TRANSFORM_RUNTIME_RUNNER_TOKEN is required}
-      TRANSFORM_LEDGER_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      TRANSFORM_LEDGER_APP_DATABASE_URL: ${TRANSFORM_LEDGER_APP_DATABASE_URL:?TRANSFORM_LEDGER_APP_DATABASE_URL is required}
       ORDINARY_S3_ACCESS_KEY_ID: ${ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID:?ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID is required}
-      ORDINARY_S3_SECRET_ACCESS_KEY: ${ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY:?ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY is required}
+      ORDINARY_S3_SECRET_ACCESS_KEY: ${ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY:?ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY is
+        required}
       RESTRICTED_S3_ACCESS_KEY_ID: ${RESTRICTED_TRANSFORM_S3_ACCESS_KEY_ID:?RESTRICTED_TRANSFORM_S3_ACCESS_KEY_ID is required}
-      RESTRICTED_S3_SECRET_ACCESS_KEY: ${RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY:?RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY is required}
+      RESTRICTED_S3_SECRET_ACCESS_KEY: ${RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY:?RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY
+        is required}
       ML_S3_ACCESS_KEY_ID: ${ML_TRANSFORM_S3_ACCESS_KEY_ID:?ML_TRANSFORM_S3_ACCESS_KEY_ID is required}
       ML_S3_SECRET_ACCESS_KEY: ${ML_TRANSFORM_S3_SECRET_ACCESS_KEY:?ML_TRANSFORM_S3_SECRET_ACCESS_KEY is required}
-      NESSIE_AUTH_TOKEN: ${NESSIE_AUTH_TOKEN:?NESSIE_AUTH_TOKEN is required}
+      NESSIE_TRANSFORM_TOKEN: ${NESSIE_TRANSFORM_TOKEN:?NESSIE_TRANSFORM_TOKEN is required}
       KAFKA_TOPICS: icmn.vpm.pain001,icmn.pmn.pain001,cpo.psn.pain002,cpo.plm.pain002,wendi.pain001,wendi.pain002,wendi.camt053,wendi.camt052,wendi.camt054,wendi.transactions,mobile.mtn.pacs008,mobile.mtn.pacs002,mobile.airtel.pacs008,mobile.airtel.pacs002,agent.transactions,agent.profiles,agent.locations,pdmis.beneficiaries,pdmis.loans,pdmis.repayments,pdmis.saccos,pdmis.households,pdmis.business_plans,pdmis.special_groups
       PLATFORM_RAW_READ_ACCESS_KEY: ${PLATFORM_RAW_READ_ACCESS_KEY:?PLATFORM_RAW_READ_ACCESS_KEY is required}
       PLATFORM_RAW_READ_SECRET_KEY: ${PLATFORM_RAW_READ_SECRET_KEY:?PLATFORM_RAW_READ_SECRET_KEY is required}
-      OBJECT_STORE_BUCKET: "${OBJECT_STORE_BUCKET:-dp-ai-payment}"
-      MINIO_BUCKET: "${OBJECT_STORE_BUCKET:-dp-ai-payment}"
-      RAW_ROOT: "${RAW_ROOT:-raw}"
-      RAW_VERSION: "${RAW_VERSION:-v2}"
-      RAW_PREFIX: "${RAW_PREFIX:-raw/v2}"
-      S3_ENDPOINT: ${S3_ENDPOINT}
+      MINIO_BUCKET: ${OBJECT_STORE_BUCKET:?OBJECT_STORE_BUCKET is required}
+      RAW_ROOT: ${RAW_ROOT:?RAW_ROOT is required}
+      RAW_VERSION: ${RAW_VERSION:?RAW_VERSION is required}
+      RAW_PREFIX: ${RAW_PREFIX:?RAW_PREFIX is required}
+      S3_ENDPOINT: ${S3_ENDPOINT:?S3_ENDPOINT is required}
+      S3_USE_SSL: ${S3_USE_SSL:?S3_USE_SSL is required}
+      S3_CA_BUNDLE: ${S3_CA_BUNDLE}
+      OBJECT_STORE_REGION: ${OBJECT_STORE_REGION:?OBJECT_STORE_REGION is required}
     volumes:
     - ./data/pdmis_ml:/app/data/pdmis_ml:ro
     networks:
@@ -1102,7 +1200,8 @@ services:
 
       setpriv --reuid="${AIRFLOW_UID:-50000}" --regid=0 --clear-groups airflow db migrate
 
-      exec setpriv --reuid="${AIRFLOW_UID:-50000}" --regid=0 --clear-groups airflow pools set transform_execution 1 "Serialized transform execution"
+      exec setpriv --reuid="${AIRFLOW_UID:-50000}" --regid=0 --clear-groups airflow pools set transform_execution 1 "Serialized
+      transform execution"
 
       '
   airflow-apiserver:
@@ -1318,7 +1417,8 @@ services:
     healthcheck:
       test:
       - CMD-SHELL
-      - celery --app airflow.providers.celery.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}" || exit 1
+      - celery --app airflow.providers.celery.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}" || exit
+        1
       interval: 20s
       timeout: 10s
       retries: 20
@@ -1370,24 +1470,52 @@ services:
     restart: unless-stopped
     command:
     - triggerer
-
-
-# ------------------------------------------------------------------
-# 10. NETWORKS
-# ------------------------------------------------------------------
-
+  minio-init-iam:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.minio-init-iam
+      args:
+        MINIO_MC_IMAGE: ${MINIO_MC_IMAGE:-quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z}
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-minio-init-iam
+    environment:
+      DP_SECRET_SOURCE: environment
+      MINIO_ENDPOINT: ${S3_ENDPOINT}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      RAW_INGEST_S3_ACCESS_KEY_ID: ${RAW_INGEST_S3_ACCESS_KEY_ID}
+      RAW_INGEST_S3_SECRET_ACCESS_KEY: ${RAW_INGEST_S3_SECRET_ACCESS_KEY}
+      CDC_QUARANTINE_S3_ACCESS_KEY_ID: ${CDC_QUARANTINE_S3_ACCESS_KEY_ID}
+      CDC_QUARANTINE_S3_SECRET_ACCESS_KEY: ${CDC_QUARANTINE_S3_SECRET_ACCESS_KEY}
+      PLATFORM_RAW_READ_ACCESS_KEY: ${PLATFORM_RAW_READ_ACCESS_KEY}
+      PLATFORM_RAW_READ_SECRET_KEY: ${PLATFORM_RAW_READ_SECRET_KEY}
+      NESSIE_S3_ACCESS_KEY: ${NESSIE_S3_ACCESS_KEY}
+      NESSIE_S3_SECRET_KEY: ${NESSIE_S3_SECRET_KEY}
+      TRINO_S3_ACCESS_KEY_ID: ${TRINO_S3_ACCESS_KEY_ID}
+      TRINO_S3_SECRET_ACCESS_KEY: ${TRINO_S3_SECRET_ACCESS_KEY}
+      ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID: ${ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID}
+      ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY: ${ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY}
+      RESTRICTED_TRANSFORM_S3_ACCESS_KEY_ID: ${RESTRICTED_TRANSFORM_S3_ACCESS_KEY_ID}
+      RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY: ${RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY}
+      ML_TRANSFORM_S3_ACCESS_KEY_ID: ${ML_TRANSFORM_S3_ACCESS_KEY_ID}
+      ML_TRANSFORM_S3_SECRET_ACCESS_KEY: ${ML_TRANSFORM_S3_SECRET_ACCESS_KEY}
+    depends_on:
+      minio:
+        condition: service_healthy
+      minio-init-buckets:
+        condition: service_completed_successfully
+      postgres-healthcheck:
+        condition: service_completed_successfully
+    restart: 'no'
+    networks:
+    - data-platform-network
 networks:
   data-platform-network:
     name: ${DOCKER_NETWORK:-data-platform-network}
     driver: bridge
-
-
-# ------------------------------------------------------------------
-# 11. PERSISTENT VOLUMES
-# ------------------------------------------------------------------
-
 volumes:
   pgdata: null
+  pdm-source-pgdata: null
+  pgadmin-data: null
   minio-data: null
   nessie-data: null
   kafka-data: null

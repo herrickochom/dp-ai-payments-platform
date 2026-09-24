@@ -28,8 +28,58 @@ import uuid
 from datetime import datetime, timezone
 from typing import Dict, List, Tuple
 
+from services.shared.security.runtime_security import validate_kafka_security
+from services.shared.security.secret_provider import resolve_secret
+
 from confluent_kafka import Consumer, KafkaError, Producer, TopicPartition
 
+
+
+def kafka_security_config() -> Dict[str, str]:
+    """Build and validate the Kafka security configuration."""
+    security_protocol = os.getenv(
+        "KAFKA_SECURITY_PROTOCOL",
+        "PLAINTEXT",
+    )
+    ssl_ca_location = os.getenv("KAFKA_SSL_CA_LOCATION")
+    sasl_mechanism = os.getenv("KAFKA_SASL_MECHANISM")
+    sasl_username = os.getenv("KAFKA_SASL_USERNAME")
+    sasl_password = resolve_secret("KAFKA_SASL_PASSWORD")
+
+    validate_kafka_security(
+        security_protocol=security_protocol,
+        ssl_ca_location=ssl_ca_location,
+        sasl_mechanism=sasl_mechanism,
+        sasl_username=sasl_username,
+        sasl_password=sasl_password,
+    )
+
+    config = {
+        "security.protocol": security_protocol,
+    }
+
+    optional = {
+        "ssl.ca.location": ssl_ca_location,
+        "ssl.certificate.location": os.getenv(
+            "KAFKA_SSL_CERTIFICATE_LOCATION"
+        ),
+        "ssl.key.location": os.getenv(
+            "KAFKA_SSL_KEY_LOCATION"
+        ),
+        "sasl.mechanism": sasl_mechanism,
+        "sasl.username": sasl_username,
+        "sasl.password": sasl_password,
+    }
+
+    config.update(
+        {
+            key: value
+            for key, value in optional.items()
+            if value
+        }
+    )
+
+    return config
 
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(description=__doc__)
@@ -83,8 +133,8 @@ def scan_dlq_envelopes(bootstrap: str, dlq_topic: str,
         "group.id": f"dlq-replay-inspector-{uuid.uuid4().hex[:8]}",
         "enable.auto.commit": False,
         "auto.offset.reset": "earliest",
-        "security.protocol": os.getenv("KAFKA_SECURITY_PROTOCOL", "PLAINTEXT"),
     }
+    config.update(kafka_security_config())
     consumer = Consumer(config)
     try:
         try:
@@ -121,9 +171,13 @@ def main() -> int:
     args = parser().parse_args()
     bootstrap = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092")
     dlq_topic = os.getenv("KAFKA_DLQ_TOPIC", "payment-events.dlq")
-    consumer = Consumer({"bootstrap.servers": bootstrap, "group.id": "dlq-replay-inspector",
-                         "enable.auto.commit": False, "security.protocol": os.getenv(
-                             "KAFKA_SECURITY_PROTOCOL", "PLAINTEXT")})
+    consumer_config = {
+        "bootstrap.servers": bootstrap,
+        "group.id": "dlq-replay-inspector",
+        "enable.auto.commit": False,
+    }
+    consumer_config.update(kafka_security_config())
+    consumer = Consumer(consumer_config)
     consumer.assign([TopicPartition(dlq_topic, args.partition, args.offset)])
     message = consumer.poll(10)
     consumer.close()
@@ -162,8 +216,13 @@ def main() -> int:
         print("   source replay.", file=sys.stderr)
         return 3
 
-    producer = Producer({"bootstrap.servers": bootstrap, "acks": "all", "enable.idempotence": True,
-                         "security.protocol": os.getenv("KAFKA_SECURITY_PROTOCOL", "PLAINTEXT")})
+    producer_config = {
+        "bootstrap.servers": bootstrap,
+        "acks": "all",
+        "enable.idempotence": True,
+    }
+    producer_config.update(kafka_security_config())
+    producer = Producer(producer_config)
     delivery = {"error": None}
     producer.produce(
         envelope["original_topic"],

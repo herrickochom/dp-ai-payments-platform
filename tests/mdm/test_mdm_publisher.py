@@ -171,3 +171,85 @@ def test_execute_fails_closed_by_default(
         publisher.execute_publish(
             "ordinary"
         )
+
+
+def test_kafka_security_config_allows_local_plaintext(monkeypatch):
+    monkeypatch.delenv("DP_SECURITY_MODE", raising=False)
+    monkeypatch.setenv("KAFKA_SECURITY_PROTOCOL", "PLAINTEXT")
+
+    config = publisher.kafka_security_config()
+
+    assert config["security.protocol"] == "PLAINTEXT"
+
+
+def test_kafka_security_config_rejects_production_plaintext(monkeypatch):
+    monkeypatch.setenv("DP_SECURITY_MODE", "production")
+    monkeypatch.setenv("DP_SECRET_SOURCE", "environment")
+    monkeypatch.setenv("KAFKA_SECURITY_PROTOCOL", "PLAINTEXT")
+
+    with pytest.raises(
+        ValueError,
+        match="encrypted security protocol",
+    ):
+        publisher.kafka_security_config()
+
+
+def test_kafka_security_config_accepts_production_ssl(monkeypatch):
+    monkeypatch.setenv("DP_SECURITY_MODE", "production")
+    monkeypatch.setenv("DP_SECRET_SOURCE", "environment")
+    monkeypatch.setenv("KAFKA_SECURITY_PROTOCOL", "SSL")
+    monkeypatch.setenv(
+        "KAFKA_SSL_CA_LOCATION",
+        "/run/secrets/kafka-ca.pem",
+    )
+
+    config = publisher.kafka_security_config()
+
+    assert config["security.protocol"] == "SSL"
+    assert (
+        config["ssl.ca.location"]
+        == "/run/secrets/kafka-ca.pem"
+    )
+
+
+def test_kafka_security_config_requires_complete_production_sasl_ssl(
+    monkeypatch,
+):
+    monkeypatch.setenv("DP_SECURITY_MODE", "production")
+    monkeypatch.setenv("DP_SECRET_SOURCE", "environment")
+    monkeypatch.setenv("KAFKA_SECURITY_PROTOCOL", "SASL_SSL")
+    monkeypatch.setenv(
+        "KAFKA_SSL_CA_LOCATION",
+        "/run/secrets/kafka-ca.pem",
+    )
+    monkeypatch.delenv("KAFKA_SASL_MECHANISM", raising=False)
+    monkeypatch.delenv("KAFKA_SASL_USERNAME", raising=False)
+    monkeypatch.delenv("KAFKA_SASL_PASSWORD", raising=False)
+
+    with pytest.raises(
+        ValueError,
+        match="SASL_SSL production configuration requires",
+    ):
+        publisher.kafka_security_config()
+
+
+def test_kafka_security_config_accepts_complete_production_sasl_ssl(
+    monkeypatch,
+):
+    monkeypatch.setenv("DP_SECURITY_MODE", "production")
+    monkeypatch.setenv("DP_SECRET_SOURCE", "environment")
+    monkeypatch.setenv("KAFKA_SECURITY_PROTOCOL", "SASL_SSL")
+    monkeypatch.setenv(
+        "KAFKA_SSL_CA_LOCATION",
+        "/run/secrets/kafka-ca.pem",
+    )
+    monkeypatch.setenv("KAFKA_SASL_MECHANISM", "PLAIN")
+    monkeypatch.setenv("KAFKA_SASL_USERNAME", "mdm-publisher")
+    monkeypatch.setenv("KAFKA_SASL_PASSWORD", "test-secret")
+
+    config = publisher.kafka_security_config()
+
+    assert config["security.protocol"] == "SASL_SSL"
+    assert config["sasl.mechanism"] == "PLAIN"
+    assert config["sasl.username"] == "mdm-publisher"
+    assert config["sasl.password"] == "test-secret"

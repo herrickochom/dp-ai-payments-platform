@@ -1,7 +1,7 @@
 {% materialization iceberg_table, adapter='duckdb' %}
 
   {%- set target_relation = api.Relation.create(
-      database=target.database,
+      database='lakehouse',
       schema=this.schema,
       identifier=this.identifier,
       type='table'
@@ -37,8 +37,8 @@
 
   {#
     IMPORTANT:
-    target.database must resolve to the attached Iceberg catalog alias
-    "lakehouse", so generated relations are:
+    The controlled connection plugin attaches the Iceberg catalog using the
+    fixed alias "lakehouse", so generated relations are:
 
       lakehouse.staging.<model>
       lakehouse.bronze.<model>

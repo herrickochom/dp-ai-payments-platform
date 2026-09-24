@@ -15,6 +15,9 @@ from __future__ import annotations
 
 import os
 import sys
+from urllib.parse import urlsplit
+
+from services.shared.security.runtime_security import validate_object_store_security
 
 import duckdb
 
@@ -32,12 +35,31 @@ def require_env(name: str) -> str:
     return value
 
 
+def object_store_settings() -> dict[str, object]:
+    endpoint, use_ssl, ca_bundle = validate_object_store_security(
+        require_env("S3_ENDPOINT"),
+        use_ssl=require_env("S3_USE_SSL"),
+        ca_bundle=os.getenv("S3_CA_BUNDLE"),
+    )
+    style = require_env("DBT_S3_URL_STYLE")
+    if style not in {"path", "vhost"}:
+        raise ValueError("DBT_S3_URL_STYLE must be path or vhost")
+    return {
+        "region": require_env("OBJECT_STORE_REGION"),
+        "endpoint": urlsplit(endpoint).netloc,
+        "url_style": style,
+        "use_ssl": use_ssl,
+        "ca_bundle": ca_bundle,
+    }
+
+
 def main() -> int:
     require_env("DP_TOKEN_KEY")
     version = require_env("DP_TOKEN_KEY_VERSION")
     minio_user = require_env("RESTRICTED_TRANSFORM_S3_ACCESS_KEY_ID")
     minio_password = require_env("RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY")
     nessie_endpoint = require_env("NESSIE_ENDPOINT")
+    storage = object_store_settings()
 
     con = duckdb.connect("/tmp/pdm-token-link.duckdb")
 
@@ -47,10 +69,12 @@ def main() -> int:
     con.execute("LOAD iceberg")
 
     # Configure MinIO without interpolating secrets into logged SQL.
-    con.execute("SET s3_region = 'eu-west-1'")
-    con.execute("SET s3_endpoint = 'minio:9000'")
-    con.execute("SET s3_url_style = 'path'")
-    con.execute("SET s3_use_ssl = false")
+    con.execute("SET s3_region = ?", [storage["region"]])
+    con.execute("SET s3_endpoint = ?", [storage["endpoint"]])
+    con.execute("SET s3_url_style = ?", [storage["url_style"]])
+    con.execute("SET s3_use_ssl = ?", [storage["use_ssl"]])
+    if storage["ca_bundle"]:
+        con.execute("SET ca_cert_file = ?", [storage["ca_bundle"]])
     con.execute("SET s3_access_key_id = ?", [minio_user])
     con.execute("SET s3_secret_access_key = ?", [minio_password])
 

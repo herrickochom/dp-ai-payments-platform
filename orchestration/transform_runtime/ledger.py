@@ -11,6 +11,8 @@ from pathlib import Path
 from threading import RLock
 from uuid import uuid4
 
+from services.shared.security.secret_provider import SecretUnavailable, require_secret
+
 
 TERMINAL = frozenset({"SUCCEEDED", "FAILED", "CANCELLED", "ORPHANED"})
 TRANSITIONS = {
@@ -122,16 +124,24 @@ def model_fingerprint(models) -> str:
     return hashlib.sha256("\n".join(sorted(models)).encode()).hexdigest()
 
 
+def application_database_url() -> str:
+    """Resolve the ledger application URL; an absent source yields an empty value."""
+    try:
+        return require_secret("TRANSFORM_LEDGER_APP_DATABASE_URL").strip()
+    except SecretUnavailable:
+        return ""
+
+
 def create_ledger_from_environment():
     """
     Create the authoritative transform ledger.
 
-    PostgreSQL is mandatory whenever TRANSFORM_LEDGER_DATABASE_URL is
+    PostgreSQL is mandatory whenever TRANSFORM_LEDGER_APP_DATABASE_URL is
     configured. SQLite exists only for isolated unit tests.
     """
     import os
 
-    database_url = os.getenv("TRANSFORM_LEDGER_DATABASE_URL", "").strip()
+    database_url = application_database_url()
 
     if database_url:
         return PostgresTransformLedger(database_url)
@@ -142,7 +152,7 @@ def create_ledger_from_environment():
         )
 
     raise LedgerError(
-        "TRANSFORM_LEDGER_DATABASE_URL is required outside isolated tests"
+        "TRANSFORM_LEDGER_APP_DATABASE_URL is required outside isolated tests"
     )
 
 
@@ -167,11 +177,8 @@ class PostgresTransformLedger:
 
         # psycopg itself expects postgresql:// rather than SQLAlchemy's
         # postgresql+psycopg:// spelling.
-        self.database_url = database_url.replace(
-            "postgresql+psycopg://",
-            "postgresql://",
-            1,
-        )
+        from orchestration.transform_runtime.postgres_connection import validate_database_url
+        self.database_url = validate_database_url(database_url)
         self._psycopg = psycopg
         self._dict_row = dict_row
 

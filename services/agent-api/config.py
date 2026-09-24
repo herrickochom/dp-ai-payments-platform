@@ -2,6 +2,8 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
+from services.shared.security.secret_provider import resolve_secret
+
 
 _config_file = Path(__file__).resolve()
 _repository_dbt_models = (
@@ -18,7 +20,7 @@ class Settings:
     trino_catalog: str = os.getenv("TRINO_CATALOG", "iceberg")
     trino_schema: str = os.getenv("TRINO_SCHEMA", "consumption")
     trino_http_scheme: str = os.getenv("TRINO_HTTP_SCHEME", "http")
-    trino_password: str | None = os.getenv("TRINO_PASSWORD")
+    trino_password: str | None = resolve_secret("TRINO_PASSWORD")
     trino_tls_ca: str | None = os.getenv("TRINO_TLS_CA")
     max_rows: int = int(os.getenv("AGENT_MAX_ROWS", "1000"))
     query_timeout_seconds: int = int(os.getenv("AGENT_QUERY_TIMEOUT_SECONDS", "30"))
@@ -29,7 +31,7 @@ class Settings:
     rag_enabled: bool = os.getenv("AGENT_RAG_ENABLED", "false").lower() == "true"
     superset_url: str = os.getenv("SUPERSET_URL", "http://localhost:8088")
     superset_username: str = os.getenv("SUPERSET_USERNAME", "admin")
-    superset_password: str | None = os.getenv("SUPERSET_PASSWORD")
+    superset_password: str | None = resolve_secret("SUPERSET_PASSWORD")
     superset_database_name: str = os.getenv("SUPERSET_DATABASE_NAME", "PDM Trino")
     superset_public_url: str = os.getenv("SUPERSET_PUBLIC_URL", "http://localhost:8088")
     dbt_models_path: str = os.getenv(

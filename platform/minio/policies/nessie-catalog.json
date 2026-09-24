@@ -2,22 +2,14 @@
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "ListScopedPrefixes",
+      "Sid": "BucketAccessForCatalogHealth",
       "Effect": "Allow",
       "Action": [
         "s3:ListBucket"
       ],
       "Resource": [
         "arn:aws:s3:::dp-ai-payment"
-      ],
-      "Condition": {
-        "StringLike": {
-          "s3:prefix": [
-            "warehouse",
-            "warehouse/*"
-          ]
-        }
-      }
+      ]
     },
     {
       "Sid": "ObjectAccess1",

@@ -6,6 +6,9 @@ import os
 from pathlib import Path
 from typing import Any
 
+from services.shared.security.runtime_security import validate_kafka_security
+from services.shared.security.secret_provider import resolve_secret
+
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -177,6 +180,54 @@ def build_publish_plan(
     return plan
 
 
+
+def kafka_security_config() -> dict[str, str]:
+    """Build and validate Kafka security for explicit MDM publication."""
+    security_protocol = os.getenv(
+        "KAFKA_SECURITY_PROTOCOL",
+        "PLAINTEXT",
+    )
+    ssl_ca_location = os.getenv("KAFKA_SSL_CA_LOCATION")
+    sasl_mechanism = os.getenv("KAFKA_SASL_MECHANISM")
+    sasl_username = os.getenv("KAFKA_SASL_USERNAME")
+    sasl_password = resolve_secret("KAFKA_SASL_PASSWORD")
+
+    validate_kafka_security(
+        security_protocol=security_protocol,
+        ssl_ca_location=ssl_ca_location,
+        sasl_mechanism=sasl_mechanism,
+        sasl_username=sasl_username,
+        sasl_password=sasl_password,
+    )
+
+    config = {
+        "security.protocol": security_protocol,
+    }
+
+    optional = {
+        "ssl.ca.location": ssl_ca_location,
+        "ssl.certificate.location": os.getenv(
+            "KAFKA_SSL_CERTIFICATE_LOCATION"
+        ),
+        "ssl.key.location": os.getenv(
+            "KAFKA_SSL_KEY_LOCATION"
+        ),
+        "sasl.mechanism": sasl_mechanism,
+        "sasl.username": sasl_username,
+        "sasl.password": sasl_password,
+    }
+
+    config.update(
+        {
+            key: value
+            for key, value in optional.items()
+            if value
+        }
+    )
+
+    return config
+
+
 def execute_publish(
     authority: str,
 ) -> int:
@@ -213,13 +264,13 @@ def execute_publish(
             "confluent_kafka is required for execution"
         ) from exc
 
-    producer = Producer(
-        {
-            "bootstrap.servers": bootstrap,
-            "enable.idempotence": True,
-            "acks": "all",
-        }
-    )
+    producer_config = {
+        "bootstrap.servers": bootstrap,
+        "enable.idempotence": True,
+        "acks": "all",
+    }
+    producer_config.update(kafka_security_config())
+    producer = Producer(producer_config)
 
     plan = build_publish_plan(authority)
 

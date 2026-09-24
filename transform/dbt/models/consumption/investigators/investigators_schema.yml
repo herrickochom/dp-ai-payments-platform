@@ -27,32 +27,28 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - PAYMENT_INSTRUCTION
-                  - PAYMENT_SETTLEMENT
-                  - CREDITING
-                  - DISBURSEMENT
-                  - CASHOUT
-                  - REPAYMENT
+              values:
+                - PAYMENT_INSTRUCTION
+                - PAYMENT_SETTLEMENT
+                - CREDITING
+                - DISBURSEMENT
+                - CASHOUT
+                - REPAYMENT
       - name: exception_type
         data_tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - MISSING_STAGE
-                  - SETTLEMENT_EXCEPTION
-                  - AMOUNT_VARIANCE
+              values:
+                - MISSING_STAGE
+                - SETTLEMENT_EXCEPTION
+                - AMOUNT_VARIANCE
       - name: exception_severity
         data_tests:
           - accepted_values:
-              arguments:
-                values:
-                  - MEDIUM
-                  - HIGH
+              values:
+                - MEDIUM
+                - HIGH
       - name: requires_review
         data_tests:
           - accepted_values:
-              arguments:
-                values: [true]
+              values: [true]

@@ -78,7 +78,6 @@ Thumbs.db
 # --- 8. Environment & Secrets ---
 .env
 .env.*
-!.env.example
 
 # --- 9. Local Backups ---
 *.bak
@@ -101,3 +100,6 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 .terraform.tfstate.lock.info
+
+# Local recovery / pre-change backup artefacts
+*.pre-*

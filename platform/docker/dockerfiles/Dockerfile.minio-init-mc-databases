@@ -3,6 +3,7 @@ FROM python:3.11-slim
 WORKDIR /app
 
 COPY platform/minio/init_databases.py /app/init_databases.py
+COPY services/shared/security /app/services/shared/security
 
 RUN pip install --no-cache-dir boto3 requests
 

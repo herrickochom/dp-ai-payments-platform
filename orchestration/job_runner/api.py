@@ -20,6 +20,7 @@ from planner import plan
 from platform_preflight import run_preflight
 from raw_readiness import run_raw_readiness
 from request import JobRequest
+from services.shared.security.secret_provider import resolve_secret
 from transform_execution import build_transform_command, execute
 
 
@@ -57,7 +58,7 @@ class TransformBatchRequest(BaseModel):
 
 
 def require_runtime(authorization: str | None = Header(default=None)) -> None:
-    expected = os.getenv("TRANSFORM_RUNTIME_RUNNER_TOKEN", "")
+    expected = resolve_secret("TRANSFORM_RUNTIME_RUNNER_TOKEN") or ""
     supplied = authorization.removeprefix("Bearer ") if authorization else ""
     if not expected or not hmac.compare_digest(expected, supplied):
         raise HTTPException(status_code=401, detail="service authentication required")

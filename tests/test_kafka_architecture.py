@@ -1,4 +1,5 @@
 import importlib.util
+import os
 import sys
 import unittest
 from datetime import datetime, timezone
@@ -43,11 +44,12 @@ class KafkaArchitectureTests(unittest.TestCase):
         stamp = datetime(2026, 9, 10, tzinfo=timezone.utc)
         expected = ("raw/v2/category=pdmis/source_group=pdmis/source_system=pdmis/"
                     "year=2026/month=09/day=10/topic=pdmis.loans/partition=2/offset=81/record.avro")
-        self.assertEqual(expected, consumer.deterministic_s3_key("pdmis.loans", 2, 81, stamp))
+        with patch.dict(os.environ, {"RAW_ROOT": "raw", "RAW_VERSION": "v2", "RAW_PREFIX": "raw/v2"}):
+            self.assertEqual(expected, consumer.deterministic_s3_key("pdmis.loans", 2, 81, stamp))
 
     def test_existing_raw_object_makes_replay_a_noop(self):
         client = Mock()
-        with patch.object(consumer, "get_minio_client", return_value=client):
+        with patch.dict(os.environ, {"RAW_ROOT": "raw", "RAW_VERSION": "v2", "RAW_PREFIX": "raw/v2", "OBJECT_STORE_BUCKET": "dp-ai-payment"}), patch.object(consumer, "get_minio_client", return_value=client):
             result = consumer.store_event_to_s3(
                 {"event_id": "e"}, "pdmis.loans", 1, 2,
                 datetime(2026, 9, 10, tzinfo=timezone.utc))
@@ -101,7 +103,8 @@ class KafkaArchitectureTests(unittest.TestCase):
     def test_topic_manifest_is_authoritative_and_complete(self):
         topics = topic_admin.load_manifest(str(ROOT / "platform/kafka/topics.yaml"))
         names = {item["name"] for item in topics}
-        self.assertEqual(32, len(topics))
+        self.assertEqual(33, len(topics))
+        self.assertIn("cdc.pdm_mdm.mdm.sacco_master_sources", names)
         self.assertIn("payment-events.retry", names)
         self.assertIn("payment-events.dlq", names)
         self.assertIn("mdm.beneficiary.golden.restricted", names)

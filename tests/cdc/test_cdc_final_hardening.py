@@ -167,6 +167,8 @@ def valid_record(module):
 def test_existing_raw_object_requires_matching_content(
     monkeypatch,
 ):
+    for name, value in {"RAW_ROOT": "raw", "RAW_VERSION": "v2", "RAW_PREFIX": "raw/v2", "OBJECT_STORE_BUCKET": "dp-ai-payment"}.items():
+        monkeypatch.setenv(name, value)
     module = load_consumer()
     record = valid_record(module)
 
@@ -217,6 +219,8 @@ def test_existing_raw_object_requires_matching_content(
 def test_existing_raw_object_collision_fails_closed(
     monkeypatch,
 ):
+    for name, value in {"RAW_ROOT": "raw", "RAW_VERSION": "v2", "RAW_PREFIX": "raw/v2", "OBJECT_STORE_BUCKET": "dp-ai-payment"}.items():
+        monkeypatch.setenv(name, value)
     module = load_consumer()
     record = valid_record(module)
 
@@ -483,6 +487,8 @@ def test_raw_collision_never_quarantines_or_commits(
 def test_quarantine_object_contains_safe_metadata_only(
     monkeypatch,
 ):
+    for name, value in {"RAW_ROOT": "raw", "RAW_VERSION": "v2", "RAW_PREFIX": "raw/v2", "OBJECT_STORE_BUCKET": "dp-ai-payment"}.items():
+        monkeypatch.setenv(name, value)
     module = load_consumer()
 
     client = MissingObjectClient()
@@ -534,6 +540,8 @@ def test_quarantine_object_contains_safe_metadata_only(
 def test_quarantine_storage_failure_is_fail_stop(
     monkeypatch,
 ):
+    for name, value in {"RAW_ROOT": "raw", "RAW_VERSION": "v2", "RAW_PREFIX": "raw/v2", "OBJECT_STORE_BUCKET": "dp-ai-payment"}.items():
+        monkeypatch.setenv(name, value)
     module = load_consumer()
 
     monkeypatch.setattr(

@@ -1,0 +1,17 @@
+services:
+  transform-runtime:
+    environment:
+      LAKEHOUSE_TRANSFORM_EXECUTION_ENABLED: 'true'
+
+  platform-transform-worker:
+    extends:
+      file: docker-compose.yaml
+      service: platform-job-runner
+    command:
+      - python
+      - transform_worker.py
+    environment:
+      PLATFORM_RUNNER_EXECUTION_ENABLED: 'true'
+      PLATFORM_JOB_EXECUTION_ENABLED: 'true'
+    healthcheck:
+      disable: true
