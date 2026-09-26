@@ -1,60 +1,77 @@
-{{ config(materialized='iceberg_table') }}
+{{ config(enabled=false) }}
 
-with staging as (
+{#
+  Raw -> Bronze transformation definition.
 
-    select
-        event_id,
-        loan_id,
-        beneficiary_id,
-        sacco_id,
-        business_plan_id,
-        application_date,
-        approval_date,
-        verification_date,
-        disbursement_date,
-        cashout_date,
-        as_of_date,
-        amount_requested,
-        amount_approved,
-        amount_disbursed,
-        amount_repaid,
-        principal_repaid,
-        interest_rate,
-        interest_charged,
-        interest_paid,
-        principal_outstanding_balance,
-        interest_outstanding_balance,
-        outstanding_balance,
-        scheduled_instalment,
-        repayment_rate,
-        repayment_status,
-        days_past_due,
-        delinquency_bucket,
-        loan_term_months,
-        repayment_frequency,
-        first_repayment_date,
-        last_repayment_date,
-        last_payment_date,
-        loan_status,
-        project_type,
-        project_location,
-        created_at,
-        updated_at,
-        kafka_topic,
-        kafka_partition,
-        kafka_offset,
-        kafka_timestamp,
-        category,
-        source_system,
-        source_group,
-        year,
-        month,
-        day,
-        load_timestamp,
-        record_source
-    from {{ ref('stg_pdm_pdmis_loans') }}
+  Execution ownership:
+      Raw Avro -> DuckDB -> bulk Parquet
+      -> transform-Trino -> Iceberg/Nessie Bronze
 
+  This model is intentionally disabled in dbt because read_avro() and
+  extract_json() are executed by DuckDB, not Trino.
+#}
+
+
+with raw_data as (
+    select event_id, event_data, parsed_event_data, _kafka_metadata, year, month, day
+    from read_avro(
+        's3://{{ var("s3_bucket") }}/{{ var("s3_path") }}/v2/**/topic=pdmis.loans/**/*.avro',
+        hive_partitioning = true
+    )
 )
 
-select *
-from staging
+select
+    event_id,
+    {{ extract_json('parsed_event_data', '$.loan_id') }} as loan_id,
+    {{ extract_json('parsed_event_data', '$.beneficiary_id') }} as beneficiary_id,
+    {{ extract_json('parsed_event_data', '$.sacco_id') }} as sacco_id,
+    {{ extract_json('parsed_event_data', '$.business_plan_id') }} as business_plan_id,
+    try_cast({{ extract_json('parsed_event_data', '$.application_date') }} as date) as application_date,
+    try_cast({{ extract_json('parsed_event_data', '$.approval_date') }} as date) as approval_date,
+    try_cast({{ extract_json('parsed_event_data', '$.verification_date') }} as date) as verification_date,
+    try_cast({{ extract_json('parsed_event_data', '$.disbursement_date') }} as date) as disbursement_date,
+    try_cast({{ extract_json('parsed_event_data', '$.cashout_date') }} as date) as cashout_date,
+    try_cast({{ extract_json('parsed_event_data', '$.as_of_date') }} as date) as as_of_date,
+    try_cast({{ extract_json('parsed_event_data', '$.amount_requested') }} as decimal(18, 2)) as amount_requested,
+    try_cast({{ extract_json('parsed_event_data', '$.amount_approved') }} as decimal(18, 2)) as amount_approved,
+    try_cast({{ extract_json('parsed_event_data', '$.amount_disbursed') }} as decimal(18, 2)) as amount_disbursed,
+    try_cast({{ extract_json('parsed_event_data', '$.amount_repaid') }} as decimal(18, 2)) as amount_repaid,
+    try_cast({{ extract_json('parsed_event_data', '$.principal_repaid') }} as decimal(18, 2)) as principal_repaid,
+    try_cast({{ extract_json('parsed_event_data', '$.interest_rate') }} as decimal(9, 4)) as interest_rate,
+    try_cast({{ extract_json('parsed_event_data', '$.interest_charged') }} as decimal(18, 2)) as interest_charged,
+    try_cast({{ extract_json('parsed_event_data', '$.interest_paid') }} as decimal(18, 2)) as interest_paid,
+    try_cast({{ extract_json('parsed_event_data', '$.principal_outstanding_balance') }} as decimal(18, 2)) as principal_outstanding_balance,
+    try_cast({{ extract_json('parsed_event_data', '$.interest_outstanding_balance') }} as decimal(18, 2)) as interest_outstanding_balance,
+    try_cast({{ extract_json('parsed_event_data', '$.outstanding_balance') }} as decimal(18, 2)) as outstanding_balance,
+    try_cast({{ extract_json('parsed_event_data', '$.scheduled_instalment') }} as decimal(18, 2)) as scheduled_instalment,
+    try_cast({{ extract_json('parsed_event_data', '$.repayment_rate') }} as decimal(18, 6)) as repayment_rate,
+    try_cast({{ extract_json('parsed_event_data', '$.contractual_repayment_progress') }} as decimal(18, 6)) as contractual_repayment_progress,
+    try_cast({{ extract_json('parsed_event_data', '$.due_repayment_rate') }} as decimal(18, 6)) as due_repayment_rate,
+    try_cast({{ extract_json('parsed_event_data', '$.principal_repayment_rate') }} as decimal(18, 6)) as principal_repayment_rate,
+    {{ extract_json('parsed_event_data', '$.repayment_status') }} as repayment_status,
+    try_cast({{ extract_json('parsed_event_data', '$.days_past_due') }} as integer) as days_past_due,
+    {{ extract_json('parsed_event_data', '$.delinquency_bucket') }} as delinquency_bucket,
+    try_cast({{ extract_json('parsed_event_data', '$.loan_term_months') }} as integer) as loan_term_months,
+    {{ extract_json('parsed_event_data', '$.repayment_frequency') }} as repayment_frequency,
+    try_cast({{ extract_json('parsed_event_data', '$.first_repayment_date') }} as date) as first_repayment_date,
+    try_cast({{ extract_json('parsed_event_data', '$.last_repayment_date') }} as date) as last_repayment_date,
+    try_cast({{ extract_json('parsed_event_data', '$.last_payment_date') }} as date) as last_payment_date,
+    {{ extract_json('parsed_event_data', '$.loan_status') }} as loan_status,
+    {{ extract_json('parsed_event_data', '$.project_type') }} as project_type,
+    {{ extract_json('parsed_event_data', '$.project_location') }} as project_location,
+    try_cast({{ extract_json('parsed_event_data', '$.created_at') }} as timestamp) as created_at,
+    try_cast({{ extract_json('parsed_event_data', '$.updated_at') }} as timestamp) as updated_at,
+    _kafka_metadata.topic as kafka_topic,
+    _kafka_metadata.partition as kafka_partition,
+    _kafka_metadata.offset as kafka_offset,
+    try_cast(_kafka_metadata.timestamp as timestamp) as kafka_timestamp,
+    _kafka_metadata.category as category,
+    'PDMIS' as source_system,
+    'loans' as source_group,
+    year, month, day,
+    event_data, parsed_event_data,
+    current_timestamp as load_timestamp,
+    'PDMIS_LOANS' as record_source
+from raw_data
+where _kafka_metadata.topic = 'pdmis.loans'
+  and parsed_event_data is not null

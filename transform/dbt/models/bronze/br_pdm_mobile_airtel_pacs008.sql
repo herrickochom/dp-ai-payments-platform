@@ -1,93 +1,239 @@
-{{ config(materialized='iceberg_table') }}
+{{ config(enabled=false) }}
 
-with staging as (
+{#
+  Raw -> Bronze transformation definition.
+
+  Execution ownership:
+      Raw Avro -> DuckDB -> bulk Parquet
+      -> transform-Trino -> Iceberg/Nessie Bronze
+
+  This model is intentionally disabled in dbt because read_avro() and
+  extract_json() are executed by DuckDB, not Trino.
+#}
+
+
+with raw_data as (
 
     select
         event_id,
         message_id,
-        end_to_end_id,
-        transaction_id,
-        creation_at,
-        number_of_transactions,
-        control_sum,
-        instructed_amount,
-        currency,
-        debtor_name,
-        creditor_name,
-        debtor_agent_bic,
-        debtor_agent_name,
-        creditor_agent_bic,
-        creditor_agent_name,
-        debtor_account_id,
-        debtor_account_issuer,
-        creditor_account_id,
-        creditor_account_issuer,
-        creditor_account_scheme,
-        remittance_information,
-        initiating_party_name,
-        initiating_party_id,
-        initiating_party_id_issuer,
-        clearing_system_reference,
-        uetr,
-        equivalent_amount,
-        equivalent_amount_currency,
-        countervalue_amount,
-        countervalue_amount_currency,
-        charge_amount,
-        charge_amount_currency,
-        charge_bearer,
-        purpose_code,
-        purpose_proprietary,
-        ultimate_debtor_name,
-        ultimate_creditor_name,
-        related_creditor_name,
-        creditor_reference_information,
-        referred_document_type,
-        referred_document_number,
-        referred_document_date,
-        regulatory_report_type,
-        regulatory_report_id,
-        regulatory_report_date,
-        regulatory_report_amount,
-        regulatory_report_currency,
-        supplementary_data_id,
-        supplementary_data,
-        debtor_address_lines,
-        debtor_town_name,
-        debtor_country_subdivision,
-        debtor_country,
-        debtor_postal_code,
-        creditor_address_lines,
-        creditor_town_name,
-        creditor_country_subdivision,
-        creditor_country,
-        creditor_postal_code,
-        debtor_agent_address_lines,
-        debtor_agent_town_name,
-        debtor_agent_country_subdivision,
-        debtor_agent_country,
-        debtor_agent_postal_code,
-        creditor_agent_address_lines,
-        creditor_agent_town_name,
-        creditor_agent_country_subdivision,
-        creditor_agent_country,
-        creditor_agent_postal_code,
-        mobile_network,
-        kafka_topic,
-        kafka_partition,
-        kafka_offset,
-        kafka_timestamp,
-        category,
-        source_system,
-        source_group,
+        event_data,
+        parsed_event_data,
+        payload,
+        _kafka_metadata,
+        year,
+        month,
+        day
+    from read_avro(
+        's3://{{ var("s3_bucket") }}/{{ var("s3_path") }}/v2/**/topic=mobile.airtel.pacs008/**/*.avro',
+        hive_partitioning = true
+    )
+
+),
+
+parsed as (
+
+    select
+        event_id,
+
+        -- Raw envelope fields retained explicitly alongside ISO 20022 fields
+        {{ extract_json('parsed_event_data', '$.agent_id') }} as raw_agent_id,
+        try_cast({{ extract_json('parsed_event_data', '$.creation_date') }} as timestamp)
+            as raw_creation_date,
+        {{ extract_json('parsed_event_data', '$.currency') }} as raw_currency,
+        try_cast({{ extract_json('parsed_event_data', '$.instructed_amount') }} as double)
+            as raw_instructed_amount,
+        {{ extract_json('parsed_event_data', '$.loan_id') }} as raw_loan_id,
+        {{ extract_json('parsed_event_data', '$.message_id') }} as raw_message_id,
+        {{ extract_json('parsed_event_data', '$.payment_id') }} as raw_payment_id,
+        {{ extract_json('parsed_event_data', '$.source_system') }} as raw_source_system,
+        {{ extract_json('parsed_event_data', '$.transaction_id') }} as raw_transaction_id,
+
+        -- Current Raw PACS.008 fields
+        {{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.CdtrAcct.Id.Othr.SchmeNm') }}
+            as creditor_account_scheme_name,
+
+        {{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.DbtrAcct.Id.Othr.SchmeNm') }}
+            as debtor_account_scheme_name,
+
+        {{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.IntrBkSttlmAmt._attributes.Ccy') }}
+            as interbank_settlement_currency,
+
+        try_cast({{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.IntrBkSttlmAmt._text') }} as double)
+            as interbank_settlement_amount,
+
+        try_cast({{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.IntrBkSttlmDt') }} as date)
+            as interbank_settlement_date,
+
+        {{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.PmtId.InstrId') }}
+            as instruction_id,
+
+        {{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.GrpHdr.SttlmInf.SttlmMtd') }}
+            as settlement_method,
+
+        -- message-specific fields
+        {{ extract_json('parsed_event_data', '$.xml.Document.FIToFICstmrCdtTrf.GrpHdr.MsgId') }}
+            as message_id,
+
+        {{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.PmtId.EndToEndId') }}
+            as end_to_end_id,
+
+        {{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.PmtId.TxId') }}
+            as transaction_id,
+
+        try_cast({{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.GrpHdr.CreDtTm') }} as timestamp)
+            as creation_at,
+
+        {{ extract_json('parsed_event_data', '$.xml.Document.FIToFICstmrCdtTrf.GrpHdr.NbOfTxs') }}
+            as number_of_transactions,
+
+        try_cast({{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.GrpHdr.CtrlSum') }} as double) as control_sum,
+
+        try_cast({{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.InstdAmt._text') }} as double)
+            as instructed_amount,
+
+        {{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.InstdAmt._attributes.Ccy') }}
+            as currency,
+
+        {{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.Dbtr.Nm') }} as debtor_name,
+
+        {{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.Cdtr.Nm') }} as creditor_name,
+
+        {{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.DbtrAgt.FinInstnId.BICFI') }}
+            as debtor_agent_bic,
+
+        {{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.DbtrAgt.FinInstnId.Nm') }}
+            as debtor_agent_name,
+
+        {{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.CdtrAgt.FinInstnId.BICFI') }}
+            as creditor_agent_bic,
+
+        {{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.CdtrAgt.FinInstnId.Nm') }}
+            as creditor_agent_name,
+
+        {{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.DbtrAcct.Id.Othr.Id') }}
+            as debtor_account_id,
+
+        {{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.DbtrAcct.Id.Othr.Issr') }}
+            as debtor_account_issuer,
+
+        {{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.CdtrAcct.Id.Othr.Id') }}
+            as creditor_account_id,
+
+        {{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.CdtrAcct.Id.Othr.Issr') }}
+            as creditor_account_issuer,
+
+        {{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.CdtrAcct.Id.Othr.SchmeNm.Prtry') }}
+            as creditor_account_scheme,
+
+        {{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.CdtTrfTxInf.RmtInf.Ustrd') }}
+            as remittance_information,
+
+        {# Complete source projection for the rich PACS.008 fixture variant. #}
+        {% set pacs008_fields = [
+            ('GrpHdr.InitgPty.Nm', 'initiating_party_name'),
+            ('GrpHdr.InitgPty.Id.OrgId.Othr.Id', 'initiating_party_id'),
+            ('GrpHdr.InitgPty.Id.OrgId.Othr.Issr', 'initiating_party_id_issuer'),
+            ('CdtTrfTxInf.PmtId.ClrSysRef', 'clearing_system_reference'),
+            ('CdtTrfTxInf.PmtId.UETR', 'uetr'),
+            ('CdtTrfTxInf.Amt.EqvtAmt._text', 'equivalent_amount'),
+            ('CdtTrfTxInf.Amt.EqvtAmt._attributes.Ccy', 'equivalent_amount_currency'),
+            ('CdtTrfTxInf.Amt.CntrValAmt._text', 'countervalue_amount'),
+            ('CdtTrfTxInf.Amt.CntrValAmt._attributes.Ccy', 'countervalue_amount_currency'),
+            ('CdtTrfTxInf.Amt.ChrgAmt._text', 'charge_amount'),
+            ('CdtTrfTxInf.Amt.ChrgAmt._attributes.Ccy', 'charge_amount_currency'),
+            ('CdtTrfTxInf.ChrgBr', 'charge_bearer'),
+            ('CdtTrfTxInf.Purp.Cd', 'purpose_code'),
+            ('CdtTrfTxInf.Purp.Prtry', 'purpose_proprietary'),
+            ('CdtTrfTxInf.UltmtDbtr.Nm', 'ultimate_debtor_name'),
+            ('CdtTrfTxInf.UltmtCdtr.Nm', 'ultimate_creditor_name'),
+            ('CdtTrfTxInf.RltdPties.Cdtr.Nm', 'related_creditor_name'),
+            ('CdtTrfTxInf.RmtInf.Strd.CdtrRefInf', 'creditor_reference_information'),
+            ('CdtTrfTxInf.RmtInf.Strd.RfrdDocInf.Tp.Cd', 'referred_document_type'),
+            ('CdtTrfTxInf.RmtInf.Strd.RfrdDocInf.Nb', 'referred_document_number'),
+            ('CdtTrfTxInf.RmtInf.Strd.RfrdDocInf.Dt', 'referred_document_date'),
+            ('CdtTrfTxInf.RgltryRptg.Inf.Tp.Cd', 'regulatory_report_type'),
+            ('CdtTrfTxInf.RgltryRptg.Inf.Id', 'regulatory_report_id'),
+            ('CdtTrfTxInf.RgltryRptg.Inf.Dt', 'regulatory_report_date'),
+            ('CdtTrfTxInf.RgltryRptg.Inf.Amt._text', 'regulatory_report_amount'),
+            ('CdtTrfTxInf.RgltryRptg.Inf.Amt._attributes.Ccy', 'regulatory_report_currency'),
+            ('CdtTrfTxInf.SplmtryData.Id', 'supplementary_data_id'),
+            ('CdtTrfTxInf.SplmtryData.Envlp.Any', 'supplementary_data')
+        ] %}
+        {% for field_path, field_alias in pacs008_fields %}
+        {{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.' ~ field_path) }} as {{ field_alias }},
+        {% endfor %}
+
+        {% set address_roles = [
+            ('CdtTrfTxInf.Dbtr.PstlAdr', 'debtor'),
+            ('CdtTrfTxInf.Cdtr.PstlAdr', 'creditor'),
+            ('CdtTrfTxInf.DbtrAgt.FinInstnId.PstlAdr', 'debtor_agent'),
+            ('CdtTrfTxInf.CdtrAgt.FinInstnId.PstlAdr', 'creditor_agent')
+        ] %}
+        {% set address_fields = [
+            ('AdrLine', 'address_lines'), ('TwnNm', 'town_name'), ('CtrySubDvsn', 'country_subdivision'),
+            ('Ctry', 'country'), ('PstCd', 'postal_code')
+        ] %}
+        {% for role_path, role_alias in address_roles %}
+            {% for field_path, field_alias in address_fields %}
+        {{ extract_json('parsed_event_data',
+            '$.xml.Document.FIToFICstmrCdtTrf.' ~ role_path ~ '.' ~ field_path) }}
+            as {{ role_alias }}_{{ field_alias }},
+            {% endfor %}
+        {% endfor %}
+
+        'AIRTEL' as mobile_network,
+
+        _kafka_metadata.topic as kafka_topic,
+        _kafka_metadata.partition as kafka_partition,
+        _kafka_metadata.offset as kafka_offset,
+        try_cast(_kafka_metadata.timestamp as timestamp) as kafka_timestamp,
+
+        _kafka_metadata.category as category,
+        upper(string_split(_kafka_metadata.topic, '.')[1]) as source_system,
+        string_split(_kafka_metadata.topic, '.')[2] as source_group,
+
         year,
         month,
         day,
-        load_timestamp,
-        record_source
-    from {{ ref('stg_pdm_mobile_airtel_pacs008') }}
+
+        event_data,
+        parsed_event_data,
+
+        current_timestamp as load_timestamp,
+        'MOBILE_AIRTEL_PACS008' as record_source
+
+    from raw_data
+    where _kafka_metadata.topic = 'mobile.airtel.pacs008'
+      and parsed_event_data is not null
 
 )
 
 select *
-from staging
+from parsed
