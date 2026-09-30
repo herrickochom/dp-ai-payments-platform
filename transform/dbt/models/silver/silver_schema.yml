@@ -245,11 +245,6 @@ models:
       Canonical PLM provider, wallet, agent and beneficiary-delivery
       lifecycle event at one row per message_id.
 
-  - name: slv_pdm_payment_technical_events
-    description: >-
-      Canonical technical-event stream kept separate from ISO business
-      messages at technical_source and event_id grain.
-
   - name: slv_pdm_payment_event_correlation
     description: >-
       Deterministic exact-key links from technical events to business

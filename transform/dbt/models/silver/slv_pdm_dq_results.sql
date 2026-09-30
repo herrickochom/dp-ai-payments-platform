@@ -8,13 +8,12 @@ with validation_results as (
         rule.rule_passed,
         rule.rule_detail
     from {{ ref('slv_pdm_payments_transactions') }} payment
-    cross join lateral (
-        values
-            ('AMOUNT_POSITIVE', amount is not null and amount > 0,
-             'Payment amount must be greater than zero'),
-            ('CURRENCY_ISO_LENGTH', currency is not null and length(currency) = 3,
-             'Currency must contain a three-character ISO code')
-    ) as rule(rule_code, rule_passed, rule_detail)
+    cross join unnest(array[
+            row('AMOUNT_POSITIVE', amount is not null and amount > 0,
+                'Payment amount must be greater than zero'),
+            row('CURRENCY_ISO_LENGTH', currency is not null and length(currency) = 3,
+                'Currency must contain a three-character ISO code')
+        ]) as rule(rule_code, rule_passed, rule_detail)
 
     union all
 
@@ -47,38 +46,34 @@ with validation_results as (
         rule.rule_passed,
         rule.rule_detail
     from {{ ref('slv_pdm_loans') }} loan
-    cross join lateral (
-        values
-            ('REQUESTED_AMOUNT_POSITIVE', amount_requested is not null and amount_requested > 0,
-             'Requested amount must be greater than zero'),
-            ('APPROVED_NOT_ABOVE_REQUESTED', amount_approved is null or
+    cross join unnest(array[
+            row('REQUESTED_AMOUNT_POSITIVE', amount_requested is not null and amount_requested > 0,
+                'Requested amount must be greater than zero'),
+            row('APPROVED_NOT_ABOVE_REQUESTED', amount_approved is null or
                 (amount_approved >= 0 and amount_approved <= amount_requested),
-             'Approved amount must be non-negative and not exceed requested amount'),
-            ('DISBURSED_NOT_ABOVE_APPROVED', amount_disbursed is null or
+                'Approved amount must be non-negative and not exceed requested amount'),
+            row('DISBURSED_NOT_ABOVE_APPROVED', amount_disbursed is null or
                 (amount_disbursed >= 0 and amount_disbursed <= amount_approved),
-             'Disbursed amount must be non-negative and not exceed approved amount'),
-            ('REPAID_NOT_ABOVE_DUE', amount_repaid is null or
+                'Disbursed amount must be non-negative and not exceed approved amount'),
+            row('REPAID_NOT_ABOVE_DUE', amount_repaid is null or
                 (amount_repaid >= 0 and amount_repaid <= coalesce(amount_disbursed, 0) + coalesce(interest_charged, 0)),
-             'Repaid amount must be non-negative and not exceed principal plus charged interest'),
-            ('REPAID_COMPONENTS_RECONCILE',
-                abs(coalesce(amount_repaid, 0) - coalesce(principal_repaid, 0) - coalesce(interest_paid, 0)) <= 0.05,
-             'Amount repaid must equal principal repaid plus interest paid within UGX 0.05'),
-            ('OUTSTANDING_COMPONENTS_RECONCILE',
-                abs(coalesce(outstanding_balance, 0) - coalesce(principal_outstanding_balance, 0)
+                'Repaid amount must be non-negative and not exceed principal plus charged interest'),
+            row('REPAID_COMPONENTS_RECONCILE', abs(coalesce(amount_repaid, 0) - coalesce(principal_repaid, 0) - coalesce(interest_paid, 0)) <= 0.05,
+                'Amount repaid must equal principal repaid plus interest paid within UGX 0.05'),
+            row('OUTSTANDING_COMPONENTS_RECONCILE', abs(coalesce(outstanding_balance, 0) - coalesce(principal_outstanding_balance, 0)
                     - coalesce(interest_outstanding_balance, 0)) <= 0.05,
-             'Outstanding balance must equal principal plus interest outstanding within UGX 0.05'),
-            ('CONTRACTUAL_BALANCE_RECONCILES',
-                abs(coalesce(amount_disbursed, 0) + coalesce(interest_charged, 0)
+                'Outstanding balance must equal principal plus interest outstanding within UGX 0.05'),
+            row('CONTRACTUAL_BALANCE_RECONCILES', abs(coalesce(amount_disbursed, 0) + coalesce(interest_charged, 0)
                     - coalesce(amount_repaid, 0) - coalesce(outstanding_balance, 0)) <= 0.05,
-             'Disbursed principal plus charged interest must reconcile to repaid plus outstanding within UGX 0.05'),
-            ('APPROVAL_DATE_ORDER', approval_date is null or application_date is null
+                'Disbursed principal plus charged interest must reconcile to repaid plus outstanding within UGX 0.05'),
+            row('APPROVAL_DATE_ORDER', approval_date is null or application_date is null
                 or approval_date >= application_date,
-             'Approval date cannot precede application date'),
-            ('LIFECYCLE_DATE_ORDER', loan_status <> 'DISBURSED' or
+                'Approval date cannot precede application date'),
+            row('LIFECYCLE_DATE_ORDER', loan_status <> 'DISBURSED' or
                 (approval_date <= verification_date and verification_date <= disbursement_date
                  and disbursement_date <= cashout_date and cashout_date <= as_of_date),
-             'Disbursed loan lifecycle dates must be ordered through the observation date')
-    ) as rule(rule_code, rule_passed, rule_detail)
+                'Disbursed loan lifecycle dates must be ordered through the observation date')
+        ]) as rule(rule_code, rule_passed, rule_detail)
 
     union all
 
@@ -97,16 +92,15 @@ with validation_results as (
       on loan.sacco_id = sacco.sacco_id
     left join {{ ref('slv_pdm_business_plans') }} business_plan
       on loan.business_plan_id = business_plan.business_plan_id
-    cross join lateral (
-        values
-            ('BENEFICIARY_EXISTS', loan_link.beneficiary_token is not null
+    cross join unnest(array[
+            row('BENEFICIARY_EXISTS', loan_link.beneficiary_token is not null
                 and beneficiary.beneficiary_token is not null,
-             'Loan beneficiary must resolve through the canonical beneficiary token'),
-            ('SACCO_EXISTS', loan.sacco_id is null or sacco.sacco_id is not null,
-             'Loan SACCO must resolve when supplied'),
-            ('BUSINESS_PLAN_EXISTS', loan.business_plan_id is null or business_plan.business_plan_id is not null,
-             'Loan business plan must resolve when supplied')
-    ) as rule(rule_code, rule_passed, rule_detail)
+                'Loan beneficiary must resolve through the canonical beneficiary token'),
+            row('SACCO_EXISTS', loan.sacco_id is null or sacco.sacco_id is not null,
+                'Loan SACCO must resolve when supplied'),
+            row('BUSINESS_PLAN_EXISTS', loan.business_plan_id is null or business_plan.business_plan_id is not null,
+                'Loan business plan must resolve when supplied')
+        ]) as rule(rule_code, rule_passed, rule_detail)
 )
 select
     entity_type,

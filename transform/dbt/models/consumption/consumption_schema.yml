@@ -296,6 +296,7 @@ models:
                 - 2
                 - 3
                 - 4
+              quote: false
 
       - name: high_identity_alert_count
         description: >
@@ -369,6 +370,7 @@ models:
                 - 2
                 - 3
                 - 4
+              quote: false
 
   - name: cns_pdm_geographic_risk_summary
     description: >
@@ -514,6 +516,7 @@ models:
                 - 2
                 - 3
                 - 4
+              quote: false
 
   - name: cns_pdm_geographic_risk_drivers
     description: >
@@ -634,6 +637,7 @@ models:
                 - 3
                 - 4
                 - 5
+              quote: false
 
       - name: alert_type
         description: >

@@ -8,7 +8,7 @@ sources:
       by the validated bounded Python tokenisation boundary; it is RESTRICTED
       and must never be referenced by Gold or Consumption models.
     schema: silver_vault
-    database: lakehouse
+    database: iceberg
     tables:
       - name: vlt_pdm_beneficiary_token_link
         description: >-

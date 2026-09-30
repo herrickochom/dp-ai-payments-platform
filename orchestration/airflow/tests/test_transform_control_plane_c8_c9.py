@@ -3,14 +3,15 @@ import pytest
 from orchestration.job_runner import transform_execution
 from orchestration.transform_runtime.nessie_publication import NessiePublisher,NessieNotFound,NessieConflict,branch_for_run
 RUN='tr_'+'b'*32; EXEC='be_'+'a'*32
-def creds(): return {'ML_S3_ACCESS_KEY_ID':'ml','ML_S3_SECRET_ACCESS_KEY':'secret','NESSIE_TRANSFORM_TOKEN':'token','S3_ENDPOINT':'http://minio:9000','S3_USE_SSL':'false','OBJECT_STORE_REGION':'us-east-1','OBJECT_STORE_BUCKET':'dp-ai-payment','RAW_ROOT':'raw','RAW_VERSION':'v2','RAW_PREFIX':'raw/v2','WAREHOUSE_PREFIX':'warehouse','WAREHOUSE_URI':'s3://dp-ai-payment/warehouse','S3_PATH_STYLE_ACCESS':'true','DBT_S3_URL_STYLE':'path','DBT_DATABASE':'lakehouse','NESSIE_ENDPOINT':'http://nessie:19120'}
+def creds(): return {'ML_TRANSFORM_S3_ACCESS_KEY_ID':'ml','ML_TRANSFORM_S3_SECRET_ACCESS_KEY':'secret','NESSIE_TRANSFORM_TOKEN':'token','DBT_TRINO_PASSWORD':'test-trino-password','S3_ENDPOINT':'http://minio:9000','S3_USE_SSL':'false','OBJECT_STORE_REGION':'us-east-1','OBJECT_STORE_BUCKET':'dp-ai-payment','RAW_ROOT':'raw','RAW_VERSION':'v2','RAW_PREFIX':'raw/v2','WAREHOUSE_PREFIX':'warehouse','WAREHOUSE_URI':'s3://dp-ai-payment/warehouse','NESSIE_WAREHOUSE':'s3://dp-ai-payment/warehouse','S3_PATH_STYLE_ACCESS':'true','DBT_S3_URL_STYLE':'path','DBT_DATABASE':'lakehouse','NESSIE_ENDPOINT':'http://nessie:19120'}
 
-def test_run_scoped_nessie_reference_is_consumed():
-    c=transform_execution.build_transform_command('C4_ML_01',EXEC,creds(),transform_run_id=RUN)
-    assert c.environment['DBT_NESSIE_BRANCH']==branch_for_run(RUN)
-    plugin=Path('orchestration/job_runner/nessie_iceberg_plugin.py').read_text()
-    assert 'iceberg/{branch}' in plugin
-    assert 'AS {_CATALOG_ALIAS}' in plugin
+def test_run_scoped_nessie_reference_is_recorded():
+    c = transform_execution.build_transform_command('C4_ML_01', EXEC, creds(), transform_run_id=RUN)
+    assert c.environment['DBT_NESSIE_BRANCH'] == f"transform_{RUN}"
+    assert branch_for_run(RUN) == f"transform_{RUN}"
+    profile = Path('transform/dbt/profiles.yml').read_text()
+    assert "type: trino" in profile
+    assert "nessie_iceberg_plugin" not in profile
 
 def test_no_sync_dispatch_and_queue_is_fenced():
     assert 'dispatch_to_runner' not in Path('orchestration/transform_runtime/api.py').read_text()
@@ -37,10 +38,13 @@ def test_branch_creation_only_treats_404_as_missing(monkeypatch):
     assert r['hash']=='base1'
     assert calls[-1][2]=={'type':'BRANCH','name':'main','hash':'base1'}
 
-def test_existing_branch_must_match_recorded_base(monkeypatch):
-    p=NessiePublisher('http://nessie:19120','token')
-    monkeypatch.setattr(p,'get_reference',lambda name:{'name':name,'hash':'different'})
-    with pytest.raises(NessieConflict): p.create_run_branch(RUN,'main','base1')
+def test_existing_branch_matches_by_name_not_hash(monkeypatch):
+    p = NessiePublisher('http://nessie:19120', 'token')
+    # F3: name matches, advanced HEAD is permitted without raising NessieConflict
+    monkeypatch.setattr(p, 'get_reference', lambda name: {'name': name, 'hash': 'advanced_head_hash'})
+    ref = p.create_run_branch(RUN, 'main', 'base1')
+    assert ref['name'] == branch_for_run(RUN)
+    assert ref['hash'] == 'advanced_head_hash'
 
 def test_promotion_rejects_target_drift(monkeypatch):
     p=NessiePublisher('http://nessie:19120','token')

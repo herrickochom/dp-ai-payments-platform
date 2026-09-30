@@ -158,9 +158,12 @@ def test_phase6_pmn_plm_semantics_intact():
         "bronze",
         "br_pdm_payments_plm_lifecycle_events.sql",
     )
-    uni = sql_text(
+    correlation = sql_text(
         "silver",
-        "slv_pdm_payment_technical_events.sql",
+        "slv_pdm_payment_event_correlation.sql",
+    )
+    retired = ROOT / "transform" / "dbt" / "models" / "silver" / (
+        "slv_pdm_payment_" + "technical_events.sql"
     )
 
     # Bronze preserves the source-specific PMN/PLM semantics.
@@ -171,10 +174,12 @@ def test_phase6_pmn_plm_semantics_intact():
     # Silver preserves technical correlation/provenance while enforcing
     # the Gate 2 privacy boundary. The direct PLM beneficiary identifier
     # must not propagate into the ordinary analytical Silver layer.
-    assert "x_beneficiary_sa" not in uni
-    assert "technical_source" in uni
-    assert "correlation_id" in uni
-    assert "uetr" in uni
+    assert not retired.exists()
+    assert "x_beneficiary_sa" not in correlation
+    assert "'ICMN_PMN' as technical_source" in correlation
+    assert "'CPO_PLM' as technical_source" in correlation
+    assert "correlation_id" in correlation
+    assert "uetr" in correlation
 
 
 def test_restricted_identity_fails_closed_without_authorisation():

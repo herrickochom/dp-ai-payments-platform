@@ -142,10 +142,6 @@ DATASET_POLICIES: dict[str, DatasetPolicy] = {
         dataset="iceberg.silver.slv_pdm_payments_plm_lifecycle_events",
         classification=DataClassification.INTERNAL,
     ),
-    "iceberg.silver.slv_pdm_payment_technical_events": DatasetPolicy(
-        dataset="iceberg.silver.slv_pdm_payment_technical_events",
-        classification=DataClassification.INTERNAL,
-    ),
     "iceberg.silver.slv_pdm_payment_event_correlation": DatasetPolicy(
         dataset="iceberg.silver.slv_pdm_payment_event_correlation",
         classification=DataClassification.INTERNAL,

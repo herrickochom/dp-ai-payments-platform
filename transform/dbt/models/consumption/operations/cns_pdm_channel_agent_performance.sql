@@ -3,7 +3,7 @@
 -- Grain: one row per mapped agent. Only AGENT-source cash-outs have a
 -- supported agent assignment, so no synthetic channel/agent mapping is made.
 select
-    agent.agent_sk,
+    agent_sk,
     agent.geography_sk,
     agent.agent_id,
     agent.agent_code,

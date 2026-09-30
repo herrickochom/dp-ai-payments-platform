@@ -36,6 +36,18 @@ class PostgresDurableQueue:
                       VALUES (%s,%s,%s,%s,clock_timestamp(),%s::jsonb)""",
                    (uuid4().hex,row["transform_run_id"],row["batch_execution_id"],event,json.dumps(meta or {},sort_keys=True)))
 
+    def _terminalize_parent_failure(self,db,row,status,failure_class=None):
+        if status not in {"FAILED","CANCELLED","ORPHANED"}: return
+        updated=db.execute("""UPDATE transform_runs SET status=%s,heartbeat_at=clock_timestamp()
+                              WHERE transform_run_id=%s
+                                AND status NOT IN ('SUCCEEDED','FAILED','CANCELLED','ORPHANED')
+                              RETURNING transform_run_id""",
+                           (status,row["transform_run_id"])).fetchone()
+        if updated:
+            metadata={"batch_execution_id":row["batch_execution_id"]}
+            if failure_class is not None: metadata["failure_class"]=failure_class
+            self._event(db,{"transform_run_id":row["transform_run_id"],"batch_execution_id":None},"RUN_"+status,metadata)
+
     def claim(self,worker,lease_seconds):
         token=uuid4().hex
         with self.tx() as db:
@@ -55,6 +67,25 @@ class PostgresDurableQueue:
                        (row["batch_execution_id"],row["attempt"]))
             self._event(db,row,"CLAIMED",{"worker_id":worker,"lease_token":token})
             return dict(out)
+
+    def record_nessie_branch(self,eid,worker,token,branch):
+        with self.tx() as db:
+            row=db.execute("SELECT * FROM batch_executions WHERE batch_execution_id=%s FOR UPDATE",(eid,)).fetchone()
+            if not row or row["lease_owner"]!=worker or row["lease_token"]!=token or row["status"] not in ACTIVE:
+                raise LeaseLost("worker lease lost")
+            persisted=row.get("nessie_branch")
+            if persisted is not None and persisted!=branch:
+                raise DurableQueueError("Nessie branch conflicts with persisted branch")
+            out=db.execute("""UPDATE batch_executions SET nessie_branch=%s
+                              WHERE batch_execution_id=%s AND lease_owner=%s AND lease_token=%s
+                                AND status IN ('RUNNING','TESTING')
+                                AND lease_expires_at>=clock_timestamp()
+                                AND (nessie_branch IS NULL OR nessie_branch=%s)
+                              RETURNING nessie_branch""",
+                           (branch,eid,worker,token,branch)).fetchone()
+            if not out or out["nessie_branch"]!=branch:
+                raise LeaseLost("worker lease lost")
+            return branch
 
     def heartbeat(self,eid,worker,token,lease_seconds):
         with self.tx() as db:
@@ -87,7 +118,9 @@ class PostgresDurableQueue:
                                   lease_owner=NULL,lease_token=NULL,lease_expires_at=NULL,
                                   failure_class='OPERATOR_CANCELLED'
                                   WHERE batch_execution_id=%s RETURNING *""",(eid,)).fetchone()
-                self._event(db,row,"CANCELLED",{}); return dict(out)
+                self._event(db,row,"CANCELLED",{})
+                self._terminalize_parent_failure(db,row,"CANCELLED","OPERATOR_CANCELLED")
+                return dict(out)
             out=db.execute("""UPDATE batch_executions SET cancel_requested=true,
                               cancel_requested_at=COALESCE(cancel_requested_at,clock_timestamp())
                               WHERE batch_execution_id=%s RETURNING *""",(eid,)).fetchone()
@@ -110,7 +143,9 @@ class PostgresDurableQueue:
             if not out: raise LeaseLost("worker lease lost")
             db.execute("UPDATE batch_attempts SET status=%s,heartbeat_at=clock_timestamp() WHERE batch_execution_id=%s AND attempt=%s",
                        (status,eid,row["attempt"]))
-            self._event(db,row,status,{"failure_class":failure_class}); return dict(out)
+            self._event(db,row,status,{"failure_class":failure_class})
+            self._terminalize_parent_failure(db,row,status,failure_class)
+            return dict(out)
 
     def orphan_if_owned(self,eid,worker,token,failure_class):
         with self.tx() as db:
@@ -124,7 +159,9 @@ class PostgresDurableQueue:
                        (failure_class,eid,worker,token))
             db.execute("UPDATE batch_attempts SET status='ORPHANED',heartbeat_at=clock_timestamp() WHERE batch_execution_id=%s AND attempt=%s",
                        (eid,row["attempt"]))
-            self._event(db,row,"ORPHANED",{"failure_class":failure_class}); return True
+            self._event(db,row,"ORPHANED",{"failure_class":failure_class})
+            self._terminalize_parent_failure(db,row,"ORPHANED",failure_class)
+            return True
 
     def reconcile_expired(self):
         ids=[]
@@ -142,4 +179,5 @@ class PostgresDurableQueue:
                 db.execute("UPDATE batch_attempts SET status='ORPHANED',heartbeat_at=clock_timestamp() WHERE batch_execution_id=%s AND attempt=%s",
                            (eid,row["attempt"]))
                 self._event(db,row,"ORPHANED",{"failure_class":"WORKER_LEASE_EXPIRED_REQUIRES_RECONCILIATION"})
+                self._terminalize_parent_failure(db,row,"ORPHANED","WORKER_LEASE_EXPIRED_REQUIRES_RECONCILIATION")
         return ids

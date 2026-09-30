@@ -21,7 +21,9 @@ select
     count(distinct loan.beneficiary_sk) filter (where loan.amount_repaid > 0)
         / nullif(count(distinct loan.beneficiary_sk), 0) as beneficiaries_entering_repayment_rate
 from {{ ref('gld_dim_pdm_special_group') }} special_group
-left join {{ ref('gld_dim_pdm_beneficiary') }} beneficiary using (special_group_sk)
-left join {{ ref('gld_fct_pdm_loans') }} loan using (beneficiary_sk)
+left join {{ ref('gld_dim_pdm_beneficiary') }} beneficiary
+  on special_group.special_group_sk = beneficiary.special_group_sk
+left join {{ ref('gld_fct_pdm_loans') }} loan
+  on beneficiary.beneficiary_sk = loan.beneficiary_sk
 where special_group.group_code is not null
 group by 1, 2, 3, 4

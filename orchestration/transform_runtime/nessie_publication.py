@@ -62,13 +62,88 @@ class NessiePublisher:
     def get_reference(self,name):
         return self._ref(self._request("GET","/trees/"+urllib.parse.quote(name,safe="")))
 
+    def _iceberg_request(self, method, prefix, path, payload=None):
+        body = None if payload is None else json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+        headers = {"Accept": "application/json"}
+        if body is not None:
+            headers["Content-Type"] = "application/json"
+        if self.token:
+            headers["Authorization"] = "Bearer " + self.token
+        quoted_prefix = urllib.parse.quote(prefix, safe="")
+        req = urllib.request.Request(
+            f"{self.endpoint}/iceberg/v1/{quoted_prefix}{path}",
+            data=body,
+            method=method,
+            headers=headers,
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=self.timeout) as r:
+                raw = r.read()
+        except urllib.error.HTTPError as e:
+            err_body = ""
+            try:
+                err_body = e.read().decode("utf-8", errors="replace")
+            except Exception:
+                pass
+            if e.code == 400 and ("NoSuchReferenceException" in err_body or "ReferenceNotFound" in err_body):
+                raise NessieNotFound(f"Nessie reference not found: {err_body}") from e
+            if e.code == 404:
+                raise NessieNotFound("Nessie Iceberg resource not found") from e
+            if e.code in {409, 412}:
+                raise NessieConflict(f"Nessie conflict HTTP {e.code}") from e
+            raise NessiePublicationError(f"Nessie HTTP {e.code}: {err_body}") from e
+        except (urllib.error.URLError, TimeoutError) as e:
+            if method in {"POST", "PUT", "DELETE"}:
+                raise NessieUnknownWriteState("Nessie write outcome unknown; reconciliation required") from e
+            raise NessiePublicationError("Nessie request failed") from e
+        try:
+            return json.loads(raw or b"{}")
+        except json.JSONDecodeError as e:
+            raise NessiePublicationError("invalid Nessie JSON response") from e
+
+    def ensure_namespaces(self, branch, warehouse):
+        allowlist = {"bronze", "silver", "silver_vault", "gold", "consumption"}
+        # Fail-closed check: exact match against allowlist; reject staging or any unknown name before HTTP
+        prefix = f"{branch}|{warehouse}"
+        # Fetch current namespaces
+        data = self._iceberg_request("GET", prefix, "/namespaces")
+        raw_namespaces = data.get("namespaces", [])
+        current = set()
+        for item in raw_namespaces:
+            if isinstance(item, list) and item:
+                current.add(item[0])
+            elif isinstance(item, str):
+                current.add(item)
+
+        missing = sorted(allowlist - current)
+        for ns in missing:
+            try:
+                self._iceberg_request("POST", prefix, "/namespaces", {"namespace": [ns], "properties": {}})
+            except NessieConflict:
+                pass
+
+        # Re-GET and verify all five allowlisted namespaces are present
+        verify_data = self._iceberg_request("GET", prefix, "/namespaces")
+        verified_raw = verify_data.get("namespaces", [])
+        verified = set()
+        for item in verified_raw:
+            if isinstance(item, list) and item:
+                verified.add(item[0])
+            elif isinstance(item, str):
+                verified.add(item)
+
+        if not allowlist.issubset(verified):
+            missing_verified = allowlist - verified
+            raise NessiePublicationError(f"failed to verify all governed namespaces; missing: {missing_verified}")
+        return verified
+
     def create_run_branch(self,run_id,base_ref,base_hash):
         name=branch_for_run(run_id)
         try: existing=self.get_reference(name)
         except NessieNotFound: existing=None
         if existing is not None:
-            if existing["hash"]!=base_hash:
-                raise NessieConflict("existing run branch does not match recorded base hash")
+            if existing.get("name") != name:
+                raise NessieConflict("existing reference does not match this transform run")
             return existing
         q=urllib.parse.urlencode({"name":name,"type":"BRANCH"})
         return self._ref(self._request("POST","/trees?"+q,{"type":"BRANCH","name":base_ref,"hash":base_hash}))

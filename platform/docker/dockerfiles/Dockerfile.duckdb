@@ -1,0 +1,22 @@
+FROM python:3.11-slim
+
+RUN pip install --no-cache-dir \
+    duckdb \
+    boto3 \
+    pyarrow \
+    pytz \
+    avro==1.11.3 \
+    fastavro==1.9.4
+
+WORKDIR /app
+
+RUN python - <<'PY'
+import duckdb
+
+con = duckdb.connect()
+con.execute("INSTALL httpfs")
+con.execute("INSTALL avro")
+con.close()
+PY
+
+CMD ["python", "-c", "import duckdb; print('DuckDB Raw-to-Bronze runtime ready:', duckdb.__version__)"]

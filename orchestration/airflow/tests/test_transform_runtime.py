@@ -71,7 +71,7 @@ def test_execution_model_allowlists_are_exhaustive_and_disjoint():
 def test_execution_model_allowlist_cardinalities():
     assert len(
         EXECUTION_UNITS["raw_to_bronze"].model_allowlist
-    ) == 48
+    ) == 26
 
     assert len(
         EXECUTION_UNITS["ml_derived_bronze"].model_allowlist
@@ -165,7 +165,7 @@ def test_execution_batches_have_approved_authority_and_models():
 def test_execution_batch_cardinalities_and_prerequisites_are_exact():
     expected = {
         "C4_ML_01": (1, frozenset()),
-        "C4_RAW_02": (48, frozenset()),
+        "C4_RAW_02": (26, frozenset()),
         "C4_RID_FOUNDATION_03": (
             1,
             frozenset({"C4_RAW_02"}),
@@ -175,7 +175,7 @@ def test_execution_batch_cardinalities_and_prerequisites_are_exact():
             frozenset({"C4_RAW_02"}),
         ),
         "C4_ORD_BRIDGE_05": (
-            18,
+            17,
             frozenset({
                 "C4_ML_01",
                 "C4_RAW_02",
@@ -243,8 +243,8 @@ def test_execution_batch_models_are_exhaustive_and_disjoint():
     ]
     union = set().union(*allowlists)
 
-    assert len(union) == 125
-    assert sum(map(len, allowlists)) == 125
+    assert len(union) == 103
+    assert sum(map(len, allowlists)) == 103
     assert union == manifest
 
 
@@ -324,9 +324,9 @@ def test_raw_batch_preserves_same_runtime_boundary():
         for model in batch.model_allowlist
     ]
 
-    assert len(batch.model_allowlist) == 48
-    assert schemas.count("staging") == 23
-    assert schemas.count("bronze") == 25
+    assert len(batch.model_allowlist) == 26
+    assert schemas.count("staging") == 0
+    assert schemas.count("bronze") == 26
     assert batch.same_runtime_required is True
 
 
@@ -542,3 +542,32 @@ def test_execution_plan_introduces_no_executor():
 
     assert "subprocess" not in source
     assert not hasattr(execution_plan, "execute")
+
+
+def test_transform_response_accepts_postgres_datetime_row():
+    from datetime import datetime, timezone
+
+    import orchestration.transform_runtime.api as api
+
+    accepted_at = datetime(
+        2026, 9, 24, 10, 30, 0,
+        tzinfo=timezone.utc,
+    )
+
+    result = api.response({
+        "transform_run_id": "tr_9211be28003f41589b6340f4527d7950",
+        "batch_execution_id": "be_00000000000000000000000000000001",
+        "batch_id": "C4_RAW_02",
+        "status": "QUEUED",
+        "accepted_at": accepted_at,
+        "started_at": None,
+        "finished_at": None,
+        "attempt": 1,
+        "test_status": None,
+        "failure_class": None,
+    })
+
+    assert result.accepted is True
+    assert result.accepted_at == accepted_at
+    assert result.started_at is None
+    assert result.finished_at is None

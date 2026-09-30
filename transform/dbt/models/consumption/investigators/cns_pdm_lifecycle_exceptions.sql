@@ -68,4 +68,5 @@ select
         else 'LOW'
     end as intervention_priority
 from {{ ref('gld_fct_pdm_payment_lifecycle') }} lifecycle
-left join {{ ref('gld_dim_pdm_sacco') }} sacco using (sacco_sk)
+left join {{ ref('gld_dim_pdm_sacco') }} sacco
+  on lifecycle.sacco_sk = sacco.sacco_sk

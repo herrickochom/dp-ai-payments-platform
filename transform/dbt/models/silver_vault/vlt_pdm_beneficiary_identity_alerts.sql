@@ -64,7 +64,7 @@ account_link as (
         case
             when nullif(regexp_replace(coalesce(pr.account_id, ''), '[^0-9]', ''), '') is null
                 then null
-            else sha256(regexp_replace(pr.account_id, '[^0-9]', ''))
+            else to_hex(sha256(to_utf8(regexp_replace(pr.account_id, '[^0-9]', ''))))
         end as creditor_account_correlator
     from {{ ref('slv_pdm_payments_transactions') }} t
     join {{ ref('slv_pdm_payment_party_roles') }} pr
@@ -109,14 +109,14 @@ account_substitution as (
 
 select
     {{ gold_surrogate_key(['identity.beneficiary_token']) }} as beneficiary_sk,
-    identity.beneficiary_id,
+    beneficiary_id,
     identity.beneficiary_token,
     identity.token_version,
     identity.legacy_source_beneficiary_token,
     identity.beneficiary_name,
     identity.nin,
-    identity.nin_hashed,
-    identity.phone_hashed,
+    nin_hashed,
+    phone_hashed,
     identity.date_of_birth,
     identity.age_band,
     identity.gender,
@@ -192,4 +192,4 @@ left join phone_reuse using (phone_hashed)
 left join loans using (beneficiary_id)
 left join account_substitution substitution
   on identity.beneficiary_token = substitution.beneficiary_token
-where identity.beneficiary_id is not null
+where beneficiary_id is not null

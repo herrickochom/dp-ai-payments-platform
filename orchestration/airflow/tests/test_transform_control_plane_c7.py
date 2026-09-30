@@ -1,4 +1,5 @@
-import asyncio, importlib, io, sys
+import asyncio, importlib, io, sys, time
+from dataclasses import replace
 from pathlib import Path
 import httpx
 import anyio.to_thread
@@ -10,6 +11,8 @@ if JOB_RUNNER not in sys.path:
     sys.path.insert(0, JOB_RUNNER)
 
 EXEC='be_'+'a'*32
+
+
 
 @pytest.fixture(autouse=True)
 def working_test_threadpool(monkeypatch):
@@ -34,7 +37,7 @@ def post(app, path, **kwargs):
         loop.close()
 
 def creds():
-    return {'ML_S3_ACCESS_KEY_ID':'ml','ML_S3_SECRET_ACCESS_KEY':'secret','NESSIE_TRANSFORM_TOKEN':'token','S3_ENDPOINT':'http://minio:9000','S3_USE_SSL':'false','OBJECT_STORE_REGION':'us-east-1','OBJECT_STORE_BUCKET':'dp-ai-payment','RAW_ROOT':'raw','RAW_VERSION':'v2','RAW_PREFIX':'raw/v2','WAREHOUSE_PREFIX':'warehouse','WAREHOUSE_URI':'s3://dp-ai-payment/warehouse','S3_PATH_STYLE_ACCESS':'true','DBT_S3_URL_STYLE':'path','DBT_DATABASE':'lakehouse','DBT_STAGING_DATABASE':'staging','DBT_BRONZE_DATABASE':'bronze','DBT_SILVER_DATABASE':'silver','DBT_SILVER_VAULT_DATABASE':'silver_vault','DBT_GOLD_DATABASE':'gold','DBT_CONSUMPTION_DATABASE':'consumption','WAREHOUSE_BUCKET':'warehouse','ICEBERG_CATALOG':'nessie','NESSIE_ENDPOINT':'http://nessie:19120'}
+    return {'ML_TRANSFORM_S3_ACCESS_KEY_ID':'ml','ML_TRANSFORM_S3_SECRET_ACCESS_KEY':'secret','NESSIE_TRANSFORM_TOKEN':'token','S3_ENDPOINT':'http://minio:9000','S3_USE_SSL':'false','OBJECT_STORE_REGION':'us-east-1','OBJECT_STORE_BUCKET':'dp-ai-payment','RAW_ROOT':'raw','RAW_VERSION':'v2','RAW_PREFIX':'raw/v2','WAREHOUSE_PREFIX':'warehouse','WAREHOUSE_URI':'s3://dp-ai-payment/warehouse','NESSIE_WAREHOUSE':'s3://dp-ai-payment/warehouse','DBT_TRINO_PASSWORD':'test-trino-password','S3_PATH_STYLE_ACCESS':'true','DBT_S3_URL_STYLE':'path','DBT_DATABASE':'lakehouse','DBT_STAGING_DATABASE':'staging','DBT_BRONZE_DATABASE':'bronze','DBT_SILVER_DATABASE':'silver','DBT_SILVER_VAULT_DATABASE':'silver_vault','DBT_GOLD_DATABASE':'gold','DBT_CONSUMPTION_DATABASE':'consumption','WAREHOUSE_BUCKET':'warehouse','ICEBERG_CATALOG':'nessie','NESSIE_ENDPOINT':'http://nessie:19120'}
 
 def test_runner_requires_service_auth(monkeypatch):
     monkeypatch.setenv('TRANSFORM_RUNTIME_RUNNER_TOKEN','runner-secret')
@@ -91,6 +94,90 @@ def test_cancel_is_cancelled(monkeypatch):
     result=transform_execution.execute(cmd,timeout_seconds=10,termination_grace_seconds=1,output_cap_bytes=64,cancel_requested=lambda:True)
     assert result.status=='CANCELLED' and signals
 
+
+def child_command(code):
+    command = transform_execution.build_transform_command(
+        'C4_ML_01',
+        EXEC,
+        creds(),
+    )
+    return replace(command, argv=(sys.executable, '-c', code))
+
+
+def test_noisy_child_is_drained_with_bounded_retained_output():
+    cap = 4096
+    command = child_command(
+        "import os; os.write(1, b'x' * 2_000_000)"
+    )
+
+    result = transform_execution.execute(
+        command,
+        timeout_seconds=10,
+        termination_grace_seconds=1,
+        output_cap_bytes=cap,
+    )
+
+    assert result.status == 'SUCCEEDED'
+    assert len(result.output.encode()) == cap
+    assert result.output_truncated is True
+
+
+def test_output_below_cap_is_preserved_and_redacted():
+    command = child_command(
+        "print('hello'); print('password=supersecret')"
+    )
+
+    result = transform_execution.execute(
+        command,
+        timeout_seconds=10,
+        termination_grace_seconds=1,
+        output_cap_bytes=1024,
+    )
+
+    assert result.status == 'SUCCEEDED'
+    assert result.output_truncated is False
+    assert 'hello' in result.output
+    assert 'password=[REDACTED]' in result.output
+    assert 'supersecret' not in result.output
+
+
+def test_timeout_terminates_noisy_child_without_pipe_deadlock():
+    command = child_command(
+        "import os\nwhile True: os.write(1, b'x' * 65536)"
+    )
+
+    result = transform_execution.execute(
+        command,
+        timeout_seconds=0.2,
+        termination_grace_seconds=1,
+        output_cap_bytes=128,
+    )
+
+    assert result.status == 'ORPHANED'
+    assert result.failure_class == 'TIMEOUT_REQUIRES_RECONCILIATION'
+    assert len(result.output.encode()) <= 128
+    assert result.output_truncated is True
+
+
+def test_operator_cancellation_terminates_noisy_child():
+    command = child_command(
+        "import os\nwhile True: os.write(1, b'x' * 65536)"
+    )
+    cancel_at = time.monotonic() + 0.2
+
+    result = transform_execution.execute(
+        command,
+        timeout_seconds=10,
+        termination_grace_seconds=1,
+        output_cap_bytes=128,
+        cancel_requested=lambda: time.monotonic() >= cancel_at,
+    )
+
+    assert result.status == 'CANCELLED'
+    assert result.failure_class == 'OPERATOR_CANCELLED'
+    assert len(result.output.encode()) <= 128
+    assert result.output_truncated is True
+
 def test_deployment_controls_are_wired():
     c=Path('docker-compose.yaml').read_text()
     assert 'transform-ledger-migrate:' in c
@@ -107,17 +194,18 @@ def test_publication_remains_fail_closed():
 
 def test_child_environment_maps_only_selected_authority_credentials():
     source=creds() | {
-        'ORDINARY_S3_ACCESS_KEY_ID':'ordinary', 'ORDINARY_S3_SECRET_ACCESS_KEY':'ordinary-secret',
-        'RESTRICTED_S3_ACCESS_KEY_ID':'restricted', 'RESTRICTED_S3_SECRET_ACCESS_KEY':'restricted-secret',
+        'ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID':'ordinary', 'ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY':'ordinary-secret',
+        'RESTRICTED_TRANSFORM_S3_ACCESS_KEY_ID':'restricted', 'RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY':'restricted-secret',
         'MINIO_ROOT_USER':'root', 'MINIO_ROOT_PASSWORD':'root-secret',
         'PLATFORM_RAW_READ_ACCESS_KEY':'raw', 'PLATFORM_RAW_READ_SECRET_KEY':'raw-secret',
     }
     cmd=transform_execution.build_transform_command('C4_ML_01',EXEC,source)
-    env=cmd.environment
-    assert env['TRANSFORM_S3_ACCESS_KEY_ID']=='ml'
-    assert env['TRANSFORM_S3_SECRET_ACCESS_KEY']=='secret'
-    assert env['NESSIE_TRANSFORM_TOKEN']=='token'
-    for forbidden in ('ML_S3_ACCESS_KEY_ID','ML_S3_SECRET_ACCESS_KEY','ORDINARY_S3_ACCESS_KEY_ID','ORDINARY_S3_SECRET_ACCESS_KEY','RESTRICTED_S3_ACCESS_KEY_ID','RESTRICTED_S3_SECRET_ACCESS_KEY','MINIO_ROOT_USER','MINIO_ROOT_PASSWORD','PLATFORM_RAW_READ_ACCESS_KEY','PLATFORM_RAW_READ_SECRET_KEY','AWS_ACCESS_KEY_ID','AWS_SECRET_ACCESS_KEY'):
+    env=cmd.trino_environment
+    assert env['TRINO_S3_ACCESS_KEY_ID']=='ml'
+    assert env['TRINO_S3_SECRET_ACCESS_KEY']=='secret'
+    assert 'NESSIE_TRANSFORM_TOKEN' not in env
+    assert 'TRINO_S3_ACCESS_KEY_ID' not in cmd.environment
+    for forbidden in ('ML_TRANSFORM_S3_ACCESS_KEY_ID','ML_TRANSFORM_S3_SECRET_ACCESS_KEY','ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID','ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY','RESTRICTED_TRANSFORM_S3_ACCESS_KEY_ID','RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY','MINIO_ROOT_USER','MINIO_ROOT_PASSWORD','PLATFORM_RAW_READ_ACCESS_KEY','PLATFORM_RAW_READ_SECRET_KEY','AWS_ACCESS_KEY_ID','AWS_SECRET_ACCESS_KEY'):
         assert forbidden not in env
 
 def test_migration_set_has_one_version_two_owner():

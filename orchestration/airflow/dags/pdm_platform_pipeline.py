@@ -57,10 +57,10 @@ with DAG(
         return create_transform_run(f"{context['dag_run'].run_id}:transform")
 
     @task(execution_timeout=timedelta(minutes=60), pool="transform_execution", retries=1)
-    def transform_batch(run_id: str, batch_id: str):
+    def transform_batch(transform_run_id: str, batch_id: str):
         from airflow.sdk import get_current_context
         context = get_current_context()
-        return submit_and_wait_batch(run_id, batch_id, f"{context['dag_run'].run_id}:{batch_id}")
+        return submit_and_wait_batch(transform_run_id, batch_id, f"{context['dag_run'].run_id}:{batch_id}")
 
     @task(execution_timeout=timedelta(minutes=15))
     def data_quality():

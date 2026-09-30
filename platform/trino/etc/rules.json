@@ -1,88 +1,33 @@
 {
   "catalogs": [
-    {
-      "user": "hochom",
-      "catalog": "iceberg",
-      "allow": "all"
-    },
-    {
-      "user": "trino",
-      "catalog": "iceberg",
-      "allow": "read-only"
-    },
-    {
-      "user": "metabase",
-      "catalog": "iceberg",
-      "allow": "read-only"
-    },
-    {
-      "user": "agent-api",
-      "catalog": "iceberg",
-      "allow": "read-only"
-    }
+    { "user": "hochom", "catalog": "iceberg", "allow": "all" },
+    { "user": "dbt", "catalog": "iceberg", "allow": "all" },
+    { "user": "dbt", "catalog": "system", "allow": "read-only" },
+    { "user": "trino", "catalog": "iceberg", "allow": "read-only" },
+    { "user": "metabase", "catalog": "iceberg", "allow": "read-only" },
+    { "user": "agent-api", "catalog": "iceberg", "allow": "read-only" }
   ],
-
   "schemas": [
-    {
-      "user": "hochom",
-      "catalog": "iceberg",
-      "schema": ".*",
-      "owner": true
-    },
-    {
-      "user": "trino|metabase|agent-api",
-      "catalog": "iceberg",
-      "schema": ".*",
-      "owner": false
-    }
+    { "user": "hochom", "catalog": "iceberg", "schema": ".*", "owner": true },
+    { "user": "dbt", "catalog": "iceberg", "schema": ".*", "owner": true },
+    { "user": "dbt", "catalog": "system", "schema": "metadata", "owner": false },
+    { "user": "trino|metabase|agent-api", "catalog": "iceberg", "schema": ".*", "owner": false }
   ],
-
   "tables": [
-    {
-      "user": "hochom",
-      "catalog": "iceberg",
-      "schema": ".*",
-      "table": ".*",
-      "privileges": [
-        "SELECT",
-        "INSERT",
-        "DELETE",
-        "UPDATE",
-        "OWNERSHIP"
-      ]
-    },
-
-    {
-      "user": "trino|metabase",
-      "catalog": "iceberg",
-      "schema": "consumption",
-      "table": ".*",
-      "privileges": [
-        "SELECT"
-      ]
-    },
-
-    {
-      "user": "agent-api",
-      "catalog": "iceberg",
-      "schema": "consumption",
-      "table": "cns_pdm_executive_overview",
-      "privileges": [
-        "SELECT"
-      ]
-    }
+    { "user": "hochom", "catalog": "iceberg", "schema": ".*", "table": ".*",
+      "privileges": ["SELECT", "INSERT", "DELETE", "UPDATE", "OWNERSHIP"] },
+    { "user": "dbt", "catalog": "iceberg", "schema": ".*", "table": ".*",
+      "privileges": ["SELECT", "INSERT", "DELETE", "UPDATE", "OWNERSHIP"] },
+    { "user": "dbt", "catalog": "system", "schema": "metadata", "table": ".*",
+      "privileges": ["SELECT"] },
+    { "user": "trino|metabase", "catalog": "iceberg", "schema": "consumption",
+      "table": ".*", "privileges": ["SELECT"] },
+    { "user": "agent-api", "catalog": "iceberg", "schema": "consumption",
+      "table": "cns_pdm_executive_overview", "privileges": ["SELECT"] }
   ],
-
   "system_session_properties": [
-    {
-      "user": "hochom",
-      "property": ".*",
-      "allow": true
-    },
-    {
-      "user": "trino|metabase|agent-api",
-      "property": ".*",
-      "allow": false
-    }
+    { "user": "hochom", "property": ".*", "allow": true },
+    { "user": "dbt", "property": ".*", "allow": true },
+    { "user": "trino|metabase|agent-api", "property": ".*", "allow": false }
   ]
 }

@@ -25,12 +25,12 @@ select
     year(calendar_date) as calendar_year,
     quarter(calendar_date) as calendar_quarter,
     month(calendar_date) as month_number,
-    monthname(calendar_date) as month_name,
-    weekofyear(calendar_date) as iso_week_number,
+    date_format(cast(calendar_date as timestamp), '%M') as month_name,
+    week(calendar_date) as iso_week_number,
     day(calendar_date) as day_of_month,
-    dayofweek(calendar_date) as day_of_week,
-    dayname(calendar_date) as day_name,
-    dayofweek(calendar_date) in (0, 6) as is_weekend
+    day_of_week(calendar_date) as day_of_week,
+    date_format(cast(calendar_date as timestamp), '%W') as day_name,
+    day_of_week(calendar_date) in (6, 7) as is_weekend
 from dates
 where calendar_date is not null
 union all

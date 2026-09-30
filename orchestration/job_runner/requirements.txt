@@ -2,5 +2,6 @@ fastapi==0.115.12
 uvicorn==0.34.2
 boto3==1.38.13
 dbt-core==1.9.4
-dbt-duckdb==1.9.3
 psycopg[binary]==3.2.9
+dbt-trino==1.9.3
+duckdb==1.5.5

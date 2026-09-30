@@ -57,7 +57,7 @@ def test_server_trino_and_worker_use_separate_contracts():
     assert "/q/health/ready" in nessie
 
 
-def test_transform_and_trino_endpoints_are_deployment_configurable(monkeypatch):
+def test_trino_endpoint_is_deployment_configurable(monkeypatch):
     from orchestration.job_runner.transform_execution import (
         build_transform_command,
     )
@@ -68,9 +68,6 @@ def test_transform_and_trino_endpoints_are_deployment_configurable(monkeypatch):
     profile = (ROOT / "transform/dbt/profiles.yml").read_text(encoding="utf-8")
     catalog = (
         ROOT / "platform/trino/catalog/iceberg.properties"
-    ).read_text(encoding="utf-8")
-    plugin = (
-        ROOT / "orchestration/job_runner/nessie_iceberg_plugin.py"
     ).read_text(encoding="utf-8")
 
     # Worker/runtime receives the Nessie endpoint through deployment
@@ -88,20 +85,6 @@ def test_transform_and_trino_endpoints_are_deployment_configurable(monkeypatch):
         _transform_credentials("https://nessie.example"),
     )
     assert command.environment["NESSIE_ENDPOINT"] == "https://nessie.example"
-
-    # Plugin consumes NESSIE_ENDPOINT and constructs the execution-scoped
-    # REST catalog endpoint for the governed branch. Parameter-binding
-    # security remains covered by test_nessie_plugin_contract_*.
-    assert 'os.environ.get("NESSIE_ENDPOINT"' in plugin
-    assert "/iceberg/{branch}" in plugin
-
-    # profiles.yml loads the plugin through dbt-duckdb's supported credential;
-    # the transform token and endpoint stay outside the profile (they are
-    # runtime-scoped, read by the plugin from the governed child env).
-    assert "module_paths:" in profile
-    assert "- module: nessie_iceberg_plugin" in profile
-    assert "NESSIE_TRANSFORM_TOKEN" not in profile
-    assert "NESSIE_ENDPOINT" not in profile
 
     # Trino keeps its own deployment-configurable read endpoint.
     trino_env = compose["services"]["trino"]["environment"]
@@ -148,8 +131,8 @@ def test_nessie_authorities_are_not_cross_wired():
 
 def _transform_credentials(endpoint: str) -> dict[str, str]:
     return {
-        "ML_S3_ACCESS_KEY_ID": "ml-access",
-        "ML_S3_SECRET_ACCESS_KEY": "ml-secret",
+        "ML_TRANSFORM_S3_ACCESS_KEY_ID": "ml-access",
+        "ML_TRANSFORM_S3_SECRET_ACCESS_KEY": "ml-secret",
         "NESSIE_TRANSFORM_TOKEN": "transform-token",
         "NESSIE_ENDPOINT": endpoint,
         "S3_ENDPOINT": "https://object-store.example.test",
@@ -159,6 +142,8 @@ def _transform_credentials(endpoint: str) -> dict[str, str]:
         "RAW_ROOT": "raw", "RAW_VERSION": "v2", "RAW_PREFIX": "raw/v2",
         "WAREHOUSE_PREFIX": "warehouse",
         "WAREHOUSE_URI": "s3://dp-ai-payment/warehouse",
+        "NESSIE_WAREHOUSE": "s3://dp-ai-payment/warehouse",
+        "DBT_TRINO_PASSWORD": "test-trino-password",
         "DBT_S3_URL_STYLE": "path",
         "DBT_DATABASE": "lakehouse",
     }
@@ -201,9 +186,8 @@ def test_production_transform_accepts_https_nessie_contract(
     assert command.environment["NESSIE_ENDPOINT"] == (
         "https://nessie.example"
     )
-    assert command.environment["NESSIE_TRANSFORM_TOKEN"] == (
-        "transform-token"
-    )
+    assert "NESSIE_TRANSFORM_TOKEN" not in command.environment
+    assert "NESSIE_TRANSFORM_TOKEN" not in command.trino_environment
 
 
 def test_development_transform_allows_http_nessie(monkeypatch):

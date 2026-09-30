@@ -43,7 +43,7 @@ with payment_daily as (
     select reporting_date from lifecycle_daily
 )
 select
-    dates.reporting_date,
+    reporting_date,
     coalesce(payment.payment_count, 0) as payment_count,
     coalesce(payment.successful_payment_count, 0) as successful_payment_count,
     coalesce(payment.failed_payment_count, 0) as failed_payment_count,
@@ -64,4 +64,4 @@ left join payment_daily payment using (reporting_date)
 left join disbursement_daily disbursement using (reporting_date)
 left join portfolio_daily portfolio using (reporting_date)
 left join lifecycle_daily lifecycle using (reporting_date)
-where dates.reporting_date is not null
+where reporting_date is not null

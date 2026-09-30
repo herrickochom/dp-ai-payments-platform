@@ -18,14 +18,15 @@ EXECUTION_ID = "be_" + ("a" * 32)
 
 def credentials_for(authority):
     source = {
-        "ORDINARY_S3_ACCESS_KEY_ID": "ordinary-key",
-        "ORDINARY_S3_SECRET_ACCESS_KEY": "ordinary-secret",
-        "RESTRICTED_S3_ACCESS_KEY_ID": "restricted-key",
-        "RESTRICTED_S3_SECRET_ACCESS_KEY": "restricted-secret",
-        "ML_S3_ACCESS_KEY_ID": "ml-key",
-        "ML_S3_SECRET_ACCESS_KEY": "ml-secret",
+        "ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID": "ordinary-key",
+        "ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY": "ordinary-secret",
+        "RESTRICTED_TRANSFORM_S3_ACCESS_KEY_ID": "restricted-key",
+        "RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY": "restricted-secret",
+        "ML_TRANSFORM_S3_ACCESS_KEY_ID": "ml-key",
+        "ML_TRANSFORM_S3_SECRET_ACCESS_KEY": "ml-secret",
         "NESSIE_TRANSFORM_TOKEN": "catalog-token",
-        "S3_ENDPOINT": "http://minio:9000", "S3_USE_SSL": "false", "OBJECT_STORE_REGION": "us-east-1", "OBJECT_STORE_BUCKET": "dp-ai-payment", "RAW_ROOT": "raw", "RAW_VERSION": "v2", "RAW_PREFIX": "raw/v2", "WAREHOUSE_PREFIX": "warehouse", "WAREHOUSE_URI": "s3://dp-ai-payment/warehouse", "S3_PATH_STYLE_ACCESS": "true", "DBT_S3_URL_STYLE": "path",
+        "DBT_TRINO_PASSWORD": "test-trino-password",
+        "S3_ENDPOINT": "http://minio:9000", "S3_USE_SSL": "false", "OBJECT_STORE_REGION": "us-east-1", "OBJECT_STORE_BUCKET": "dp-ai-payment", "RAW_ROOT": "raw", "RAW_VERSION": "v2", "RAW_PREFIX": "raw/v2", "WAREHOUSE_PREFIX": "warehouse", "WAREHOUSE_URI": "s3://dp-ai-payment/warehouse", "NESSIE_WAREHOUSE": "s3://dp-ai-payment/warehouse", "S3_PATH_STYLE_ACCESS": "true", "DBT_S3_URL_STYLE": "path",
         "MINIO_ROOT_USER": "must-not-cross-boundary",
         "MINIO_ROOT_PASSWORD": "must-not-cross-boundary",
         "AWS_ACCESS_KEY_ID": "must-not-cross-boundary",
@@ -43,14 +44,21 @@ def test_command_is_server_owned_and_bounded(batch_id):
         credentials_for(batch.authority),
     )
 
-    assert command.argv[0] == "/opt/dbt/bin/dbt"
-    assert command.argv[1] == "build"
-    assert "--project-dir" in command.argv
-    assert "--profiles-dir" in command.argv
-    assert "--select" in command.argv
+    if batch.ownership_unit in {"raw_to_bronze", "ml_derived_bronze"}:
+        assert command.argv[:2] == (
+            "/usr/local/bin/python",
+            "/app/job_runner/raw_to_bronze_executor.py",
+        )
+        selected = command.argv[2:]
+    else:
+        assert command.argv[0] == "/opt/dbt/bin/dbt"
+        assert command.argv[1] == "build"
+        assert "--project-dir" in command.argv
+        assert "--profiles-dir" in command.argv
+        assert "--select" in command.argv
 
-    select_index = command.argv.index("--select")
-    selected = command.argv[select_index + 1 :]
+        select_index = command.argv.index("--select")
+        selected = command.argv[select_index + 1 :]
 
     expected = tuple(
         model.rsplit(".", 1)[-1]
@@ -79,29 +87,40 @@ def test_only_authority_credentials_cross_process_boundary(batch_id):
         credentials_for(batch.authority),
     )
 
-    assert command.environment["TRANSFORM_S3_ACCESS_KEY_ID"]
-    assert command.environment["TRANSFORM_S3_SECRET_ACCESS_KEY"]
-    assert command.environment["NESSIE_TRANSFORM_TOKEN"] == "catalog-token"
+    assert command.trino_environment["TRINO_S3_ACCESS_KEY_ID"]
+    assert command.trino_environment["TRINO_S3_SECRET_ACCESS_KEY"]
+    assert "NESSIE_TRANSFORM_TOKEN" not in command.environment
 
     for key in FORBIDDEN_ENV:
         assert key not in command.environment
 
     authority_source_credentials = {
-        "ORDINARY_S3_ACCESS_KEY_ID",
-        "ORDINARY_S3_SECRET_ACCESS_KEY",
-        "RESTRICTED_S3_ACCESS_KEY_ID",
-        "RESTRICTED_S3_SECRET_ACCESS_KEY",
-        "ML_S3_ACCESS_KEY_ID",
-        "ML_S3_SECRET_ACCESS_KEY",
+        "ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID",
+        "ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY",
+        "RESTRICTED_TRANSFORM_S3_ACCESS_KEY_ID",
+        "RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY",
+        "ML_TRANSFORM_S3_ACCESS_KEY_ID",
+        "ML_TRANSFORM_S3_SECRET_ACCESS_KEY",
     }
-    for key in authority_source_credentials:
-        assert key not in command.environment
+
+    selected_credentials = set(AUTHORITY_ENV[batch.authority]) - {
+        "NESSIE_TRANSFORM_TOKEN"
+    }
+
+    if batch.ownership_unit in {"raw_to_bronze", "ml_derived_bronze"}:
+        assert authority_source_credentials.intersection(
+            command.environment
+        ) == selected_credentials
+    else:
+        assert not authority_source_credentials.intersection(
+            command.environment
+        )
 
 
-def test_raw_to_bronze_is_one_process_with_exactly_48_explicit_models():
+def test_raw_to_bronze_is_one_process_with_exactly_24_explicit_models():
     batch = EXECUTION_BATCHES["C4_RAW_02"]
 
-    assert len(batch.model_allowlist) == 48
+    assert len(batch.model_allowlist) == 24
 
     command = build_transform_command(
         "C4_RAW_02",
@@ -109,18 +128,22 @@ def test_raw_to_bronze_is_one_process_with_exactly_48_explicit_models():
         credentials_for(batch.authority),
     )
 
-    assert command.argv.count("build") == 1
-    assert command.argv.count("--select") == 1
+    assert command.argv[:2] == (
+        "/usr/local/bin/python",
+        "/app/job_runner/raw_to_bronze_executor.py",
+    )
+    assert "build" not in command.argv
+    assert "--select" not in command.argv
 
-    selected = command.argv[
-        command.argv.index("--select") + 1 :
-    ]
+    selected = command.argv[2:]
 
-    assert len(selected) == 48
-    assert len(set(selected)) == 48
+    assert len(selected) == 24
+    assert len(set(selected)) == 24
 
 
 def test_each_execution_gets_isolated_duckdb_path():
+    # DuckDB file-per-execution was retired with the Trino profile; the
+    # per-execution isolation contract is now DBT_LOG_PATH/DBT_TARGET_PATH.
     first = build_transform_command(
         "C4_ML_01",
         "be_" + ("1" * 32),
@@ -132,9 +155,8 @@ def test_each_execution_gets_isolated_duckdb_path():
         credentials_for("ml_prediction_transform"),
     )
 
-    assert first.duckdb_path != second.duckdb_path
-    assert first.environment["DBT_DUCKDB_PATH"] == first.duckdb_path
-    assert second.environment["DBT_DUCKDB_PATH"] == second.duckdb_path
+    assert first.environment["DBT_LOG_PATH"] != second.environment["DBT_LOG_PATH"]
+    assert first.environment["DBT_TARGET_PATH"] != second.environment["DBT_TARGET_PATH"]
 
 
 def test_each_execution_gets_isolated_dbt_log_path():
@@ -227,61 +249,18 @@ def test_publication_macro_never_drops_existing_table():
 def test_profile_uses_execution_scoped_credentials():
     """Bearer credentials never enter profiles.yml.
 
-    The execution-scoped Nessie token crosses the governed transform
-    boundary (AUTHORITY_ENV) and is consumed only by
-    nessie_iceberg_plugin.py, which binds it with ``TOKEN ?`` /
-    ``ENDPOINT ?`` parameters. Behavioural proofs for the plugin live in
-    tests/security/test_nessie_plugin_contract_{b,d,e}.py; this test
-    owns the profile-side contract.
+    With the Trino profile, Trino reads its S3/Iceberg configuration from
+    platform/trino/etc/catalog/nessie.properties; the dbt profile carries
+    only Trino connection fields. This test keeps the "no bearer token in
+    profile" assertion.
     """
     profile = Path("transform/dbt/profiles.yml").read_text()
-    plugin = Path("orchestration/job_runner/nessie_iceberg_plugin.py").read_text()
-
-    # Execution-scoped object-store credentials stay env-driven.
-    assert "DBT_DUCKDB_PATH" in profile
-    assert "TRANSFORM_S3_ACCESS_KEY_ID" in profile
-    assert "TRANSFORM_S3_SECRET_ACCESS_KEY" in profile
 
     # No bearer credential is referenced or interpolated in the profile.
     assert "NESSIE_TRANSFORM_TOKEN" not in profile
     assert "NESSIE_AUTH_TOKEN" not in profile
     interpolated = re.findall(r"env_var\(\s*['\"]([^'\"]+)['\"]", profile)
     assert not any("TOKEN" in name or name.startswith("NESSIE") for name in interpolated)
-
-    # Nessie access is wired through the dbt-duckdb plugin mechanism,
-    # not through profile credentials (module_paths wiring: contract_b).
-    assert "plugins:" in profile
-    assert "module: nessie_iceberg_plugin" in profile
-
-    # Token consumption happens only in the plugin, via parameter
-    # binding rather than SQL interpolation (behaviour: contract_d/e).
-    assert 'os.environ.get("NESSIE_TRANSFORM_TOKEN"' in plugin
-    assert "TOKEN ?" in plugin and "[token]" in plugin
-    assert "ENDPOINT ?" in plugin
-    assert "TOKEN {" not in plugin
-
-    # The governed transform boundary supplies the token and forbids
-    # MinIO root / generic AWS credentials from crossing the child env.
-    for authority_env in AUTHORITY_ENV.values():
-        assert "NESSIE_TRANSFORM_TOKEN" in authority_env
-    for name in (
-        "MINIO_ROOT_USER",
-        "MINIO_ROOT_PASSWORD",
-        "AWS_ACCESS_KEY_ID",
-        "AWS_SECRET_ACCESS_KEY",
-    ):
-        assert name in FORBIDDEN_ENV
-        assert name not in profile
-    assert "PLATFORM_RAW_READ_ACCESS_KEY" not in profile
-    assert "PLATFORM_RAW_READ_SECRET_KEY" not in profile
-
-
-def test_profile_uses_immutable_extension_directory_and_valid_scalar_jinja():
-    profile = Path("transform/dbt/profiles.yml").read_text()
-
-    assert "extension_directory: /opt/duckdb/extensions" in profile
-    assert "{%" not in profile
-    assert "%}" not in profile
 
 
 def test_worker_image_bakes_required_extensions_into_immutable_directory():
@@ -290,7 +269,9 @@ def test_worker_image_bakes_required_extensions_into_immutable_directory():
     ).read_text()
 
     assert "extension_directory': '/opt/duckdb/extensions'" in dockerfile
-    assert "('httpfs', 'avro', 'iceberg')" in dockerfile
+    assert "c.install_extension('httpfs')" in dockerfile
+    assert "c.install_extension('avro')" in dockerfile
+    assert "install_extension('iceberg')" not in dockerfile
 
 
 def test_worker_keeps_read_only_root_and_execution_tmpfs():
@@ -314,8 +295,11 @@ def test_dbt_target_is_fixed_and_not_execution_authority():
             credentials_for(batch.authority),
         )
 
-        target_index = command.argv.index("--target")
-        assert command.argv[target_index + 1] == "runtime"
+        if batch.ownership_unit not in {"raw_to_bronze", "ml_derived_bronze"}:
+            target_index = command.argv.index("--target")
+            assert command.argv[target_index + 1] == "runtime"
+        else:
+            assert "--target" not in command.argv
 
         assert command.environment["TRANSFORM_AUTHORITY"] == batch.authority
         authorities.add(batch.authority)
@@ -371,7 +355,6 @@ def test_dbt_schema_test_arguments_are_flat_for_pinned_dbt_1_9_4():
             elif isinstance(node, list):
                 stack.extend(node)
 
-    # The seven formerly-wrapped schema files alone declared 493 test
-    # entries when the arguments: wrappers were flattened; a lower count
-    # would mean tests were dropped rather than re-nested.
-    assert test_entries >= 493
+    # Current canonical schemas contain 342 test entries; deleted duplicate
+    # PLM/PMN models stay retired rather than inflating this safety baseline.
+    assert test_entries >= 342

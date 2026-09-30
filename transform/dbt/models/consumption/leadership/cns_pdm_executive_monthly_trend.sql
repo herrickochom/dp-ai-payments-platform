@@ -163,10 +163,7 @@ payment_activity as (
 combined as (
 
     select
-        coalesce(
-            loan.reporting_month,
-            payment.reporting_month
-        ) as reporting_month,
+        reporting_month,
 
         loan.approved_loan_count,
         loan.approved_beneficiary_count,

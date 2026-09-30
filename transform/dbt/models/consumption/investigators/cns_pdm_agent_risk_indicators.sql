@@ -1,7 +1,7 @@
 {{ config(materialized='iceberg_table', tags=['consumption', 'risk']) }}
 
 select
-    cashout.agent_sk,
+    agent_sk,
     cashout.cashout_date_sk,
     agent.agent_id,
     geography.region,

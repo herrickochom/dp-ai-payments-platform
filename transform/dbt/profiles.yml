@@ -1,74 +1,41 @@
-# /home/hochom/projects/dp-pdm-ai-platform/transform/dbt/profiles.yml
+# /home/hochom/projects/dp-ai-payments-platform/transform/dbt/profiles.yml
+#
+# Governed dbt execution profile.
+#
+# dbt executes through the dedicated transform Trino boundary.
+# Trino, not dbt, owns the Nessie REST and S3 configuration.
+#
+# The transform Trino catalog is bound at startup to:
+#
+#   transform_<run>|<NESSIE_WAREHOUSE>
+#
+# Therefore dbt must never connect directly to Nessie or MinIO and must
+# never select or default to the Nessie main branch.
 
 pdm_platform:
   target: runtime
 
   outputs:
     runtime:
-      type: duckdb
+      type: trino
 
-      # Local DuckDB execution database.
-      path: "{{ env_var('DBT_DUCKDB_PATH') }}"
+      # Trino PASSWORD authentication.
+      method: ldap
+      user: "{{ env_var('DBT_TRINO_USER') }}"
+      password: "{{ env_var('DBT_TRINO_PASSWORD') }}"
 
-      # Required extensions are baked into this immutable image directory.
-      config_options:
-        extension_directory: /opt/duckdb/extensions
+      # Dedicated transform Trino service.
+      host: "{{ env_var('DBT_TRINO_HOST') }}"
+      port: "{{ env_var('DBT_TRINO_PORT', '8443') | int }}"
+      http_scheme: https
 
-      # Default dbt schema.
+      # The transform Trino exposes the run-scoped Nessie catalog as
+      # the normal logical Iceberg catalog.
+      database: iceberg
+
+      # Default dbt schema. Individual models may override this through
+      # their existing dbt configuration.
       schema: staging
 
-      # Keep dbt execution conservative for large synthetic datasets.
+      # Keep governed transform execution conservative.
       threads: 1
-
-      # ------------------------------------------------------------------------
-      # DuckDB extensions
-      # ------------------------------------------------------------------------
-
-      extensions:
-        - httpfs
-        - avro
-        - iceberg
-
-      # dbt-duckdb 1.9.3 cannot express authenticated Iceberg REST ATTACH
-      # options. This controlled connection plugin creates a temporary bearer
-      # secret and attaches the execution-scoped Nessie reference as lakehouse.
-      # module_paths is the explicit packaging/import design: the dbt child
-      # process starts with a minimal environment (no cwd on sys.path), so the
-      # plugin directory is added via dbt-duckdb's supported credential rather
-      # than runtime sys.path mutation inside the plugin.
-      module_paths:
-        - /app/job_runner
-      plugins:
-        - module: nessie_iceberg_plugin
-
-      # ------------------------------------------------------------------------
-      # DuckDB runtime / memory configuration
-      # ------------------------------------------------------------------------
-
-      settings:
-        memory_limit: "7GB"
-        preserve_insertion_order: false
-
-        # Do not configure temp_directory here. dbt-duckdb reapplies settings
-        # whenever it opens a connection, but DuckDB cannot set this option
-        # after the temp directory has been used for spilling. The Compose
-        # services mount the swap volume at DuckDB's default path instead.
-
-        # MinIO / S3 configuration
-        s3_region: "{{ env_var('OBJECT_STORE_REGION') }}"
-        s3_endpoint: "{{ env_var('DUCKDB_S3_ENDPOINT') }}"
-        s3_url_style: "{{ env_var('DBT_S3_URL_STYLE') }}"
-        s3_use_ssl: "{{ env_var('S3_USE_SSL') | lower }}"
-        ca_cert_file: "{{ env_var('S3_CA_BUNDLE', '') }}"
-        s3_access_key_id: "{{ env_var('TRANSFORM_S3_ACCESS_KEY_ID') }}"
-        s3_secret_access_key: "{{ env_var('TRANSFORM_S3_SECRET_ACCESS_KEY') }}"
-
-      secrets:
-        - type: s3
-          provider: config
-          key_id: "{{ env_var('TRANSFORM_S3_ACCESS_KEY_ID') }}"
-          secret: "{{ env_var('TRANSFORM_S3_SECRET_ACCESS_KEY') }}"
-          region: "{{ env_var('OBJECT_STORE_REGION') }}"
-          endpoint: "{{ env_var('DUCKDB_S3_ENDPOINT') }}"
-          url_style: "{{ env_var('DBT_S3_URL_STYLE') }}"
-          use_ssl: "{{ env_var('S3_USE_SSL') | lower }}"

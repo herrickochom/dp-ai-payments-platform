@@ -1,7 +1,7 @@
 {{ config(materialized='iceberg_table', tags=['consumption', 'local-government']) }}
 
 select
-    parish.parish_sk,
+    parish_sk,
     parish.region,
     parish.district,
     parish.parish,

@@ -1,0 +1,16 @@
+services:
+  nessie:
+    volumes:
+      - ./platform/nessie/config/application.properties:/deployments/config/application.properties:ro
+  platform-transform-worker:
+    volumes:
+      - ./orchestration/job_runner/nessie_iceberg_plugin.py:/app/job_runner/nessie_iceberg_plugin.py:ro
+      - pycache-worker:/app/job_runner/__pycache__
+  platform-job-runner:
+    volumes:
+      - ./orchestration/job_runner/nessie_iceberg_plugin.py:/app/job_runner/nessie_iceberg_plugin.py:ro
+      - pycache-runner:/app/job_runner/__pycache__
+
+volumes:
+  pycache-worker: null
+  pycache-runner: null

@@ -3,7 +3,7 @@ from __future__ import annotations
 import importlib, sys
 import pytest
 from test_nessie_plugin_contract_a import (
-    ROOT, PLUGIN_PATH, MACRO_PATH, VALID_TR, SYNTHETIC_TOKEN, _load_plugin, _env, _FakeConn, _STUBBED,
+    ROOT, PLUGIN_PATH, PROFILE_PATH, MACRO_PATH, VALID_TR, SYNTHETIC_TOKEN, _load_plugin, _env, _FakeConn, _STUBBED,
 )
 WORKER_PATH = ROOT / "orchestration/job_runner/transform_worker.py"
 
@@ -33,12 +33,8 @@ def test_create_secret_uses_parameter_binding(monkeypatch):
     real = duckdb.connect(":memory:")
     real.execute("CREATE SECRET test_secret (TYPE iceberg, TOKEN ?)", [SYNTHETIC_TOKEN])
 
-def test_attach_endpoint_uses_parameter_binding(monkeypatch):
-    module, _ = _load_plugin()
-    _env(monkeypatch, branch=VALID_TR, token=SYNTHETIC_TOKEN)
-    conn = _FakeConn()
-    module.Plugin(name="p", plugin_config={}, credentials=None).configure_connection(conn)
-    attach_sql, attach_params = conn.calls[1]
-    assert "ENDPOINT ?" in attach_sql
-    assert attach_params and attach_params[0].endswith(f"/iceberg/{VALID_TR}")
-    assert SYNTHETIC_TOKEN not in attach_sql
+def test_duckdb_plugin_is_deprecated(monkeypatch):
+    plugin_text = PLUGIN_PATH.read_text(encoding="utf-8")
+    assert plugin_text.startswith('"""DEPRECATED:')
+    profile_text = PROFILE_PATH.read_text(encoding="utf-8")
+    assert "nessie_iceberg_plugin" not in profile_text
