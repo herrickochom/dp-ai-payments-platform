@@ -102,7 +102,7 @@ def test_success(monkeypatch):
     assert result["object_writes"] == 0
     assert result["object_deletes"] == 0
 
-    client.head_bucket.assert_called_once()
+    client.head_bucket.assert_not_called()
 
 
 def test_missing_topic_fails(monkeypatch):

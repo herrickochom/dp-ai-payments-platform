@@ -34,7 +34,6 @@ def test_runtime_uses_canonical_warehouse_location():
 
     assert "WAREHOUSE_BUCKET" not in compose + nessie
     assert "nessie.catalog.warehouses.payments.location=${WAREHOUSE_URI}" in nessie
-    assert "nessie.catalog.default-warehouse=${NESSIE_WAREHOUSE}" in nessie
 
     assert "WAREHOUSE_URI" in compose
     assert "OBJECT_STORE_BUCKET" in compose

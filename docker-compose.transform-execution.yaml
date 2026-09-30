@@ -13,5 +13,18 @@ services:
     environment:
       PLATFORM_RUNNER_EXECUTION_ENABLED: 'true'
       PLATFORM_JOB_EXECUTION_ENABLED: 'true'
+
+      JAVA_TOOL_OPTIONS: -Djna.tmpdir=/var/lib/platform-transform-worker/jna
+
+      # dbt connects only to the dedicated transform Trino boundary.
+      DBT_TRINO_HOST: 127.0.0.1
+      DBT_TRINO_PORT: '18443'
+      TRINO_KEYSTORE_PASSWORD: ${TRINO_KEYSTORE_PASSWORD:?TRINO_KEYSTORE_PASSWORD is required}
+      TRINO_INTERNAL_SHARED_SECRET: ${TRINO_INTERNAL_SHARED_SECRET:?TRINO_INTERNAL_SHARED_SECRET is required}
+      DBT_TRINO_USER: dbt
+      DBT_TRINO_PASSWORD: ${DBT_TRINO_PASSWORD:?DBT_TRINO_PASSWORD is required}
+    tmpfs:
+      - /var/lib/platform-transform-worker/jna:exec,uid=50001,gid=50001,mode=0700
+
     healthcheck:
       disable: true

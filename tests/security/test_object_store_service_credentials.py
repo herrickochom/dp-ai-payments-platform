@@ -19,6 +19,7 @@ def service(name):
     return match.group(1)
 
 
+
 def test_raw_consumer_uses_dedicated_credentials():
     block = service("payment-consumer-events")
     consumer = (ROOT / "services/kafka-consumer-events/kafka_consumer_events.py").read_text()
@@ -129,20 +130,21 @@ def test_runtime_has_no_legacy_warehouse_bucket_dependency():
         assert "dp-ai-payment-warehouse" not in text
 
 
+
 @pytest.mark.parametrize("authority,source_keys", [
-    ("ordinary_transform", ("ORDINARY_S3_ACCESS_KEY_ID", "ORDINARY_S3_SECRET_ACCESS_KEY")),
-    ("restricted_identity_transform", ("RESTRICTED_S3_ACCESS_KEY_ID", "RESTRICTED_S3_SECRET_ACCESS_KEY")),
-    ("ml_prediction_transform", ("ML_S3_ACCESS_KEY_ID", "ML_S3_SECRET_ACCESS_KEY")),
+    ("ordinary_transform", ("ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID", "ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY")),
+    ("restricted_identity_transform", ("RESTRICTED_TRANSFORM_S3_ACCESS_KEY_ID", "RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY")),
+    ("ml_prediction_transform", ("ML_TRANSFORM_S3_ACCESS_KEY_ID", "ML_TRANSFORM_S3_SECRET_ACCESS_KEY")),
 ])
 def test_transform_child_receives_only_selected_authority(authority, source_keys):
     batch = next(batch for batch in EXECUTION_BATCHES.values() if batch.authority == authority)
     source = {
-        "ORDINARY_S3_ACCESS_KEY_ID": "ordinary-id",
-        "ORDINARY_S3_SECRET_ACCESS_KEY": "ordinary-secret",
-        "RESTRICTED_S3_ACCESS_KEY_ID": "restricted-id",
-        "RESTRICTED_S3_SECRET_ACCESS_KEY": "restricted-secret",
-        "ML_S3_ACCESS_KEY_ID": "ml-id",
-        "ML_S3_SECRET_ACCESS_KEY": "ml-secret",
+        "ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID": "ordinary-id",
+        "ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY": "ordinary-secret",
+        "RESTRICTED_TRANSFORM_S3_ACCESS_KEY_ID": "restricted-id",
+        "RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY": "restricted-secret",
+        "ML_TRANSFORM_S3_ACCESS_KEY_ID": "ml-id",
+        "ML_TRANSFORM_S3_SECRET_ACCESS_KEY": "ml-secret",
         "PLATFORM_RAW_READ_ACCESS_KEY": "read-id",
         "PLATFORM_RAW_READ_SECRET_KEY": "read-secret",
         "MINIO_ROOT_USER": "root-id",
@@ -158,15 +160,30 @@ def test_transform_child_receives_only_selected_authority(authority, source_keys
         "RAW_PREFIX": "raw/v2",
         "WAREHOUSE_PREFIX": "warehouse",
         "WAREHOUSE_URI": "s3://dp-ai-payment/warehouse",
+        "NESSIE_WAREHOUSE": "s3://dp-ai-payment/warehouse",
         "DBT_S3_URL_STYLE": "path",
+        "DBT_TRINO_PASSWORD": "test-trino-password",
         "NESSIE_ENDPOINT": "https://nessie.example.test",
         "NESSIE_TRANSFORM_TOKEN": "catalog-token",
     }
     command = build_transform_command(batch.batch_id, "be_" + "a" * 32, source)
-    assert command.environment["TRANSFORM_S3_ACCESS_KEY_ID"] == source[source_keys[0]]
-    assert command.environment["TRANSFORM_S3_SECRET_ACCESS_KEY"] == source[source_keys[1]]
-    for name in source.keys() - {"NESSIE_TRANSFORM_TOKEN", *('S3_ENDPOINT', 'S3_USE_SSL', 'OBJECT_STORE_REGION', 'OBJECT_STORE_BUCKET', 'RAW_ROOT', 'RAW_VERSION', 'RAW_PREFIX', 'WAREHOUSE_PREFIX', 'WAREHOUSE_URI', 'DBT_S3_URL_STYLE', 'NESSIE_ENDPOINT')}:
-        assert name not in command.environment
+    assert command.trino_environment["TRINO_S3_ACCESS_KEY_ID"] == source[source_keys[0]]
+    assert command.trino_environment["TRINO_S3_SECRET_ACCESS_KEY"] == source[source_keys[1]]
+    credential_names = {
+        name
+        for name in source
+        if name.endswith(("ACCESS_KEY_ID", "SECRET_ACCESS_KEY"))
+        or name.endswith(("ACCESS_KEY", "SECRET_KEY"))
+        or name.startswith("MINIO_ROOT_")
+    }
+    expected_child_credentials = (
+        set(source_keys)
+        if batch.ownership_unit == "raw_to_bronze"
+        else set()
+    )
+    assert credential_names.intersection(command.environment) == (
+        expected_child_credentials
+    )
 
 
 def test_platform_raw_read_stays_in_readiness_authority():

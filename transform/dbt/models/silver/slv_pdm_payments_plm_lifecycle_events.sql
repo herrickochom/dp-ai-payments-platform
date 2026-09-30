@@ -9,4 +9,4 @@ select
     technical_stage, technical_status, event_timestamp, processing_timestamp,
     x_latency_ms, x_error_code, x_error_category, x_retry_count, x_timeout_indicator,
     kafka_topic, kafka_partition, kafka_offset, kafka_timestamp
-from {{ ref('br_pdm_payments_plm_lifecycle_events') }}
+from {{ source('bronze', 'br_pdm_payments_plm_lifecycle_events') }}

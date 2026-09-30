@@ -218,19 +218,6 @@ All payment messages must include the PDM loan_id as the EndToEndId:
 ## 📁 dbt Staging Layer Mapping
 | Staging Model | Source Directory | Silver Table |
 | --- | --- | --- |
-| stg_pdmis_beneficiaries | pdmis/beneficiaries.json | slv_pdm_payments_party |
-| stg_pdmis_loans | pdmis/loans.json | slv_pdm_disbursements |
-| stg_pdmis_saccos | pdmis/saccos.json | slv_pdm_payments_party |
-| stg_icmn_vpm | icmn/vpm/pain001/*.xml | slv_pdm_payments_messages |
-| stg_icmn_pmn | icmn/pmn/pain001/*.xml | slv_pdm_payments_messages |
-| stg_cpo_psn | cpo/psn/pain002/*.xml | slv_pdm_payments_status_report |
-| stg_cpo_plm | cpo/plm/pain002/*.xml | slv_pdm_payments_messages |
-| stg_wendi_camt053 | wendi/camt053/*.xml | slv_pdm_payments_accounts |
-| stg_wendi_camt052 | wendi/camt052/*.xml | slv_pdm_payments_accounts |
-| stg_wendi_camt054 | wendi/camt054/*.xml | slv_pdm_payments_transactions |
-| stg_mtn_pacs008 | mobile_networks/mtn/pacs008/*.xml | slv_pdm_payments_transactions |
-| stg_airtel_pacs008 | mobile_networks/airtel/pacs008/*.xml | slv_pdm_payments_transactions |
-| stg_agent_transactions | agent_network/agent_transactions/*.xml | slv_pdm_payments_transactions |
 ## 🔄 Complete Payment Flow
 
 ```mermaid

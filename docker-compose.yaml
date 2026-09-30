@@ -405,7 +405,7 @@ services:
       QUARKUS_OIDC_CLIENT_ID: ${NESSIE_OIDC_CLIENT_ID:?NESSIE_OIDC_CLIENT_ID is required}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      NESSIE_CATALOG_DEFAULT_WAREHOUSE: ${NESSIE_WAREHOUSE:?NESSIE_WAREHOUSE is required}
+      NESSIE_CATALOG_DEFAULT_WAREHOUSE: payments
       NESSIE_CATALOG_WAREHOUSES_PAYMENTS_LOCATION: ${WAREHOUSE_URI:?WAREHOUSE_URI is required}
       NESSIE_HTTPS_PORT: ${NESSIE_HTTPS_PORT:-19121}
       NESSIE_SSL_KEYSTORE_FILE: ${NESSIE_SSL_KEYSTORE_FILE:-/etc/nessie/certs/nessie.keystore.jks}
@@ -616,6 +616,7 @@ services:
     - 8089:8080
     - 8443:8443
     volumes:
+    - ./platform/trino/etc/catalog:/etc/trino/catalog:ro
     - ./platform/trino/etc/access-control.properties:/etc/trino/access-control.properties:ro
     - ./platform/trino/etc/config.properties:/etc/trino/config.properties:ro
     - ./platform/trino/etc/event-listeners.json:/etc/trino/event-listeners.json:ro
@@ -1101,14 +1102,14 @@ services:
       PLATFORM_JOB_EXECUTION_ENABLED: 'false'
       TRANSFORM_RUNTIME_RUNNER_TOKEN: ${TRANSFORM_RUNTIME_RUNNER_TOKEN:?TRANSFORM_RUNTIME_RUNNER_TOKEN is required}
       TRANSFORM_LEDGER_APP_DATABASE_URL: ${TRANSFORM_LEDGER_APP_DATABASE_URL:?TRANSFORM_LEDGER_APP_DATABASE_URL is required}
-      ORDINARY_S3_ACCESS_KEY_ID: ${ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID:?ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID is required}
-      ORDINARY_S3_SECRET_ACCESS_KEY: ${ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY:?ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY is
+      ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID: ${ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID:?ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID is required}
+      ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY: ${ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY:?ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY is
         required}
-      RESTRICTED_S3_ACCESS_KEY_ID: ${RESTRICTED_TRANSFORM_S3_ACCESS_KEY_ID:?RESTRICTED_TRANSFORM_S3_ACCESS_KEY_ID is required}
-      RESTRICTED_S3_SECRET_ACCESS_KEY: ${RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY:?RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY
+      RESTRICTED_TRANSFORM_S3_ACCESS_KEY_ID: ${RESTRICTED_TRANSFORM_S3_ACCESS_KEY_ID:?RESTRICTED_TRANSFORM_S3_ACCESS_KEY_ID is required}
+      RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY: ${RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY:?RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY
         is required}
-      ML_S3_ACCESS_KEY_ID: ${ML_TRANSFORM_S3_ACCESS_KEY_ID:?ML_TRANSFORM_S3_ACCESS_KEY_ID is required}
-      ML_S3_SECRET_ACCESS_KEY: ${ML_TRANSFORM_S3_SECRET_ACCESS_KEY:?ML_TRANSFORM_S3_SECRET_ACCESS_KEY is required}
+      ML_TRANSFORM_S3_ACCESS_KEY_ID: ${ML_TRANSFORM_S3_ACCESS_KEY_ID:?ML_TRANSFORM_S3_ACCESS_KEY_ID is required}
+      ML_TRANSFORM_S3_SECRET_ACCESS_KEY: ${ML_TRANSFORM_S3_SECRET_ACCESS_KEY:?ML_TRANSFORM_S3_SECRET_ACCESS_KEY is required}
       NESSIE_TRANSFORM_TOKEN: ${NESSIE_TRANSFORM_TOKEN:?NESSIE_TRANSFORM_TOKEN is required}
       KAFKA_TOPICS: icmn.vpm.pain001,icmn.pmn.pain001,cpo.psn.pain002,cpo.plm.pain002,wendi.pain001,wendi.pain002,wendi.camt053,wendi.camt052,wendi.camt054,wendi.transactions,mobile.mtn.pacs008,mobile.mtn.pacs002,mobile.airtel.pacs008,mobile.airtel.pacs002,agent.transactions,agent.profiles,agent.locations,pdmis.beneficiaries,pdmis.loans,pdmis.repayments,pdmis.saccos,pdmis.households,pdmis.business_plans,pdmis.special_groups
       PLATFORM_RAW_READ_ACCESS_KEY: ${PLATFORM_RAW_READ_ACCESS_KEY:?PLATFORM_RAW_READ_ACCESS_KEY is required}
@@ -1156,7 +1157,7 @@ services:
       AIRFLOW_HOME: /opt/airflow
       AIRFLOW__CORE__EXECUTOR: CeleryExecutor
       AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
-      PYTHONPATH: /opt/airflow/job_runner
+      PYTHONPATH: /opt/airflow:/opt/airflow/job_runner
       PLATFORM_JOB_AUDIT_PATH: /var/lib/platform-job-runner/audit.jsonl
       PLATFORM_JOB_RUNNER_URL: http://platform-job-runner:8090
       AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
@@ -1175,6 +1176,7 @@ services:
       PYTHONUNBUFFERED: '1'
     volumes:
     - ./orchestration/airflow/dags:/opt/airflow/dags:ro
+    - ./services:/opt/airflow/services:ro
     - ./orchestration/airflow/plugins:/opt/airflow/plugins:ro
     - airflow-logs:/opt/airflow/logs
     - airflow-config:/opt/airflow/config
@@ -1216,7 +1218,7 @@ services:
       AIRFLOW_HOME: /opt/airflow
       AIRFLOW__CORE__EXECUTOR: CeleryExecutor
       AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
-      PYTHONPATH: /opt/airflow/job_runner
+      PYTHONPATH: /opt/airflow:/opt/airflow/job_runner
       PLATFORM_JOB_AUDIT_PATH: /var/lib/platform-job-runner/audit.jsonl
       PLATFORM_JOB_RUNNER_URL: http://platform-job-runner:8090
       AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
@@ -1235,6 +1237,7 @@ services:
       PYTHONUNBUFFERED: '1'
     volumes:
     - ./orchestration/airflow/dags:/opt/airflow/dags:ro
+    - ./services:/opt/airflow/services:ro
     - ./orchestration/airflow/plugins:/opt/airflow/plugins:ro
     - airflow-logs:/opt/airflow/logs
     - airflow-config:/opt/airflow/config
@@ -1273,7 +1276,7 @@ services:
       AIRFLOW_HOME: /opt/airflow
       AIRFLOW__CORE__EXECUTOR: CeleryExecutor
       AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
-      PYTHONPATH: /opt/airflow/job_runner
+      PYTHONPATH: /opt/airflow:/opt/airflow/job_runner
       PLATFORM_JOB_AUDIT_PATH: /var/lib/platform-job-runner/audit.jsonl
       PLATFORM_JOB_RUNNER_URL: http://platform-job-runner:8090
       AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
@@ -1292,6 +1295,7 @@ services:
       PYTHONUNBUFFERED: '1'
     volumes:
     - ./orchestration/airflow/dags:/opt/airflow/dags:ro
+    - ./services:/opt/airflow/services:ro
     - ./orchestration/airflow/plugins:/opt/airflow/plugins:ro
     - airflow-logs:/opt/airflow/logs
     - airflow-config:/opt/airflow/config
@@ -1328,7 +1332,7 @@ services:
       AIRFLOW_HOME: /opt/airflow
       AIRFLOW__CORE__EXECUTOR: CeleryExecutor
       AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
-      PYTHONPATH: /opt/airflow/job_runner
+      PYTHONPATH: /opt/airflow:/opt/airflow/job_runner
       PLATFORM_JOB_AUDIT_PATH: /var/lib/platform-job-runner/audit.jsonl
       PLATFORM_JOB_RUNNER_URL: http://platform-job-runner:8090
       AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
@@ -1347,6 +1351,7 @@ services:
       PYTHONUNBUFFERED: '1'
     volumes:
     - ./orchestration/airflow/dags:/opt/airflow/dags:ro
+    - ./services:/opt/airflow/services:ro
     - ./orchestration/airflow/plugins:/opt/airflow/plugins:ro
     - airflow-logs:/opt/airflow/logs
     - airflow-config:/opt/airflow/config
@@ -1375,7 +1380,7 @@ services:
       AIRFLOW_HOME: /opt/airflow
       AIRFLOW__CORE__EXECUTOR: CeleryExecutor
       AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
-      PYTHONPATH: /opt/airflow/job_runner
+      PYTHONPATH: /opt/airflow:/opt/airflow/job_runner
       PLATFORM_JOB_AUDIT_PATH: /var/lib/platform-job-runner/audit.jsonl
       PLATFORM_JOB_RUNNER_URL: http://platform-job-runner:8090
       TRANSFORM_RUNTIME_URL: http://transform-runtime:8089
@@ -1397,6 +1402,7 @@ services:
       DUMB_INIT_SETSID: '0'
     volumes:
     - ./orchestration/airflow/dags:/opt/airflow/dags:ro
+    - ./services:/opt/airflow/services:ro
     - ./orchestration/airflow/plugins:/opt/airflow/plugins:ro
     - airflow-logs:/opt/airflow/logs
     - airflow-config:/opt/airflow/config
@@ -1435,7 +1441,7 @@ services:
       AIRFLOW_HOME: /opt/airflow
       AIRFLOW__CORE__EXECUTOR: CeleryExecutor
       AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
-      PYTHONPATH: /opt/airflow/job_runner
+      PYTHONPATH: /opt/airflow:/opt/airflow/job_runner
       PLATFORM_JOB_AUDIT_PATH: /var/lib/platform-job-runner/audit.jsonl
       PLATFORM_JOB_RUNNER_URL: http://platform-job-runner:8090
       AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
@@ -1454,6 +1460,7 @@ services:
       PYTHONUNBUFFERED: '1'
     volumes:
     - ./orchestration/airflow/dags:/opt/airflow/dags:ro
+    - ./services:/opt/airflow/services:ro
     - ./orchestration/airflow/plugins:/opt/airflow/plugins:ro
     - airflow-logs:/opt/airflow/logs
     - airflow-config:/opt/airflow/config

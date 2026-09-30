@@ -47,13 +47,10 @@ from icmn_generator import generate_pmn  # noqa: E402
 
 DBT = ROOT / "transform/dbt/models"
 PHASE6_SQL = (
-    DBT / "staging/stg_pdm_icmn_pmn_pain001.sql",
-    DBT / "staging/stg_pdm_cpo_plm_pain002.sql",
     DBT / "bronze/br_pdm_payments_pmn_lifecycle_events.sql",
     DBT / "bronze/br_pdm_payments_plm_lifecycle_events.sql",
     DBT / "silver/slv_pdm_payments_pmn_lifecycle_events.sql",
     DBT / "silver/slv_pdm_payments_plm_lifecycle_events.sql",
-    DBT / "silver/slv_pdm_payment_technical_events.sql",
     DBT / "silver/slv_pdm_payment_event_correlation.sql",
 )
 
@@ -236,8 +233,6 @@ def test_beneficiary_experience_decision_table():
 
 def test_raw_to_silver_lineage_is_type_specific():
     expected = {
-        "pmn": ("icmn.pmn.pain001", "stg_pdm_icmn_pmn_pain001"),
-        "plm": ("cpo.plm.pain002", "stg_pdm_cpo_plm_pain002"),
     }
     for family, (topic, staging) in expected.items():
         staging_sql = (DBT / f"staging/{staging}.sql").read_text()
@@ -249,25 +244,44 @@ def test_raw_to_silver_lineage_is_type_specific():
         assert f"ref('{bronze_name}')" in silver_sql
 
 
-def test_unified_models_consume_only_intended_phase6_upstreams():
-    unified = (DBT / "silver/slv_pdm_payment_technical_events.sql").read_text()
+def test_correlation_consumes_only_intended_phase6_upstreams():
+    retired = DBT / "silver" / ("slv_pdm_payment_" + "technical_events.sql")
     correlation = (DBT / "silver/slv_pdm_payment_event_correlation.sql").read_text()
-    assert "ref('slv_pdm_payments_pmn_lifecycle_events')" in unified
-    assert "ref('slv_pdm_payments_plm_lifecycle_events')" in unified
-    assert "ref('slv_pdm_payment_technical_events')" in correlation
+    assert not retired.exists()
+    assert "ref('slv_pdm_payments_pmn_lifecycle_events')" in correlation
+    assert "ref('slv_pdm_payments_plm_lifecycle_events')" in correlation
+    assert "'ICMN_PMN' as technical_source" in correlation
+    assert "'CPO_PLM' as technical_source" in correlation
     assert "ref('slv_pdm_payments_transactions')" in correlation
+
+
+def test_retired_technical_model_is_absent_from_active_metadata():
+    retired_name = "slv_pdm_payment_" + "technical_events"
+    retired_unique_id = "model.pdm_platform." + retired_name
+    active_text = [
+        (ROOT / "transform/dbt/models/silver/silver_schema.yml").read_text(),
+        (ROOT / "orchestration/transform_runtime/execution_plan.py").read_text(),
+        (ROOT / "orchestration/transform_runtime/execution_policy.py").read_text(),
+        (ROOT / "services/agent-api/classification.py").read_text(),
+    ]
+    contract = json.loads(
+        (ROOT / "orchestration/transform_runtime/contracts/lakehouse_transform.json").read_text()
+    )
+    assert all(retired_name not in text for text in active_text)
+    assert retired_unique_id not in json.dumps(contract)
 
 
 def test_phase6_sql_contracts_have_explicit_columns_and_no_select_star():
     for path in PHASE6_SQL:
         sql = path.read_text().lower()
         assert not re.search(r"\bselect\s+(?:[a-z_][a-z0-9_]*\.)?\*", sql), path
-    technical = projected_names(DBT / "silver/slv_pdm_payment_technical_events.sql")
     correlation = projected_names(DBT / "silver/slv_pdm_payment_event_correlation.sql")
-    assert SHARED_FIELDS <= technical
-    assert PMN_FIELDS <= technical
-    assert (PLM_FIELDS - {"x_beneficiary_sa"}) <= technical
-    assert "x_beneficiary_sa" not in technical
+    assert {
+        "event_id", "event_type", "correlation_id", "instruction_id",
+        "end_to_end_id", "transaction_id", "uetr", "business_reference",
+        "technical_status", "event_timestamp", "technical_source",
+    } <= correlation
+    assert "x_beneficiary_sa" not in correlation
     assert {
         "technical_event_id", "correlation_method", "match_status",
         "business_source_system", "business_message_id", "business_transaction_id",

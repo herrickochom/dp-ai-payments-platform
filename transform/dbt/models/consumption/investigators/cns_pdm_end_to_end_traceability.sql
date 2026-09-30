@@ -35,14 +35,18 @@ with payment_summary as (
     select loan_id, probability_default_90d, ai_risk_band, risk_rank,
         requires_priority_review, observation_date, model_name, model_version,
         interpretation
-    from {{ ref('cns_pdm_ai_default_risk') }}
-    qualify row_number() over (
-        partition by loan_id order by observation_date desc, scored_at_utc desc, snapshot_id desc
-    ) = 1
+    from (
+        select *,
+            row_number() over (
+                partition by loan_id order by observation_date desc, scored_at_utc desc, snapshot_id desc
+            ) as rn
+        from {{ ref('cns_pdm_ai_default_risk') }}
+    )
+    where rn = 1
 )
 select
     lifecycle.lifecycle_sk,
-    loan.loan_id,
+    loan_id,
     loan.business_plan_id,
     loan.beneficiary_token,
     sacco.sacco_id,

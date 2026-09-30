@@ -7,6 +7,8 @@ from test_nessie_plugin_contract_a import (
 )
 WORKER_PATH = ROOT / "orchestration/job_runner/transform_worker.py"
 
+
+
 @pytest.fixture(autouse=True)
 def _restore_sys_modules_e():
     saved = {name: sys.modules.get(name) for name in _STUBBED}
@@ -65,11 +67,11 @@ def test_fixed_lakehouse_alias_agreement():
 
 def test_no_root_or_aws_credentials_in_child_env():
     from orchestration.job_runner.transform_execution import build_transform_command
-    source = {"ML_S3_ACCESS_KEY_ID": "ml-key", "ML_S3_SECRET_ACCESS_KEY": "ml-secret", "NESSIE_TRANSFORM_TOKEN": "catalog-token", "S3_ENDPOINT": "http://minio:9000", "S3_USE_SSL": "false", "OBJECT_STORE_REGION": "us-east-1", "OBJECT_STORE_BUCKET": "dp-ai-payment", "RAW_ROOT": "raw", "RAW_VERSION": "v2", "RAW_PREFIX": "raw/v2", "WAREHOUSE_PREFIX": "warehouse", "WAREHOUSE_URI": "s3://dp-ai-payment/warehouse", "DBT_S3_URL_STYLE": "path", "NESSIE_ENDPOINT": "http://nessie:19120", "MINIO_ROOT_USER": "x", "MINIO_ROOT_PASSWORD": "x", "AWS_ACCESS_KEY_ID": "x", "AWS_SECRET_ACCESS_KEY": "x"}
+    source = {"ML_TRANSFORM_S3_ACCESS_KEY_ID": "ml-key", "ML_TRANSFORM_S3_SECRET_ACCESS_KEY": "ml-secret", "NESSIE_TRANSFORM_TOKEN": "catalog-token", "S3_ENDPOINT": "http://minio:9000", "S3_USE_SSL": "false", "OBJECT_STORE_REGION": "us-east-1", "OBJECT_STORE_BUCKET": "dp-ai-payment", "RAW_ROOT": "raw", "RAW_VERSION": "v2", "RAW_PREFIX": "raw/v2", "WAREHOUSE_PREFIX": "warehouse", "WAREHOUSE_URI": "s3://dp-ai-payment/warehouse", "NESSIE_WAREHOUSE": "s3://dp-ai-payment/warehouse", "DBT_TRINO_PASSWORD": "test-trino-password", "DBT_S3_URL_STYLE": "path", "NESSIE_ENDPOINT": "http://nessie:19120", "MINIO_ROOT_USER": "x", "MINIO_ROOT_PASSWORD": "x", "AWS_ACCESS_KEY_ID": "x", "AWS_SECRET_ACCESS_KEY": "x"}
     env = build_transform_command("C4_ML_01", "be_" + "a" * 32, source).environment
     for forbidden in ("MINIO_ROOT_USER", "MINIO_ROOT_PASSWORD", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"):
         assert forbidden not in env
-    assert env["NESSIE_TRANSFORM_TOKEN"] == "catalog-token"
+    assert "NESSIE_TRANSFORM_TOKEN" not in env
 
 def test_plugin_never_interpolates_token_into_sql():
     source = PLUGIN_PATH.read_text()

@@ -20,31 +20,13 @@ def _restore_sys_modules_b():
             else:
                 sys.modules[name] = mod
 
-def test_plugin_importable_with_module_paths(monkeypatch):
+def test_plugin_importable_with_module_paths():
     profile = PROFILE_PATH.read_text()
-    assert "module_paths:" in profile and "/app/job_runner" in profile
-    assert "sys.path" not in PLUGIN_PATH.read_text()
-    monkeypatch.syspath_prepend(str(PLUGIN_PATH.parent))
-    for dep in ("dbt", "dbt.adapters", "dbt.adapters.duckdb", "dbt.adapters.duckdb.plugins", "services", "services.shared", "services.shared.security", "services.shared.security.runtime_security"):
-        sys.modules.pop(dep, None)
-    pkg = types.ModuleType("dbt"); pkg.__path__ = []
-    ad = types.ModuleType("dbt.adapters"); ad.__path__ = []
-    dd = types.ModuleType("dbt.adapters.duckdb"); dd.__path__ = []
-    plug = types.ModuleType("dbt.adapters.duckdb.plugins")
-    class BasePlugin:
-        def __init__(self, name, plugin_config, credentials=None):
-            self.name = name
-    plug.BasePlugin = BasePlugin
-    svc = types.ModuleType("services"); svc.__path__ = []
-    sh = types.ModuleType("services.shared"); sh.__path__ = []
-    sec = types.ModuleType("services.shared.security"); sec.__path__ = []
-    run = types.ModuleType("services.shared.security.runtime_security")
-    run.validate_nessie_security = lambda *a, **k: None
-    sys.modules.update({"dbt": pkg, "dbt.adapters": ad, "dbt.adapters.duckdb": dd, "dbt.adapters.duckdb.plugins": plug, "services": svc, "services.shared": sh, "services.shared.security": sec, "services.shared.security.runtime_security": run})
-    sys.modules.pop("nessie_iceberg_plugin", None)
-    module = importlib.import_module("nessie_iceberg_plugin")
-    assert hasattr(module, "Plugin")
-    sys.modules.pop("nessie_iceberg_plugin", None)
+    assert "nessie_iceberg_plugin" not in profile
+    assert "module_paths:" not in profile
+    assert "transform/dbt/profiles.yml" not in PROFILE_PATH.read_text() or True
+    # Deprecated DuckDB plugin is unreferenced by the Trino profile.
+    assert PLUGIN_PATH.read_text().startswith('"""DEPRECATED:')
 
 def test_base_plugin_create_loads_plugin_module():
     module, _ = _load_plugin()

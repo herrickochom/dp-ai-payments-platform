@@ -23,11 +23,11 @@ with entitlements as (
     group by 1, 2, 3, 4
 )
 select
-    {{ gold_surrogate_key(['entitlements.beneficiary_sk', 'entitlements.loan_id', 'entitlements.payment_date_sk', 'entitlements.currency']) }} as payment_pattern_sk,
+    {{ gold_surrogate_key(['entitlements.beneficiary_sk', 'loan_id', 'entitlements.payment_date_sk', 'entitlements.currency']) }} as payment_pattern_sk,
     entitlements.beneficiary_sk,
     beneficiary.beneficiary_token,
-    entitlements.loan_id,
-    loan.sacco_sk,
+    loan_id,
+    sacco_sk,
     sacco.sacco_id,
     loan.region,
     loan.district,

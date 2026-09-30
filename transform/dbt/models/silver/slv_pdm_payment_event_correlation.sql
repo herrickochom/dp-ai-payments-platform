@@ -2,10 +2,20 @@
 
 with technical as (
     select
-        event_id, technical_source, event_type, correlation_id,
+        event_id, event_type, correlation_id,
         instruction_id, end_to_end_id, transaction_id, uetr,
-        business_reference, technical_status, event_timestamp
-    from {{ ref('slv_pdm_payment_technical_events') }}
+        business_reference, technical_status, event_timestamp,
+        'ICMN_PMN' as technical_source
+    from {{ ref('slv_pdm_payments_pmn_lifecycle_events') }}
+
+    union all
+
+    select
+        event_id, event_type, correlation_id,
+        instruction_id, end_to_end_id, transaction_id, uetr,
+        business_reference, technical_status, event_timestamp,
+        'CPO_PLM' as technical_source
+    from {{ ref('slv_pdm_payments_plm_lifecycle_events') }}
 ), business as (
     select
         source_system, message_id, transaction_id, uetr,

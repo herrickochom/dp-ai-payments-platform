@@ -24,7 +24,7 @@ with loans as (
     group by 1
 )
 select
-    beneficiary.beneficiary_sk,
+    beneficiary_sk,
     beneficiary.geography_sk,
     beneficiary.special_group_sk,
     beneficiary.beneficiary_token,

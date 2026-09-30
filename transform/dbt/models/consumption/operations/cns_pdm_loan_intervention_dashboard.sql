@@ -25,15 +25,19 @@ with payment_metrics as (
         model_version,
         scored_at_utc,
         interpretation
-    from {{ ref('cns_pdm_ai_default_risk') }}
-    qualify row_number() over (
-        partition by loan_id order by observation_date desc, scored_at_utc desc, snapshot_id desc
-    ) = 1
+    from (
+        select *,
+            row_number() over (
+                partition by loan_id order by observation_date desc, scored_at_utc desc, snapshot_id desc
+            ) as rn
+        from {{ ref('cns_pdm_ai_default_risk') }}
+    )
+    where rn = 1
 )
 select
     lifecycle.lifecycle_sk,
     loan.loan_sk,
-    loan.loan_id,
+    loan_id,
     loan.beneficiary_token,
     sacco.sacco_id,
     sacco.sacco_name,

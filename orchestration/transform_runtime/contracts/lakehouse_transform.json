@@ -33,7 +33,7 @@
       "unique_id": "source.pdm_platform.silver_vault.vlt_pdm_beneficiary_token_link"
     }
   ],
-  "manifest_model_count": 125,
+  "manifest_model_count": 100,
   "manifest_test_count": 495,
   "mode": "production_bounded_transform",
   "models": [
@@ -47,219 +47,10 @@
       "unique_id": "model.pdm_platform.br_pdm_ai_default_risk"
     },
     {
-      "direct_test_count": 4,
-      "materialized": "view",
-      "name": "stg_pdm_agent_locations",
-      "parents": [],
-      "qualified_name": "staging.stg_pdm_agent_locations",
-      "schema": "staging",
-      "unique_id": "model.pdm_platform.stg_pdm_agent_locations"
-    },
-    {
-      "direct_test_count": 4,
-      "materialized": "view",
-      "name": "stg_pdm_agent_profiles",
-      "parents": [],
-      "qualified_name": "staging.stg_pdm_agent_profiles",
-      "schema": "staging",
-      "unique_id": "model.pdm_platform.stg_pdm_agent_profiles"
-    },
-    {
-      "direct_test_count": 6,
-      "materialized": "view",
-      "name": "stg_pdm_agent_transactions",
-      "parents": [],
-      "qualified_name": "staging.stg_pdm_agent_transactions",
-      "schema": "staging",
-      "unique_id": "model.pdm_platform.stg_pdm_agent_transactions"
-    },
-    {
-      "direct_test_count": 7,
-      "materialized": "view",
-      "name": "stg_pdm_cpo_plm_pain002",
-      "parents": [],
-      "qualified_name": "staging.stg_pdm_cpo_plm_pain002",
-      "schema": "staging",
-      "unique_id": "model.pdm_platform.stg_pdm_cpo_plm_pain002"
-    },
-    {
-      "direct_test_count": 6,
-      "materialized": "view",
-      "name": "stg_pdm_cpo_psn_pain002",
-      "parents": [],
-      "qualified_name": "staging.stg_pdm_cpo_psn_pain002",
-      "schema": "staging",
-      "unique_id": "model.pdm_platform.stg_pdm_cpo_psn_pain002"
-    },
-    {
-      "direct_test_count": 7,
-      "materialized": "view",
-      "name": "stg_pdm_icmn_pmn_pain001",
-      "parents": [],
-      "qualified_name": "staging.stg_pdm_icmn_pmn_pain001",
-      "schema": "staging",
-      "unique_id": "model.pdm_platform.stg_pdm_icmn_pmn_pain001"
-    },
-    {
-      "direct_test_count": 6,
-      "materialized": "view",
-      "name": "stg_pdm_icmn_vpm_pain001",
-      "parents": [],
-      "qualified_name": "staging.stg_pdm_icmn_vpm_pain001",
-      "schema": "staging",
-      "unique_id": "model.pdm_platform.stg_pdm_icmn_vpm_pain001"
-    },
-    {
-      "direct_test_count": 6,
-      "materialized": "view",
-      "name": "stg_pdm_mobile_airtel_pacs002",
-      "parents": [],
-      "qualified_name": "staging.stg_pdm_mobile_airtel_pacs002",
-      "schema": "staging",
-      "unique_id": "model.pdm_platform.stg_pdm_mobile_airtel_pacs002"
-    },
-    {
-      "direct_test_count": 6,
-      "materialized": "view",
-      "name": "stg_pdm_mobile_airtel_pacs008",
-      "parents": [],
-      "qualified_name": "staging.stg_pdm_mobile_airtel_pacs008",
-      "schema": "staging",
-      "unique_id": "model.pdm_platform.stg_pdm_mobile_airtel_pacs008"
-    },
-    {
-      "direct_test_count": 6,
-      "materialized": "view",
-      "name": "stg_pdm_mobile_mtn_pacs002",
-      "parents": [],
-      "qualified_name": "staging.stg_pdm_mobile_mtn_pacs002",
-      "schema": "staging",
-      "unique_id": "model.pdm_platform.stg_pdm_mobile_mtn_pacs002"
-    },
-    {
-      "direct_test_count": 6,
-      "materialized": "view",
-      "name": "stg_pdm_mobile_mtn_pacs008",
-      "parents": [],
-      "qualified_name": "staging.stg_pdm_mobile_mtn_pacs008",
-      "schema": "staging",
-      "unique_id": "model.pdm_platform.stg_pdm_mobile_mtn_pacs008"
-    },
-    {
-      "direct_test_count": 7,
-      "materialized": "view",
-      "name": "stg_pdm_pdmis_beneficiaries",
-      "parents": [],
-      "qualified_name": "staging.stg_pdm_pdmis_beneficiaries",
-      "schema": "staging",
-      "unique_id": "model.pdm_platform.stg_pdm_pdmis_beneficiaries"
-    },
-    {
-      "direct_test_count": 7,
-      "materialized": "view",
-      "name": "stg_pdm_pdmis_business_plans",
-      "parents": [],
-      "qualified_name": "staging.stg_pdm_pdmis_business_plans",
-      "schema": "staging",
-      "unique_id": "model.pdm_platform.stg_pdm_pdmis_business_plans"
-    },
-    {
-      "direct_test_count": 6,
-      "materialized": "view",
-      "name": "stg_pdm_pdmis_households",
-      "parents": [],
-      "qualified_name": "staging.stg_pdm_pdmis_households",
-      "schema": "staging",
-      "unique_id": "model.pdm_platform.stg_pdm_pdmis_households"
-    },
-    {
-      "direct_test_count": 8,
-      "materialized": "view",
-      "name": "stg_pdm_pdmis_loans",
-      "parents": [],
-      "qualified_name": "staging.stg_pdm_pdmis_loans",
-      "schema": "staging",
-      "unique_id": "model.pdm_platform.stg_pdm_pdmis_loans"
-    },
-    {
-      "direct_test_count": 7,
-      "materialized": "view",
-      "name": "stg_pdm_pdmis_saccos",
-      "parents": [],
-      "qualified_name": "staging.stg_pdm_pdmis_saccos",
-      "schema": "staging",
-      "unique_id": "model.pdm_platform.stg_pdm_pdmis_saccos"
-    },
-    {
-      "direct_test_count": 7,
-      "materialized": "view",
-      "name": "stg_pdm_pdmis_special_groups",
-      "parents": [],
-      "qualified_name": "staging.stg_pdm_pdmis_special_groups",
-      "schema": "staging",
-      "unique_id": "model.pdm_platform.stg_pdm_pdmis_special_groups"
-    },
-    {
-      "direct_test_count": 5,
-      "materialized": "view",
-      "name": "stg_pdm_wendi_camt052",
-      "parents": [],
-      "qualified_name": "staging.stg_pdm_wendi_camt052",
-      "schema": "staging",
-      "unique_id": "model.pdm_platform.stg_pdm_wendi_camt052"
-    },
-    {
-      "direct_test_count": 6,
-      "materialized": "view",
-      "name": "stg_pdm_wendi_camt053",
-      "parents": [],
-      "qualified_name": "staging.stg_pdm_wendi_camt053",
-      "schema": "staging",
-      "unique_id": "model.pdm_platform.stg_pdm_wendi_camt053"
-    },
-    {
-      "direct_test_count": 6,
-      "materialized": "view",
-      "name": "stg_pdm_wendi_camt054",
-      "parents": [],
-      "qualified_name": "staging.stg_pdm_wendi_camt054",
-      "schema": "staging",
-      "unique_id": "model.pdm_platform.stg_pdm_wendi_camt054"
-    },
-    {
-      "direct_test_count": 5,
-      "materialized": "view",
-      "name": "stg_pdm_wendi_pain001",
-      "parents": [],
-      "qualified_name": "staging.stg_pdm_wendi_pain001",
-      "schema": "staging",
-      "unique_id": "model.pdm_platform.stg_pdm_wendi_pain001"
-    },
-    {
-      "direct_test_count": 5,
-      "materialized": "view",
-      "name": "stg_pdm_wendi_pain002",
-      "parents": [],
-      "qualified_name": "staging.stg_pdm_wendi_pain002",
-      "schema": "staging",
-      "unique_id": "model.pdm_platform.stg_pdm_wendi_pain002"
-    },
-    {
-      "direct_test_count": 6,
-      "materialized": "view",
-      "name": "stg_pdm_wendi_transactions",
-      "parents": [],
-      "qualified_name": "staging.stg_pdm_wendi_transactions",
-      "schema": "staging",
-      "unique_id": "model.pdm_platform.stg_pdm_wendi_transactions"
-    },
-    {
       "direct_test_count": 8,
       "materialized": "iceberg_table",
       "name": "br_pdm_agent_locations",
-      "parents": [
-        "model.pdm_platform.stg_pdm_agent_locations"
-      ],
+      "parents": [],
       "qualified_name": "bronze.br_pdm_agent_locations",
       "schema": "bronze",
       "unique_id": "model.pdm_platform.br_pdm_agent_locations"
@@ -268,9 +59,7 @@
       "direct_test_count": 8,
       "materialized": "iceberg_table",
       "name": "br_pdm_agent_profiles",
-      "parents": [
-        "model.pdm_platform.stg_pdm_agent_profiles"
-      ],
+      "parents": [],
       "qualified_name": "bronze.br_pdm_agent_profiles",
       "schema": "bronze",
       "unique_id": "model.pdm_platform.br_pdm_agent_profiles"
@@ -279,31 +68,16 @@
       "direct_test_count": 10,
       "materialized": "iceberg_table",
       "name": "br_pdm_agent_transactions",
-      "parents": [
-        "model.pdm_platform.stg_pdm_agent_transactions"
-      ],
+      "parents": [],
       "qualified_name": "bronze.br_pdm_agent_transactions",
       "schema": "bronze",
       "unique_id": "model.pdm_platform.br_pdm_agent_transactions"
     },
     {
-      "direct_test_count": 8,
-      "materialized": "iceberg_table",
-      "name": "br_pdm_cpo_plm_pain002",
-      "parents": [
-        "model.pdm_platform.stg_pdm_cpo_plm_pain002"
-      ],
-      "qualified_name": "bronze.br_pdm_cpo_plm_pain002",
-      "schema": "bronze",
-      "unique_id": "model.pdm_platform.br_pdm_cpo_plm_pain002"
-    },
-    {
       "direct_test_count": 3,
       "materialized": "iceberg_table",
       "name": "br_pdm_payments_plm_lifecycle_events",
-      "parents": [
-        "model.pdm_platform.stg_pdm_cpo_plm_pain002"
-      ],
+      "parents": [],
       "qualified_name": "bronze.br_pdm_payments_plm_lifecycle_events",
       "schema": "bronze",
       "unique_id": "model.pdm_platform.br_pdm_payments_plm_lifecycle_events"
@@ -312,31 +86,16 @@
       "direct_test_count": 8,
       "materialized": "iceberg_table",
       "name": "br_pdm_cpo_psn_pain002",
-      "parents": [
-        "model.pdm_platform.stg_pdm_cpo_psn_pain002"
-      ],
+      "parents": [],
       "qualified_name": "bronze.br_pdm_cpo_psn_pain002",
       "schema": "bronze",
       "unique_id": "model.pdm_platform.br_pdm_cpo_psn_pain002"
     },
     {
-      "direct_test_count": 8,
-      "materialized": "iceberg_table",
-      "name": "br_pdm_icmn_pmn_pain001",
-      "parents": [
-        "model.pdm_platform.stg_pdm_icmn_pmn_pain001"
-      ],
-      "qualified_name": "bronze.br_pdm_icmn_pmn_pain001",
-      "schema": "bronze",
-      "unique_id": "model.pdm_platform.br_pdm_icmn_pmn_pain001"
-    },
-    {
       "direct_test_count": 3,
       "materialized": "iceberg_table",
       "name": "br_pdm_payments_pmn_lifecycle_events",
-      "parents": [
-        "model.pdm_platform.stg_pdm_icmn_pmn_pain001"
-      ],
+      "parents": [],
       "qualified_name": "bronze.br_pdm_payments_pmn_lifecycle_events",
       "schema": "bronze",
       "unique_id": "model.pdm_platform.br_pdm_payments_pmn_lifecycle_events"
@@ -345,9 +104,7 @@
       "direct_test_count": 8,
       "materialized": "iceberg_table",
       "name": "br_pdm_icmn_vpm_pain001",
-      "parents": [
-        "model.pdm_platform.stg_pdm_icmn_vpm_pain001"
-      ],
+      "parents": [],
       "qualified_name": "bronze.br_pdm_icmn_vpm_pain001",
       "schema": "bronze",
       "unique_id": "model.pdm_platform.br_pdm_icmn_vpm_pain001"
@@ -356,9 +113,7 @@
       "direct_test_count": 8,
       "materialized": "iceberg_table",
       "name": "br_pdm_mobile_airtel_pacs002",
-      "parents": [
-        "model.pdm_platform.stg_pdm_mobile_airtel_pacs002"
-      ],
+      "parents": [],
       "qualified_name": "bronze.br_pdm_mobile_airtel_pacs002",
       "schema": "bronze",
       "unique_id": "model.pdm_platform.br_pdm_mobile_airtel_pacs002"
@@ -367,9 +122,7 @@
       "direct_test_count": 8,
       "materialized": "iceberg_table",
       "name": "br_pdm_mobile_airtel_pacs008",
-      "parents": [
-        "model.pdm_platform.stg_pdm_mobile_airtel_pacs008"
-      ],
+      "parents": [],
       "qualified_name": "bronze.br_pdm_mobile_airtel_pacs008",
       "schema": "bronze",
       "unique_id": "model.pdm_platform.br_pdm_mobile_airtel_pacs008"
@@ -378,9 +131,7 @@
       "direct_test_count": 8,
       "materialized": "iceberg_table",
       "name": "br_pdm_mobile_mtn_pacs002",
-      "parents": [
-        "model.pdm_platform.stg_pdm_mobile_mtn_pacs002"
-      ],
+      "parents": [],
       "qualified_name": "bronze.br_pdm_mobile_mtn_pacs002",
       "schema": "bronze",
       "unique_id": "model.pdm_platform.br_pdm_mobile_mtn_pacs002"
@@ -389,9 +140,7 @@
       "direct_test_count": 8,
       "materialized": "iceberg_table",
       "name": "br_pdm_mobile_mtn_pacs008",
-      "parents": [
-        "model.pdm_platform.stg_pdm_mobile_mtn_pacs008"
-      ],
+      "parents": [],
       "qualified_name": "bronze.br_pdm_mobile_mtn_pacs008",
       "schema": "bronze",
       "unique_id": "model.pdm_platform.br_pdm_mobile_mtn_pacs008"
@@ -400,9 +149,7 @@
       "direct_test_count": 8,
       "materialized": "iceberg_table",
       "name": "br_pdm_pdmis_beneficiaries",
-      "parents": [
-        "model.pdm_platform.stg_pdm_pdmis_beneficiaries"
-      ],
+      "parents": [],
       "qualified_name": "bronze.br_pdm_pdmis_beneficiaries",
       "schema": "bronze",
       "unique_id": "model.pdm_platform.br_pdm_pdmis_beneficiaries"
@@ -411,9 +158,7 @@
       "direct_test_count": 8,
       "materialized": "iceberg_table",
       "name": "br_pdm_pdmis_business_plans",
-      "parents": [
-        "model.pdm_platform.stg_pdm_pdmis_business_plans"
-      ],
+      "parents": [],
       "qualified_name": "bronze.br_pdm_pdmis_business_plans",
       "schema": "bronze",
       "unique_id": "model.pdm_platform.br_pdm_pdmis_business_plans"
@@ -422,9 +167,7 @@
       "direct_test_count": 8,
       "materialized": "iceberg_table",
       "name": "br_pdm_pdmis_households",
-      "parents": [
-        "model.pdm_platform.stg_pdm_pdmis_households"
-      ],
+      "parents": [],
       "qualified_name": "bronze.br_pdm_pdmis_households",
       "schema": "bronze",
       "unique_id": "model.pdm_platform.br_pdm_pdmis_households"
@@ -433,9 +176,7 @@
       "direct_test_count": 8,
       "materialized": "iceberg_table",
       "name": "br_pdm_pdmis_loans",
-      "parents": [
-        "model.pdm_platform.stg_pdm_pdmis_loans"
-      ],
+      "parents": [],
       "qualified_name": "bronze.br_pdm_pdmis_loans",
       "schema": "bronze",
       "unique_id": "model.pdm_platform.br_pdm_pdmis_loans"
@@ -444,9 +185,7 @@
       "direct_test_count": 8,
       "materialized": "iceberg_table",
       "name": "br_pdm_pdmis_saccos",
-      "parents": [
-        "model.pdm_platform.stg_pdm_pdmis_saccos"
-      ],
+      "parents": [],
       "qualified_name": "bronze.br_pdm_pdmis_saccos",
       "schema": "bronze",
       "unique_id": "model.pdm_platform.br_pdm_pdmis_saccos"
@@ -455,9 +194,7 @@
       "direct_test_count": 8,
       "materialized": "iceberg_table",
       "name": "br_pdm_pdmis_special_groups",
-      "parents": [
-        "model.pdm_platform.stg_pdm_pdmis_special_groups"
-      ],
+      "parents": [],
       "qualified_name": "bronze.br_pdm_pdmis_special_groups",
       "schema": "bronze",
       "unique_id": "model.pdm_platform.br_pdm_pdmis_special_groups"
@@ -466,9 +203,7 @@
       "direct_test_count": 8,
       "materialized": "iceberg_table",
       "name": "br_pdm_wendi_camt052",
-      "parents": [
-        "model.pdm_platform.stg_pdm_wendi_camt052"
-      ],
+      "parents": [],
       "qualified_name": "bronze.br_pdm_wendi_camt052",
       "schema": "bronze",
       "unique_id": "model.pdm_platform.br_pdm_wendi_camt052"
@@ -477,9 +212,7 @@
       "direct_test_count": 8,
       "materialized": "iceberg_table",
       "name": "br_pdm_wendi_camt053",
-      "parents": [
-        "model.pdm_platform.stg_pdm_wendi_camt053"
-      ],
+      "parents": [],
       "qualified_name": "bronze.br_pdm_wendi_camt053",
       "schema": "bronze",
       "unique_id": "model.pdm_platform.br_pdm_wendi_camt053"
@@ -488,9 +221,7 @@
       "direct_test_count": 8,
       "materialized": "iceberg_table",
       "name": "br_pdm_wendi_camt054",
-      "parents": [
-        "model.pdm_platform.stg_pdm_wendi_camt054"
-      ],
+      "parents": [],
       "qualified_name": "bronze.br_pdm_wendi_camt054",
       "schema": "bronze",
       "unique_id": "model.pdm_platform.br_pdm_wendi_camt054"
@@ -499,9 +230,7 @@
       "direct_test_count": 8,
       "materialized": "iceberg_table",
       "name": "br_pdm_wendi_pain001",
-      "parents": [
-        "model.pdm_platform.stg_pdm_wendi_pain001"
-      ],
+      "parents": [],
       "qualified_name": "bronze.br_pdm_wendi_pain001",
       "schema": "bronze",
       "unique_id": "model.pdm_platform.br_pdm_wendi_pain001"
@@ -510,9 +239,7 @@
       "direct_test_count": 8,
       "materialized": "iceberg_table",
       "name": "br_pdm_wendi_pain002",
-      "parents": [
-        "model.pdm_platform.stg_pdm_wendi_pain002"
-      ],
+      "parents": [],
       "qualified_name": "bronze.br_pdm_wendi_pain002",
       "schema": "bronze",
       "unique_id": "model.pdm_platform.br_pdm_wendi_pain002"
@@ -521,9 +248,7 @@
       "direct_test_count": 8,
       "materialized": "iceberg_table",
       "name": "br_pdm_wendi_transactions",
-      "parents": [
-        "model.pdm_platform.stg_pdm_wendi_transactions"
-      ],
+      "parents": [],
       "qualified_name": "bronze.br_pdm_wendi_transactions",
       "schema": "bronze",
       "unique_id": "model.pdm_platform.br_pdm_wendi_transactions"
@@ -754,18 +479,6 @@
       "unique_id": "model.pdm_platform.gld_dim_pdm_agent"
     },
     {
-      "direct_test_count": 0,
-      "materialized": "iceberg_table",
-      "name": "slv_pdm_payment_technical_events",
-      "parents": [
-        "model.pdm_platform.slv_pdm_payments_plm_lifecycle_events",
-        "model.pdm_platform.slv_pdm_payments_pmn_lifecycle_events"
-      ],
-      "qualified_name": "silver.slv_pdm_payment_technical_events",
-      "schema": "silver",
-      "unique_id": "model.pdm_platform.slv_pdm_payment_technical_events"
-    },
-    {
       "direct_test_count": 5,
       "materialized": "iceberg_table",
       "name": "slv_pdm_beneficiaries",
@@ -855,7 +568,8 @@
       "materialized": "iceberg_table",
       "name": "slv_pdm_payment_event_correlation",
       "parents": [
-        "model.pdm_platform.slv_pdm_payment_technical_events",
+        "model.pdm_platform.slv_pdm_payments_plm_lifecycle_events",
+        "model.pdm_platform.slv_pdm_payments_pmn_lifecycle_events",
         "model.pdm_platform.slv_pdm_payments_transactions"
       ],
       "qualified_name": "silver.slv_pdm_payment_event_correlation",
@@ -1495,6 +1209,15 @@
       "qualified_name": "consumption.cns_pdm_geographic_risk_summary",
       "schema": "consumption",
       "unique_id": "model.pdm_platform.cns_pdm_geographic_risk_summary"
+    },
+    {
+      "direct_test_count": 8,
+      "materialized": "iceberg_table",
+      "name": "br_pdm_pdmis_repayments",
+      "parents": [],
+      "qualified_name": "bronze.br_pdm_pdmis_repayments",
+      "schema": "bronze",
+      "unique_id": "model.pdm_platform.br_pdm_pdmis_repayments"
     }
   ],
   "runtime_groups": {
@@ -1595,30 +1318,7 @@
   "topological_waves": [
     {
       "models": [
-        "model.pdm_platform.br_pdm_ai_default_risk",
-        "model.pdm_platform.stg_pdm_agent_locations",
-        "model.pdm_platform.stg_pdm_agent_profiles",
-        "model.pdm_platform.stg_pdm_agent_transactions",
-        "model.pdm_platform.stg_pdm_cpo_plm_pain002",
-        "model.pdm_platform.stg_pdm_cpo_psn_pain002",
-        "model.pdm_platform.stg_pdm_icmn_pmn_pain001",
-        "model.pdm_platform.stg_pdm_icmn_vpm_pain001",
-        "model.pdm_platform.stg_pdm_mobile_airtel_pacs002",
-        "model.pdm_platform.stg_pdm_mobile_airtel_pacs008",
-        "model.pdm_platform.stg_pdm_mobile_mtn_pacs002",
-        "model.pdm_platform.stg_pdm_mobile_mtn_pacs008",
-        "model.pdm_platform.stg_pdm_pdmis_beneficiaries",
-        "model.pdm_platform.stg_pdm_pdmis_business_plans",
-        "model.pdm_platform.stg_pdm_pdmis_households",
-        "model.pdm_platform.stg_pdm_pdmis_loans",
-        "model.pdm_platform.stg_pdm_pdmis_saccos",
-        "model.pdm_platform.stg_pdm_pdmis_special_groups",
-        "model.pdm_platform.stg_pdm_wendi_camt052",
-        "model.pdm_platform.stg_pdm_wendi_camt053",
-        "model.pdm_platform.stg_pdm_wendi_camt054",
-        "model.pdm_platform.stg_pdm_wendi_pain001",
-        "model.pdm_platform.stg_pdm_wendi_pain002",
-        "model.pdm_platform.stg_pdm_wendi_transactions"
+        "model.pdm_platform.br_pdm_ai_default_risk"
       ],
       "wave": 1
     },
@@ -1627,9 +1327,7 @@
         "model.pdm_platform.br_pdm_agent_locations",
         "model.pdm_platform.br_pdm_agent_profiles",
         "model.pdm_platform.br_pdm_agent_transactions",
-        "model.pdm_platform.br_pdm_cpo_plm_pain002",
         "model.pdm_platform.br_pdm_cpo_psn_pain002",
-        "model.pdm_platform.br_pdm_icmn_pmn_pain001",
         "model.pdm_platform.br_pdm_icmn_vpm_pain001",
         "model.pdm_platform.br_pdm_mobile_airtel_pacs002",
         "model.pdm_platform.br_pdm_mobile_airtel_pacs008",
@@ -1641,6 +1339,7 @@
         "model.pdm_platform.br_pdm_pdmis_business_plans",
         "model.pdm_platform.br_pdm_pdmis_households",
         "model.pdm_platform.br_pdm_pdmis_loans",
+        "model.pdm_platform.br_pdm_pdmis_repayments",
         "model.pdm_platform.br_pdm_pdmis_saccos",
         "model.pdm_platform.br_pdm_pdmis_special_groups",
         "model.pdm_platform.br_pdm_wendi_camt052",
@@ -1683,7 +1382,6 @@
         "model.pdm_platform.slv_pdm_beneficiaries",
         "model.pdm_platform.slv_pdm_loan_beneficiary_links",
         "model.pdm_platform.slv_pdm_payment_lifecycle",
-        "model.pdm_platform.slv_pdm_payment_technical_events",
         "model.pdm_platform.slv_pdm_payments_reconciliation"
       ],
       "wave": 4
@@ -1784,7 +1482,6 @@
     "model.pdm_platform.slv_pdm_payments_party",
     "model.pdm_platform.slv_pdm_payments_remittance",
     "model.pdm_platform.slv_pdm_payments_status_report",
-    "model.pdm_platform.slv_pdm_payment_technical_events",
     "model.pdm_platform.slv_pdm_payments_reconciliation",
     "model.pdm_platform.cns_pdm_ai_default_risk",
     "model.pdm_platform.cns_pdm_district_ai_risk",

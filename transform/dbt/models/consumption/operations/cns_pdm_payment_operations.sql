@@ -16,6 +16,7 @@ with reported_status as (
 ), payments as (
     select
         payment.*,
+        transaction_id,
         coalesce(payment.transaction_status, status.transaction_status, status.group_status)
             as resolved_transaction_status
     from {{ ref('gld_fct_pdm_payments') }} payment

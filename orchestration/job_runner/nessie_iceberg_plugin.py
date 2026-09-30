@@ -1,4 +1,7 @@
-"""Attach the execution-scoped Nessie Iceberg REST catalogue to DuckDB."""
+"""DEPRECATED: DuckDB's Iceberg extension cannot construct valid URLs for
+Nessie branches (see docs/governance/...). Superseded by the Trino Iceberg
+REST connector configured in platform/trino/etc/catalog/nessie.properties.
+Do not use. Scheduled for removal."""
 from __future__ import annotations
 
 import os
@@ -36,6 +39,15 @@ class Plugin(BasePlugin):
         if not _WAREHOUSE.fullmatch(warehouse):
             raise ValueError("invalid Nessie warehouse name")
 
+        # Nessie 0.108.x advertises iceberg-base-uri <endpoint>/iceberg and
+        # prefix-pattern "{ref}|{warehouse}", so the execution branch never
+        # appears in the endpoint (a branch segment there returns 404 on
+        # every REST operation).
+        # ATTACH the warehouse via the Nessie Iceberg REST endpoint.
+        # The branch is in the endpoint path; the warehouse name is the
+        # ATTACH identifier. ACCESS_DELEGATION_MODE 'none' tells DuckDB to
+        # use the locally configured S3 credentials instead of requesting
+        # vended credentials from Nessie.
         catalog_endpoint = f"{endpoint.rstrip('/')}/iceberg/{branch}"
         conn.execute(
             f"CREATE SECRET {_SECRET_NAME} (TYPE iceberg, TOKEN ?)",
@@ -43,7 +55,7 @@ class Plugin(BasePlugin):
         )
         conn.execute(
             f"ATTACH '{warehouse}' AS {_CATALOG_ALIAS} "
-            f"(TYPE iceberg, ENDPOINT ?, SECRET {_SECRET_NAME}, "
-            "ACCESS_DELEGATION_MODE none)",
+            f"(TYPE iceberg, ENDPOINT ?, "
+            f"SECRET {_SECRET_NAME}, ACCESS_DELEGATION_MODE 'none')",
             [catalog_endpoint],
         )

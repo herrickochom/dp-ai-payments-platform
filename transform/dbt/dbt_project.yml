@@ -1,4 +1,4 @@
-# /home/hochom/projects/dp-pdm-ai-platform/transform/dbt/dbt_project.yml
+# /home/hochom/projects/dp-ai-payments-platform/transform/dbt/dbt_project.yml
 
 name: "pdm_platform"
 version: "1.0.0"
@@ -36,6 +36,24 @@ clean-targets:
 
 # ------------------------------------------------------------------------------
 # Model configuration
+#
+# Trino relation hierarchy:
+#
+#   catalog.schema.table
+#
+# The catalog is "iceberg".
+# The dbt model layers are Iceberg schemas:
+#
+#   staging
+#   bronze
+#   silver
+#   silver_vault
+#   gold
+#   consumption
+#
+# The dedicated transform Trino instance owns the Nessie reference,
+# physical warehouse and S3 configuration. dbt does not select or
+# construct the Nessie branch directly.
 # ------------------------------------------------------------------------------
 
 models:
@@ -43,34 +61,34 @@ models:
     +materialized: table
 
     staging:
-      +database: "{{ env_var('DBT_STAGING_DATABASE') }}"
-      +materialized: view
+      +database: iceberg
       +schema: staging
+      +materialized: view
 
     bronze:
-      +database: "{{ env_var('DBT_BRONZE_DATABASE') }}"
-      +materialized: table
+      +database: iceberg
       +schema: bronze
+      +materialized: table
 
     silver:
-      +database: "{{ env_var('DBT_SILVER_DATABASE') }}"
-      +materialized: table
+      +database: iceberg
       +schema: silver
-
-    gold:
-      +database: "{{ env_var('DBT_GOLD_DATABASE') }}"
       +materialized: table
-      +schema: gold
 
     silver_vault:
-      +database: "{{ env_var('DBT_SILVER_VAULT_DATABASE') }}"
-      +materialized: table
+      +database: iceberg
       +schema: silver_vault
+      +materialized: table
+
+    gold:
+      +database: iceberg
+      +schema: gold
+      +materialized: table
 
     consumption:
-      +database: "{{ env_var('DBT_CONSUMPTION_DATABASE') }}"
-      +materialized: table
+      +database: iceberg
       +schema: consumption
+      +materialized: table
 
 # ------------------------------------------------------------------------------
 # Project variables

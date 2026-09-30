@@ -35,6 +35,8 @@ def _profile(storage: dict[str, str]) -> dict:
 
 @pytest.mark.parametrize("ssl", ["true", "false"])
 def test_dbt_profile_uses_environment_region_and_boolean_tls(ssl):
+    # Trino profile carries no DuckDB settings/secrets: Trino reads its S3
+    # config from platform/trino/etc/catalog/nessie.properties.
     output = _profile({
         "OBJECT_STORE_REGION": "eu-central-2",
         "S3_ENDPOINT": "https://object-store.example.test" if ssl == "true" else "http://object-store.example.test",
@@ -42,20 +44,18 @@ def test_dbt_profile_uses_environment_region_and_boolean_tls(ssl):
         "S3_USE_SSL": ssl,
         "S3_CA_BUNDLE": "/run/secrets/ca.pem" if ssl == "true" else "",
     })["pdm_platform"]["outputs"]["runtime"]
-    assert output["settings"]["s3_region"] == "eu-central-2"
-    assert output["settings"]["s3_endpoint"] == "object-store.example.test"
-    assert output["settings"]["s3_use_ssl"] == ssl
-    assert output["settings"]["ca_cert_file"] == ("/run/secrets/ca.pem" if ssl == "true" else "")
-    assert output["config_options"]["extension_directory"] == "/opt/duckdb/extensions"
-    assert output["secrets"][0]["region"] == "eu-central-2"
-    assert output["secrets"][0]["endpoint"] == "object-store.example.test"
-    assert output["secrets"][0]["use_ssl"] == ssl
+    assert output["type"] == "trino"
+    assert "settings" not in output
+    assert "secrets" not in output
+    assert "config_options" not in output
+    assert not any("s3" in str(key).lower() for key in output)
+    assert not any("s3" in str(value).lower() for value in output.values() if isinstance(value, str))
 
 
 def test_runner_propagates_validated_object_store_configuration(monkeypatch):
     monkeypatch.delenv("DP_SECURITY_MODE", raising=False)
     source = {
-        "ML_S3_ACCESS_KEY_ID": "key", "ML_S3_SECRET_ACCESS_KEY": "secret",
+        "ML_TRANSFORM_S3_ACCESS_KEY_ID": "key", "ML_TRANSFORM_S3_SECRET_ACCESS_KEY": "secret",
         "NESSIE_TRANSFORM_TOKEN": "token", "NESSIE_ENDPOINT": "http://nessie:19120",
         "S3_ENDPOINT": "https://object-store.example.test", "S3_USE_SSL": "true",
         "S3_CA_BUNDLE": "/run/secrets/ca.pem", "OBJECT_STORE_REGION": "eu-central-2",
@@ -63,14 +63,15 @@ def test_runner_propagates_validated_object_store_configuration(monkeypatch):
         "OBJECT_STORE_BUCKET": "dp-ai-payment", "RAW_ROOT": "raw",
         "RAW_VERSION": "v2", "RAW_PREFIX": "raw/v2",
         "WAREHOUSE_PREFIX": "warehouse", "WAREHOUSE_URI": "s3://dp-ai-payment/warehouse",
+        "NESSIE_WAREHOUSE": "s3://dp-ai-payment/warehouse", "DBT_TRINO_PASSWORD": "test-trino-password",
     }
     child = build_transform_command("C4_ML_01", EXECUTION_ID, source).environment
     for name in ("S3_ENDPOINT", "S3_USE_SSL", "S3_CA_BUNDLE", "OBJECT_STORE_REGION",
                  "S3_PATH_STYLE_ACCESS", "RAW_ROOT", "RAW_VERSION", "RAW_PREFIX"):
         assert child[name] == source[name]
-    assert child["DUCKDB_S3_ENDPOINT"] == "object-store.example.test"
+    assert "DUCKDB_S3_ENDPOINT" not in child
     assert "ML_S3_ACCESS_KEY_ID" not in child
-    assert child["TRANSFORM_S3_ACCESS_KEY_ID"] == "key"
+    assert build_transform_command("C4_ML_01", EXECUTION_ID, source).trino_environment["TRINO_S3_ACCESS_KEY_ID"] == "key"
 
 
 def test_runtime_configuration_contains_no_hidden_storage_deployment_values():
@@ -99,8 +100,9 @@ def test_dbt_profile_is_valid_yaml_before_dbt_renders_scalar_jinja():
     profile = yaml.safe_load((ROOT / "transform/dbt/profiles.yml").read_text())
 
     runtime = profile["pdm_platform"]["outputs"]["runtime"]
-    assert runtime["settings"]["s3_use_ssl"] == "{{ env_var('S3_USE_SSL') | lower }}"
-    assert runtime["secrets"][0]["use_ssl"] == "{{ env_var('S3_USE_SSL') | lower }}"
+    assert runtime["type"] == "trino"
+    assert runtime["port"] == "{{ env_var('DBT_TRINO_PORT', '8443') | int }}"
+    assert runtime["host"] == "{{ env_var('DBT_TRINO_HOST') }}"
 
 
 def test_token_link_storage_settings_are_runtime_selected(monkeypatch):

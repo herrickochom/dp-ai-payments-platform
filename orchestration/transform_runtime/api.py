@@ -22,7 +22,7 @@ def plan_digest() -> str:
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
 def response(row: dict) -> TransformResponse:
-    return TransformResponse(transform_run_id=row["transform_run_id"], batch_execution_id=row.get("batch_execution_id"), batch_id=row.get("batch_id"), status=row["status"], accepted_at=row["accepted_at"], started_at=row.get("started_at"), finished_at=row.get("finished_at"), attempt=row.get("attempt"), test_status=row.get("test_status"), failure_class=row.get("failure_class"))
+    return TransformResponse(accepted=True, transform_run_id=row["transform_run_id"], batch_execution_id=row.get("batch_execution_id"), batch_id=row.get("batch_id"), status=row["status"], accepted_at=row["accepted_at"], started_at=row.get("started_at"), finished_at=row.get("finished_at"), attempt=row.get("attempt"), test_status=row.get("test_status"), failure_class=row.get("failure_class"))
 
 
 

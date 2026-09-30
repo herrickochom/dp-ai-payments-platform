@@ -91,8 +91,43 @@ class TransformLedger:
             execution_id = f"be_{uuid4().hex}"
             accepted = now()
             db.execute(
-                "INSERT INTO batch_executions VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                (execution_id, run_id, caller, key, batch.batch_id, batch.authority, fingerprint, "ADMITTED", accepted, None, None, 1, None, None, accepted),
+                """
+                INSERT INTO batch_executions (
+                    batch_execution_id,
+                    transform_run_id,
+                    caller_identity,
+                    idempotency_key,
+                    batch_id,
+                    authority,
+                    model_fingerprint,
+                    status,
+                    accepted_at,
+                    started_at,
+                    finished_at,
+                    attempt,
+                    test_status,
+                    failure_class,
+                    heartbeat_at
+                )
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                """,
+                (
+                    execution_id,
+                    run_id,
+                    caller,
+                    key,
+                    batch.batch_id,
+                    batch.authority,
+                    fingerprint,
+                    "ADMITTED",
+                    accepted,
+                    None,
+                    None,
+                    1,
+                    None,
+                    None,
+                    accepted,
+                ),
             )
             db.execute("INSERT INTO batch_attempts (batch_execution_id,attempt,status,heartbeat_at) VALUES (?,?,?,?)", (execution_id, 1, "ADMITTED", accepted))
             self._event(db, run_id, execution_id, "BATCH_ADMITTED", {"batch_id": batch.batch_id, "authority": batch.authority})
@@ -114,6 +149,38 @@ class TransformLedger:
             finished = timestamp if state in TERMINAL else None
             db.execute("UPDATE batch_executions SET status=?,started_at=?,finished_at=?,test_status=?,failure_class=?,heartbeat_at=? WHERE batch_execution_id=?", (state, started, finished, test_status, failure_class, timestamp, execution_id))
             self._event(db, row["transform_run_id"], execution_id, state, {"failure_class": failure_class})
+
+            if state in {"FAILED", "CANCELLED", "ORPHANED"}:
+                db.execute(
+                    """
+                    UPDATE transform_runs
+                    SET status=?,
+                        heartbeat_at=?
+                    WHERE transform_run_id=?
+                      AND status NOT IN (
+                          'SUCCEEDED',
+                          'FAILED',
+                          'CANCELLED',
+                          'ORPHANED'
+                      )
+                    """,
+                    (
+                        state,
+                        timestamp,
+                        row["transform_run_id"],
+                    ),
+                )
+                self._event(
+                    db,
+                    row["transform_run_id"],
+                    None,
+                    "RUN_" + state,
+                    {
+                        "batch_execution_id": execution_id,
+                        "failure_class": failure_class,
+                    },
+                )
+
             return self.get_batch(execution_id, row["caller_identity"])
 
     def _event(self, db, run_id, execution_id, event_type, metadata):
@@ -523,6 +590,40 @@ class PostgresTransformLedger:
                 state,
                 {"failure_class": failure_class},
             )
+
+            if state in {"FAILED", "CANCELLED", "ORPHANED"}:
+                run_updated = db.execute(
+                    """
+                    UPDATE transform_runs
+                    SET status=%s,
+                        heartbeat_at=%s
+                    WHERE transform_run_id=%s
+                      AND status NOT IN (
+                          'SUCCEEDED',
+                          'FAILED',
+                          'CANCELLED',
+                          'ORPHANED'
+                      )
+                    RETURNING transform_run_id
+                    """,
+                    (
+                        state,
+                        timestamp,
+                        row["transform_run_id"],
+                    ),
+                ).fetchone()
+
+                if run_updated:
+                    self._event(
+                        db,
+                        row["transform_run_id"],
+                        None,
+                        "RUN_" + state,
+                        {
+                            "batch_execution_id": execution_id,
+                            "failure_class": failure_class,
+                        },
+                    )
 
             return dict(updated)
 

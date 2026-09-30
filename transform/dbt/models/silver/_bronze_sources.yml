@@ -1,0 +1,139 @@
+version: 2
+
+sources:
+  - name: bronze
+    database: iceberg
+    schema: bronze
+    description: >
+      Physical Bronze Iceberg tables written by the governed Raw-to-Bronze
+      ingestion runtime through transform-Trino on the run-specific Nessie
+      branch.
+
+    tables:
+      - name: br_pdm_agent_locations
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+      - name: br_pdm_agent_profiles
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+      - name: br_pdm_agent_transactions
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+      - name: br_pdm_cpo_psn_pain002
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+      - name: br_pdm_icmn_vpm_pain001
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+      - name: br_pdm_mobile_airtel_pacs002
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+      - name: br_pdm_mobile_airtel_pacs008
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+      - name: br_pdm_mobile_mtn_pacs002
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+      - name: br_pdm_mobile_mtn_pacs008
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+      - name: br_pdm_payments_plm_lifecycle_events
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+      - name: br_pdm_payments_pmn_lifecycle_events
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+      - name: br_pdm_pdmis_beneficiaries
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+      - name: br_pdm_pdmis_business_plans
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+      - name: br_pdm_pdmis_households
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+      - name: br_pdm_pdmis_loans
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+      - name: br_pdm_pdmis_repayments
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+      - name: br_pdm_pdmis_saccos
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+      - name: br_pdm_pdmis_special_groups
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+      - name: br_pdm_wendi_camt052
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+      - name: br_pdm_wendi_camt053
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+      - name: br_pdm_wendi_camt054
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+      - name: br_pdm_wendi_pain001
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+      - name: br_pdm_wendi_pain002
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.
+
+      - name: br_pdm_wendi_transactions
+        description: >
+          Physical Bronze Iceberg table written by the governed
+          Raw-to-Bronze ingestion runtime.

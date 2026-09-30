@@ -83,6 +83,7 @@ OBJECT_STORE_CONFIG = {
     "RAW_PREFIX": "raw/v2",
     "WAREHOUSE_PREFIX": "warehouse",
     "WAREHOUSE_URI": "s3://dp-ai-payment/warehouse",
+    "NESSIE_WAREHOUSE": "s3://dp-ai-payment/warehouse",
     "DBT_S3_URL_STYLE": "path",
     "NESSIE_ENDPOINT": "http://nessie:19120",
 }
@@ -93,6 +94,7 @@ SECRET_SOURCE_NAMES = (
     "DP_SECRET_DIR",
     "NESSIE_PUBLICATION_TOKEN",
     "NESSIE_TRANSFORM_TOKEN",
+    "DBT_TRINO_PASSWORD",
     "TRANSFORM_RUNTIME_AIRFLOW_TOKEN",
     "TRANSFORM_RUNTIME_RUNNER_TOKEN",
     "TRANSFORM_LEDGER_APP_DATABASE_URL",
@@ -107,6 +109,7 @@ SECRET_SOURCE_NAMES = (
     *OBJECT_STORE_CONFIG,
     *sorted(AUTHORITY_SECRET_NAMES),
 )
+
 
 
 @pytest.fixture(autouse=True)
@@ -207,6 +210,7 @@ def test_mounted_file_supplies_each_authority_class(monkeypatch, tmp_path, autho
             access: f"{authority}-access-from-file",
             secret: f"{authority}-secret-from-file",
             "NESSIE_TRANSFORM_TOKEN": TRANSFORM_TOKEN,
+            "DBT_TRINO_PASSWORD": "test-trino-password",
         },
     )
 
@@ -214,9 +218,9 @@ def test_mounted_file_supplies_each_authority_class(monkeypatch, tmp_path, autho
     command = build_transform_command(batch.batch_id, EXECUTION_ID)
 
     assert command.authority == authority
-    assert command.environment["TRANSFORM_S3_ACCESS_KEY_ID"] == f"{authority}-access-from-file"
-    assert command.environment["TRANSFORM_S3_SECRET_ACCESS_KEY"] == f"{authority}-secret-from-file"
-    assert command.environment["NESSIE_TRANSFORM_TOKEN"] == TRANSFORM_TOKEN
+    assert command.trino_environment["TRINO_S3_ACCESS_KEY_ID"] == f"{authority}-access-from-file"
+    assert command.trino_environment["TRINO_S3_SECRET_ACCESS_KEY"] == f"{authority}-secret-from-file"
+    assert "NESSIE_TRANSFORM_TOKEN" not in command.environment
 
 
 def test_child_environment_carries_only_authorised_resolved_credentials(monkeypatch, tmp_path):
@@ -229,30 +233,31 @@ def test_child_environment_carries_only_authorised_resolved_credentials(monkeypa
         tmp_path,
         monkeypatch,
         {
-            "ORDINARY_S3_ACCESS_KEY_ID": "ordinary-access",
-            "ORDINARY_S3_SECRET_ACCESS_KEY": "ordinary-secret",
+            "ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID": "ordinary-access",
+            "ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY": "ordinary-secret",
             "NESSIE_TRANSFORM_TOKEN": TRANSFORM_TOKEN,
-            "RESTRICTED_S3_ACCESS_KEY_ID": "restricted-access",
-            "RESTRICTED_S3_SECRET_ACCESS_KEY": "restricted-secret",
-            "ML_S3_ACCESS_KEY_ID": "ml-access",
-            "ML_S3_SECRET_ACCESS_KEY": "ml-secret",
+            "RESTRICTED_TRANSFORM_S3_ACCESS_KEY_ID": "restricted-access",
+            "RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY": "restricted-secret",
+            "ML_TRANSFORM_S3_ACCESS_KEY_ID": "ml-access",
+            "ML_TRANSFORM_S3_SECRET_ACCESS_KEY": "ml-secret",
             "NESSIE_PUBLICATION_TOKEN": PUBLICATION_TOKEN,
+            "DBT_TRINO_PASSWORD": "test-trino-password",
         },
     )
 
     command = build_transform_command(
         authority_batch("ordinary_transform").batch_id, EXECUTION_ID
     )
-    environment = command.environment
+    environment = command.trino_environment
 
-    assert environment["TRANSFORM_S3_ACCESS_KEY_ID"] == "ordinary-access"
-    assert environment["TRANSFORM_S3_SECRET_ACCESS_KEY"] == "ordinary-secret"
+    assert environment["TRINO_S3_ACCESS_KEY_ID"] == "ordinary-access"
+    assert environment["TRINO_S3_SECRET_ACCESS_KEY"] == "ordinary-secret"
 
     for absent in (
-        "RESTRICTED_S3_ACCESS_KEY_ID",
-        "RESTRICTED_S3_SECRET_ACCESS_KEY",
-        "ML_S3_ACCESS_KEY_ID",
-        "ML_S3_SECRET_ACCESS_KEY",
+        "RESTRICTED_TRANSFORM_S3_ACCESS_KEY_ID",
+        "RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY",
+        "ML_TRANSFORM_S3_ACCESS_KEY_ID",
+        "ML_TRANSFORM_S3_SECRET_ACCESS_KEY",
         "NESSIE_PUBLICATION_TOKEN",
         "DP_SECRET_DIR",
         "DP_SECRET_SOURCE",
@@ -314,8 +319,9 @@ def test_publication_authority_stays_separate_from_transform_authority(monkeypat
         {
             "NESSIE_TRANSFORM_TOKEN": TRANSFORM_TOKEN,
             "NESSIE_PUBLICATION_TOKEN": PUBLICATION_TOKEN,
-            "ORDINARY_S3_ACCESS_KEY_ID": "ordinary-access",
-            "ORDINARY_S3_SECRET_ACCESS_KEY": "ordinary-secret",
+            "DBT_TRINO_PASSWORD": "test-trino-password",
+            "ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID": "ordinary-access",
+            "ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY": "ordinary-secret",
         },
     )
 
@@ -324,7 +330,7 @@ def test_publication_authority_stays_separate_from_transform_authority(monkeypat
     command = build_transform_command(
         authority_batch("ordinary_transform").batch_id, EXECUTION_ID
     )
-    assert command.environment["NESSIE_TRANSFORM_TOKEN"] == TRANSFORM_TOKEN
+    assert "NESSIE_TRANSFORM_TOKEN" not in command.environment
     assert PUBLICATION_TOKEN not in command.environment.values()
 
 
@@ -489,12 +495,12 @@ PROVIDER_SECRET_NAMES = frozenset(
 
 EXPECTED_AUTHORITY_NAMES = frozenset(
     {
-        "ORDINARY_S3_ACCESS_KEY_ID",
-        "ORDINARY_S3_SECRET_ACCESS_KEY",
-        "RESTRICTED_S3_ACCESS_KEY_ID",
-        "RESTRICTED_S3_SECRET_ACCESS_KEY",
-        "ML_S3_ACCESS_KEY_ID",
-        "ML_S3_SECRET_ACCESS_KEY",
+        "ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID",
+        "ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY",
+        "RESTRICTED_TRANSFORM_S3_ACCESS_KEY_ID",
+        "RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY",
+        "ML_TRANSFORM_S3_ACCESS_KEY_ID",
+        "ML_TRANSFORM_S3_SECRET_ACCESS_KEY",
         "NESSIE_TRANSFORM_TOKEN",
     }
 )

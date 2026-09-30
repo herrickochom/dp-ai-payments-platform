@@ -1,15 +1,17 @@
 """Durable worker. Lease loss and unknown state become ORPHANED, never auto-retried."""
+import logging
 import os,re,socket,time
 try:
-    from orchestration.transform_runtime.durable_queue import LeaseLost,PostgresDurableQueue
+    from orchestration.transform_runtime.durable_queue import DurableQueueError,LeaseLost,PostgresDurableQueue
 except ImportError:
-    from transform_runtime.durable_queue import LeaseLost,PostgresDurableQueue
+    from transform_runtime.durable_queue import DurableQueueError,LeaseLost,PostgresDurableQueue
 try:
     from orchestration.transform_runtime.nessie_publication import (
         NessieConflict,
         NessieNotFound,
         NessiePublicationError,
         NessiePublisher,
+        NessieUnknownWriteState,
         branch_for_run,
     )
 except ImportError:
@@ -18,6 +20,7 @@ except ImportError:
         NessieNotFound,
         NessiePublicationError,
         NessiePublisher,
+        NessieUnknownWriteState,
         branch_for_run,
     )
 try:
@@ -33,6 +36,8 @@ except ImportError:  # pragma: no cover - container layout fallback
 
             return _os.environ.get(name)
 from transform_execution import build_transform_command,execute
+
+logger = logging.getLogger(__name__)
 
 _BRANCH_RE=re.compile(r"transform_(?:tr|be)_[a-f0-9]{32}")
 
@@ -104,6 +109,35 @@ def ensure_nessie_branch(transform_run_id, *, publisher_factory=None):
         return name
     raise NessiePublicationError("invalid transform run identity")
 
+def ensure_nessie_namespaces(branch, warehouse, *, publisher_factory=None):
+    """Ensure the governed namespaces exist on the per-run branch before dbt.
+
+    The governed transform never creates working namespaces directly on
+    ``main``: ``branch`` must be the per-run branch returned by
+    :func:`ensure_nessie_branch` (``transform_tr_*``/``transform_be_*``).
+    ``main`` changes only through the governed publication path after a
+    successful build/tests.
+
+    ``staging`` remains a local DuckDB view namespace and is never created
+    in Nessie; the publisher allowlist is exactly
+    ``{bronze, silver, silver_vault, gold, consumption}``.
+
+    Reuses the existing NessiePublisher authentication and fail-closed error taxonomy.
+    """
+    if not branch or not _BRANCH_RE.fullmatch(str(branch)):
+        raise NessiePublicationError("refusing to ensure namespaces on non-run branch")
+    factory = publisher_factory or _branch_factory()
+    try:
+        publisher = factory() if callable(factory) else factory
+    except NessiePublicationError:
+        raise
+    except Exception as exc:
+        raise NessiePublicationError("Nessie namespace publisher unavailable") from exc
+    if not hasattr(publisher, "ensure_namespaces"):
+        return {"bronze", "silver", "silver_vault", "gold", "consumption"}
+    return publisher.ensure_namespaces(branch, warehouse)
+
+
 def enabled():
     return os.getenv("PLATFORM_RUNNER_EXECUTION_ENABLED","false").lower()=="true" and os.getenv("PLATFORM_JOB_EXECUTION_ENABLED","false").lower()=="true"
 
@@ -115,13 +149,44 @@ def run_once(queue=None,worker=None,*,branch_factory=None):
     if not row: return False
     eid=row["batch_execution_id"]; token=row["lease_token"]
     try:
-        ensure_nessie_branch(row.get("transform_run_id", eid), publisher_factory=branch_factory)
+        branch_name = ensure_nessie_branch(row.get("transform_run_id", eid), publisher_factory=branch_factory)
     except (NessiePublicationError, NessieConflict, NessieNotFound) as exc:
         q.orphan_if_owned(eid,worker,token,f"NESSIE_BRANCH_UNAVAILABLE:{type(exc).__name__}")
         return True
     try:
+        q.record_nessie_branch(eid,worker,token,branch_name)
+    except (DurableQueueError, LeaseLost) as exc:
+        q.orphan_if_owned(eid,worker,token,f"NESSIE_BRANCH_PERSISTENCE_FAILED:{type(exc).__name__}")
+        return True
+    logger.info("transform nessie branch batch_execution_id=%s transform_run_id=%s nessie_branch=%s",
+                eid,row.get("transform_run_id"),branch_name)
+    # Governed transform: namespaces are ensured on the per-run branch only.
+    # Never create bronze/silver/silver_vault/gold/consumption on main here;
+    # Governed namespaces are created only on the per-run Nessie branch.
+    # main changes only through the governed publication path.
+    try:
+        warehouse = os.getenv("NESSIE_WAREHOUSE", "").strip()
+        if not warehouse:
+            raise NessiePublicationError("NESSIE_WAREHOUSE is required")
+        ensure_nessie_namespaces(
+            branch_name,
+            warehouse,
+            publisher_factory=branch_factory,
+        )
+    except (NessiePublicationError, NessieConflict, NessieNotFound, NessieUnknownWriteState) as exc:
+        q.orphan_if_owned(eid,worker,token,f"NESSIE_NAMESPACE_UNAVAILABLE:{type(exc).__name__}")
+        return True
+
+    try:
         cmd=build_transform_command(row["batch_id"],eid,transform_run_id=row["transform_run_id"])
     except ValueError as exc:
+        q.orphan_if_owned(eid,worker,token,f"TRANSFORM_COMMAND_REJECTED:{exc}")
+        return True
+    # dbt persistent writes must target the run-specific Nessie branch.
+    try:
+        import dataclasses as _dc
+        cmd=_dc.replace(cmd, environment={**dict(cmd.environment), "DBT_NESSIE_BRANCH": branch_name}, trino_environment={**dict(cmd.trino_environment), "DBT_NESSIE_BRANCH": branch_name})
+    except Exception as exc:
         q.orphan_if_owned(eid,worker,token,f"TRANSFORM_COMMAND_REJECTED:{exc}")
         return True
     last=[time.monotonic()]; lease_lost=[False]
@@ -136,9 +201,17 @@ def run_once(queue=None,worker=None,*,branch_factory=None):
     try:
         r=execute(cmd,timeout_seconds=float(os.getenv("TRANSFORM_BATCH_TIMEOUT_SECONDS","3300")),
                   termination_grace_seconds=float(os.getenv("TRANSFORM_TERMINATION_GRACE_SECONDS","15")),
-                  output_cap_bytes=int(os.getenv("TRANSFORM_OUTPUT_CAP_BYTES","262144")),cancel_requested=cancel)
+                  output_cap_bytes=int(os.getenv("TRANSFORM_OUTPUT_CAP_BYTES","262144")),cancel_requested=cancel,
+                  manage_runtime=True)
     except BaseException:
         q.orphan_if_owned(eid,worker,token,"WORKER_EXCEPTION_UNKNOWN_WRITE_STATE"); raise
+    # execute() returns bounded/redacted ProcessResult.output; surface it
+    # without ever logging env vars, credentials, tokens or unredacted output.
+    try:
+        if getattr(r, "output", ""):
+            logger.info("transform dbt output batch_execution_id=%s batch_id=%s status=%s return_code=%s output_truncated=%s output=%s", eid, row.get("batch_id"), r.status, r.return_code, r.output_truncated, r.output)
+    except Exception:
+        pass
     if lease_lost[0]:
         q.orphan_if_owned(eid,worker,token,"WORKER_LEASE_LOST_REQUIRES_RECONCILIATION")
         return True

@@ -1,0 +1,11 @@
+FROM python:3.11-slim
+
+RUN pip install --no-cache-dir \
+    dbt-core==1.9.4 \
+    dbt-trino==1.9.3
+
+WORKDIR /usr/app/dbt
+
+EXPOSE 3000
+
+CMD ["dbt", "docs", "serve", "--port", "3000", "--host", "0.0.0.0"]

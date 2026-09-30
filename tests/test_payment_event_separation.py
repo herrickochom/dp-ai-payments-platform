@@ -118,9 +118,9 @@ class PaymentEventSeparationTests(unittest.TestCase):
         messages = (ROOT / "transform/dbt/models/silver/slv_pdm_payments_messages.sql").read_text()
         statuses = (ROOT / "transform/dbt/models/silver/slv_pdm_payments_status_report.sql").read_text()
         correlation = (ROOT / "transform/dbt/models/silver/slv_pdm_payment_event_correlation.sql").read_text()
-        self.assertNotIn("br_pdm_icmn_pmn_pain001", messages)
-        self.assertNotIn("br_pdm_cpo_plm_pain002", messages)
-        self.assertNotIn("br_pdm_cpo_plm_pain002", statuses)
+        self.assertNotIn("br_pdm_payments_pmn_lifecycle_events", messages)
+        self.assertNotIn("br_pdm_payments_plm_lifecycle_events", messages)
+        self.assertNotIn("br_pdm_payments_plm_lifecycle_events", statuses)
         self.assertIn("'UNMATCHED'", correlation)
         self.assertNotIn("like", correlation.lower())
 
@@ -140,8 +140,17 @@ class PaymentEventSeparationTests(unittest.TestCase):
         for family in ("pmn", "plm"):
             bronze = (ROOT / f"transform/dbt/models/bronze/br_pdm_payments_{family}_lifecycle_events.sql").read_text()
             silver = (ROOT / f"transform/dbt/models/silver/slv_pdm_payments_{family}_lifecycle_events.sql").read_text()
-            self.assertIn("event_family = 'TECHNICAL_PAYMENT_EVENT'", bronze)
-            self.assertIn(f"ref('br_pdm_payments_{family}_lifecycle_events')", silver)
+            expected_topic = {
+                "pmn": "topic=icmn.pmn.pain001",
+                "plm": "topic=cpo.plm.pain002",
+            }[family]
+            self.assertIn("read_avro(", bronze)
+            self.assertIn("extract_json(", bronze)
+            self.assertIn(expected_topic, bronze)
+            self.assertIn(
+                f"source('bronze', 'br_pdm_payments_{family}_lifecycle_events')",
+                silver,
+            )
 
     def test_generator_technical_contract_is_deterministic_and_correlated(self):
         context = {
@@ -176,12 +185,27 @@ class PaymentEventSeparationTests(unittest.TestCase):
             ROOT / "transform/dbt/models/bronze/br_pdm_payments_plm_lifecycle_events.sql",
             ROOT / "transform/dbt/models/silver/slv_pdm_payments_pmn_lifecycle_events.sql",
             ROOT / "transform/dbt/models/silver/slv_pdm_payments_plm_lifecycle_events.sql",
-            ROOT / "transform/dbt/models/silver/slv_pdm_payment_technical_events.sql",
         ]
         for model in models:
             self.assertNotIn("select *", model.read_text().lower())
-        self.assertIn("ref('stg_pdm_icmn_pmn_pain001')", models[0].read_text())
-        self.assertIn("ref('stg_pdm_cpo_plm_pain002')", models[1].read_text())
+        retired = ROOT / "transform/dbt/models/silver" / (
+            "slv_pdm_payment_" + "technical_events.sql"
+        )
+        self.assertFalse(retired.exists())
+        pmn_bronze = models[0].read_text()
+        plm_bronze = models[1].read_text()
+
+        self.assertIn("config(enabled=false)", pmn_bronze)
+        self.assertIn("read_avro(", pmn_bronze)
+        self.assertIn("extract_json(", pmn_bronze)
+        self.assertIn("topic=icmn.pmn.pain001", pmn_bronze)
+        self.assertNotIn("source('bronze'", pmn_bronze)
+
+        self.assertIn("config(enabled=false)", plm_bronze)
+        self.assertIn("read_avro(", plm_bronze)
+        self.assertIn("extract_json(", plm_bronze)
+        self.assertIn("topic=cpo.plm.pain002", plm_bronze)
+        self.assertNotIn("source('bronze'", plm_bronze)
 
 
 if __name__ == "__main__":

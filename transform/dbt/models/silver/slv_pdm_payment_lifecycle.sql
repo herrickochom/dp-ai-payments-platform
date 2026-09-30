@@ -62,17 +62,17 @@ with payment_stages as (
         count(*) as credit_notification_count,
         max(coalesce(transaction_amount, entry_amount)) as credited_amount,
         min(notification_created_at) as first_credited_at
-    from {{ ref('br_pdm_wendi_camt054') }}
+    from {{ source('bronze', 'br_pdm_wendi_camt054') }}
     where end_to_end_id is not null
     group by 1
 ), statements as (
     select end_to_end_id as loan_id, count(*) as statement_evidence_count
-    from {{ ref('br_pdm_wendi_camt053') }}
+    from {{ source('bronze', 'br_pdm_wendi_camt053') }}
     where end_to_end_id is not null
     group by 1
 )
 select
-    loan.loan_id,
+    loan_id,
     loan.beneficiary_id,
     loan.sacco_id,
     loan.approval_date,

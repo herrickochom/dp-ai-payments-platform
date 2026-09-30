@@ -23,7 +23,7 @@ with identity_risk as (
         sacco.sacco_sk,
         sacco.sacco_id,
         sacco.sacco_name,
-        beneficiary.beneficiary_sk,
+        beneficiary_sk,
         beneficiary.beneficiary_token,
         loan.loan_sk,
         loan.loan_id,

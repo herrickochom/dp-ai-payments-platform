@@ -16,7 +16,7 @@ with transactions as (
         instructed_amount as amount,
         currency,
         cast(null as varchar) as transaction_status
-    from {{ ref('br_pdm_icmn_vpm_pain001') }}
+    from {{ source('bronze', 'br_pdm_icmn_vpm_pain001') }}
 
     union all
 
@@ -34,7 +34,7 @@ with transactions as (
         instructed_amount,
         currency,
         null
-    from {{ ref('br_pdm_wendi_pain001') }}
+    from {{ source('bronze', 'br_pdm_wendi_pain001') }}
 
     union all
 
@@ -52,7 +52,7 @@ with transactions as (
         instructed_amount,
         currency,
         null
-    from {{ ref('br_pdm_mobile_mtn_pacs008') }}
+    from {{ source('bronze', 'br_pdm_mobile_mtn_pacs008') }}
 
     union all
 
@@ -70,7 +70,7 @@ with transactions as (
         instructed_amount,
         currency,
         null
-    from {{ ref('br_pdm_mobile_airtel_pacs008') }}
+    from {{ source('bronze', 'br_pdm_mobile_airtel_pacs008') }}
 
     union all
 
@@ -88,7 +88,7 @@ with transactions as (
         amount,
         currency,
         transaction_status
-    from {{ ref('br_pdm_wendi_transactions') }}
+    from {{ source('bronze', 'br_pdm_wendi_transactions') }}
 
     union all
 
@@ -106,12 +106,11 @@ with transactions as (
         amount,
         'UGX' as currency,
         status as transaction_status
-    from {{ ref('br_pdm_agent_transactions') }}
+    from {{ source('bronze', 'br_pdm_agent_transactions') }}
 
 ),
 
 identified_transactions as (
-
     select
         *,
         coalesce(
@@ -121,13 +120,33 @@ identified_transactions as (
             message_id
         ) as record_identifier
     from transactions
+),
 
+ranked as (
+    select
+        *,
+        row_number() over (
+            partition by source_system, record_identifier
+            order by occurred_at desc nulls last
+        ) as _row_number
+    from identified_transactions
+    where record_identifier is not null
 )
 
-select *
-from identified_transactions
-where record_identifier is not null
-qualify row_number() over (
-    partition by source_system, record_identifier
-    order by occurred_at desc nulls last
-) = 1
+select
+    transaction_id,
+    end_to_end_id,
+    instruction_id,
+    uetr,
+    message_id,
+    beneficiary_id,
+    sacco_id,
+    agent_id,
+    source_system,
+    occurred_at,
+    amount,
+    currency,
+    transaction_status,
+    record_identifier
+from ranked
+where _row_number = 1

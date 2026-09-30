@@ -12,7 +12,22 @@
 -- must never be readable by analyst / BI dashboard / agent / Gold / Consumption.
 -- Ordinary Silver projects only the pseudonymous boundary attributes.
 
-with bronze_dedup as (
+with bronze_ranked as (
+
+    select
+        beneficiary_id, beneficiary_token, nin, nin_hashed, nin_verified,
+        beneficiary_name, date_of_birth, gender, phone, alternative_phone, email,
+        phone_verified, household_id, special_group_code, village, parish,
+        sub_county, county, district, region, registration_date, is_active,
+        created_at, updated_at,
+        row_number() over (
+            partition by beneficiary_id order by updated_at desc nulls last, kafka_timestamp desc, kafka_offset desc
+        ) as _row_number
+    from {{ source('bronze', 'br_pdm_pdmis_beneficiaries') }}
+
+),
+
+bronze_dedup as (
 
     select
         beneficiary_id, beneficiary_token, nin, nin_hashed, nin_verified,
@@ -20,10 +35,8 @@ with bronze_dedup as (
         phone_verified, household_id, special_group_code, village, parish,
         sub_county, county, district, region, registration_date, is_active,
         created_at, updated_at
-    from {{ ref('br_pdm_pdmis_beneficiaries') }}
-    qualify row_number() over (
-        partition by beneficiary_id order by updated_at desc nulls last, kafka_timestamp desc, kafka_offset desc
-    ) = 1
+    from bronze_ranked
+    where _row_number = 1
 
 )
 
@@ -36,7 +49,7 @@ select
     b.beneficiary_name,
     b.nin,
     case when nullif(trim(b.nin), '') is null then null
-        else nullif(b.nin_hashed, sha256('')) end as nin_hashed,
+        else nullif(b.nin_hashed, to_hex(sha256(to_utf8('')))) end as nin_hashed,
     b.nin_verified,
     b.date_of_birth,
     case
@@ -52,7 +65,7 @@ select
     b.phone,
     -- Restricted reuse correlator; never projected into ordinary analytics.
     case when nullif(regexp_replace(coalesce(b.phone, ''), '[^0-9]', ''), '') is null then null
-        else sha256(regexp_replace(b.phone, '[^0-9]', '')) end as phone_hashed,
+        else to_hex(sha256(to_utf8(regexp_replace(b.phone, '[^0-9]', '')))) end as phone_hashed,
     b.alternative_phone,
     b.email,
     b.phone_verified,

@@ -107,10 +107,9 @@ def run_raw_readiness() -> dict:
     topics = _topics_from_env()
     client = _client()
 
-    # Read-only bucket metadata operation.
-    client.head_bucket(
-        Bucket=bucket,
-    )
+    # The scoped ListObjectsV2 call below is the readiness probe.
+    # Do not perform HeadBucket: the dedicated Raw reader is intentionally
+    # restricted to the governed Raw prefix rather than bucket-wide access.
 
     counts = {
         topic: 0

@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -47,9 +48,9 @@ class TransformResponse(BaseModel):
     batch_execution_id: str | None = None
     batch_id: str | None = None
     status: str
-    accepted_at: str
-    started_at: str | None = None
-    finished_at: str | None = None
+    accepted_at: datetime
+    started_at: datetime | None = None
+    finished_at: datetime | None = None
     attempt: int | None = None
     test_status: str | None = None
     failure_class: str | None = None
