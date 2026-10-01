@@ -2,6 +2,9 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
+from services.shared.security.runtime_security import (
+    is_production_security_mode,
+)
 from services.shared.security.secret_provider import resolve_secret
 
 
@@ -48,6 +51,29 @@ class Settings:
     max_request_bytes: int = int(os.getenv("AGENT_MAX_REQUEST_BYTES", "1000000"))
     auth_enabled: bool = os.getenv("AGENT_AUTH_ENABLED", "false").lower() == "true"
 
+    #
+    # F1 trusted identity.  These are deployment-owned values, never defaults:
+    # when trusted authentication is enabled and any of them is missing, the
+    # service FAILS CLOSED rather than silently disabling authentication.
+    #
+    auth_issuer: str = os.getenv("AGENT_AUTH_ISSUER", "")
+    auth_audience: str = os.getenv("AGENT_AUTH_AUDIENCE", "")
+    auth_jwks_url: str = os.getenv("AGENT_AUTH_JWKS_URL", "")
+    auth_allowed_algorithms: str = os.getenv(
+        "AGENT_AUTH_ALLOWED_ALGORITHMS",
+        "RS256",
+    )
+    auth_clock_skew_seconds: int = int(
+        os.getenv("AGENT_AUTH_CLOCK_SKEW_SECONDS", "0")
+    )
+    auth_jwks_cache_seconds: int = int(
+        os.getenv("AGENT_AUTH_JWKS_CACHE_SECONDS", "300")
+    )
+    auth_role_bindings_file: str = os.getenv(
+        "AGENT_AUTH_ROLE_BINDINGS_FILE",
+        "",
+    )
+
     def __post_init__(self):
         if not 1 <= self.trino_port <= 65535:
             raise ValueError("TRINO_PORT must be between 1 and 65535")
@@ -63,3 +89,69 @@ class Settings:
             raise ValueError("AGENT_TOOL_MAX_RETRIES must be between 0 and 3")
         if self.max_request_bytes < 1024:
             raise ValueError("AGENT_MAX_REQUEST_BYTES must be at least 1024")
+        self._validate_trusted_authentication()
+
+    def _validate_trusted_authentication(self) -> None:
+        """Fail closed on incomplete trusted-authentication configuration."""
+
+        if not self.auth_enabled:
+            return
+
+        missing = [
+            name
+            for name, value in (
+                ("AGENT_AUTH_ISSUER", self.auth_issuer),
+                ("AGENT_AUTH_AUDIENCE", self.auth_audience),
+                ("AGENT_AUTH_JWKS_URL", self.auth_jwks_url),
+            )
+            if not (value or "").strip()
+        ]
+
+        if missing:
+            #
+            # Authentication was requested but cannot be performed securely.
+            # Disabling it silently would restore the A2.2/A2.7 exposure, so
+            # the service refuses to start instead.
+            #
+            raise ValueError(
+                "AGENT_AUTH_ENABLED=true requires "
+                + ", ".join(missing)
+                + " to be configured"
+            )
+
+        algorithms = tuple(
+            algorithm.strip().upper()
+            for algorithm in self.auth_allowed_algorithms.split(",")
+            if algorithm.strip()
+        )
+
+        if not algorithms:
+            raise ValueError(
+                "AGENT_AUTH_ALLOWED_ALGORITHMS must list at least one algorithm"
+            )
+
+        forbidden = {"NONE", "HS256", "HS384", "HS512"}
+
+        if forbidden.intersection(algorithms):
+            raise ValueError(
+                "AGENT_AUTH_ALLOWED_ALGORITHMS must not permit unsigned or "
+                "symmetric algorithms"
+            )
+
+        if self.auth_clock_skew_seconds < 0:
+            raise ValueError(
+                "AGENT_AUTH_CLOCK_SKEW_SECONDS must not be negative"
+            )
+
+        if not is_production_security_mode():
+            return
+
+        #
+        # Production: the JWKS endpoint is a network trust anchor and must be
+        # fetched over TLS.  Certificate verification is never disabled.
+        #
+        if not self.auth_jwks_url.strip().lower().startswith("https://"):
+            raise ValueError(
+                "AGENT_AUTH_JWKS_URL must use https when "
+                "DP_SECURITY_MODE=production"
+            )

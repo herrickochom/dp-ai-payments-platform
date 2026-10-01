@@ -8,6 +8,8 @@ from agent_asgi_client import LocalClient
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "services/agent-api"))
+# F1 authentication fixtures live with the security proof suite.
+sys.path.insert(0, str(ROOT / "tests" / "security"))
 
 import api
 from agent_authority_fixtures import (
@@ -193,13 +195,74 @@ def test_oversized_request_body_is_rejected_before_handlers(monkeypatch):
     assert response.json()["error"]["category"] == "RequestTooLarge"
 
 
-def test_optional_auth_hook_blocks_anonymous_when_enabled(monkeypatch):
-    monkeypatch.setattr(api, "settings", Settings(auth_enabled=True))
+def test_authentication_hook_requires_a_verified_bearer_identity(monkeypatch):
+    """F1: only a cryptographically verified token authenticates.
+
+    OLD CONTRACT (retired): `AGENT_AUTH_ENABLED=true` plus an `x-subject-id`
+    header was treated as an authenticated caller.  A caller-supplied header is
+    spoofable, so it is now an untrusted diagnostic hint with no authority.
+    NEW CONTRACT: a valid signed bearer token authenticates; a bare
+    `x-subject-id` header does not.
+    """
+    from f1_identity_fixtures import (
+        TEST_AUDIENCE,
+        TEST_ISSUER,
+        StaticSigningKeyResolver,
+        bearer,
+        make_token,
+    )
+    from authentication import TokenVerifier
+
+    monkeypatch.setattr(
+        api,
+        "settings",
+        Settings(
+            auth_enabled=True,
+            auth_issuer=TEST_ISSUER,
+            auth_audience=TEST_AUDIENCE,
+            auth_jwks_url="https://idp.test.invalid/jwks.json",
+        ),
+    )
+    monkeypatch.setattr(
+        api,
+        "token_verifier",
+        TokenVerifier(
+            issuer=TEST_ISSUER,
+            audience=TEST_AUDIENCE,
+            signing_keys=StaticSigningKeyResolver(),
+        ),
+    )
+    monkeypatch.setattr(
+        api.orchestrator, "gateway", SmokeGateway()
+    )
+
     client = LocalClient(api.app)
-    denied = client.get("/health/live")
+
+    discovery = {
+        "objective": "What tables contain repayment information?",
+    }
+
+    denied = client.post("/agents/query", json=discovery)
     assert denied.status_code == 401
-    allowed = client.get("/health/live", headers={"x-subject-id": "analyst-1"})
-    assert allowed.status_code == 200
+
+    # The retired header alone must not authenticate.
+    spoofed = client.post(
+        "/agents/query",
+        headers={"x-subject-id": "analyst-1"},
+        json=discovery,
+    )
+    assert spoofed.status_code == 401
+
+    # A cryptographically verified bearer identity authenticates. Discovery is
+    # the anonymous-safe surface, so reaching it proves authentication only.
+    allowed = client.post(
+        "/agents/query",
+        headers={
+            "Authorization": bearer(make_token(subject="analyst-1"))
+        },
+        json=discovery,
+    )
+    assert allowed.status_code == 200, allowed.text
 
 
 def test_request_timeout_returns_504_without_stack_trace(monkeypatch):
