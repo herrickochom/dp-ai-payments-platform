@@ -16,7 +16,9 @@
 # removed as BI-approved: ['cns_pdm_beneficiary_insights', 'cns_pdm_loan_intervention_dashboard']
 databases:
 - database_name: PDM Lakehouse
-  sqlalchemy_uri: trino://superset_bi@trino:8080/iceberg/consumption
+  # F8: authenticated as superset_bi. The credential is injected at runtime
+  # from the secret source; it is never committed here.
+  sqlalchemy_uri: "trino://superset_bi:${SUPERSET_BI_TRINO_PASSWORD}@trino:8080/iceberg/consumption"
   expose_in_sqllab: false
   allow_ctas: false
   allow_cvas: false

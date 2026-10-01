@@ -372,8 +372,17 @@ def test_bi_manifest_uses_the_canonical_identity_and_no_credential():
     manifest = yaml.safe_load(MANIFEST_PATH.read_text(encoding="utf-8"))
     uri = manifest["databases"][0]["sqlalchemy_uri"]
 
-    assert uri.startswith(f"trino://{SUPERSET_BI_TRINO_USER}@")
+    #
+    # F8: the manifest must authenticate as the canonical BI identity and must
+    # never carry a literal credential. A `${...}` placeholder is required
+    # because the password is injected at runtime from the secret source.
+    #
+    assert f"trino://{SUPERSET_BI_TRINO_USER}" in uri
     assert "pdm@" not in uri
+    assert "${" in uri, (
+        "SECURITY: the BI manifest must not embed a literal Trino password; "
+        "it must reference a runtime-injected secret variable"
+    )
 
     tables = {t["table_name"] for t in manifest["databases"][0]["tables"]}
     assert tables == set(APPROVED_BI_TABLES)
@@ -402,3 +411,36 @@ def test_publication_never_marks_a_dashboard_published_or_public():
     assert '"published": False' in source
     assert '"published": True' not in source
     assert '"owners": []' in source
+
+
+def test_trino_requires_authentication_before_authorisation():
+    """F5 critical: the coordinator must not trust an unauthenticated identity.
+
+    `http-server.authentication.allow-insecure-over-http=true` made Trino skip
+    authentication on the plaintext port and accept the caller's `X-Trino-User`
+    verbatim, so any reachable client could assert `hochom` and inherit its
+    `allow: all` + OWNERSHIP grants on the whole Iceberg warehouse. This test
+    pins the fail-closed property so it cannot be silently reintroduced.
+    """
+
+    config = (
+        ROOT / "platform" / "trino" / "etc" / "config.properties"
+    ).read_text(encoding="utf-8")
+
+    assert "http-server.authentication.type=PASSWORD" in config
+    assert "http-server.authentication.allow-insecure-over-http=false" in config
+    assert "http-server.authentication.allow-insecure-over-http=true" not in config
+
+
+def test_trino_coordinator_is_not_published_on_all_interfaces():
+    """F8: the coordinator must not be reachable from arbitrary networks."""
+
+    compose = yaml.safe_load(COMPOSE_PATH.read_text(encoding="utf-8"))
+
+    for port in compose["services"]["trino"]["ports"]:
+        # compose short syntax is [HOST:]CONTAINER[/PROTOCOL]
+        host_binding = str(port).split(":")[0]
+        assert host_binding in {"127.0.0.1", "localhost"}, (
+            "SECURITY: the Trino coordinator must be bound to loopback only, "
+            f"found {port}"
+        )
