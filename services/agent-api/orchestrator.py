@@ -5,6 +5,10 @@ from typing import Any
 from pydantic import ValidationError
 
 from agents import AnalyticsAgent, DataDiscoveryAgent
+from authority import (
+    ServerAuthorityResolver,
+    narrow_permissions,
+)
 from config import Settings
 from governance import GovernancePolicyEngine
 from governance_models import GovernanceRequest
@@ -19,6 +23,21 @@ from trino_gateway import TrinoGateway
 logger = logging.getLogger(__name__)
 
 
+#
+# Agents that read governed platform data.  These require resolved governance
+# authority; metadata-only discovery does not (A2.1).
+#
+GOVERNED_DATA_AGENTS = frozenset(
+    {
+        "analytics",
+        "visualization",
+        "dashboard",
+        "data_quality",
+        "insight",
+    }
+)
+
+
 class Orchestrator:
     def __init__(
         self,
@@ -26,6 +45,8 @@ class Orchestrator:
         gateway=None,
         governance_engine: GovernancePolicyEngine | None = None,
         audit_store=None,
+        authority_resolver=None,
+        classification_resolver=None,
     ):
         self.settings = settings or Settings()
         self.gateway = gateway or TrinoGateway(self.settings)
@@ -61,6 +82,87 @@ class Orchestrator:
             self.discovery,
             self.analytics,
             self.settings,
+        )
+
+        #
+        # Single server-side authority resolver.  Caller-supplied permissions
+        # are narrowed against this; they never widen it (A2.2/A2.3).
+        #
+        self.authority_resolver = authority_resolver or ServerAuthorityResolver(
+            max_rows=self.settings.max_rows,
+        )
+
+        #
+        # Platform-owned trusted classification.  Injectable so a deployment
+        # can supply its own metadata source; it is never derived from a
+        # caller-supplied GovernanceRequest.
+        #
+        self.classification_resolver = classification_resolver
+
+    def _authoritative_governance(
+        self,
+        governance_request: GovernanceRequest | None,
+    ) -> GovernanceRequest | None:
+        """Replace a claimed identity with the server-authorised one.
+
+        A request may CLAIM roles, but only the intersection of the claim and
+        the server-side role registry for that subject survives.  Raw
+        ``identity.permissions`` are discarded outright, and an approval in the
+        payload is only ever a reference id.
+
+        With no configured role registry the authorised role set is empty, so a
+        request that merely claims a privileged role gains nothing.
+        """
+
+        if governance_request is None:
+            return None
+
+        identity = getattr(governance_request, "identity", None)
+
+        roles = self.authority_resolver.authorised_roles(identity)
+
+        authoritative_identity = (
+            identity.model_copy(
+                update={
+                    "roles": list(roles),
+                    "permissions": [],
+                },
+            )
+            if identity is not None
+            else None
+        )
+
+        return governance_request.model_copy(
+            update={
+                "identity": authoritative_identity,
+            }
+        )
+
+    def effective_permissions(
+        self,
+        request: AgentRequest,
+        governance_request: GovernanceRequest | None = None,
+    ):
+        """Server-authorised capabilities for a request.
+
+        The returned ``Permissions`` is the intersection of what the caller
+        REQUESTED and what the server AUTHORISED, so
+
+            effective_capability is a subset of server authority
+        """
+
+        identity = (
+            getattr(governance_request, "identity", None)
+            if governance_request is not None
+            else None
+        )
+
+        authority = self.authority_resolver.resolve(identity)
+
+        return narrow_permissions(
+            request.permissions,
+            authority,
+            server_max_rows=self.settings.max_rows,
         )
 
     # ------------------------------------------------------------------
@@ -351,6 +453,60 @@ class Orchestrator:
 
             return response
 
+        #
+        # A2.1/A2.3: replace the claimed identity with the server-authorised
+        # one before any policy decision is made.
+        #
+        governance_request = self._authoritative_governance(
+            governance_request
+        )
+
+        #
+        # A2.1: governance is mandatory.  Agents that read governed data are
+        # refused outright when no governance authority can be resolved, so
+        # the request fails before any tool is constructed.  Metadata-only
+        # discovery still runs, because it reads no governed platform data.
+        #
+        if (
+            identity in GOVERNED_DATA_AGENTS
+            and governance_request is None
+        ):
+            response.status = "failed"
+
+            response.permissions = (
+                self.effective_permissions(
+                    request,
+                    None,
+                )
+            )
+
+            response.error = StructuredError(
+                category="GovernanceContextRequired",
+                message=(
+                    "Governance context is required for "
+                    f"'{identity}' requests and was not supplied."
+                ),
+            )
+
+            response.completed_at = (
+                datetime.now(
+                    timezone.utc
+                )
+            )
+
+            return response
+
+        #
+        # A2.2/A2.3: caller permissions are narrowed against server authority.
+        # The response reports the EFFECTIVE permissions actually applied.
+        #
+        response.permissions = (
+            self.effective_permissions(
+                request,
+                governance_request,
+            )
+        )
+
         tools = ToolRegistry(
             self.gateway,
             self.settings,
@@ -362,6 +518,7 @@ class Orchestrator:
             ),
             audit_store=self.audit_store,
             request_id=response.request_id,
+            classification_resolver=self.classification_resolver,
         )
 
         emit("orchestration_started", request_id=response.request_id,
@@ -403,7 +560,7 @@ class Orchestrator:
                     response.warnings,
                 ) = agent.run(
                     request.objective,
-                    request.permissions,
+                    response.permissions,
                     tools,
                     request.context,
                 )
@@ -415,7 +572,7 @@ class Orchestrator:
                     response.warnings,
                 ) = agent.run(
                     request.objective,
-                    request.permissions,
+                    response.permissions,
                     tools,
                 )
 

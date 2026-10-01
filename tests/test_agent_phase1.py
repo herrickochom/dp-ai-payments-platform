@@ -7,12 +7,19 @@ from unittest.mock import patch
 
 from agent_asgi_client import LocalClient
 
+from agent_authority_fixtures import (
+    authority_resolver,
+    governance_context,
+    platform_classifier,
+)
+
 ROOT = Path(__file__).resolve().parents[1]
 SERVICE = ROOT / "services" / "agent-api"
 if not SERVICE.exists() and Path("/app/config.py").exists():
     SERVICE = Path("/app")
 sys.path.insert(0, str(SERVICE))
 
+from classification import DataClassification
 from config import Settings
 from models import AgentRequest, Permissions
 from orchestrator import Orchestrator
@@ -27,6 +34,22 @@ METADATA = [
     ["gold", "gld_fct_pdm_loans", "district_sk", "varchar"],
     ["gold", "gld_fct_pdm_loans", "repayment_rate", "double"],
 ]
+
+TEST_DATASET = "iceberg.consumption.cns_pdm_parish_performance"
+
+
+def phase1_classifier():
+    """Platform-owned classification for this suite's synthetic dataset."""
+
+    return platform_classifier(
+        {TEST_DATASET: DataClassification.PUBLIC}
+    )
+
+
+def governed_context():
+    """Governance is mandatory for governed reads (A2.1)."""
+
+    return governance_context(dataset=TEST_DATASET)
 
 
 class FakeGateway:
@@ -75,14 +98,16 @@ class QuerySafetyTests(unittest.TestCase):
 class AgentTests(unittest.TestCase):
     def setUp(self):
         self.settings = Settings(max_rows=50, max_tool_calls=20, query_timeout_seconds=9)
-        self.orchestrator = Orchestrator(self.settings, FakeGateway())
+        self.orchestrator = Orchestrator(self.settings, FakeGateway(), classification_resolver=phase1_classifier(),
+                             authority_resolver=authority_resolver())
     def test_discovery_routes_and_returns_real_metadata_evidence(self):
         response = self.orchestrator.execute(AgentRequest(objective="What tables contain PDM repayment information?"))
         self.assertEqual("data_discovery", response.agent)
         self.assertIn("iceberg.consumption.cns_pdm_parish_performance", response.result["tables"])
         self.assertTrue(response.evidence)
     def test_analytics_routes_discovers_specifies_validates_and_executes(self):
-        response = self.orchestrator.execute(AgentRequest(objective="What is repayment performance by district?"))
+        response = self.orchestrator.execute(AgentRequest(objective="What is repayment performance by district?",
+                                                          context=governed_context()))
         self.assertEqual("analytics", response.agent)
         self.assertEqual("completed", response.status)
         self.assertEqual(["district"], response.result["analytical_request"]["dimensions"])
@@ -123,7 +148,7 @@ class ApiTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         import api
-        api.orchestrator = Orchestrator(Settings(), FakeGateway())
+        api.orchestrator = Orchestrator(Settings(), FakeGateway(), authority_resolver=authority_resolver())
         cls.client = LocalClient(api.app)
     def test_agents_endpoint(self):
         identities = {item["id"] for item in self.client.get("/agents").json()["agents"]}

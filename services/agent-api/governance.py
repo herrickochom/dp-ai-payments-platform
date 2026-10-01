@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import hashlib
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
+from approvals import ApprovalRegistry, resolve_approval
 from governance_models import (
     ApprovalContext,
     DataClassification,
@@ -86,6 +87,26 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "can_view_governance_evidence",
         "can_approve_sensitive_access",
     },
+
+    #
+    # Server-side BI publication role (A2.2/A2.7).
+    #
+    # Holding this role is necessary but NOT sufficient to publish: the request
+    # must additionally carry an identity verified by a trusted identity
+    # provider.  A caller cannot reach this role through request data, because
+    # publication authority is resolved server-side and requires authentication.
+    #
+    "bi_publisher": {
+        "can_discover_metadata",
+        "can_run_read_queries",
+        "can_build_visualizations",
+        "can_build_dashboards",
+        "can_view_internal_data",
+        "can_view_confidential_data",
+        "can_view_restricted_data",
+        "can_publish_bi_assets",
+        "can_view_governance_evidence",
+    },
 }
 
 
@@ -126,13 +147,33 @@ APPROVED_PURPOSES = {
 
 @dataclass(frozen=True)
 class GovernancePolicyEngine:
+    """Deterministic policy evaluation over server-trusted inputs.
+
+    Two authority rules are enforced here and nowhere else:
+
+    1. Effective authority is ROLE-DERIVED ONLY.  A caller may present
+       ``IdentityContext.permissions`` but those values grant nothing; the
+       field survives only so that older payloads still parse.
+
+    2. Approval is resolved from a server-side registry.  A caller-supplied
+       ``GovernanceRequest.approval`` is only a reference id and can never
+       itself satisfy an approval requirement.
+    """
+
     fail_closed: bool = True
+    approval_registry: ApprovalRegistry | None = field(default=None)
 
     def effective_permissions(
         self,
         request: GovernanceRequest,
     ) -> set[str]:
-        permissions = set(request.identity.permissions)
+        """Return role-derived authority only.
+
+        ``request.identity.permissions`` is caller-controlled request data and
+        is deliberately NOT a source of authority (A2.3).
+        """
+
+        permissions: set[str] = set()
 
         for role in request.identity.roles:
             permissions.update(
@@ -140,6 +181,17 @@ class GovernancePolicyEngine:
             )
 
         return permissions
+
+    def _approval_satisfied(
+        self,
+        request: GovernanceRequest,
+    ) -> bool:
+        """True only when a trusted, correctly bound approval exists."""
+
+        return resolve_approval(
+            self.approval_registry,
+            request,
+        ) is not None
 
     def evaluate(
         self,
@@ -293,11 +345,12 @@ class GovernancePolicyEngine:
         )
 
         if sensitive_access:
-            approval = request.approval or ApprovalContext(
-                status="required"
-            )
-
-            if approval.status != "approved":
+            #
+            # A2.4: the requester cannot approve its own request.  The gate is
+            # satisfied only by a server-held approval record that is bound to
+            # this subject, action and dataset.
+            #
+            if not self._approval_satisfied(request):
                 return PolicyDecision(
                     decision_id=decision_id,
                     subject=request.identity.subject_id,
@@ -306,7 +359,9 @@ class GovernancePolicyEngine:
                     decision=PolicyDecisionType.REQUIRE_APPROVAL,
                     reasons=[
                         "Sensitive beneficiary/payment access requires "
-                        "approved access context."
+                        "an independent approval bound to this subject, "
+                        "action and resource. A request-supplied approval "
+                        "status is not accepted as authority."
                     ],
                     matched_policies=[
                         *matched,

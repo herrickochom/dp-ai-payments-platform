@@ -660,6 +660,20 @@ class ToolRegistry:
             for name in decision.masked_fields
         }
 
+        #
+        # Trusted output-label -> source-field lineage (A2.5).
+        #
+        # Masking follows FIELD LINEAGE, not the returned column label.  For
+        # ``SELECT beneficiary_name AS bn`` the decision names the source field
+        # ``beneficiary_name`` while Trino returns the label ``bn``; resolving
+        # the label back to its source is what stops an alias from removing
+        # protection.
+        #
+        lineage = {
+            str(label).lower(): str(source).lower()
+            for label, source in request.resource.field_lineage.items()
+        }
+
         classifications = {
             item.field.lower(): item
             for item
@@ -676,15 +690,20 @@ class ToolRegistry:
             ):
                 column_key = column.lower()
 
+                source_key = lineage.get(
+                    column_key,
+                    column_key,
+                )
+
                 if (
-                    column_key
+                    source_key
                     not in masked_names
                 ):
                     continue
 
                 classification = (
                     classifications.get(
-                        column_key
+                        source_key
                     )
                 )
 
@@ -721,8 +740,10 @@ class ToolRegistry:
         """
         Execute a bounded read-only query.
 
-        An explicit governance_request overrides the request-scoped
-        governance context configured on this ToolRegistry.
+        GOVERNANCE IS MANDATORY (A2.1).  There is no governance-free
+        execution path.  When no governance context can be resolved, the query
+        is denied before the Trino gateway is reached; classification, policy
+        evaluation and masking can never be skipped while data is still read.
 
         When governance is active:
 
@@ -735,9 +756,6 @@ class ToolRegistry:
         7. ALLOW executes normally.
         8. MASK executes and masks governed fields before results
            leave ToolRegistry.
-
-        Requests without governance context remain backward compatible
-        with Phase 1-4 behaviour.
         """
 
         #
@@ -749,6 +767,18 @@ class ToolRegistry:
                 self.governance_request
             )
 
+        #
+        # Fail closed: a governed read without governance authority is denied
+        # before any protected execution.  This is the security boundary that
+        # removes the Phase 1-4 "backward compatible" bypass.
+        #
+        if governance_request is None:
+            raise GovernanceDenied(
+                "Governance context is required for every governed query. "
+                "A query without resolved governance authority is denied "
+                "before execution."
+            )
+
         validated = self.validate_query(
             sql,
             max_rows,
@@ -756,19 +786,18 @@ class ToolRegistry:
 
         governance_decision = None
 
-        if governance_request is not None:
-            governance_request = (
-                self._authoritative_governance_request(
-                    sql,
-                    governance_request,
-                )
+        governance_request = (
+            self._authoritative_governance_request(
+                sql,
+                governance_request,
             )
+        )
 
-            governance_decision = (
-                self._enforce_governance_pre_query(
-                    governance_request
-                )
+        governance_decision = (
+            self._enforce_governance_pre_query(
+                governance_request
             )
+        )
 
         def execute():
             columns, rows, query_id = (

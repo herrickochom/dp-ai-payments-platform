@@ -10,6 +10,10 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "services/agent-api"))
 
 import api
+from agent_authority_fixtures import (
+    approval_registry,
+    publication_authority,
+)
 from audit import JsonlAuditStore
 from bi_adapter import AdapterError, AdapterPermissionDenied, SupersetAdapter
 from builder_models import (
@@ -74,9 +78,10 @@ class SmokeGateway:
         return {"status": "healthy", "query_id": "q-health"}
 
 
-def identity(subject="analyst-1", roles=None, permissions=None, purpose="programme_monitoring"):
+# A2.3: authority is role-derived only, so the fixture deliberately supplies
+# NO raw permission list.  programme_analyst derives can_view_internal_data.
+def identity(subject="analyst-1", roles=None, purpose="programme_monitoring"):
     return IdentityContext(subject_id=subject, roles=list(roles or ["programme_analyst"]),
-                           permissions=list(permissions or ["can_view_internal_data"]),
                            purpose=purpose)
 
 
@@ -284,7 +289,7 @@ def test_smoke_dashboard_dry_run_is_offline_and_governed():
     assert plan["mode"] == "dry_run" and plan["status"] == "validated"
 
     with pytest.raises(AdapterError) as excinfo:
-        SupersetAdapter(Settings()).publish(dashboard, Permissions(can_publish_bi_assets=True))
+        SupersetAdapter(Settings()).publish(dashboard, publication_authority())
     assert "SUPERSET_PASSWORD" in str(excinfo.value)
 def test_smoke_restricted_beneficiary_publication_fails_closed():
     tools = ToolRegistry(SmokeGateway(columns=[["beneficiary_name", "varchar", 1],
@@ -308,7 +313,7 @@ def test_smoke_restricted_beneficiary_publication_fails_closed():
         permissions=Permissions()))
     adapter = SupersetAdapter(Settings(superset_password="x"))
     with pytest.raises(AdapterPermissionDenied) as excinfo:
-        adapter.publish(dashboard, Permissions(can_publish_bi_assets=True))
+        adapter.publish(dashboard, publication_authority())
     assert "RESTRICTED" in str(excinfo.value)
 
 
@@ -338,10 +343,19 @@ def test_smoke_technical_payment_lifecycle_query_is_governed():
 
 def test_smoke_unauthorised_beneficiary_query_is_denied_or_masked():
     gateway = SmokeGateway()
-    tools = ToolRegistry(gateway, Settings())
+    tools = ToolRegistry(
+        gateway,
+        Settings(),
+        governance_engine=GovernancePolicyEngine(
+            approval_registry=approval_registry(
+                approval_id="approval-smoke",
+                subject_id="investigator",
+                dataset="iceberg.silver.slv_pdm_beneficiaries",
+            )
+        ),
+    )
     denied = GovernanceRequest(
         identity=IdentityContext(subject_id="analyst", roles=["programme_analyst"],
-                                 permissions=["can_view_internal_data"],
                                  purpose="programme_monitoring"),
         action="read",
         resource=ResourceContext(dataset="iceberg.silver.slv_pdm_beneficiaries",
@@ -356,13 +370,9 @@ def test_smoke_unauthorised_beneficiary_query_is_denied_or_masked():
 
     masked = GovernanceRequest(
         identity=IdentityContext(subject_id="investigator", roles=["investigator"],
-                                 permissions=["can_view_internal_data",
-                                              "can_view_restricted_data",
-                                              "can_view_beneficiary_data"],
                                  purpose="investigation"),
         action="read",
-        approval=ApprovalContext(approval_id="approval-smoke", status="approved",
-                                 approver="governance-admin"),
+        approval=ApprovalContext(approval_id="approval-smoke"),
         resource=ResourceContext(dataset="iceberg.silver.slv_pdm_beneficiaries",
                                  classification=DataClassification.RESTRICTED,
                                  fields=["district", "beneficiary_name"]),
@@ -378,8 +388,7 @@ def test_smoke_audit_event_created_for_protected_action_denial(tmp_path):
     gateway = SmokeGateway()
     tools = ToolRegistry(gateway, Settings(), audit_store=store, request_id="req-protected")
     denied = GovernanceRequest(
-        identity=IdentityContext(subject_id="analyst", roles=["programme_analyst"],
-                                 permissions=["can_view_internal_data"]),
+        identity=IdentityContext(subject_id="analyst", roles=["programme_analyst"]),
         action="read",
         resource=ResourceContext(dataset="iceberg.silver.slv_pdm_beneficiaries",
                                  classification=DataClassification.RESTRICTED),

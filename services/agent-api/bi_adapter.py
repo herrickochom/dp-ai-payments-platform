@@ -4,6 +4,7 @@ from typing import Any, Protocol
 import requests
 from pydantic import BaseModel, Field
 
+from authority import Authority
 from builder_models import DashboardSpec, DataSourceSpec, VisualizationSpec
 from classification import ClassificationError, TrustedClassificationResolver
 from config import Settings
@@ -24,6 +25,9 @@ class PublicationRequest(BaseModel):
 class DashboardAgentRequest(BaseModel):
     objective: str
     publish: bool = False
+    # Governance authority is mandatory for governed reads (A2.1), so the
+    # request must be able to carry it.
+    context: dict[str, Any] = Field(default_factory=dict)
     permissions: Permissions = Field(default_factory=Permissions)
 
 
@@ -66,9 +70,17 @@ class SupersetAdapter:
             "layout": self.translate_layout(dashboard),
             "filters": self.translate_filters(dashboard), "status": "validated"}
 
-    def publish(self, dashboard: DashboardSpec, permissions: Permissions) -> dict[str, Any]:
-        if not permissions.can_publish_bi_assets:
-            raise AdapterPermissionDenied("BI publishing permission is required")
+    def publish(self, dashboard: DashboardSpec, authority) -> dict[str, Any]:
+        """Publish a dashboard using SERVER-DERIVED authority.
+
+        A2.2/A2.7: ``authority`` must be an `authority.Authority` issued by the
+        server-side resolver.  A caller-supplied capability model such as
+        ``models.Permissions`` is not accepted here and can never authorise a
+        publication, no matter what it contains.
+        """
+
+        self._require_publication_authority(authority)
+
         self._validate_publication_governance(dashboard)
         if not self.settings.superset_password:
             raise AdapterError("SUPERSET_PASSWORD is required for publishing")
@@ -96,6 +108,32 @@ class SupersetAdapter:
             raise AdapterError(f"Superset publication failed after {completed}: {exc}") from exc
         return {**plan, "mode": "published", "status": "completed", "artifacts": completed,
                 "dashboard_url": f"{self.settings.superset_public_url}/superset/dashboard/{dashboard_id}/"}
+
+    @staticmethod
+    def _require_publication_authority(authority) -> None:
+        """Fail closed unless publication authority came from the server.
+
+        The type check is a real structural barrier, not a naming convention:
+        `authority.Authority` is a frozen dataclass that is never built from
+        request payload data, so no caller-supplied model can satisfy it.
+        """
+
+        if not isinstance(authority, Authority):
+            raise AdapterPermissionDenied(
+                "BI publishing permission is required and must be "
+                "server-authorised; request-supplied capabilities are not "
+                "accepted as publication authority"
+            )
+
+        if not authority.permits(
+            "can_publish_bi_assets",
+            require_authenticated=True,
+        ):
+            raise AdapterPermissionDenied(
+                "BI publishing permission is required and must be "
+                "server-authorised; request-supplied capabilities are not "
+                "accepted as publication authority"
+            )
 
     def _validate_publication_governance(self, dashboard: DashboardSpec) -> None:
         """

@@ -74,6 +74,15 @@ class ResourceContext(BaseModel):
         default_factory=list
     )
 
+    #
+    # Trusted output-label -> source-field lineage for the resolved projection.
+    #
+    # ``SELECT beneficiary_name AS bn`` records ``bn -> beneficiary_name`` so
+    # that field masking follows field lineage rather than the returned column
+    # label (A2.5).
+    #
+    field_lineage: dict[str, str] = Field(default_factory=dict)
+
     district: str | None = None
     parish: str | None = None
 
