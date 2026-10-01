@@ -116,13 +116,97 @@ def test_iceberg_catalog_has_no_literal_s3_credential() -> None:
         )
 
 
+def _load_provisioner():
+    """Load the provisioning script by path.
+
+    ``platform`` is a standard-library module name, so the repository's
+    ``platform/`` directory cannot be imported as a package from the repo
+    root. The script is a standalone entrypoint, so it is loaded directly.
+    """
+    import importlib.util
+
+    path = ROOT / "platform" / "minio" / "provision_object_store_identities.py"
+    spec = importlib.util.spec_from_file_location("provision_object_store_identities", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_rotation_is_limited_to_the_approved_identities() -> None:
+    """A rotation must not be able to target an arbitrary principal.
+
+    ``--rotate`` is the only path that rewrites a stored secret, so it is
+    bounded twice: the identity must be one of the eight approved ones, and
+    the target user must already exist with its policy attached. Anything else
+    would let a caller either invent a principal or silently create one.
+    """
+    provisioner = _load_provisioner()
+
+    approved = {row[0] for row in provisioner.IDENTITIES}
+    assert approved == {
+        "raw_ingest",
+        "cdc_quarantine",
+        "platform_raw_read",
+        "nessie_catalog",
+        "trino_iceberg",
+        "ordinary_transform",
+        "restricted_identity_transform",
+        "ml_prediction_transform",
+    }
+
+    # An unapproved identity is rejected before any MinIO contact.
+    with pytest.raises(provisioner.ProvisionError):
+        provisioner.rotate({}, "not_an_identity")
+
+    with pytest.raises(provisioner.ProvisionError):
+        provisioner.rotate({}, "")
+
+
+def test_rotation_target_is_scoped_to_one_identity() -> None:
+    """``rotate`` must act on exactly the identity it was given.
+
+    The blast radius of an exposure response is one principal. If rotation
+    wrote another identity's secret, an operator intending to re-key the
+    Nessie catalog could unknowingly re-key a transform identity as well.
+    """
+    provisioner = _load_provisioner()
+
+    rows = {row[0]: row for row in provisioner.IDENTITIES}
+    _, _, access_name, secret_name = rows["nessie_catalog"]
+    assert (access_name, secret_name) == ("NESSIE_S3_ACCESS_KEY", "NESSIE_S3_SECRET_KEY")
+
+    # The catalog credential and the Trino read credential stay distinct.
+    _, _, trino_access, trino_secret = rows["trino_iceberg"]
+    assert trino_secret != secret_name
+    assert trino_access != access_name
+
+    # Rotation refuses to run without a fully specified administrative
+    # environment, so it cannot silently proceed on partial configuration.
+    with pytest.raises(provisioner.ProvisionError):
+        provisioner.rotate({}, "nessie_catalog")
+
+
 def test_compose_requires_the_catalog_credential() -> None:
-    """The injected catalog credential must fail closed when absent."""
+    """The injected catalog credential must fail closed when absent.
+
+    The Trino catalog must consume the same canonical variables that
+    ``platform/minio/provision_object_store_identities.sh`` provisions for the
+    ``nessie_catalog`` identity. Introducing a second copy of the credential
+    under a private name was tried and reverted: it duplicated a live secret
+    and created a second place for it to drift.
+    """
     compose = yaml.safe_load(COMPOSE_PATH.read_text(encoding="utf-8"))
     environment = compose["services"]["trino"]["environment"]
 
-    for key in ("NESSIE_CATALOG_S3_ACCESS_KEY", "NESSIE_CATALOG_S3_SECRET_KEY"):
+    for key in ("NESSIE_S3_ACCESS_KEY", "NESSIE_S3_SECRET_KEY"):
+        assert key in environment, f"{key} must be passed to the Trino service"
         assert f"${{{key}:?" in environment[key], (
             f"SECURITY: {key} must be required, not defaulted, so Trino cannot "
             "start with an implicit credential"
         )
+
+    duplicates = [name for name in environment if "CATALOG_S3" in name]
+    assert not duplicates, (
+        "SECURITY: the catalog credential must be supplied only through the "
+        f"canonical NESSIE_S3_* variables, not duplicated: {duplicates}"
+    )
