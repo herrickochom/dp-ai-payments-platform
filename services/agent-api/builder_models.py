@@ -109,6 +109,9 @@ class DashboardSpec(DashboardBuildRequest):
 
 class BuildWorkflowRequest(BaseModel):
     objective: str = Field(min_length=3, max_length=4000)
+    # Governance authority is mandatory for governed reads (A2.1), so the
+    # request must be able to carry it.
+    context: dict[str, Any] = Field(default_factory=dict)
     permissions: Permissions = Field(default_factory=Permissions)
 
 

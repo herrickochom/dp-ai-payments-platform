@@ -9,6 +9,7 @@ from uuid import uuid4
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
+from authority import Authority, publication_authority, unauthenticated
 from bi_adapter import (
     DashboardAgentRequest,
     PublicationRequest,
@@ -104,25 +105,59 @@ async def request_context(request: Request, call_next):
 
 @app.middleware("http")
 async def authentication_hook(request: Request, call_next):
-    """Optional deterministic authentication hook.
+    """Resolve the caller identity for the request.
 
-    Local development runs with AGENT_AUTH_ENABLED=false (the default) and
-    passes through with a local-pilot subject hint. A real deployment sets
-    AGENT_AUTH_ENABLED=true behind an upstream gateway that resolves identity;
-    this hook then rejects requests that carry no valid subject header.
-    Authorisation itself remains the deterministic governance engine's job.
+    HONESTY NOTE (A3-CORE): this hook does NOT perform cryptographic
+    verification.  ``x-subject-id`` is caller-supplied and spoofable, so it is
+    recorded as an UNVERIFIED subject hint and is never treated as sufficient
+    authority for a privileged operation.
+
+    ``request.state.authority`` is therefore server-derived.  Without a
+    configured trusted identity provider the authority is
+    ``unauthenticated()``: it grants nothing, so privileged operations such as
+    BI publication fail closed (A2.7).
+
+    Deployments that front this service with an OIDC/JWT or mTLS gateway should
+    install a `TrustedIdentityProvider` (see `authority.publication_authority`)
+    and set ``authenticated=True`` only for identities that provider verified.
     """
+    subject = ""
+
     if settings.auth_enabled:
-        subject = request.headers.get("x-subject-id", "")
-        if not re.fullmatch(r"[A-Za-z0-9._:-]{1,128}", subject):
+        candidate = request.headers.get("x-subject-id", "")
+        if not re.fullmatch(r"[A-Za-z0-9._:-]{1,128}", candidate):
             return JSONResponse(status_code=401,
                                 content={"status": "unauthorised",
                                          "error": {"category": "AuthenticationRequired",
                                                    "message": "A valid x-subject-id header is required"}})
-        request.state.subject_id = subject
-    else:
-        request.state.subject_id = request.headers.get("x-subject-id", "local-pilot-user")
+        subject = candidate
+
+    #
+    # Unverified subject hint only.  It carries NO authority.
+    #
+    request.state.subject_id = subject or "local-pilot-user"
+    request.state.subject_verified = False
+    request.state.authority = unauthenticated()
+
     return await call_next(request)
+
+
+def _publication_authority_for(request: Request) -> Authority:
+    """Server-derived publication authority for the current request.
+
+    Returns an authority that grants nothing unless a trusted identity provider
+    has verified the caller.  ``Authority`` is never built from request body
+    data, so a caller-supplied ``permissions.can_publish_bi_assets`` flag can
+    never reach this function's result.
+    """
+
+    return publication_authority(
+        getattr(request.state, "subject_id", ""),
+        (),
+        authenticated=bool(
+            getattr(request.state, "subject_verified", False)
+        ),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -661,6 +696,7 @@ def build_workflow(
         AgentRequest(
             agent="analytics",
             objective=request.objective,
+            context=request.context,
             permissions=request.permissions,
         )
     )
@@ -788,6 +824,7 @@ def visualize(
         AgentRequest(
             agent="visualization",
             objective=request.objective,
+            context=request.context,
             permissions=request.permissions,
         )
     )
@@ -810,11 +847,13 @@ def visualize(
 @app.post("/agents/dashboard")
 def dashboard(
     request: DashboardAgentRequest,
+    http_request: Request,
 ):
     response = orchestrator.execute(
         AgentRequest(
             agent="dashboard",
             objective=request.objective,
+            context=request.context,
             permissions=request.permissions,
         )
     )
@@ -838,13 +877,37 @@ def dashboard(
         response.result["dashboard"]
     )
 
+    #
+    # A2.7: publication authority is server-derived, never the request body's
+    # `permissions.can_publish_bi_assets`.
+    #
+    authority = _publication_authority_for(http_request)
+
+    if request.publish and not authority.permits(
+        "can_publish_bi_assets",
+        require_authenticated=True,
+    ):
+        return JSONResponse(
+            status_code=403,
+            content={
+                "status": "forbidden",
+                "error": {
+                    "category": "PublicationAuthorityRequired",
+                    "message": (
+                        "BI publication requires a server-authorised, "
+                        "authenticated publication role."
+                    ),
+                },
+            },
+        )
+
     adapter = SupersetAdapter(settings)
 
     try:
         if request.publish:
             publication = adapter.publish(
                 artifact,
-                request.permissions,
+                authority,
             )
         else:
             publication = adapter.plan(
@@ -894,14 +957,40 @@ def dashboard(
 @app.post("/publish/superset")
 def publish_superset(
     request: PublicationRequest,
+    http_request: Request,
 ):
+    #
+    # A2.7: publication authority is server-derived.  An anonymous or
+    # unverified caller is refused BEFORE the adapter is constructed, so no
+    # Superset network boundary can be reached on request-supplied capability.
+    #
+    authority = _publication_authority_for(http_request)
+
+    if not authority.permits(
+        "can_publish_bi_assets",
+        require_authenticated=True,
+    ):
+        return JSONResponse(
+            status_code=403,
+            content={
+                "status": "forbidden",
+                "error": {
+                    "category": "PublicationAuthorityRequired",
+                    "message": (
+                        "BI publication requires a server-authorised, "
+                        "authenticated publication role."
+                    ),
+                },
+            },
+        )
+
     adapter = SupersetAdapter(settings)
 
     try:
         if request.publish:
             result = adapter.publish(
                 request.dashboard,
-                request.permissions,
+                authority,
             )
         else:
             result = adapter.plan(

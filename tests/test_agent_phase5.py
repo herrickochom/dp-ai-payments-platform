@@ -1,6 +1,13 @@
 import pytest
 from types import SimpleNamespace
 
+from agent_authority_fixtures import (
+    approval_registry,
+    governance_request,
+    platform_classifier,
+    publication_authority,
+)
+
 from data_quality import DataQualityEngine
 from quality_models import DQRule
 
@@ -26,6 +33,9 @@ from governance_models import (
     PolicyDecisionType,
     ResourceContext,
 )
+
+
+BENEFICIARY_DATASET = "iceberg.silver.slv_pdm_beneficiaries"
 from phase5_agents import GovernanceAgent
 from tools import (
     GovernanceApprovalRequired,
@@ -192,7 +202,10 @@ def test_restricted_field_requires_approval():
 
 
 def test_approved_investigator_gets_masked_identity():
-    engine = GovernancePolicyEngine()
+    engine = GovernancePolicyEngine(
+        approval_registry=approval_registry(
+            subject_id="investigator-1", dataset=BENEFICIARY_DATASET)
+    )
 
     request = GovernanceRequest(
         identity=IdentityContext(
@@ -201,13 +214,9 @@ def test_approved_investigator_gets_masked_identity():
             purpose="investigation",
         ),
         action="read",
-        approval=ApprovalContext(
-            approval_id="approval-1",
-            status="approved",
-            approver="governance-admin",
-        ),
+        approval=ApprovalContext(approval_id="trusted-approval-1"),
         resource=ResourceContext(
-            dataset="iceberg.silver.slv_pdm_beneficiaries",
+            dataset=BENEFICIARY_DATASET,
             classification=DataClassification.RESTRICTED,
             fields=["beneficiary_name"],
             field_classifications=[
@@ -231,7 +240,10 @@ def test_approved_investigator_gets_masked_identity():
 
 
 def test_governance_admin_can_view_identity_after_approval():
-    engine = GovernancePolicyEngine()
+    engine = GovernancePolicyEngine(
+        approval_registry=approval_registry(
+            subject_id="admin", dataset=BENEFICIARY_DATASET)
+    )
 
     request = GovernanceRequest(
         identity=IdentityContext(
@@ -240,13 +252,9 @@ def test_governance_admin_can_view_identity_after_approval():
             purpose="investigation",
         ),
         action="read",
-        approval=ApprovalContext(
-            approval_id="approval-2",
-            status="approved",
-            approver="governance-admin-2",
-        ),
+        approval=ApprovalContext(approval_id="trusted-approval-1"),
         resource=ResourceContext(
-            dataset="iceberg.silver.slv_pdm_beneficiaries",
+            dataset=BENEFICIARY_DATASET,
             classification=DataClassification.RESTRICTED,
             fields=["beneficiary_name"],
             field_classifications=[
@@ -554,9 +562,18 @@ def test_governance_approval_requirement_prevents_execution():
 def test_governance_masks_result_before_return():
     gateway = FakeGateway()
 
+    # A2.4: the approval below is a server-held record bound to this
+    # subject/action/resource, not a request-supplied assertion.
     tools = ToolRegistry(
         gateway,
         FakeSettings(),
+        governance_engine=GovernancePolicyEngine(
+            approval_registry=approval_registry(
+                approval_id="approval-test",
+                subject_id="investigator-1",
+                dataset=BENEFICIARY_DATASET,
+            )
+        ),
     )
 
     governance_request = GovernanceRequest(
@@ -566,11 +583,7 @@ def test_governance_masks_result_before_return():
             purpose="investigation",
         ),
         action="read",
-        approval=ApprovalContext(
-            approval_id="approval-test",
-            status="approved",
-            approver="governance-admin",
-        ),
+        approval=ApprovalContext(approval_id="approval-test"),
         resource=ResourceContext(
             dataset=(
                 "iceberg.silver."
@@ -674,7 +687,13 @@ def test_governance_allow_preserves_query_result():
     assert result["rows"][0][2] == "Kabale"
 
 
-def test_query_without_governance_remains_backward_compatible():
+def test_query_without_governance_is_denied_before_execution():
+    """A2.1 contract: governance is mandatory for every governed read.
+
+    This test previously asserted that a query with no governance context
+    still executed, which was the proven governance-omission bypass.  The
+    contract is now fail-closed and is protected permanently.
+    """
     gateway = FakeGateway()
 
     tools = ToolRegistry(
@@ -682,14 +701,13 @@ def test_query_without_governance_remains_backward_compatible():
         FakeSettings(),
     )
 
-    result = tools.execute_query(
-        "SELECT district FROM example",
-        10,
-    )
+    with pytest.raises(GovernanceDenied):
+        tools.execute_query(
+            "SELECT district FROM example",
+            10,
+        )
 
-    assert result["query_id"] == "test_query_001"
-    assert "governance" not in result
-    assert len(gateway.executed) == 1
+    assert gateway.executed == []
 
 
 # ---------------------------------------------------------------------------
@@ -1154,9 +1172,9 @@ def test_restricted_dataset_publish_is_denied_before_superset_network():
         ["district"],
     )
 
-    permissions = SimpleNamespace(
-        can_publish_bi_assets=True,
-    )
+    # Server-issued publication authority: the RESTRICTED dataset refusal
+    # must still apply ahead of any network call.
+    authority = publication_authority()
 
     with pytest.raises(
         AdapterPermissionDenied,
@@ -1164,7 +1182,7 @@ def test_restricted_dataset_publish_is_denied_before_superset_network():
     ):
         adapter.publish(
             dashboard,
-            permissions,
+            authority,
         )
 
 

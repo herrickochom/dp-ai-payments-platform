@@ -4,6 +4,11 @@ from pathlib import Path
 from unittest.mock import Mock
 
 from agent_asgi_client import LocalClient
+from agent_authority_fixtures import (
+    authority_resolver,
+    governance_context,
+    publication_authority,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 SERVICE = ROOT / "services" / "agent-api"
@@ -57,23 +62,26 @@ def artifacts():
 
 
 class Phase3AgentTests(unittest.TestCase):
-    def setUp(self): self.orchestrator = Orchestrator(Settings(), Gateway())
+    def setUp(self): self.orchestrator = Orchestrator(Settings(), Gateway(), authority_resolver=authority_resolver())
     def test_visualization_fallback_and_provenance(self):
         result = self.orchestrator.execute(AgentRequest(agent="visualization",
-            objective="Visualize repayment performance by district"))
+            objective="Visualize repayment performance by district",
+            context=governance_context(dataset=DATASET)))
         self.assertEqual("completed", result.status)
         self.assertEqual("deterministic_fallback", result.result["strategy"])
         self.assertEqual(["kpi", "bar", "table"], [v["type"] for v in result.result["visualizations"]])
         self.assertTrue(any(e.kind == "visualization_agent" for e in result.evidence))
     def test_dashboard_fallback_layout_and_provenance(self):
         result = self.orchestrator.execute(AgentRequest(agent="dashboard",
-            objective="Build repayment performance dashboard by district"))
+            objective="Build repayment performance dashboard by district",
+            context=governance_context(dataset=DATASET)))
         self.assertEqual("completed", result.status)
         self.assertEqual(3, len(result.result["dashboard"]["layout"]))
         self.assertTrue(any(e.kind == "dashboard_agent" for e in result.evidence))
     def test_routes_and_permissions(self):
         self.assertEqual("dashboard", self.orchestrator.route(AgentRequest(objective="Build a district dashboard")))
         denied = self.orchestrator.execute(AgentRequest(agent="visualization", objective="district chart",
+            context=governance_context(dataset=DATASET),
             permissions=Permissions(can_build_visualizations=False)))
         self.assertEqual("failed", denied.status)
 
@@ -113,7 +121,7 @@ class AdapterTests(unittest.TestCase):
         self.assertEqual({"dashboards": [6]}, self.adapter._write.call_args.args[3])
     def test_publish_permission_denied(self):
         with self.assertRaises(AdapterPermissionDenied):
-            self.adapter.publish(self.dashboard, Permissions(can_publish_bi_assets=False))
+            self.adapter.publish(self.dashboard, publication_authority('publisher-1', authenticated=False))
     def test_publish_create_and_partial_failure_propagation(self):
         adapter = SupersetAdapter(Settings(superset_password="x"), Mock())
         adapter._login = Mock(return_value={})
@@ -121,14 +129,14 @@ class AdapterTests(unittest.TestCase):
         adapter._upsert_dataset = Mock(return_value=10)
         adapter._upsert_chart = Mock(side_effect=[20, RuntimeError("API down")])
         with self.assertRaisesRegex(AdapterError, "failed after"):
-            adapter.publish(self.dashboard, Permissions(can_publish_bi_assets=True))
+            adapter.publish(self.dashboard, publication_authority())
     def test_publish_reuses_one_dataset(self):
         adapter = SupersetAdapter(Settings(superset_password="x"), Mock())
         adapter._login = Mock(return_value={}); adapter._database_id = Mock(return_value=1)
         adapter._upsert_dataset = Mock(return_value=10); adapter._upsert_chart = Mock(side_effect=[20,21,22])
         adapter._upsert_dashboard = Mock(return_value=30)
         adapter._associate_charts = Mock()
-        result = adapter.publish(self.dashboard, Permissions(can_publish_bi_assets=True))
+        result = adapter.publish(self.dashboard, publication_authority())
         self.assertEqual(1, adapter._upsert_dataset.call_count)
         self.assertEqual(30, result["artifacts"][-1]["superset_id"])
 
@@ -137,21 +145,23 @@ class Phase3ApiTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         import api
-        api.orchestrator = Orchestrator(Settings(), Gateway())
+        api.orchestrator = Orchestrator(Settings(), Gateway(), authority_resolver=authority_resolver())
         cls.client = LocalClient(api.app)
     def test_visualize_and_dashboard_dry_run(self):
         self.assertEqual(200, self.client.post("/agents/visualize", json={
-            "objective": "Visualize repayment performance by district"}).status_code)
+            "objective": "Visualize repayment performance by district",
+            "context": governance_context(dataset=DATASET)}).status_code)
         response = self.client.post("/agents/dashboard", json={
-            "objective": "Build repayment performance dashboard by district", "publish": False})
+            "objective": "Build repayment performance dashboard by district", "publish": False,
+            "context": governance_context(dataset=DATASET)})
         self.assertEqual(200, response.status_code, response.text)
         self.assertEqual("dry_run", response.json()["superset"]["mode"])
     def test_publish_requires_permission(self):
         _, _, dashboard = artifacts()
         response = self.client.post("/publish/superset", json={
             "dashboard": dashboard.model_dump(mode="json"), "publish": True})
-        self.assertEqual(502, response.status_code)
-        self.assertEqual("AdapterPermissionDenied", response.json()["error"]["category"])
+        self.assertEqual(403, response.status_code)
+        self.assertEqual("PublicationAuthorityRequired", response.json()["error"]["category"])
     def test_phase1_endpoint_compatible(self):
         self.assertEqual(200, self.client.post("/agents/query", json={
             "objective": "What tables contain repayment information?"}).status_code)

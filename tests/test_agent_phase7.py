@@ -12,7 +12,13 @@ from knowledge import LocalKnowledgeRetriever
 from knowledge_models import HybridEvidence, KnowledgeDocument, KnowledgeMetadata, KnowledgeQuery
 
 
-def identity(*permissions, roles=()):
+# A2.3: retrieval authority is role-derived only, so this fixture expresses
+# authority through roles.  `permissions` is retained purely so that older
+# call sites still parse; it grants nothing.
+ANALYST = "programme_analyst"
+
+
+def identity(*permissions, roles=(ANALYST,)):
     return IdentityContext(subject_id="user-1", roles=list(roles), permissions=list(permissions))
 
 
@@ -26,7 +32,7 @@ def document(content="A delayed payment remains pending beyond the policy servic
 
 
 def query(text, user=None, limit=5):
-    return KnowledgeQuery(query=text, user_context=user or identity("can_view_internal_data"), limit=limit)
+    return KnowledgeQuery(query=text, user_context=user or identity(), limit=limit)
 
 
 def test_deterministic_ids_and_idempotent_ingestion():
@@ -53,7 +59,7 @@ def test_classification_and_role_filter_before_content_exposure():
     retriever = LocalKnowledgeRetriever()
     retriever.ingest(document("secret beneficiary escalation procedure", classification=DataClassification.RESTRICTED,
                                allowed_roles=["investigator"], title="Sensitive title"))
-    denied = retriever.retrieve(query("secret beneficiary", identity("can_view_internal_data")))
+    denied = retriever.retrieve(query("secret beneficiary", identity()))
     assert denied.hits == [] and denied.citations == []
     wrong_role = retriever.retrieve(query("secret beneficiary", identity("can_view_restricted_data", roles=["auditor"])))
     assert wrong_role.hits == []

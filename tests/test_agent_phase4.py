@@ -9,6 +9,13 @@ if not SERVICE.exists() and Path("/app/config.py").exists():
     SERVICE = Path("/app")
 sys.path.insert(0, str(SERVICE))
 
+from agent_authority_fixtures import (
+    authority_resolver,
+    governance_context,
+    governance_request,
+    platform_classifier,
+)
+from classification import DataClassification
 from config import Settings
 from data_quality import DataQualityEngine
 from models import AgentRequest, Permissions
@@ -82,8 +89,19 @@ def rule(kind, **parameters):
 
 class DataQualityTests(unittest.TestCase):
     def registry(self, failed=0, **kwargs):
-        return ToolRegistry(Phase4Gateway(failed=failed, **kwargs),
-                            Settings(max_tool_calls=30, dq_max_sample_rows=5))
+        # Governance is mandatory for governed reads (A2.1); the synthetic
+        # dataset is classified by platform-owned test metadata.
+        return ToolRegistry(
+            Phase4Gateway(failed=failed, **kwargs),
+            Settings(max_tool_calls=30, dq_max_sample_rows=5),
+            governance_request=governance_request(
+                roles=("programme_analyst",),
+                dataset="iceberg.consumption.quality_target",
+            ),
+            classification_resolver=platform_classifier(
+                {"iceberg.consumption.quality_target": DataClassification.PUBLIC}
+            ),
+        )
 
     def test_not_null_pass_and_fail_with_recommendation_and_evidence(self):
         passed = DataQualityEngine(self.registry()).run_rule(rule("not_null"), Permissions())
@@ -117,9 +135,12 @@ class DataQualityTests(unittest.TestCase):
         rules = catalogue.list_rules("iceberg.silver.slv_pdm_loans")
         self.assertTrue(any(item.rule_type == "not_null" and item.field == "loan_id" for item in rules))
         self.assertTrue(all(item.source == "dbt_test" and item.provenance for item in rules))
-        response = Orchestrator(Settings(), Phase4Gateway()).execute(AgentRequest(
+        response = Orchestrator(Settings(), Phase4Gateway(), authority_resolver=authority_resolver(),
+            classification_resolver=platform_classifier(
+                {"iceberg.consumption.quality_target": DataClassification.PUBLIC})).execute(AgentRequest(
             agent="data_quality", objective="check a fabricated thing",
-            context={"dataset": "iceberg.consumption.no_such_rule"}))
+            context={"dataset": "iceberg.consumption.no_such_rule",
+                     "governance": governance_context(dataset="iceberg.consumption.quality_target")["governance"]}))
         self.assertEqual([], response.result["findings"])
         self.assertIn("no rule was invented", response.result["explanation"].lower())
 
@@ -166,14 +187,22 @@ class DataQualityTests(unittest.TestCase):
 
 class InsightTests(unittest.TestCase):
     def orchestrator(self, **kwargs):
-        return Orchestrator(Settings(max_tool_calls=30, insight_change_threshold=0.2),
-                            Phase4Gateway(**kwargs))
+        # Governance is mandatory for governed reads (A2.1).
+        return Orchestrator(
+            Settings(max_tool_calls=30, insight_change_threshold=0.2),
+            Phase4Gateway(**kwargs),
+            authority_resolver=authority_resolver(),
+            classification_resolver=platform_classifier(
+                {"iceberg.consumption.quality_target": DataClassification.PUBLIC}
+            ),
+        )
 
     def request(self, **context):
         base = {"dataset": "iceberg.consumption.quality_target",
                 "metric": "principal_repayment_rate", "dimension": "district",
                 "time_field": "reporting_month"}
         base.update(context)
+        base["governance"] = governance_context(dataset="iceberg.consumption.quality_target")["governance"]
         return AgentRequest(agent="insight", objective="What changed compared with the previous period?",
                             context=base)
 
@@ -211,7 +240,9 @@ class InsightTests(unittest.TestCase):
     def test_static_ranking_and_zscore_method(self):
         request = AgentRequest(agent="insight", objective="repayment differences across districts",
             context={"dataset": "iceberg.consumption.quality_target",
-                     "metric": "principal_repayment_rate", "dimension": "district"})
+                     "metric": "principal_repayment_rate", "dimension": "district",
+                     "governance": governance_context(
+                         dataset="iceberg.consumption.quality_target")["governance"]})
         response = self.orchestrator().execute(request)
         insight = response.result["insights"][0]
         self.assertEqual("ranking", insight["type"])

@@ -150,6 +150,23 @@ DATASET_POLICIES: dict[str, DatasetPolicy] = {
 
 
 #
+# Complete trusted column lists, required to expand a ``SELECT *`` projection.
+#
+# This registry belongs to the platform.  It is deliberately explicit and
+# starts EMPTY: the dbt schema yml files under transform/dbt/models document
+# only a subset of each model's columns, and expanding a star projection from a
+# partial list would classify fewer fields than Trino actually returns, which
+# would itself leak unclassified columns.
+#
+# Until a dataset is registered here with its COMPLETE column list, a
+# ``SELECT *`` against it fails closed rather than returning ungoverned
+# columns.  A dataset may be registered only when the list is known to be
+# complete for that dataset.
+#
+DATASET_COLUMNS: dict[str, tuple[str, ...]] = {}
+
+
+#
 # ---------------------------------------------------------------------------
 # Trusted field semantic registry
 # ---------------------------------------------------------------------------
@@ -587,6 +604,7 @@ class TrustedClassificationResolver:
         *,
         district: str | None = None,
         parish: str | None = None,
+        field_lineage: dict[str, str] | None = None,
     ) -> ResourceContext:
         """
         Construct an authoritative ResourceContext.
@@ -637,6 +655,7 @@ class TrustedClassificationResolver:
             field_classifications=(
                 field_classifications
             ),
+            field_lineage=dict(field_lineage or {}),
             district=district,
             parish=parish,
         )
@@ -796,6 +815,138 @@ class TrustedClassificationResolver:
 
         return fields
 
+    @staticmethod
+    def projection_lineage_from_sql(
+        sql: str,
+        dataset: str | None = None,
+    ) -> dict[str, str]:
+        """Resolve an output-label -> source-field map for the projection.
+
+        ``SELECT beneficiary_name AS bn`` -> ``{"bn": "beneficiary_name"}``
+
+        A star projection (``SELECT *``) has no deterministic source field, so
+        it may only be resolved when the platform holds a COMPLETE trusted
+        column list for the dataset.  Otherwise the query fails closed (A2.6).
+        """
+
+        try:
+            tree = sqlglot.parse_one(sql, read="trino")
+
+        except sqlglot.errors.ParseError as exc:
+            raise ClassificationError(
+                f"Unable to parse SQL for field lineage: {exc}"
+            ) from exc
+
+        lineage: dict[str, str] = {}
+
+        #
+        # Aliases introduced by derived tables.  A star over a derived table
+        # re-exposes the inner projection verbatim, so its lineage is already
+        # contributed by the inner SELECT and must not be expanded against the
+        # base dataset's column list.  This is what lets the platform's own
+        # bounding wrapper ``SELECT * FROM (...) AS agent_bounded LIMIT n``
+        # remain governable.
+        #
+        derived_aliases = {
+            normalize_identifier(subquery.alias_or_name)
+            for subquery in tree.find_all(exp.Subquery)
+            if subquery.alias_or_name
+        }
+
+        for select in tree.find_all(exp.Select):
+            #
+            # A star over a DERIVED source re-exposes the inner projection
+            # verbatim, so its lineage is contributed by the inner SELECT and
+            # must not be expanded against the base dataset's column list.
+            # This is what keeps the platform's own bounding wrapper
+            # ``SELECT * FROM (...) AS agent_bounded LIMIT n`` governable while
+            # still failing closed on ``SELECT * FROM <base table>``.
+            #
+            from_clause = (
+                select.args.get("from_")
+                or select.args.get("from")
+            )
+
+            derived_source = bool(
+                from_clause is not None
+                and from_clause.this is not None
+                and isinstance(
+                    from_clause.this,
+                    exp.Subquery,
+                )
+            )
+
+            for expression in select.expressions:
+                if isinstance(expression, exp.Star):
+                    qualifier = ""
+
+                    star_column = expression.find(exp.Column)
+
+                    if star_column is not None and star_column.table:
+                        qualifier = normalize_identifier(
+                            star_column.table
+                        )
+
+                    if derived_source or qualifier in derived_aliases:
+                        continue
+
+                    for column in TrustedClassificationResolver.columns_for_star(
+                        dataset
+                    ):
+                        lineage[column] = column
+                    continue
+
+                columns = list(
+                    expression.find_all(exp.Column)
+                )
+
+                if not columns:
+                    #
+                    # An aggregate with no physical column, e.g. COUNT(*),
+                    # exposes no field to classify.
+                    #
+                    continue
+
+                source = normalize_identifier(
+                    columns[0].name
+                )
+
+                if not source:
+                    continue
+
+                output = normalize_identifier(
+                    expression.alias_or_name or source
+                )
+
+                lineage[output] = source
+
+        return lineage
+
+    @staticmethod
+    def columns_for_star(
+        dataset: str | None,
+    ) -> tuple[str, ...]:
+        """Return the complete trusted column list required to expand ``*``.
+
+        The platform does not hold complete column metadata for every governed
+        dataset, so an unresolvable star projection fails closed rather than
+        silently returning unclassified columns.
+        """
+
+        canonical = normalize_dataset(dataset or "")
+
+        columns = DATASET_COLUMNS.get(canonical)
+
+        if not columns:
+            raise ClassificationError(
+                "SELECT * cannot be governed because the platform holds no "
+                f"complete trusted column list for dataset {canonical!r}. "
+                "Star projections must name their columns explicitly, or the "
+                "dataset must be registered with a complete column list."
+            )
+
+        return tuple(columns)
+
     def resolve_sql(
         self,
         sql: str,
@@ -836,9 +987,19 @@ class TrustedClassificationResolver:
             )
         )
 
+        #
+        # Resolve lineage FIRST so that an unresolvable star projection fails
+        # closed before any field classification is trusted (A2.6).
+        #
+        lineage = self.projection_lineage_from_sql(
+            sql,
+            dataset,
+        )
+
         return self.resolve_resource(
             dataset,
             fields,
             district=district,
             parish=parish,
+            field_lineage=lineage,
         )

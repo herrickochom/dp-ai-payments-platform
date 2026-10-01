@@ -5,6 +5,7 @@ import re
 from abc import ABC, abstractmethod
 from copy import deepcopy
 
+from authority import capabilities_for_roles
 from governance_models import DataClassification, IdentityContext
 from knowledge_models import (
     KnowledgeChunk, KnowledgeCitation, KnowledgeDocument, KnowledgeEvidence,
@@ -91,7 +92,15 @@ class LocalKnowledgeRetriever(KnowledgeRetriever):
             DataClassification.CONFIDENTIAL: "can_view_confidential_data",
             DataClassification.RESTRICTED: "can_view_restricted_data",
         }[metadata.classification]
-        return required is None or required in identity.permissions
+
+        if required is None:
+            return True
+
+        #
+        # A2.3: retrieval authority is role-derived only.  A caller-supplied
+        # `IdentityContext.permissions` list grants nothing.
+        #
+        return required in capabilities_for_roles(identity.roles)
 
     def retrieve(self, query: KnowledgeQuery, governance_context=None) -> RetrievalResult:
         query_tokens = _tokens(query.query)

@@ -3,6 +3,10 @@ import unittest
 from pathlib import Path
 
 from agent_asgi_client import LocalClient
+from agent_authority_fixtures import (
+    authority_resolver,
+    governance_context,
+)
 from pydantic import ValidationError
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -147,10 +151,11 @@ class DashboardBuilderTests(unittest.TestCase):
 
 
 class IntegrationTests(unittest.TestCase):
-    def setUp(self): self.orchestrator = Orchestrator(Settings(), Gateway())
+    def setUp(self): self.orchestrator = Orchestrator(Settings(), Gateway(), authority_resolver=authority_resolver())
     def test_analytics_to_all_builders(self):
         from models import AgentRequest
-        analytics = self.orchestrator.execute(AgentRequest(objective="repayment performance by district"))
+        analytics = self.orchestrator.execute(AgentRequest(objective="repayment performance by district",
+            context=governance_context(dataset=DATASET)))
         self.assertEqual("completed", analytics.status)
         self.assertIn("data_source", analytics.result)
         source = source_spec()
@@ -171,7 +176,8 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual(200, client.post("/agents/query", json={
             "objective": "What tables contain repayment information?"}).status_code)
         response = client.post("/agents/build", json={
-            "objective": "What is repayment performance by district?"})
+            "objective": "What is repayment performance by district?",
+            "context": governance_context(dataset=DATASET)})
         self.assertEqual(200, response.status_code, response.text)
         self.assertEqual(3, len(response.json()["visualizations"]))
 
