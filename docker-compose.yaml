@@ -935,6 +935,7 @@ services:
     ports:
     - ${SUPERSET_PORT:-8088}:8088
     volumes:
+    - ./platform/trino/etc/trino-public.crt:/etc/ssl/certs/trino-public.crt:ro
     - ./platform/superset/superset_config.py:/app/pythonpath/superset_config.py:ro
     - ./platform/superset:/app/platform/superset:ro
     - ./platform/superset/dashboards/Coat-of-arms-Uganda.webp:/app/superset/static/assets/images/Coat-of-arms-Uganda.webp:ro
