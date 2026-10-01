@@ -855,7 +855,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: '6379'
       TRINO_HOST: trino
-      TRINO_PORT: '8080'
+      TRINO_PORT: '8443'
       TRINO_CATALOG: iceberg
       TRINO_SCHEMA: consumption
       TRINO_DATABASE_NAME: ${TRINO_DATABASE_NAME:-PDM Trino}
@@ -865,7 +865,13 @@ services:
       # F8: the BI connection must be authenticated. An unauthenticated
       # default is refused rather than silently falling back.
       TRINO_SQLALCHEMY_URI: ${TRINO_SQLALCHEMY_URI:?TRINO_SQLALCHEMY_URI with superset_bi credentials must be supplied}
+      # F7: plaintext HTTP cannot carry a password once
+      # allow-insecure-over-http is false, and a clear-text credential on the
+      # container network is not acceptable either. The driver verifies the
+      # coordinator against this certificate; verification is never disabled.
+      TRINO_SSL_CA: ${TRINO_SSL_CA:-/etc/ssl/certs/trino-public.crt}
     volumes:
+    - ./platform/trino/etc/trino-public.crt:/etc/ssl/certs/trino-public.crt:ro
     - ./platform/superset/superset_config.py:/app/pythonpath/superset_config.py:ro
     - ./platform/superset:/app/platform/superset:ro
     - superset-data:/app/superset_home
