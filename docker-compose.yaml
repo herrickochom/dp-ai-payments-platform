@@ -613,8 +613,10 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-    - 8089:8080
-    - 8443:8443
+    # F8: loopback-only host publication. Container-to-container access
+    # uses the compose network and is unaffected.
+    - 127.0.0.1:8089:8080
+    - 127.0.0.1:8443:8443
     volumes:
     - ./platform/trino/etc/catalog:/etc/trino/catalog:ro
     - ./platform/trino/etc/access-control.properties:/etc/trino/access-control.properties:ro
@@ -857,7 +859,9 @@ services:
       # F3-3/D5: canonical BI Trino identity is `superset_bi`.
       # The previous curated manifest referenced `pdm`, which was never
       # provisioned in password.db or access control.
-      TRINO_SQLALCHEMY_URI: ${TRINO_SQLALCHEMY_URI:-trino://superset_bi@trino:8080/iceberg/consumption}
+      # F8: the BI connection must be authenticated. An unauthenticated
+      # default is refused rather than silently falling back.
+      TRINO_SQLALCHEMY_URI: ${TRINO_SQLALCHEMY_URI:?TRINO_SQLALCHEMY_URI with superset_bi credentials must be supplied}
     volumes:
     - ./platform/superset/superset_config.py:/app/pythonpath/superset_config.py:ro
     - ./platform/superset:/app/platform/superset:ro
