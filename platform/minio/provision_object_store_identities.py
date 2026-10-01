@@ -198,6 +198,42 @@ def apply(source: dict[str, str]) -> None:
     print(f"Reconciled eight service identities; {preserved} existing user secret(s) were not verified or rotated")
 
 
+def rotate(source: dict[str, str], identity: str) -> None:
+    """Re-key exactly one approved identity, in place.
+
+    ``apply`` deliberately never rewrites an existing user's secret: MinIO
+    cannot read a stored secret back, so reconciliation cannot tell a matching
+    secret from a stale one. That is correct for a convergence loop, but it
+    means a credential that has leaked through, for example, version control
+    cannot be revoked through ``--apply`` at all.
+
+    This mode is the deliberate exception. It is limited to the eight approved
+    identities, requires the user to already exist, and uses the same
+    ``mc admin user add`` call that ``apply`` uses to create a user, which
+    replaces the stored secret. The access key, the policy attachment and every
+    other identity are left untouched, so the blast radius of a rotation is a
+    single principal.
+    """
+    require_apply_environment(source)
+    rows = {row[0]: row for row in IDENTITIES}
+    if identity not in rows:
+        raise ProvisionError("unknown identity; rotation is limited to the eight approved identities")
+    _, policy, access_name, secret_name = rows[identity]
+
+    environment = admin_environment(source)
+    access_key = source[access_name]
+    existing = existing_users(mc(["admin", "user", "ls", ALIAS], environment))
+    if access_key not in existing:
+        raise ProvisionError("refusing to rotate an identity that does not already exist")
+    if policy not in existing[access_key]:
+        raise ProvisionError("refusing to rotate an identity whose policy is not attached")
+
+    # Re-add with the current secret. Built only at the point of use and
+    # never echoed: the command line is not logged or printed.
+    mc(["admin", "user", "add", ALIAS, access_key, source[secret_name]], environment)
+    print(f"Rotated secret for identity '{identity}'; access key, policy and all other identities unchanged")
+
+
 def administrative_source() -> dict[str, str]:
     """Process environment with secret material resolved via the provider.
 
@@ -221,8 +257,13 @@ def main(argv: list[str] | None = None, source: dict[str, str] | None = None) ->
         print("--validate  Local policy and mapping validation; no MinIO contact")
         print("--dry-run   Local desired-state plan; no MinIO mutation")
         print("--apply     LIVE MinIO IAM administration; invoke deliberately with administrative credentials")
+        print("--rotate <identity>  LIVE re-key of one approved identity, for a credential that has been exposed")
         return 0
-    if argv not in (["--validate"], ["--dry-run"], ["--apply"]):
+    if len(argv) == 2 and argv[0] == "--rotate":
+        rotate_argv = argv
+    elif argv in (["--validate"], ["--dry-run"], ["--apply"]):
+        rotate_argv = None
+    else:
         print("Use --help; live provisioning requires explicit --apply", file=sys.stderr)
         return 2
     try:
@@ -233,6 +274,8 @@ def main(argv: list[str] | None = None, source: dict[str, str] | None = None) ->
             print("PLAN (offline; no mutation):")
             for identity, policy, _, _ in IDENTITIES:
                 print(f"  {identity} -> {policy} ({POLICY_DIR / (policy + '.json')}): ensure/update policy; ensure user; attach policy")
+        elif rotate_argv is not None:
+            rotate(source, rotate_argv[1])
         else:
             apply(source)
         return 0
