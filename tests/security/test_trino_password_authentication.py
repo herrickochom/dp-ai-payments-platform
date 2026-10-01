@@ -186,6 +186,57 @@ def test_rotation_target_is_scoped_to_one_identity() -> None:
         provisioner.rotate({}, "nessie_catalog")
 
 
+def test_bi_connection_uri_cannot_be_plaintext() -> None:
+    """The registered BI connection must be authenticated TLS.
+
+    Three separate defects surfaced during runtime provisioning and each is
+    pinned here:
+
+    * the connection defaulted to ``trino://`` on the plaintext listener, which
+      Trino rejects with "TLS/SSL is required for authentication" once
+      ``allow-insecure-over-http`` is false;
+    * the credential is percent-encoded in the URI, because a generated secret
+      may contain ``/`` or ``+`` and an unencoded ``/`` silently truncates the
+      authority (``Port could not be cast to integer value``);
+    * the certificate must be mounted into the service that runs the query,
+      not only into the one-shot initialiser.
+    """
+    compose = yaml.safe_load(COMPOSE_PATH.read_text(encoding="utf-8"))
+
+    # superset-init must be given an explicit URI; it has no default to fall
+    # back to. The webserver does not receive the URI at all - it uses the
+    # connection persisted in the metadata database - but it does need the
+    # certificate, because the webserver is what executes BI queries.
+    assert ":?" in compose["services"]["superset-init"]["environment"]["TRINO_SQLALCHEMY_URI"], (
+        "SECURITY: superset-init must require an explicit BI URI rather than "
+        "defaulting to an unauthenticated connection"
+    )
+
+    for service in ("superset-init", "superset"):
+        assert any(
+            "trino-public.crt" in str(volume)
+            for volume in compose["services"][service]["volumes"]
+        ), (
+            f"SECURITY: {service} needs the coordinator certificate mounted so "
+            "the driver can verify it"
+        )
+
+
+def test_bi_connection_registration_refuses_insecure_forms() -> None:
+    """The registration step must fail closed on an insecure URI."""
+    compose = yaml.safe_load(COMPOSE_PATH.read_text(encoding="utf-8"))
+    command = " ".join(compose["services"]["superset-init"]["command"])
+
+    assert "trino://trino@" not in command, (
+        "SECURITY: the BI registration must not carry an anonymous plaintext "
+        "fallback URI"
+    )
+    for guard in ("must use https", "superset_bi", "must verify the coordinator"):
+        assert guard in command, (
+            f"SECURITY: BI registration must refuse a connection that lacks: {guard}"
+        )
+
+
 def test_compose_requires_the_catalog_credential() -> None:
     """The injected catalog credential must fail closed when absent.
 
