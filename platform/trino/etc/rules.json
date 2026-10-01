@@ -1,33 +1,484 @@
 {
   "catalogs": [
-    { "user": "hochom", "catalog": "iceberg", "allow": "all" },
-    { "user": "dbt", "catalog": "iceberg", "allow": "all" },
-    { "user": "dbt", "catalog": "system", "allow": "read-only" },
-    { "user": "trino", "catalog": "iceberg", "allow": "read-only" },
-    { "user": "metabase", "catalog": "iceberg", "allow": "read-only" },
-    { "user": "agent-api", "catalog": "iceberg", "allow": "read-only" }
+    {
+      "user": "hochom",
+      "catalog": "iceberg",
+      "allow": "all"
+    },
+    {
+      "user": "dbt",
+      "catalog": "iceberg",
+      "allow": "all"
+    },
+    {
+      "user": "dbt",
+      "catalog": "system",
+      "allow": "read-only"
+    },
+    {
+      "user": "trino",
+      "catalog": "iceberg",
+      "allow": "read-only"
+    },
+    {
+      "user": "metabase",
+      "catalog": "iceberg",
+      "allow": "read-only"
+    },
+    {
+      "user": "superset_bi",
+      "catalog": "iceberg",
+      "allow": "read-only"
+    },
+    {
+      "user": "metabase_bi",
+      "catalog": "iceberg",
+      "allow": "read-only"
+    },
+    {
+      "user": "agent-api",
+      "catalog": "iceberg",
+      "allow": "read-only"
+    }
   ],
   "schemas": [
-    { "user": "hochom", "catalog": "iceberg", "schema": ".*", "owner": true },
-    { "user": "dbt", "catalog": "iceberg", "schema": ".*", "owner": true },
-    { "user": "dbt", "catalog": "system", "schema": "metadata", "owner": false },
-    { "user": "trino|metabase|agent-api", "catalog": "iceberg", "schema": ".*", "owner": false }
+    {
+      "user": "hochom",
+      "catalog": "iceberg",
+      "schema": ".*",
+      "owner": true
+    },
+    {
+      "user": "dbt",
+      "catalog": "iceberg",
+      "schema": ".*",
+      "owner": true
+    },
+    {
+      "user": "dbt",
+      "catalog": "system",
+      "schema": "metadata",
+      "owner": false
+    },
+    {
+      "user": "trino|metabase|superset_bi|metabase_bi|agent-api",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "owner": false
+    }
   ],
   "tables": [
-    { "user": "hochom", "catalog": "iceberg", "schema": ".*", "table": ".*",
-      "privileges": ["SELECT", "INSERT", "DELETE", "UPDATE", "OWNERSHIP"] },
-    { "user": "dbt", "catalog": "iceberg", "schema": ".*", "table": ".*",
-      "privileges": ["SELECT", "INSERT", "DELETE", "UPDATE", "OWNERSHIP"] },
-    { "user": "dbt", "catalog": "system", "schema": "metadata", "table": ".*",
-      "privileges": ["SELECT"] },
-    { "user": "trino|metabase", "catalog": "iceberg", "schema": "consumption",
-      "table": ".*", "privileges": ["SELECT"] },
-    { "user": "agent-api", "catalog": "iceberg", "schema": "consumption",
-      "table": "cns_pdm_executive_overview", "privileges": ["SELECT"] }
+    {
+      "user": "hochom",
+      "catalog": "iceberg",
+      "schema": ".*",
+      "table": ".*",
+      "privileges": [
+        "SELECT",
+        "INSERT",
+        "DELETE",
+        "UPDATE",
+        "OWNERSHIP"
+      ]
+    },
+    {
+      "user": "dbt",
+      "catalog": "iceberg",
+      "schema": ".*",
+      "table": ".*",
+      "privileges": [
+        "SELECT",
+        "INSERT",
+        "DELETE",
+        "UPDATE",
+        "OWNERSHIP"
+      ]
+    },
+    {
+      "user": "dbt",
+      "catalog": "system",
+      "schema": "metadata",
+      "table": ".*",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "trino|metabase",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": ".*",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "superset_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_district_geographic_risk",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "superset_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_executive_monthly_trend",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "superset_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_executive_overview",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "superset_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_financial_fund_flow",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "superset_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_fraud_risk_insights",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "superset_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_fund_flow_funnel",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "superset_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_geographic_alerts",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "superset_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_geographic_coverage",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "superset_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_geographic_risk_drivers",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "superset_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_geographic_risk_summary",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "superset_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_geographic_risk_trend",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "superset_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_lifecycle_exceptions",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "superset_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_local_government_performance",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "superset_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_parish_geographic_risk",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "superset_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_parish_performance",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "superset_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_payments_daily_summary",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "superset_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_social_impact",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "superset_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_subcounty_geographic_risk",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "superset_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_village_geographic_risk",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "metabase_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_district_geographic_risk",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "metabase_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_executive_monthly_trend",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "metabase_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_executive_overview",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "metabase_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_financial_fund_flow",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "metabase_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_fraud_risk_insights",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "metabase_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_fund_flow_funnel",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "metabase_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_geographic_alerts",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "metabase_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_geographic_coverage",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "metabase_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_geographic_risk_drivers",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "metabase_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_geographic_risk_summary",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "metabase_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_geographic_risk_trend",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "metabase_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_lifecycle_exceptions",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "metabase_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_local_government_performance",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "metabase_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_parish_geographic_risk",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "metabase_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_parish_performance",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "metabase_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_payments_daily_summary",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "metabase_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_social_impact",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "metabase_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_subcounty_geographic_risk",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "metabase_bi",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_village_geographic_risk",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "user": "agent-api",
+      "catalog": "iceberg",
+      "schema": "consumption",
+      "table": "cns_pdm_executive_overview",
+      "privileges": [
+        "SELECT"
+      ]
+    }
   ],
   "system_session_properties": [
-    { "user": "hochom", "property": ".*", "allow": true },
-    { "user": "dbt", "property": ".*", "allow": true },
-    { "user": "trino|metabase|agent-api", "property": ".*", "allow": false }
+    {
+      "user": "hochom",
+      "property": ".*",
+      "allow": true
+    },
+    {
+      "user": "dbt",
+      "property": ".*",
+      "allow": true
+    },
+    {
+      "user": "trino|metabase|superset_bi|metabase_bi|agent-api",
+      "property": ".*",
+      "allow": false
+    }
   ]
 }

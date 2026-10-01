@@ -123,7 +123,14 @@ class AdapterTests(unittest.TestCase):
         with self.assertRaises(AdapterPermissionDenied):
             self.adapter.publish(self.dashboard, publication_authority('publisher-1', authenticated=False))
     def test_publish_create_and_partial_failure_propagation(self):
-        adapter = SupersetAdapter(Settings(superset_password="x"), Mock())
+        adapter = SupersetAdapter(
+            Settings(
+                superset_password="x",
+                superset_publisher_username="agent_publisher",
+                superset_publisher_password="publisher-test-only",
+            ),
+            Mock(),
+        )
         adapter._login = Mock(return_value={})
         adapter._database_id = Mock(return_value=1)
         adapter._upsert_dataset = Mock(return_value=10)
@@ -131,7 +138,14 @@ class AdapterTests(unittest.TestCase):
         with self.assertRaisesRegex(AdapterError, "failed after"):
             adapter.publish(self.dashboard, publication_authority())
     def test_publish_reuses_one_dataset(self):
-        adapter = SupersetAdapter(Settings(superset_password="x"), Mock())
+        adapter = SupersetAdapter(
+            Settings(
+                superset_password="x",
+                superset_publisher_username="agent_publisher",
+                superset_publisher_password="publisher-test-only",
+            ),
+            Mock(),
+        )
         adapter._login = Mock(return_value={}); adapter._database_id = Mock(return_value=1)
         adapter._upsert_dataset = Mock(return_value=10); adapter._upsert_chart = Mock(side_effect=[20,21,22])
         adapter._upsert_dashboard = Mock(return_value=30)

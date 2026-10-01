@@ -351,9 +351,12 @@ def test_smoke_dashboard_dry_run_is_offline_and_governed():
     plan = SupersetAdapter(Settings()).plan(dashboard)
     assert plan["mode"] == "dry_run" and plan["status"] == "validated"
 
+    # F2-1: automated publication authenticates as the DEDICATED publisher
+    # identity, never as the administrator. With no publisher credential
+    # configured it fails closed.
     with pytest.raises(AdapterError) as excinfo:
         SupersetAdapter(Settings()).publish(dashboard, publication_authority())
-    assert "SUPERSET_PASSWORD" in str(excinfo.value)
+    assert "SUPERSET_PUBLISHER" in str(excinfo.value)
 def test_smoke_restricted_beneficiary_publication_fails_closed():
     tools = ToolRegistry(SmokeGateway(columns=[["beneficiary_name", "varchar", 1],
                                                ["district", "varchar", 2]]), Settings())
@@ -374,7 +377,13 @@ def test_smoke_restricted_beneficiary_publication_fails_closed():
         title="restricted beneficiary view", visualizations=[visual],
         layout=[LayoutItem(visualization_id="v-r", x=0, y=0, width=12, height=4)],
         permissions=Permissions()))
-    adapter = SupersetAdapter(Settings(superset_password="x"))
+    adapter = SupersetAdapter(
+        Settings(
+            superset_password="x",
+            superset_publisher_username="agent_publisher",
+            superset_publisher_password="publisher-test-only",
+        )
+    )
     with pytest.raises(AdapterPermissionDenied) as excinfo:
         adapter.publish(dashboard, publication_authority())
     assert "RESTRICTED" in str(excinfo.value)

@@ -261,6 +261,88 @@ which asserts the fail-closed contract.
 
 ---
 
+---
+
+## 4B. F2/F3 - BI AND SUPERSET LEAST-PRIVILEGE BOUNDARY
+
+F1 secured WHO may request a privileged operation. F2/F3 secure the authority
+of the BI services that act downstream.
+
+### 4B.1 Discovery findings
+
+| ID | Finding |
+|---|---|
+| F2-1 | The publication adapter authenticated with `${SUPERSET_ADMIN_USERNAME}`/`${SUPERSET_ADMIN_PASSWORD}` - the Superset **administrator** created by `superset fab create-admin`. |
+| F2-2 | `/publish/superset` accepted an arbitrary caller-supplied `DashboardSpec`; only the classification gate bounded it, so any INTERNAL dataset could be registered. |
+| F3-1 | `rules.json` granted `trino` and `metabase` `consumption.*` SELECT, including the identity-bearing datasets GATE-2 identified. |
+| F3-2 | `expose_in_sqllab: true` on the automated BI connection. |
+| F3-3 | The curated BI manifest referenced `trino://pdm@...`, an identity never provisioned in `password.db` or access control. |
+| F3-4 | No repository-controlled dashboard exposure policy. |
+
+### 4B.2 Controls implemented
+
+**F2-1 - dedicated publication identity.** `SUPERSET_PUBLISHER_USERNAME` /
+`SUPERSET_PUBLISHER_PASSWORD` (via the SecretProvider contract). The adapter
+reads only these; `SupersetAdapter._require_publisher_identity()` fails closed
+when absent and **never** falls back to administrator credentials. The
+agent-api compose block no longer receives `SUPERSET_ADMIN_*`.
+
+**F2-2 - server-owned publication allowlist.** `services/agent-api/bi_policy.py`
+holds the approved BI dataset policy. Publication is refused unless the dataset
+is on it. Holding `bi_publisher` plus an INTERNAL classification is explicitly
+**not** sufficient. The RESTRICTED classification gate keeps precedence.
+
+**F3-1 - explicit BI table grants.** `rules.json` now grants
+`superset_bi` and `metabase_bi` SELECT on exactly the 19 approved BI tables.
+Trino file access control is deny-by-default, so bronze, silver,
+silver_vault, gold and every non-approved consumption table are denied.
+
+**F3-2 - SQL Lab disabled** on the controlled BI connection.
+
+**F3-3 - canonical BI identity.** The manifest and compose now use
+`superset_bi`; the unprovisioned `pdm` reference is gone. No credential is
+embedded in any committed file.
+
+**F3-4 - dashboard exposure policy.** Automated publication creates dashboards
+with `published: False` and `owners: []`, so repository-controlled publication
+can never make an asset anonymously reachable.
+
+### 4B.3 Trino BI access matrix
+
+| Identity | Approved BI tables | Identity-bearing | bronze/silver/silver_vault/gold | Write |
+|---|---|---|---|---|
+| `superset_bi` | ALLOW (19) | DENY | DENY | none |
+| `metabase_bi` | ALLOW (19) | DENY | DENY | none |
+| `trino`, `metabase` (legacy) | preserved unchanged (D6) | unchanged | DENY | none |
+| `agent-api` | unchanged: 1 table | DENY | DENY | none |
+| `dbt` | unchanged: full | unchanged | unchanged | preserved |
+
+### 4B.4 Runtime provisioning still outstanding
+
+Repository controls are complete, but these external states are NOT claimed:
+
+```
+F2_RUNTIME_SUPERSET_PUBLISHER_PROVISIONING=OUTSTANDING
+F2_RUNTIME_ROLE_PROVISIONING=OUTSTANDING
+F3_RUNTIME_TRINO_IDENTITY_PROVISIONING=OUTSTANDING
+F3_METABASE_RUNTIME_IDENTITY_MIGRATION=OUTSTANDING
+F3_RUNTIME_DASHBOARD_ACCESS_REVIEW=OUTSTANDING
+```
+
+Superset permission identifiers could not be proven without running Superset
+6.1.0, so no role/permission guess was made; only the REST endpoint surface
+traced from the adapter is enforced.
+
+### 4B.5 Test evidence
+
+```
+tests/security/test_bi_publication_least_privilege.py   17 passed
+tests/security/test_bi_trino_access_control.py          38 passed
+F1 suite                                               55 passed
+A2/A3/A4 security suite                                21 passed
+Agent regression                                  142 passed + 15 subtests
+```
+
 ## 5. REMAINING limitations
 
 These are real and are NOT solved by this work.
@@ -297,6 +379,8 @@ These are real and are NOT solved by this work.
 | ID | Item |
 |---|---|
 | ~~F1~~ | **CLOSED** - cryptographic OIDC/JWT + JWKS verification implemented (section 4A) |
+| ~~F2~~ | **CODE CLOSED** - dedicated publication identity + allowlist (section 4B); runtime provisioning outstanding |
+| ~~F3~~ | **CODE CLOSED** - explicit BI Trino grants + SQL Lab off (section 4B); runtime identity provisioning outstanding |
 | F1a | Provision a production IdP; configure issuer/audience/JWKS and subject-role bindings |
 | F2 | Superset least-privilege service account for publication |
 | F3 | BI least privilege over identity-bearing consumption datasets |
