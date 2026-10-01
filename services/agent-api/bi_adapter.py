@@ -5,6 +5,7 @@ import requests
 from pydantic import BaseModel, Field
 
 from authority import Authority
+from bi_policy import check_bi_publication
 from builder_models import DashboardSpec, DataSourceSpec, VisualizationSpec
 from classification import ClassificationError, TrustedClassificationResolver
 from config import Settings
@@ -82,8 +83,7 @@ class SupersetAdapter:
         self._require_publication_authority(authority)
 
         self._validate_publication_governance(dashboard)
-        if not self.settings.superset_password:
-            raise AdapterError("SUPERSET_PASSWORD is required for publishing")
+        self._require_publisher_identity()
         plan = self.plan(dashboard)
         headers = self._login()
         database_id = self._database_id(headers)
@@ -183,6 +183,21 @@ class SupersetAdapter:
                     "or reporting dataset instead"
                 )
 
+            #
+            # F2-2: publication is bounded by the SERVER-OWNED approved BI
+            # allowlist. Holding the bi_publisher role plus an INTERNAL
+            # classification is NOT sufficient; the dataset itself must be
+            # approved for automated BI publication. A caller cannot extend
+            # this policy.
+            #
+            refusal = check_bi_publication(source.dataset)
+
+            if refusal is not None:
+                raise AdapterPermissionDenied(
+                    "BI publication denied because "
+                    f"{refusal.reason}: {refusal.dataset}"
+                )
+
             restricted_fields = sorted(
                 field.field
                 for field in resource.field_classifications
@@ -235,10 +250,28 @@ class SupersetAdapter:
                 "datasource_type": "table", "params": json.dumps(params, separators=(",", ":")),
                 "description": f"Agent artifact {visual.id}"}
 
+    def _require_publisher_identity(self) -> None:
+        """Fail closed unless the dedicated publisher identity is configured.
+
+        F2-1: automated publication must never authenticate as the Superset
+        administrator, and must never fall back to SUPERSET_ADMIN_* when the
+        publisher credential is absent.
+        """
+
+        username = (self.settings.superset_publisher_username or "").strip()
+
+        if not username or not (self.settings.superset_publisher_password or ""):
+            raise AdapterError(
+                "SUPERSET_PUBLISHER_USERNAME and SUPERSET_PUBLISHER_PASSWORD are "
+                "required for publishing; automated publication never falls "
+                "back to administrator credentials"
+            )
+
     def _login(self):
+        self._require_publisher_identity()
         response = self.session.post(f"{self.settings.superset_url}/api/v1/security/login",
-            json={"username": self.settings.superset_username,
-                  "password": self.settings.superset_password, "provider": "db", "refresh": True}, timeout=20)
+            json={"username": self.settings.superset_publisher_username,
+                  "password": self.settings.superset_publisher_password, "provider": "db", "refresh": True}, timeout=20)
         response.raise_for_status()
         headers = {"Authorization": f"Bearer {response.json()['access_token']}"}
         csrf = self.session.get(f"{self.settings.superset_url}/api/v1/security/csrf_token/",
@@ -289,7 +322,12 @@ class SupersetAdapter:
         # lives in the dashboard slug and returned artifact map; only supported
         # native-filter metadata is persisted here.
         metadata = {"native_filter_configuration": self.translate_filters(dashboard)}
-        payload = {"dashboard_title": dashboard.title, "slug": slug, "published": True,
+        # F3-4: a dashboard is materialised in the Superset workspace only.
+        # `published` is left False and no anonymous/public role is assigned,
+        # so repository-controlled publication can never make an
+        # identity-bearing asset anonymously reachable. Operator role binding
+        # is a runtime concern (F3_RUNTIME_DASHBOARD_ACCESS_REVIEW).
+        payload = {"dashboard_title": dashboard.title, "slug": slug, "published": False,
                    "position_json": json.dumps(position, separators=(",", ":")),
                    "json_metadata": json.dumps(metadata, separators=(",", ":")),
                    "css": "", "owners": []}

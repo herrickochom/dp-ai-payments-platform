@@ -759,8 +759,11 @@ services:
       AGENT_MODEL: ${AGENT_MODEL:-}
       AGENT_RAG_ENABLED: ${AGENT_RAG_ENABLED:-false}
       SUPERSET_URL: ${AGENT_SUPERSET_URL:-http://superset:8088}
-      SUPERSET_USERNAME: ${SUPERSET_ADMIN_USERNAME:-admin}
-      SUPERSET_PASSWORD: ${SUPERSET_ADMIN_PASSWORD:?SUPERSET_ADMIN_PASSWORD must be supplied by environment}
+      # F2-1: automated publication uses a DEDICATED, least-privilege
+      # Superset identity. SUPERSET_ADMIN_* remains bootstrap/administrative
+      # only and is never consumed by the publication adapter.
+      SUPERSET_PUBLISHER_USERNAME: ${SUPERSET_PUBLISHER_USERNAME:-agent_publisher}
+      SUPERSET_PUBLISHER_PASSWORD: ${SUPERSET_PUBLISHER_PASSWORD:-}
       SUPERSET_DATABASE_NAME: ${TRINO_DATABASE_NAME:-PDM Trino}
       SUPERSET_PUBLIC_URL: ${SUPERSET_PUBLIC_URL:-http://localhost:8088}
       AGENT_AUDIT_LOG_PATH: /var/lib/dp-agent/audit/audit.jsonl
@@ -851,7 +854,10 @@ services:
       TRINO_CATALOG: iceberg
       TRINO_SCHEMA: consumption
       TRINO_DATABASE_NAME: ${TRINO_DATABASE_NAME:-PDM Trino}
-      TRINO_SQLALCHEMY_URI: ${TRINO_SQLALCHEMY_URI:-trino://trino@trino:8080/iceberg/consumption}
+      # F3-3/D5: canonical BI Trino identity is `superset_bi`.
+      # The previous curated manifest referenced `pdm`, which was never
+      # provisioned in password.db or access control.
+      TRINO_SQLALCHEMY_URI: ${TRINO_SQLALCHEMY_URI:-trino://superset_bi@trino:8080/iceberg/consumption}
     volumes:
     - ./platform/superset/superset_config.py:/app/pythonpath/superset_config.py:ro
     - ./platform/superset:/app/platform/superset:ro
@@ -879,9 +885,9 @@ services:
       , \"PDM Trino\")\n    sqlalchemy_uri = os.getenv(\n        \"TRINO_SQLALCHEMY_URI\",\n        \"trino://trino@trino:8080/iceberg/consumption\"\
       ,\n    )\n\n    database = (\n        db.session.query(Database)\n        .filter(Database.database_name == database_name)\n\
       \        .first()\n    )\n\n    if database is None:\n        database = Database(\n            database_name=database_name,\n\
-      \            sqlalchemy_uri=sqlalchemy_uri,\n            expose_in_sqllab=True,\n            allow_ctas=False,\n   \
+      \            sqlalchemy_uri=sqlalchemy_uri,\n            expose_in_sqllab=False,\n            allow_ctas=False,\n   \
       \         allow_cvas=False,\n            allow_dml=False,\n        )\n        db.session.add(database)\n        action\
-      \ = \"Created\"\n    else:\n        database.sqlalchemy_uri = sqlalchemy_uri\n        database.expose_in_sqllab = True\n\
+      \ = \"Created\"\n    else:\n        database.sqlalchemy_uri = sqlalchemy_uri\n        database.expose_in_sqllab = False\n\
       \        database.allow_ctas = False\n        database.allow_cvas = False\n        database.allow_dml = False\n    \
       \    action = \"Updated\"\n\n    db.session.commit()\n\n    print(\n        f\"{action} Superset Trino connection: \"\
       \n        f\"id={database.id}, name={database.database_name}\"\n    )\nPY\n\necho \"Superset initialization completed\

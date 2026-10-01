@@ -35,6 +35,19 @@ class Settings:
     superset_url: str = os.getenv("SUPERSET_URL", "http://localhost:8088")
     superset_username: str = os.getenv("SUPERSET_USERNAME", "admin")
     superset_password: str | None = resolve_secret("SUPERSET_PASSWORD")
+    #
+    # F2: the automated publication path uses a DEDICATED, non-human Superset
+    # identity. It never falls back to SUPERSET_ADMIN_* (which remains
+    # bootstrap/administrative only). Absent publisher credentials, publication
+    # fails closed.
+    #
+    superset_publisher_username: str = os.getenv(
+        "SUPERSET_PUBLISHER_USERNAME",
+        "",
+    )
+    superset_publisher_password: str | None = resolve_secret(
+        "SUPERSET_PUBLISHER_PASSWORD"
+    )
     superset_database_name: str = os.getenv("SUPERSET_DATABASE_NAME", "PDM Trino")
     superset_public_url: str = os.getenv("SUPERSET_PUBLIC_URL", "http://localhost:8088")
     dbt_models_path: str = os.getenv(
