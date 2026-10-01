@@ -9,7 +9,17 @@ from uuid import uuid4
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from authority import Authority, publication_authority, unauthenticated
+from authentication import (
+    AuthenticationError,
+    JwksSigningKeyResolver,
+    TokenVerifier,
+)
+from authority import (
+    Authority,
+    ServerAuthorityResolver,
+    publication_authority,
+    unauthenticated,
+)
 from bi_adapter import (
     DashboardAgentRequest,
     PublicationRequest,
@@ -27,6 +37,7 @@ from governance import GovernancePolicyEngine
 from governance_models import GovernanceRequest
 from models import AgentRequest
 from orchestrator import Orchestrator
+from role_bindings import load_role_bindings
 from phase5_agents import GovernanceAgent
 from quality_models import (
     DQCheckRequest,
@@ -48,13 +59,59 @@ settings = Settings()
 
 audit_store = JsonlAuditStore(settings.audit_log_path)
 
-orchestrator = Orchestrator(settings, audit_store=audit_store)
+#
+# F1 server-owned subject-to-role bindings.  Read from server configuration
+# only; never from a request body, header, or token claim.
+#
+role_authorities = load_role_bindings(
+    settings.auth_role_bindings_file
+)
+
+#
+# F1 trusted identity.  With authentication disabled the verifier exists but is
+# never consulted, so the A3/A4 fail-closed posture is preserved exactly.
+#
+token_verifier = TokenVerifier(
+    issuer=settings.auth_issuer or "unconfigured-issuer",
+    audience=settings.auth_audience or "unconfigured-audience",
+    signing_keys=JwksSigningKeyResolver(
+        settings.auth_jwks_url or "https://unconfigured.invalid/jwks.json",
+        cache_seconds=settings.auth_jwks_cache_seconds,
+    ),
+    allowed_algorithms=tuple(
+        algorithm.strip().upper()
+        for algorithm in settings.auth_allowed_algorithms.split(",")
+        if algorithm.strip()
+    ),
+    clock_skew_seconds=settings.auth_clock_skew_seconds,
+)
+
+orchestrator = Orchestrator(
+    settings,
+    audit_store=audit_store,
+    authority_resolver=ServerAuthorityResolver(
+        role_authorities=role_authorities,
+        max_rows=settings.max_rows,
+    ),
+)
 
 governance_policy_engine = GovernancePolicyEngine()
 
 governance_agent = GovernanceAgent(
     policy_engine=governance_policy_engine
 )
+
+#
+# Paths exempt from authentication: liveness/readiness probes only.  The
+# container healthcheck calls /agents/health unauthenticated, and none of
+# these expose governed platform data.
+#
+HEALTH_PATHS = frozenset({
+    "/health/live",
+    "/health/ready",
+    "/agents/health",
+})
+
 
 app = FastAPI(
     title="DP AI Agent API",
@@ -105,58 +162,121 @@ async def request_context(request: Request, call_next):
 
 @app.middleware("http")
 async def authentication_hook(request: Request, call_next):
-    """Resolve the caller identity for the request.
+    """Authenticate the caller with a cryptographically verified bearer token.
 
-    HONESTY NOTE (A3-CORE): this hook does NOT perform cryptographic
-    verification.  ``x-subject-id`` is caller-supplied and spoofable, so it is
-    recorded as an UNVERIFIED subject hint and is never treated as sufficient
-    authority for a privileged operation.
+    F1 replaces the previous ``x-subject-id`` presence check.  A bare header
+    can no longer make ``subject_verified`` true, so it can never grant
+    authority.
 
-    ``request.state.authority`` is therefore server-derived.  Without a
-    configured trusted identity provider the authority is
-    ``unauthenticated()``: it grants nothing, so privileged operations such as
-    BI publication fail closed (A2.7).
+    When ``AGENT_AUTH_ENABLED`` is false the service keeps the deliberate A3/A4
+    posture: no trusted identity, no governed-data authority, no privileged
+    publication.  Discovery (metadata) remains available, which is exactly the
+    surface the A3 contract permits.
 
-    Deployments that front this service with an OIDC/JWT or mTLS gateway should
-    install a `TrustedIdentityProvider` (see `authority.publication_authority`)
-    and set ``authenticated=True`` only for identities that provider verified.
+    Health endpoints are exempt because the container healthcheck probes
+    ``/agents/health`` unauthenticated; they expose no governed data.
     """
-    subject = ""
+
+    if request.url.path in HEALTH_PATHS:
+        request.state.subject_id = "health-probe"
+        request.state.subject_verified = False
+        request.state.trusted_identity = None
+        request.state.authority = unauthenticated()
+        return await call_next(request)
+
+    trusted_identity = None
 
     if settings.auth_enabled:
-        candidate = request.headers.get("x-subject-id", "")
-        if not re.fullmatch(r"[A-Za-z0-9._:-]{1,128}", candidate):
-            return JSONResponse(status_code=401,
-                                content={"status": "unauthorised",
-                                         "error": {"category": "AuthenticationRequired",
-                                                   "message": "A valid x-subject-id header is required"}})
-        subject = candidate
+        try:
+            trusted_identity = token_verifier.verify(
+                request.headers.get("authorization")
+            )
+
+        except AuthenticationError as exc:
+            logger.warning(
+                json.dumps(
+                    {
+                        "event": "authentication_failed",
+                        "path": request.url.path,
+                        "error_category": exc.category,
+                    }
+                )
+            )
+            request.state.subject_verified = False
+            request.state.trusted_identity = None
+            request.state.authority = unauthenticated()
+
+            #
+            # Generic client-facing message: never the expected issuer,
+            # audience, key id, or a raw library exception.
+            #
+            return JSONResponse(
+                status_code=401,
+                headers={"WWW-Authenticate": "Bearer"},
+                content={
+                    "status": "unauthenticated",
+                    "error": {
+                        "category": exc.category,
+                        "message": "Valid authentication is required.",
+                    },
+                },
+            )
 
     #
-    # Unverified subject hint only.  It carries NO authority.
+    # `x-subject-id` survives ONLY as an untrusted diagnostic hint.  It is
+    # never consulted for authority and never sets subject_verified.
     #
-    request.state.subject_id = subject or "local-pilot-user"
-    request.state.subject_verified = False
-    request.state.authority = unauthenticated()
+    request.state.subject_id = (
+        trusted_identity.subject_id
+        if trusted_identity is not None
+        else request.headers.get("x-subject-id", "local-pilot-user")
+    )
+    request.state.subject_verified = trusted_identity is not None
+    request.state.trusted_identity = trusted_identity
+    request.state.authority = authority_for_identity(
+        trusted_identity,
+        role_authorities,
+    )
 
     return await call_next(request)
+
+
+def authority_for_identity(
+    identity,
+    bindings: dict[str, frozenset[str]],
+) -> Authority:
+    """Server-derived authority for a verified identity.
+
+    Roles come from the server-owned subject-role binding ONLY.  Token claims
+    are never consulted, and an unknown subject resolves to no roles at all:
+    authenticated, but unprivileged.
+    """
+
+    if identity is None or not getattr(identity, "authenticated", False):
+        return unauthenticated()
+
+    return ServerAuthorityResolver(
+        role_authorities=bindings,
+    ).resolve_verified(identity.subject_id)
 
 
 def _publication_authority_for(request: Request) -> Authority:
     """Server-derived publication authority for the current request.
 
-    Returns an authority that grants nothing unless a trusted identity provider
-    has verified the caller.  ``Authority`` is never built from request body
-    data, so a caller-supplied ``permissions.can_publish_bi_assets`` flag can
-    never reach this function's result.
+    Requires a cryptographically verified identity AND a server-side
+    publication-role binding.  A caller-supplied
+    ``permissions.can_publish_bi_assets`` flag cannot reach this result.
     """
 
+    identity = getattr(request.state, "trusted_identity", None)
+
+    if identity is None or not getattr(identity, "authenticated", False):
+        return unauthenticated()
+
     return publication_authority(
-        getattr(request.state, "subject_id", ""),
-        (),
-        authenticated=bool(
-            getattr(request.state, "subject_verified", False)
-        ),
+        identity.subject_id,
+        tuple(sorted(role_authorities.get(identity.subject_id, frozenset()))),
+        authenticated=True,
     )
 
 

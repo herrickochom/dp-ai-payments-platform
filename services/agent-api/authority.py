@@ -155,6 +155,37 @@ class ServerAuthorityResolver:
             sorted(self.role_authorities.get(subject, frozenset()) & claimed)
         )
 
+    def roles_for_subject(self, subject_id: str) -> tuple[str, ...]:
+        """Server-authorised roles for an already-verified subject.
+
+        A verified subject IS the claim, so there is nothing to intersect with:
+        the binding alone decides.  An unbound subject yields no roles, which
+        keeps authentication and authorisation as separate decisions.
+        """
+
+        return tuple(sorted(self.role_authorities.get(subject_id, frozenset())))
+
+    def resolve_verified(self, subject_id: str) -> Authority:
+        """Authority for a cryptographically verified subject.
+
+        Roles come exclusively from the server-owned binding.  No token claim
+        and no request-body value can influence the result.
+        """
+
+        roles = self.roles_for_subject(subject_id)
+
+        #
+        # Capabilities are DERIVED from the server-bound roles, never from a
+        # token claim or a request-body field.
+        #
+        return Authority(
+            subject_id=subject_id,
+            capabilities=capabilities_for_roles(roles),
+            roles=roles,
+            source="trusted_identity",
+            authenticated=True,
+        )
+
     def resolve(
         self,
         identity: Any | None = None,

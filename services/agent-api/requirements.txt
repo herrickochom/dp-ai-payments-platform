@@ -1,5 +1,8 @@
 fastapi==0.104.1
 httpx==0.24.1
+# F1 trusted identity: asymmetric JWT signature verification via JWKS.
+# cryptography arrives through the [crypto] extra.
+PyJWT[crypto]==2.9.0
 pydantic==2.5.0
 PyYAML==6.0.1
 requests==2.31.0

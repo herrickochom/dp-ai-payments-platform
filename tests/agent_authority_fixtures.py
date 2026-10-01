@@ -180,3 +180,20 @@ def platform_classifier(
         dataset_policies=policies,
         field_policies=field_policies,
     )
+# ---------------------------------------------------------------------------
+# Example server-owned role bindings (F1) - SYNTHETIC PLACEHOLDER ONLY.
+#
+# Shape of the file referenced by AGENT_AUTH_ROLE_BINDINGS_FILE.  The subjects
+# below are placeholders, not production identities: replace them with the `sub`
+# values your identity provider actually issues.
+#
+# An unknown subject is NOT an error.  It authenticates and receives no roles,
+# which keeps authentication and authorisation as separate decisions.
+#
+# subjects:
+#   <analyst-subject-id>:
+#     roles:
+#       - programme_analyst
+#   <publisher-subject-id>:
+#     roles:
+#       - bi_publisher
