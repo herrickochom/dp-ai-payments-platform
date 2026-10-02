@@ -893,17 +893,7 @@ services:
       \        --firstname \"$${SUPERSET_ADMIN_FIRSTNAME}\"           --lastname \"$${SUPERSET_ADMIN_LASTNAME}\"         \
       \  --email \"$${SUPERSET_ADMIN_EMAIL}\"           --password \"$${SUPERSET_ADMIN_PASSWORD}\" || true\n\necho \"Synchronising\
       \ Superset roles and permissions...\"\nsuperset init\n\necho \"Registering/updating Trino database connection...\"\n\
-      python - <<'PY'\nimport os\n\nfrom superset.app import create_app\n\napp = create_app()\n\nwith app.app_context():\n\
-      \    from superset import db\n    from superset.models.core import Database\n\n    database_name = os.getenv(\"TRINO_DATABASE_NAME\"\
-      , \"PDM Trino\")\n    sqlalchemy_uri = os.getenv(\n        \"TRINO_SQLALCHEMY_URI\",\n        \"trino://trino@trino:8080/iceberg/consumption\"\
-      ,\n    )\n\n    database = (\n        db.session.query(Database)\n        .filter(Database.database_name == database_name)\n\
-      \        .first()\n    )\n\n    if database is None:\n        database = Database(\n            database_name=database_name,\n\
-      \            sqlalchemy_uri=sqlalchemy_uri,\n            expose_in_sqllab=False,\n            allow_ctas=False,\n   \
-      \         allow_cvas=False,\n            allow_dml=False,\n        )\n        db.session.add(database)\n        action\
-      \ = \"Created\"\n    else:\n        database.sqlalchemy_uri = sqlalchemy_uri\n        database.expose_in_sqllab = False\n\
-      \        database.allow_ctas = False\n        database.allow_cvas = False\n        database.allow_dml = False\n    \
-      \    action = \"Updated\"\n\n    db.session.commit()\n\n    print(\n        f\"{action} Superset Trino connection: \"\
-      \n        f\"id={database.id}, name={database.database_name}\"\n    )\nPY\n\necho \"Superset initialization completed\
+      python /app/platform/superset/register_bi_connection.py\n\necho \"Superset initialization completed\
       \ successfully.\"\n"
   superset:
     build:
