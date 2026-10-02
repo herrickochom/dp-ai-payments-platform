@@ -104,3 +104,7 @@ override.tf.json
 
 # Local recovery / pre-change backup artefacts
 *.pre-*
+
+# Programme control: generated workbook temps and caches.
+programme/output/.*.tmp.xlsx
+programme/**/__pycache__/
