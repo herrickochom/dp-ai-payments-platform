@@ -870,6 +870,11 @@ services:
       # container network is not acceptable either. The driver verifies the
       # coordinator against this certificate; verification is never disabled.
       TRINO_SSL_CA: ${TRINO_SSL_CA:-/etc/ssl/certs/trino-public.crt}
+      # F2: the publisher credential is resolved through the shared secret
+      # provider at run time. It is required, never defaulted, so provisioning
+      # fails closed rather than creating an identity with a weak secret.
+      SUPERSET_PUBLISHER_USERNAME: ${SUPERSET_PUBLISHER_USERNAME:-agent_publisher}
+      SUPERSET_PUBLISHER_PASSWORD: ${SUPERSET_PUBLISHER_PASSWORD:?SUPERSET_PUBLISHER_PASSWORD must be supplied}
     volumes:
     - ./platform/trino/etc/trino-public.crt:/etc/ssl/certs/trino-public.crt:ro
     - ./platform/superset/superset_config.py:/app/pythonpath/superset_config.py:ro
@@ -893,7 +898,7 @@ services:
       \        --firstname \"$${SUPERSET_ADMIN_FIRSTNAME}\"           --lastname \"$${SUPERSET_ADMIN_LASTNAME}\"         \
       \  --email \"$${SUPERSET_ADMIN_EMAIL}\"           --password \"$${SUPERSET_ADMIN_PASSWORD}\" || true\n\necho \"Synchronising\
       \ Superset roles and permissions...\"\nsuperset init\n\necho \"Registering/updating Trino database connection...\"\n\
-      python /app/platform/superset/register_bi_connection.py\n\necho \"Superset initialization completed\
+      python /app/platform/superset/register_bi_connection.py\n\necho \"Provisioning the least-privilege agent_publisher identity...\"\npython /app/platform/superset/provision_agent_publisher.py\n\necho \"Superset initialization completed\
       \ successfully.\"\n"
   superset:
     build:

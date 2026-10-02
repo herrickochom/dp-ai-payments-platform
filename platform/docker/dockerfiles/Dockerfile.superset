@@ -20,9 +20,20 @@ COPY platform/superset/superset_config.py \
 COPY platform/superset/dashboards/ \
     /app/platform/superset/dashboards/
 
-RUN chown -R superset:superset \
+# F2: the shared secret provider is the platform's single secret-resolution
+# contract. Provisioning resolves the publisher credential through it rather
+# than reading the environment directly, so the same fail-closed semantics
+# apply here as elsewhere in the platform. The whole package is copied because
+# secret_provider imports runtime_security from within it.
+COPY services/shared/security/ /app/services/shared/security/
+
+RUN touch /app/services/__init__.py \
+    && touch /app/services/shared/__init__.py \
+    && touch /app/services/shared/security/__init__.py \
+    && chown -R superset:superset \
     /app/pythonpath \
-    /app/platform/superset
+    /app/platform/superset \
+    /app/services
 
 ENV SUPERSET_CONFIG_PATH=/app/pythonpath/superset_config.py \
     PYTHONUNBUFFERED=1
