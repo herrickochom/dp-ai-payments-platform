@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Validate the programme control system: schemas, identifiers, reference
+# integrity, date rules, secret leakage and workbook integrity.
+#
+#   programme-validate              validate registries and the workbook
+#   programme-validate --strict     also fail on warnings
+#   programme-validate --json       machine-readable findings
+#
+# Exit codes: 0 pass, 1 fail, 2 could not run.
+# This command never writes to the workbook.
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+
+if [[ -x "${ROOT}/.venv/bin/python" ]]; then
+  PY="${ROOT}/.venv/bin/python"
+elif command -v python3 >/dev/null 2>&1; then
+  PY="python3"
+else
+  echo "ERROR: no Python interpreter found." >&2
+  exit 2
+fi
+
+exec "${PY}" "${ROOT}/programme/tooling/validate_programme.py" "$@"

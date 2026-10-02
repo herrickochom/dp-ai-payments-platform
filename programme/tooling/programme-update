@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Convenience CLI wrapper so the programme workbook can be refreshed from
+# any shell without typing a Python path:
+#
+#   programme-update                 refresh the workbook
+#   programme-update --dry-run       build and validate only
+#   programme-update --check         validate registries only
+#   programme-update --skip-evidence reuse the last evidence collection
+#
+# VS Code equivalent: Tasks: Run Task -> Update Enterprise Programme Workbook
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+
+if [[ -x "${ROOT}/.venv/bin/python" ]]; then
+  PY="${ROOT}/.venv/bin/python"
+elif command -v python3 >/dev/null 2>&1; then
+  PY="python3"
+else
+  echo "ERROR: no Python interpreter found." >&2
+  exit 2
+fi
+
+exec "${PY}" "${ROOT}/programme/tooling/update_workbook.py" "$@"

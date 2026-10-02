@@ -69,7 +69,11 @@ _state/
 dead_letter_queue/
 
 # --- 7. IDE & OS Junk ---
-.vscode/
+# Personal editor settings stay local. Shared, team-facing editor
+# configuration (the programme control tasks) IS version controlled so
+# every engineer gets the same Tasks: Run Task entries.
+.vscode/*
+!.vscode/tasks.json
 .idea/
 *.swp
 *.swo
