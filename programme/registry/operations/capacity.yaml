@@ -1,0 +1,6 @@
+register: capacity
+description: >-
+  Capacity design targets versus measured capacity. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: CAP
+records: []

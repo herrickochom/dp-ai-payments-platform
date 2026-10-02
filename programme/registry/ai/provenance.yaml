@@ -1,0 +1,6 @@
+register: ai_provenance
+description: >-
+  Provenance capture for agent and model outputs. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: AIPROV
+records: []

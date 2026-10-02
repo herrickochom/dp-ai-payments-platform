@@ -1,0 +1,6 @@
+register: agents
+description: >-
+  Only agents present in services/agent-api are registered. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: AGENT
+records: []

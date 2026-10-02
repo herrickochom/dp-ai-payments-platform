@@ -1,0 +1,6 @@
+register: access_reviews
+description: >-
+  Access review cycles for identities and service accounts. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: ACCREV
+records: []

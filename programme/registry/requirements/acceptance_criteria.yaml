@@ -1,0 +1,6 @@
+register: acceptance_criteria
+description: >-
+  Verifiable acceptance statements linked to requirements. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: AC
+records: []

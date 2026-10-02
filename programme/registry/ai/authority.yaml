@@ -1,0 +1,6 @@
+register: ai_authority
+description: >-
+  Controls bounding what AI may do without a human. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: AIAUTH
+records: []

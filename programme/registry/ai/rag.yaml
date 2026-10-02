@@ -1,0 +1,6 @@
+register: rag
+description: >-
+  Retrieval subsystems. NOT_CONFIGURED is an honest state. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: RAG
+records: []

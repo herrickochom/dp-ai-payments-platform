@@ -1,0 +1,6 @@
+register: data_assets
+description: >-
+  Medallion-layer assets. BUILT is not POPULATED. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: DATA
+records: []

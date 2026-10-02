@@ -1,0 +1,6 @@
+register: dependencies_sbom
+description: >-
+  Declared third-party dependencies per service and root contract. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: DEP
+records: []

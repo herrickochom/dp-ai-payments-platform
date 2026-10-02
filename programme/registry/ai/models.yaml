@@ -1,0 +1,6 @@
+register: models
+description: >-
+  Trained model artefacts present under services/pdm-ml/models. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: MODEL
+records: []

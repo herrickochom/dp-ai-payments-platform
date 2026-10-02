@@ -1,0 +1,6 @@
+register: phases
+description: >-
+  Programme phases and phase gates. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: PHASE
+records: []

@@ -1,0 +1,6 @@
+register: ai_evaluations
+description: >-
+  Recorded model or agent evaluations. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: AIEVAL
+records: []

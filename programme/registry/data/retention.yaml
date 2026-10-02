@@ -1,0 +1,6 @@
+register: retention
+description: >-
+  Retention periods. Planning-only lifecycle is stated as such. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: RET
+records: []

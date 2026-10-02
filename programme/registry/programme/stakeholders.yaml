@@ -1,0 +1,6 @@
+register: stakeholders
+description: >-
+  Stakeholder register by role. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: STK
+records: []

@@ -1,0 +1,6 @@
+register: security_controls
+description: >-
+  IMPLEMENTED is not VERIFIED_RUNTIME. Both are recorded separately. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: CTRL
+records: []

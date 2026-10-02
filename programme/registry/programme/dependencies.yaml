@@ -1,0 +1,6 @@
+register: dependencies
+description: >-
+  Cross-task and external dependencies. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: DEP
+records: []

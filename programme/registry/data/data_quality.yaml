@@ -1,0 +1,6 @@
+register: data_quality
+description: >-
+  Governed quality rules. DESIGNED is not VERIFIED. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: DQ
+records: []

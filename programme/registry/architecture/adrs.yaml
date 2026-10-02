@@ -1,0 +1,6 @@
+register: adrs
+description: >-
+  ADRs discovered in docs/adr plus decisions that clearly exist without an ADR. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: ADR
+records: []

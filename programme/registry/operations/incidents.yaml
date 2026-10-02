@@ -1,0 +1,6 @@
+register: incidents
+description: >-
+  Incidents recorded in repository evidence documents. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: INC
+records: []

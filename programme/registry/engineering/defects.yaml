@@ -1,0 +1,6 @@
+register: defects
+description: >-
+  Defects raised during delivery and assurance. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: DEFECT
+records: []

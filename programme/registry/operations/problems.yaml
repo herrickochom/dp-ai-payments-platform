@@ -1,0 +1,6 @@
+register: problems
+description: >-
+  Root cause analysis records. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: PROB
+records: []

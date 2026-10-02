@@ -1,0 +1,6 @@
+register: git_evidence
+description: >-
+  Commit-level engineering evidence. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: GIT
+records: []

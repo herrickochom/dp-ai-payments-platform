@@ -1,0 +1,6 @@
+register: tests
+description: >-
+  Test suites present in the repository. A suite existing is not a suite passing. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: TEST
+records: []

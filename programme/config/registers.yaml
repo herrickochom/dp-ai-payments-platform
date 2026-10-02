@@ -1,0 +1,669 @@
+# ===================================================================
+# Register catalogue - the controlled set of programme registers
+# ===================================================================
+# Each register is a YAML file under programme/registry/<area>/<name>.yaml
+# with this envelope:
+#
+#   register: tasks
+#   description: ...
+#   records:
+#     - id: TASK-001
+#       ...
+#
+# `id_prefix` is the stable identifier namespace. IDs are never reused.
+# `required` fields must be present and non-empty on every record.
+# `*_values` keys are closed vocabularies for the matching field.
+# `reference_fields` / `reference_list_fields` are cross-validated.
+#
+# A register with zero records is a legitimate state: the workbook then
+# renders the capability as AWAITING EVIDENCE / POPULATION.
+
+register_areas:
+  programme:
+    label: "Programme Management"
+  requirements:
+    label: "Requirements"
+  architecture:
+    label: "Architecture"
+  data:
+    label: "Data"
+  ai:
+    label: "AI"
+  security:
+    label: "Security"
+  engineering:
+    label: "Engineering and Delivery"
+  operations:
+    label: "Operations"
+
+registers:
+
+  # ------------------------------------------------------------------
+  # Programme management
+  # ------------------------------------------------------------------
+  tasks:
+    file: "programme/tasks.yaml"
+    label: "Master Tasks (WBS)"
+    id_prefix: "TASK"
+    wbs: true
+    required: [id, title, phase_id, owner, status, planned_start, planned_finish]
+    status_values: [NOT_STARTED, IN_PROGRESS, COMPLETE, BLOCKED, ON_HOLD, CANCELLED]
+    date_fields: [planned_start, planned_finish, forecast_finish, actual_start, actual_finish]
+    reference_fields:
+      phase_id: phases
+      milestone_id: milestones
+    reference_list_fields:
+      dependencies: tasks
+      requirement_ids: requirements
+      test_ids: tests
+      control_ids: security_controls
+      component_ids: components
+    description: "Work Breakdown Structure. planned_* are PLANNING BASELINE dates."
+
+  phases:
+    file: "programme/phases.yaml"
+    label: "Phases"
+    id_prefix: "PHASE"
+    required: [id, name, status, planned_start, planned_finish]
+    status_values: [NOT_STARTED, IN_PROGRESS, COMPLETE, BLOCKED, FUTURE]
+    date_fields: [planned_start, planned_finish, actual_start, actual_finish]
+    description: "Programme phases and phase gates."
+
+  deliverables:
+    file: "programme/deliverables.yaml"
+    label: "Deliverables"
+    id_prefix: "DELIV"
+    required: [id, name, phase_id, owner, status]
+    status_values: [NOT_STARTED, IN_PROGRESS, COMPLETE, BLOCKED, ACCEPTED_PENDING, ACCEPTED]
+    reference_fields:
+      phase_id: phases
+    reference_list_fields:
+      task_ids: tasks
+    description: "Controlled deliverables with acceptance state."
+
+  milestones:
+    file: "programme/milestones.yaml"
+    label: "Milestones"
+    id_prefix: "M"
+    required: [id, name, planned_date, status, criticality]
+    status_values: [NOT_STARTED, IN_PROGRESS, ACHIEVED, AT_RISK, MISSED, REJECTED]
+    date_fields: [planned_date, forecast_date, actual_date]
+    reference_fields:
+      phase_id: phases
+    description: "Programme milestones. actual_date only where evidence exists."
+
+  dependencies:
+    file: "programme/dependencies.yaml"
+    label: "Dependencies"
+    id_prefix: "DEP"
+    required: [id, name, depends_on, type, owner, status]
+    status_values: [OPEN, MITIGATED, CLOSED, ACCEPTED]
+    description: "Cross-task and external dependencies."
+
+  raid:
+    file: "programme/raid.yaml"
+    label: "RAID"
+    id_prefix: "RAID"
+    required: [id, type, title, owner, status, severity]
+    status_values: [OPEN, MITIGATING, MONITORING, CLOSED, ACCEPTED]
+    type_values: [RISK, ISSUE, ASSUMPTION, DEPENDENCY]
+    severity_values: [LOW, MEDIUM, HIGH, CRITICAL]
+    reference_list_fields:
+      mitigation_task_ids: tasks
+      control_ids: security_controls
+    description: "Risks, Issues, Assumptions, Dependencies. risk_acceptance is HUMAN-controlled."
+
+  decisions:
+    file: "programme/decisions.yaml"
+    label: "Decision Log"
+    id_prefix: "DEC"
+    required: [id, title, decision_date, status, decider_role]
+    status_values: [PROPOSED, DECIDED, SUPERSEDED, REJECTED, DEFERRED]
+    date_fields: [decision_date]
+    description: "Programme and technical decisions including any rebaseline decision."
+
+  change_requests:
+    file: "programme/change_requests.yaml"
+    label: "Change Requests"
+    id_prefix: "CR"
+    required: [id, title, raised_date, status, requester]
+    status_values: [DRAFT, SUBMITTED, UNDER_REVIEW, APPROVED, REJECTED, IMPLEMENTED, WITHDRAWN]
+    date_fields: [raised_date, decision_date]
+    description: "Formal change control including baseline changes."
+
+  resources:
+    file: "programme/resources.yaml"
+    label: "Resources"
+    id_prefix: "RES"
+    required: [id, name, role, allocation_pct]
+    description: "Role-based resources. No personal data required."
+
+  raci:
+    file: "programme/raci.yaml"
+    label: "RACI"
+    id_prefix: "RACI"
+    required: [id, activity, responsible, accountable, consulted, informed]
+    description: "Role-based RACI assignments."
+
+  stakeholders:
+    file: "programme/stakeholders.yaml"
+    label: "Stakeholders"
+    id_prefix: "STK"
+    required: [id, name, role, engagement]
+    engagement_values: [HIGH, MEDIUM, LOW]
+    description: "Stakeholder register by role."
+
+  communications:
+    file: "programme/communications.yaml"
+    label: "Communications"
+    id_prefix: "COMM"
+    required: [id, channel, audience, cadence, owner]
+    description: "Reporting and communication cadence."
+
+  budget:
+    file: "programme/budget.yaml"
+    label: "Budget and Forecast"
+    id_prefix: "BUD"
+    required: [id, category, basis]
+    description: "Budget structure. budget_approved is HUMAN-controlled."
+
+  benefits:
+    file: "programme/benefits.yaml"
+    label: "Benefits Realisation"
+    id_prefix: "BEN"
+    required: [id, name, owner, measurement, status]
+    status_values: [PROPOSED, APPROVED, REALISING, REALISED, NOT_REALISING]
+    description: "Benefit lines. benefit_acceptance is HUMAN-controlled."
+
+  acceptance:
+    file: "programme/acceptance.yaml"
+    label: "Acceptance and Sign-off"
+    id_prefix: "ACC"
+    required: [id, subject, decision, decision_date]
+    date_fields: [decision_date]
+    description: "Gate and deliverable acceptance records."
+
+  # ------------------------------------------------------------------
+  # Requirements
+  # ------------------------------------------------------------------
+  business_requirements:
+    file: "requirements/business_requirements.yaml"
+    label: "Business Requirements"
+    id_prefix: "BR"
+    required: [id, title, status]
+    status_values: [DRAFT, BASELINED, APPROVED, IMPLEMENTED, VERIFIED, RETIRED]
+    description: "Business outcomes the programme must deliver."
+
+  functional_requirements:
+    file: "requirements/functional_requirements.yaml"
+    label: "Functional Requirements"
+    id_prefix: "FR"
+    required: [id, title, status, business_requirement_ids]
+    status_values: [DRAFT, BASELINED, APPROVED, IMPLEMENTED, VERIFIED, RETIRED]
+    reference_list_fields:
+      business_requirement_ids: business_requirements
+      component_ids: components
+      control_ids: security_controls
+      test_ids: tests
+    description: "System behaviour required by the business."
+
+  non_functional_requirements:
+    file: "requirements/non_functional_requirements.yaml"
+    label: "Non-Functional Requirements"
+    id_prefix: "NFR"
+    required: [id, title, category, status]
+    status_values: [DRAFT, BASELINED, APPROVED, IMPLEMENTED, VERIFIED, RETIRED]
+    category_values: [SECURITY, PERFORMANCE, AVAILABILITY, SCALABILITY, DATA_QUALITY, OPERABILITY, COMPLIANCE, MAINTAINABILITY, PORTABILITY, RECOVERABILITY]
+    reference_list_fields:
+      business_requirement_ids: business_requirements
+      control_ids: security_controls
+      slo_ids: slos
+    description: "Quality attributes. A design target is NOT runtime proof."
+
+  acceptance_criteria:
+    file: "requirements/acceptance_criteria.yaml"
+    label: "Acceptance Criteria"
+    id_prefix: "AC"
+    required: [id, requirement_id, criterion, evidence_required]
+    description: "Verifiable acceptance statements linked to requirements."
+
+  traceability:
+    file: "requirements/traceability.yaml"
+    label: "Requirements Traceability"
+    id_prefix: "TRC"
+    required: [id, business_requirement_id]
+    reference_fields:
+      business_requirement_id: business_requirements
+    reference_list_fields:
+      functional_requirement_ids: functional_requirements
+      non_functional_requirement_ids: non_functional_requirements
+      component_ids: components
+      adr_ids: adrs
+      data_product_ids: data_products
+      control_ids: security_controls
+      test_ids: tests
+      evidence_ids: evidence
+      release_ids: releases
+      slo_ids: slos
+      runbook_ids: runbooks
+      acceptance_ids: acceptance
+    description: "Full chain: BR -> FR/NFR -> COMP -> ADR -> DP -> CTRL -> TEST -> EV -> REL -> SLO -> RUN -> ACC."
+
+  # ------------------------------------------------------------------
+  # Architecture
+  # ------------------------------------------------------------------
+  adrs:
+    file: "architecture/adrs.yaml"
+    label: "ADR Register"
+    id_prefix: "ADR"
+    required: [id, title, status]
+    status_values: [PROPOSED, ACCEPTED, SUPERSEDED, REJECTED, ADR_REQUIRED]
+    description: "ADRs discovered in docs/adr plus decisions that clearly exist without an ADR."
+
+  components:
+    file: "architecture/components.yaml"
+    label: "Architecture Components"
+    id_prefix: "COMP"
+    required: [id, name, category, status]
+    status_values: [DESIGNED, IMPLEMENTED, OPERATIONAL, DECOMMISSIONED, PLANNED]
+    category_values: [INGESTION, STREAMING, CATALOG, STORAGE, TRANSFORM, QUERY, BI, ORCHESTRATION, AI, ML, SERVICE, INFRASTRUCTURE, OBSERVABILITY, CDC, MDM, IDENTITY]
+    reference_list_fields:
+      requirement_ids: requirements
+      control_ids: security_controls
+      technology_ids: technologies
+    description: "Runtime and platform components evidenced by the repository."
+
+  technologies:
+    file: "architecture/technologies.yaml"
+    label: "Technology Register"
+    id_prefix: "TECH"
+    required: [id, name, category, status]
+    status_values: [IN_USE, AVAILABLE_NOT_USED, EVALUATED, PLANNED, RETIRED]
+    description: "Standard and product technologies in use or under evaluation."
+
+  integrations:
+    file: "architecture/integrations.yaml"
+    label: "Interface and Integration Register"
+    id_prefix: "INT"
+    required: [id, name, source_component, target_component, direction, status]
+    status_values: [IMPLEMENTED, CONFIGURED, PLANNED, DEPRECATED]
+    direction_values: [INGRESS, EGRESS, BIDIRECTIONAL, INTERNAL]
+    description: "Component-to-component interfaces and data flows."
+
+  apis:
+    file: "architecture/apis.yaml"
+    label: "API Register"
+    id_prefix: "API"
+    required: [id, path, method, owner_component, status]
+    status_values: [IMPLEMENTED, DEPRECATED, PLANNED]
+    description: "HTTP API surface exposed by repository services."
+
+  environments:
+    file: "architecture/environments.yaml"
+    label: "Environment Register"
+    id_prefix: "ENV"
+    required: [id, name, classification, status]
+    status_values: [DEFINED, OPERATIONAL, PLANNED]
+    classification_values: [PRODUCTION, PRE_PRODUCTION, REFERENCE_INTEGRATION, DEVELOPMENT]
+    description: "Deployment environments and their governed classification."
+
+  configuration:
+    file: "architecture/configuration.yaml"
+    label: "Configuration Register"
+    id_prefix: "CFG"
+    required: [id, name, location, classification, status]
+    status_values: [AUTHORITATIVE, SUPPORTING, SUPERSEDED]
+    classification_values: [PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED]
+    description: "Configuration-as-code artefacts. METADATA ONLY - never secret values."
+
+  # ------------------------------------------------------------------
+  # Data
+  # ------------------------------------------------------------------
+  data_assets:
+    file: "data/data_assets.yaml"
+    label: "Data Assets"
+    id_prefix: "DATA"
+    required: [id, name, layer, status]
+    status_values: [DESIGNED, BUILT, POPULATED, DECOMMISSIONED]
+    layer_values: [RAW, STAGING, BRONZE, SILVER, SILVER_VAULT, GOLD, CONSUMPTION]
+    reference_list_fields:
+      product_ids: data_products
+      contract_ids: data_contracts
+      control_ids: security_controls
+    description: "Medallion-layer assets. BUILT is not POPULATED."
+
+  data_products:
+    file: "data/data_products.yaml"
+    label: "Data Product Catalogue"
+    id_prefix: "DP"
+    required: [id, name, audience, status]
+    status_values: [DESIGNED, BUILT, PUBLISHED, DEPRECATED, RESTRICTED]
+    reference_list_fields:
+      asset_ids: data_assets
+      contract_ids: data_contracts
+    description: "Consumption-layer products consumed by BI, ML or agents."
+
+  data_contracts:
+    file: "data/data_contracts.yaml"
+    label: "Schema and Data Contract Register"
+    id_prefix: "CONTRACT"
+    required: [id, name, kind, location, compatibility, status]
+    status_values: [ACTIVE, DEPRECATED, DRAFT, SUPERSEDED]
+    kind_values: [AVRO, JSON, XML_XSD, SQL, OPENAPI, CDC]
+    compatibility_values: [BACKWARD, BACKWARD_TRANSITIVE, FORWARD, FULL, NONE, NOT_APPLICABLE]
+    description: "Machine-readable contracts crossing a service or layer boundary."
+
+  data_classification:
+    file: "data/classification.yaml"
+    label: "Metadata and Classification"
+    id_prefix: "CLS"
+    required: [id, name, level, control]
+    level_values: [PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED, HIGHLY_RESTRICTED]
+    description: "Classification levels and their governance controls."
+
+  lineage:
+    file: "data/lineage.yaml"
+    label: "Lineage"
+    id_prefix: "LIN"
+    required: [id, name, upstream, downstream]
+    reference_list_fields:
+      upstream: data_assets
+      downstream: data_assets
+    description: "Documented dataset-level lineage edges."
+
+  data_quality:
+    file: "data/data_quality.yaml"
+    label: "Data Quality Controls"
+    id_prefix: "DQ"
+    required: [id, name, type, dimension, status]
+    status_values: [DESIGNED, AUTOMATED, MONITORED, VERIFIED, MANUAL]
+    type_values: [COMPLETENESS, VALIDITY, UNIQUENESS, CONSISTENCY, ACCURACY, TIMELINESS, INTEGRITY]
+    dimension_values: [RECORD, DATASET, DOMAIN]
+    description: "Governed quality rules. DESIGNED is not VERIFIED."
+
+  retention:
+    file: "data/retention.yaml"
+    label: "Retention and Lifecycle"
+    id_prefix: "RET"
+    required: [id, name, asset_class, retention_days, enforcement_status]
+    enforcement_status_values: [PLANNING_ONLY, MONITORED, ENFORCED, NOT_ENFORCED]
+    description: "Retention periods. Planning-only lifecycle is stated as such."
+
+  # ------------------------------------------------------------------
+  # AI
+  # ------------------------------------------------------------------
+  agents:
+    file: "ai/agents.yaml"
+    label: "Agent Register"
+    id_prefix: "AGENT"
+    required: [id, name, capability, status]
+    status_values: [IMPLEMENTED, PILOT_READY, EXPERIMENTAL, PLANNED, DECOMMISSIONED]
+    description: "Only agents present in services/agent-api are registered."
+
+  models:
+    file: "ai/models.yaml"
+    label: "Model Register"
+    id_prefix: "MODEL"
+    required: [id, name, task, status]
+    status_values: [IMPLEMENTED, TRAINED, EVALUATED, PRODUCTION, EXPERIMENTAL, RETIRED]
+    description: "Trained model artefacts present under services/pdm-ml/models."
+
+  rag:
+    file: "ai/rag.yaml"
+    label: "RAG and Retrieval Register"
+    id_prefix: "RAG"
+    required: [id, name, status]
+    status_values: [IMPLEMENTED, NOT_CONFIGURED, PLANNED, EXPERIMENTAL]
+    description: "Retrieval subsystems. NOT_CONFIGURED is an honest state."
+
+  ai_evaluations:
+    file: "ai/evaluations.yaml"
+    label: "AI Evaluations"
+    id_prefix: "AIEVAL"
+    required: [id, subject, metric, outcome]
+    outcome_values: [PASS, FAIL, INCONCLUSIVE, NOT_RUN]
+    description: "Recorded model or agent evaluations."
+
+  ai_provenance:
+    file: "ai/provenance.yaml"
+    label: "AI Provenance"
+    id_prefix: "AIPROV"
+    required: [id, subject, method, status]
+    status_values: [IMPLEMENTED, PARTIAL, NOT_IMPLEMENTED]
+    description: "Provenance capture for agent and model outputs."
+
+  ai_authority:
+    file: "ai/authority.yaml"
+    label: "Delegated Authority Controls"
+    id_prefix: "AIAUTH"
+    required: [id, name, control_type, enforcement]
+    control_type_values: [HUMAN_APPROVAL, RATE_LIMIT, SCOPE_LIMIT, ALLOWLIST, AUDIT, REVOCATION]
+    enforcement_values: [ENFORCED, PARTIAL, DESIGNED, NOT_ENFORCED]
+    description: "Controls bounding what AI may do without a human."
+
+  ai_risks:
+    file: "ai/risks.yaml"
+    label: "AI Risks"
+    id_prefix: "AIRISK"
+    required: [id, title, category, status, severity]
+    status_values: [OPEN, MITIGATING, MONITORING, CLOSED, ACCEPTED]
+    severity_values: [LOW, MEDIUM, HIGH, CRITICAL]
+    description: "AI-specific risk register."
+
+  # ------------------------------------------------------------------
+  # Security
+  # ------------------------------------------------------------------
+  security_controls:
+    file: "security/controls.yaml"
+    label: "Security Control Register"
+    id_prefix: "CTRL"
+    required: [id, title, control_type, implementation, verification_status]
+    control_type_values: [PREVENTIVE, DETECTIVE, CORRECTIVE, DIRECTIVE]
+    implementation_values: [IMPLEMENTED, PARTIALLY_IMPLEMENTED, DESIGNED, NOT_IMPLEMENTED]
+    verification_status_values: [VERIFIED_RUNTIME, VERIFIED_STATIC, VERIFIED_TEST, DOCUMENTED_ONLY, UNVERIFIED]
+    reference_list_fields:
+      component_ids: components
+      threat_ids: threats
+      test_ids: tests
+    description: "IMPLEMENTED is not VERIFIED_RUNTIME. Both are recorded separately."
+
+  threats:
+    file: "security/threats.yaml"
+    label: "Threat Register"
+    id_prefix: "THREAT"
+    required: [id, title, category, status, severity]
+    status_values: [OPEN, MITIGATED, ACCEPTED, CLOSED]
+    severity_values: [LOW, MEDIUM, HIGH, CRITICAL]
+    category_values: [STRIDE, DATA_PROTECTION, IDENTITY, SUPPLY_CHAIN, AI, INFRASTRUCTURE, COMPLIANCE]
+    reference_list_fields:
+      control_ids: security_controls
+    description: "Identified threats and their mitigating controls."
+
+  vulnerabilities:
+    file: "security/vulnerabilities.yaml"
+    label: "Vulnerability and Remediation Register"
+    id_prefix: "VULN"
+    required: [id, title, status, severity, source]
+    status_values: [OPEN, IN_REMEDIATION, REMEDIATED, ACCEPTED_RISK, FALSE_POSITIVE]
+    severity_values: [LOW, MEDIUM, HIGH, CRITICAL]
+    description: "Scanner findings. Populated only from real scan output."
+
+  secrets_metadata:
+    file: "security/secrets_metadata.yaml"
+    label: "Secrets Metadata Register"
+    id_prefix: "SEC"
+    required: [id, name, owner, provider, status]
+    status_values: [ACTIVE, ROTATED, REVOKED, PLANNED, UNRESOLVED]
+    description: "SECRET VALUES ARE PROHIBITED. Name, owner, provider, rotation and status only."
+
+  certificates:
+    file: "security/certificates.yaml"
+    label: "Certificate Metadata Register"
+    id_prefix: "CERT"
+    required: [id, name, subject, purpose, status]
+    status_values: [VALID, EXPIRED, SELF_SIGNED_DEV, PRODUCTION, NOT_PROVISIONED]
+    description: "Certificate metadata. Private keys and keystore contents are prohibited."
+
+  access_reviews:
+    file: "security/access_reviews.yaml"
+    label: "Access Review Register"
+    id_prefix: "ACCREV"
+    required: [id, scope, review_type, status]
+    review_type_values: [PERIODIC, JOINER_MOVER_LEAVER, BREAK_GLASS, SERVICE_ACCOUNT]
+    status_values: [SCHEDULED, IN_PROGRESS, COMPLETE, OVERDUE]
+    description: "Access review cycles for identities and service accounts."
+
+  compliance:
+    file: "security/compliance.yaml"
+    label: "Compliance Mapping"
+    id_prefix: "COMPCTL"
+    required: [id, framework, control_reference, mapped_control_ids]
+    reference_list_fields:
+      mapped_control_ids: security_controls
+    description: "External framework mapping. Mapping is not certification."
+
+  # ------------------------------------------------------------------
+  # Engineering and delivery
+  # ------------------------------------------------------------------
+  tests:
+    file: "engineering/tests.yaml"
+    label: "Test Register"
+    id_prefix: "TEST"
+    required: [id, name, level, scope]
+    level_values: [UNIT, INTEGRATION, CONTRACT, SECURITY, ACCEPTANCE, STATIC, REGRESSION]
+    description: "Test suites present in the repository. A suite existing is not a suite passing."
+
+  defects:
+    file: "engineering/defects.yaml"
+    label: "Defect Register"
+    id_prefix: "DEFECT"
+    required: [id, title, severity, status]
+    status_values: [OPEN, IN_PROGRESS, RESOLVED, CLOSED, DEFERRED, REJECTED]
+    severity_values: [LOW, MEDIUM, HIGH, CRITICAL]
+    description: "Defects raised during delivery and assurance."
+
+  evidence:
+    file: "engineering/evidence.yaml"
+    label: "Evidence Register"
+    id_prefix: "EV"
+    required: [id, title, evidence_type, location, status]
+    status_values: [PRESENT, PRESENT_EMPTY, SUPERSEDED, MISSING]
+    evidence_type_values: [DOCUMENT, TEST_RESULT, LOG, BUILD, DEPLOYMENT, MANUAL, SCAN]
+    description: "PRESENT_EMPTY means the artefact exists but carries no result. EXISTS != PASS."
+
+  releases:
+    file: "engineering/releases.yaml"
+    label: "Release Register"
+    id_prefix: "REL"
+    required: [id, name, version, status]
+    status_values: [PLANNED, IN_BUILD, RELEASED, ROLLED_BACK, SUPERSEDED]
+    description: "Release versions and their controlled promotion state."
+
+  deployments:
+    file: "engineering/deployments.yaml"
+    label: "Deployment Register"
+    id_prefix: "DEPX"
+    required: [id, environment_id, component_id, status]
+    status_values: [PLANNED, DEPLOYED, VERIFIED, ROLLED_BACK, NOT_DEPLOYED]
+    reference_fields:
+      environment_id: environments
+      component_id: components
+    description: "Component-to-environment deployment state."
+
+  cicd_controls:
+    file: "engineering/cicd.yaml"
+    label: "CI/CD Controls"
+    id_prefix: "CICD"
+    required: [id, name, pipeline, control_type]
+    control_type_values: [QUALITY_GATE, IMMUTABILITY, PERMISSION, PROHIBITION, ARTIFACT]
+    description: "Controls declared in CI contracts and workflow definitions."
+
+  dependencies_sbom:
+    file: "engineering/dependencies.yaml"
+    label: "Dependency and SBOM Register"
+    id_prefix: "DEP"
+    required: [id, name, scope, version_constraint]
+    description: "Declared third-party dependencies per service and root contract."
+
+  git_evidence:
+    file: "engineering/git_evidence.yaml"
+    label: "Git and Commit Evidence"
+    id_prefix: "GIT"
+    required: [id, sha, summary, author_date]
+    description: "Commit-level engineering evidence."
+
+  # ------------------------------------------------------------------
+  # Operations
+  # ------------------------------------------------------------------
+  slos:
+    file: "operations/slos.yaml"
+    label: "SLA / SLO / SLI Register"
+    id_prefix: "SLO"
+    required: [id, name, sli_definition, target, status]
+    status_values: [DESIGNED, MONITORED, MEASURED, NOT_MEASURED, BREACHED]
+    description: "A target with no measurement is NOT_MEASURED, not a passing SLA."
+
+  capacity:
+    file: "operations/capacity.yaml"
+    label: "Capacity and Performance Register"
+    id_prefix: "CAP"
+    required: [id, subject, metric, status]
+    status_values: [DESIGNED, MEASURED, LOAD_TESTED, NOT_TESTED]
+    description: "Capacity design targets versus measured capacity."
+
+  monitoring:
+    file: "operations/monitoring.yaml"
+    label: "Monitoring and Alert Register"
+    id_prefix: "MON"
+    required: [id, name, signal_type, status]
+    status_values: [IMPLEMENTED, CONFIGURED, DESIGNED, NOT_IMPLEMENTED]
+    signal_type_values: [METRIC, LOG, TRACE, EVENT, SYNTHETIC]
+    description: "Operational signals and alerting."
+
+  incidents:
+    file: "operations/incidents.yaml"
+    label: "Incident Register"
+    id_prefix: "INC"
+    required: [id, title, severity, status]
+    status_values: [OPEN, RESOLVED, CLOSED, POST_MORTEM_DUE]
+    severity_values: [SEV1, SEV2, SEV3, SEV4]
+    description: "Incidents recorded in repository evidence documents."
+
+  problems:
+    file: "operations/problems.yaml"
+    label: "Problem and RCA Register"
+    id_prefix: "PROB"
+    required: [id, title, status]
+    status_values: [OPEN, ROOT_CAUSE_IDENTIFIED, IN_PROGRESS, CLOSED]
+    description: "Root cause analysis records."
+
+  runbooks:
+    file: "operations/runbooks.yaml"
+    label: "Runbook Register"
+    id_prefix: "RUN"
+    required: [id, name, scenario, location]
+    description: "Operational runbooks and operator scripts."
+
+  backup_restore:
+    file: "operations/backup_restore.yaml"
+    label: "Backup and Restore Register"
+    id_prefix: "BK"
+    required: [id, name, scope, status]
+    status_values: [PROVEN, SIMULATED, DESIGNED, NOT_IMPLEMENTED]
+    description: "Backup and restore capability state. SIMULATED is not PROVEN in production."
+
+  dr:
+    file: "operations/dr.yaml"
+    label: "Disaster Recovery Register"
+    id_prefix: "DR"
+    required: [id, name, rto, rpo, status]
+    status_values: [DESIGNED, TESTED, NOT_TESTED, NOT_IMPLEMENTED]
+    description: "DR scenarios with explicitly claimed or unclaimed capability."
+
+  training:
+    file: "operations/training.yaml"
+    label: "Training and Knowledge Transfer"
+    id_prefix: "TRN"
+    required: [id, topic, audience, status]
+    status_values: [PLANNED, DELIVERED, NOT_DELIVERED, IN_PROGRESS]
+    description: "Knowledge transfer and enablement records."

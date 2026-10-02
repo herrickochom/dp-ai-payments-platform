@@ -1,0 +1,6 @@
+register: components
+description: >-
+  Runtime and platform components evidenced by the repository. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: COMP
+records: []

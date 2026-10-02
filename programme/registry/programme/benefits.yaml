@@ -1,0 +1,6 @@
+register: benefits
+description: >-
+  Benefit lines. benefit_acceptance is HUMAN-controlled. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: BEN
+records: []

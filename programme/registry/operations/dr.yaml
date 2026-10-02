@@ -1,0 +1,6 @@
+register: dr
+description: >-
+  DR scenarios with explicitly claimed or unclaimed capability. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: DR
+records: []

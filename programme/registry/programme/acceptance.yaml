@@ -1,0 +1,6 @@
+register: acceptance
+description: >-
+  Gate and deliverable acceptance records. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: ACC
+records: []

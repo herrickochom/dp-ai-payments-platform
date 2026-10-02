@@ -1,0 +1,6 @@
+register: budget
+description: >-
+  Budget structure. budget_approved is HUMAN-controlled. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: BUD
+records: []

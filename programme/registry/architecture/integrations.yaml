@@ -1,0 +1,6 @@
+register: integrations
+description: >-
+  Component-to-component interfaces and data flows. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: INT
+records: []

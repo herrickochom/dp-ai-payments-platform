@@ -1,0 +1,6 @@
+register: runbooks
+description: >-
+  Operational runbooks and operator scripts. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: RUN
+records: []

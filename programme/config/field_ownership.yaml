@@ -1,0 +1,139 @@
+# ===================================================================
+# Field ownership policy
+# ===================================================================
+# HUMAN  = controlled by named humans. Automation MUST NOT modify these.
+# MACHINE = derived from repository evidence or calculated. Automation owns.
+# SHARED  = seeded once by a human, then machine-maintained evidence attaches.
+#
+# Validation fails if automation attempts to write a HUMAN field.
+# The workbook renders an ownership marker against every column so a
+# reviewer can see who may change what.
+
+default:
+  # Anything not listed below is treated as human-controlled.
+  unknown_field_policy: HUMAN
+
+human_fields:
+  # Programme management
+  - business_priority
+  - risk_owner
+  - risk_acceptance
+  - residual_risk_acceptance
+  - business_approval
+  - business_approver
+  - business_approval_date
+  - architecture_approval
+  - architecture_approver
+  - architecture_approval_date
+  - uat_approval
+  - uat_approver
+  - uat_approval_date
+  - milestone_sign_off
+  - milestone_sign_off_by
+  - milestone_sign_off_date
+  - budget_approved
+  - budget_approver
+  - baseline_change_authority
+  - target_baseline_finish
+  - benefit_acceptance
+  - benefit_accepted_by
+  - benefit_acceptance_date
+  - stakeholder_satisfaction_comment
+  - notes
+  - comments
+  - comment
+  - rationale
+  - decision_rationale
+  - action_owner
+  - due_date
+  - target_date
+  - mitigation_owner
+  - escalation_owner
+  - reviewer
+  - reviewed_by
+  - reviewed_on
+  - quality_rating
+  - actual_start
+  - actual_finish
+  - planned_start
+  - planned_finish
+  - planned_effort_days
+  - estimated_effort_days
+  - assigned_team
+  - percent_complete
+  - progress_pct
+  - forecast_finish
+  - manual_rag
+  - manual_status_note
+  - last_updated_by
+  - sign_off_status
+
+machine_fields:
+  # Test and evidence results
+  - technical_status
+  - test_result
+  - test_count
+  - test_failures
+  - test_errors
+  - tests_passed
+  - tests_failed
+  - last_test_run
+  - git_sha
+  - git_branch
+  - evidence_path
+  - evidence_url
+  - evidence_hash
+  - last_evidence_timestamp
+  - evidence_type
+  - dbt_result
+  - dbt_model_count
+  - dbt_test_count
+  - terraform_validation
+  - terraform_fmt
+  - compose_validation
+  - ci_status
+  - ci_workflow
+  - ci_run_url
+  - discovered_at
+  - source_path
+  - record_count
+  - calculated_percent_complete
+  - calculated_schedule_variance_days
+  - calculated_rag
+  - calculated_days_to_finish
+  - is_milestone_critical
+  - documentation_inventory_count
+  - last_refresh_utc
+  - generated_by
+  - schema_version
+  - contract_version
+  - repository_file_count
+  - model_count
+  - topic_count
+  - service_count
+  - definition_count
+  - contract_count
+  - has_resource_block
+  - has_provider_block
+  - detected_technology
+  - category
+  - severity
+  - severity_source
+  - source_of_truth
+  - linked_count
+  - broken_link_count
+  - machine_summary
+  - workbook_version
+  - baseline_start
+  - baseline_version
+
+shared_fields:
+  # Seeded by a human once; automation may then maintain evidence columns
+  # on the same record but never overwrites the seeded values.
+  - id
+  - title
+  - description
+  - owner
+  - status
+  - reference
+  - version
