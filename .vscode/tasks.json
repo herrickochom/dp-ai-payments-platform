@@ -1,0 +1,108 @@
+{
+  // Programme control tasks. Run from Command Palette:
+  //   Tasks: Run Task  ->  Update Enterprise Programme Workbook
+  //
+  // ${workspaceFolder} is the repository root. The interpreter is the
+  // repository virtualenv pinned by .vscode/settings.json and used by CI,
+  // so the tasks work with or without the VS Code Python extension.
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Update Enterprise Programme Workbook",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/bin/python",
+      "args": [
+        "${workspaceFolder}/programme/tooling/update_workbook.py"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Validate Programme Control System",
+      "detail": "Run programme-validate: schemas, references, secrets and workbook integrity",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/bin/python",
+      "args": [
+        "${workspaceFolder}/programme/tooling/validate_programme.py"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "Update and Validate Programme Workbook",
+      "detail": "Refresh the workbook from repository evidence, then validate it",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/bin/python",
+      "args": [
+        "-c",
+        "import subprocess,sys; r=[subprocess.run([sys.executable,'${workspaceFolder}/programme/tooling/update_workbook.py']), subprocess.run([sys.executable,'${workspaceFolder}/programme/tooling/validate_programme.py'])]; sys.exit(max(x.returncode for x in r))"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "Programme Workbook: Dry Run",
+      "detail": "Build and validate a temporary workbook without replacing the current one",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/bin/python",
+      "args": [
+        "${workspaceFolder}/programme/tooling/update_workbook.py",
+        "--dry-run"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Programme: Run Tests",
+      "detail": "Run the programme control system test suite",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/bin/python",
+      "args": [
+        "-m",
+        "pytest",
+        "-q",
+        "${workspaceFolder}/programme/tests"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    }
+  ]
+}
