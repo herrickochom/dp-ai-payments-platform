@@ -233,20 +233,23 @@ def test_sql_lab_is_disabled_on_the_controlled_bi_connection():
     assert database["allow_ctas"] is False
 
 
+BI_REGISTRATION_PATH = ROOT / "platform" / "superset" / "register_bi_connection.py"
+
+
 def _superset_init_sqllab_assignments():
     """Parse every SQL Lab assignment in the repository-controlled BI connection.
 
-    The superset-init command is an embedded heredoc inside a compose command
-    string. Rather than matching one exact substring (which silently misses
-    whitespace variants such as ``expose_in_sqllab = True``), the parsed source
-    is normalised and every assignment is evaluated.
+    The registration logic lives in ``platform/superset/register_bi_connection.py``,
+    which superset-init invokes; it was previously an inline heredoc in the
+    compose command. Rather than matching one exact substring (which silently
+    misses whitespace variants such as ``expose_in_sqllab = True``), the parsed
+    source is normalised and every assignment is evaluated.
 
     Returns ``[(branch_label, assigned_value), ...]`` where the value is the
     literal text assigned, upper-cased.
     """
 
-    compose = yaml.safe_load(COMPOSE_PATH.read_text(encoding="utf-8"))
-    shell = compose["services"]["superset-init"]["command"][-1]
+    shell = BI_REGISTRATION_PATH.read_text(encoding="utf-8")
 
     assignments = []
     branch = "unknown"

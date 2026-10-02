@@ -22,6 +22,7 @@ gitignored, holds real credentials, and is not present in CI.
 from __future__ import annotations
 
 import re
+from urllib.parse import unquote, urlsplit
 import subprocess
 from pathlib import Path
 
@@ -222,19 +223,149 @@ def test_bi_connection_uri_cannot_be_plaintext() -> None:
         )
 
 
-def test_bi_connection_registration_refuses_insecure_forms() -> None:
-    """The registration step must fail closed on an insecure URI."""
+def _load_bi_registration():
+    """Load the BI registration module by path.
+
+    ``platform`` is a standard-library module name, so the repository's
+    ``platform/`` directory is not importable as a package from the repo root.
+    """
+    import importlib.util
+
+    path = ROOT / "platform" / "superset" / "register_bi_connection.py"
+    spec = importlib.util.spec_from_file_location("register_bi_connection", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _executable_source(path: Path) -> str:
+    """Return the module source with comments and docstrings removed.
+
+    The rationale for these guards is documented in prose that necessarily names
+    the insecure URI that was removed. Checking raw text would therefore match
+    the documentation rather than the behaviour, so only executable code is
+    inspected.
+    """
+    import ast
+
+    source = path.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    for node in ast.walk(tree):
+        if isinstance(
+            node, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+        ):
+            body = node.body
+            if (
+                body
+                and isinstance(body[0], ast.Expr)
+                and isinstance(body[0].value, ast.Constant)
+                and isinstance(body[0].value.value, str)
+            ):
+                node.body = body[1:] or [ast.Pass()]
+    return ast.unparse(tree)
+
+
+def test_registration_has_no_plaintext_or_anonymous_fallback() -> None:
+    """The registration step must not embed an insecure default URI.
+
+    The old inline heredoc carried
+    ``trino://trino@trino:8080/iceberg/consumption`` as a fallback, so an
+    absent environment value silently produced a plaintext anonymous
+    connection. Registration now lives in a version-controlled module with no
+    such default.
+    """
+    module = _load_bi_registration()
+    code = _executable_source(ROOT / "platform" / "superset" / "register_bi_connection.py")
+
+    assert "trino://" not in code, (
+        "SECURITY: BI registration must not contain a plaintext trino:// URI"
+    )
+    assert "os.getenv" not in code or "TRINO_SQLALCHEMY_URI" in code
+    # The only permitted literal scheme is the TLS one.
+    assert set(re.findall(r"""["'](https?|trino)://""", code)) <= {"https"}, (
+        "SECURITY: BI registration may only construct an https:// connection"
+    )
+
     compose = yaml.safe_load(COMPOSE_PATH.read_text(encoding="utf-8"))
     command = " ".join(compose["services"]["superset-init"]["command"])
-
-    assert "trino://trino@" not in command, (
-        "SECURITY: the BI registration must not carry an anonymous plaintext "
-        "fallback URI"
+    assert "trino://trino@" not in command
+    assert "register_bi_connection.py" in command, (
+        "SECURITY: superset-init must invoke the version-controlled, fail-closed "
+        "registration module rather than an inline heredoc"
     )
-    for guard in ("must use https", "superset_bi", "must verify the coordinator"):
-        assert guard in command, (
-            f"SECURITY: BI registration must refuse a connection that lacks: {guard}"
+    assert module.BI_TRINO_USER == "superset_bi"
+
+
+@pytest.mark.parametrize(
+    ("uri", "reason"),
+    [
+        (None, "required"),
+        ("", "required"),
+        ("trino://superset_bi:pw@trino:8080/iceberg/consumption", "https"),
+        ("http://superset_bi:pw@trino:8080/iceberg/consumption", "https"),
+        ("https://trino:pw@trino:8443/iceberg/consumption", "superset_bi"),
+        ("https://superset_bi@trino:8443/iceberg/consumption", "superset_bi"),
+        ("https://superset_bi:pw@trino:8443/iceberg/consumption", "verify"),
+        ("https://superset_bi:pw@trino:8443/iceberg/consumption?verify=False", "verify=False"),
+    ],
+)
+def test_bi_connection_registration_refuses_insecure_forms(uri, reason: str) -> None:
+    """Every insecure or incomplete configuration must abort registration."""
+    module = _load_bi_registration()
+
+    with pytest.raises(module.BiConnectionRejected) as excinfo:
+        module.build_bi_connection_uri(uri)
+    assert reason in str(excinfo.value)
+
+
+def test_bi_connection_credential_is_uri_safe_by_construction() -> None:
+    """A credential with reserved characters must round-trip safely.
+
+    The generated secret is base64 and can contain ``+``. The URI is rebuilt
+    with the credential decoded then re-encoded, so the value the driver uses
+    is the original secret regardless of how the string was assembled.
+    """
+    module = _load_bi_registration()
+
+    raw = "https://superset_bi:ab%2Fcd+ef@trino:8443/iceberg/consumption?verify=/ca.pem"
+    normalised = module.build_bi_connection_uri(raw)
+
+    parts = urlsplit(normalised)
+    assert parts.hostname == "trino"
+    assert parts.port == 8443
+    assert parts.username == "superset_bi"
+    assert unquote(parts.password) == "ab/cd+ef"
+    assert "verify=" in parts.query
+
+
+def test_bi_connection_rejects_unencoded_credential_delimiter() -> None:
+    """An unencoded "/" in the credential truncates the authority.
+
+    This is unrecoverable by re-encoding: the tail of the credential has
+    already been parsed as the path. It surfaced at runtime as
+    ``Port could not be cast to integer value``, so it must be rejected as
+    malformed rather than silently accepted.
+    """
+    module = _load_bi_registration()
+
+    with pytest.raises(module.BiConnectionRejected) as excinfo:
+        module.build_bi_connection_uri(
+            "https://superset_bi:ab+cd/ef@trino:8443/iceberg/consumption?verify=/ca.pem"
         )
+    assert "URI-encoded" in str(excinfo.value)
+
+
+def test_bi_connection_rejection_messages_never_contain_the_credential() -> None:
+    """A rejection must name the defect without echoing the secret."""
+    module = _load_bi_registration()
+
+    secret = "sup3rs3cr3t/with+reserved"
+    with pytest.raises(module.BiConnectionRejected) as excinfo:
+        module.build_bi_connection_uri(f"trino://superset_bi:{secret}@trino:8080/x")
+    message = str(excinfo.value)
+
+    assert "sup3rs3cr3t" not in message
+    assert secret not in message
 
 
 def test_compose_requires_the_catalog_credential() -> None:
