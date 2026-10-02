@@ -1,0 +1,6 @@
+register: configuration
+description: >-
+  Configuration-as-code artefacts. METADATA ONLY - never secret values. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: CFG
+records: []

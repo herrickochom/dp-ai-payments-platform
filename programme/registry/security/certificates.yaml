@@ -1,0 +1,6 @@
+register: certificates
+description: >-
+  Certificate metadata. Private keys and keystore contents are prohibited. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: CERT
+records: []

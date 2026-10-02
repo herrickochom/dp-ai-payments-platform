@@ -1,0 +1,6 @@
+register: technologies
+description: >-
+  Standard and product technologies in use or under evaluation. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: TECH
+records: []

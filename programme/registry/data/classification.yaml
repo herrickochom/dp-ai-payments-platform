@@ -1,0 +1,6 @@
+register: data_classification
+description: >-
+  Classification levels and their governance controls. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: CLS
+records: []

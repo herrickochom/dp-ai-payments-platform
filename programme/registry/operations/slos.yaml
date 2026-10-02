@@ -1,0 +1,6 @@
+register: slos
+description: >-
+  A target with no measurement is NOT_MEASURED, not a passing SLA. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: SLO
+records: []

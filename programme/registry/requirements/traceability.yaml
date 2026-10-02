@@ -1,0 +1,6 @@
+register: traceability
+description: >-
+  Full chain: BR -> FR/NFR -> COMP -> ADR -> DP -> CTRL -> TEST -> EV -> REL -> SLO -> RUN -> ACC. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: TRC
+records: []

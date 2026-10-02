@@ -1,0 +1,6 @@
+register: raid
+description: >-
+  Risks, Issues, Assumptions, Dependencies. risk_acceptance is HUMAN-controlled. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: RAID
+records: []

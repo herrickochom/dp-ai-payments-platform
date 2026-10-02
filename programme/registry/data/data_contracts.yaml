@@ -1,0 +1,6 @@
+register: data_contracts
+description: >-
+  Machine-readable contracts crossing a service or layer boundary. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: CONTRACT
+records: []

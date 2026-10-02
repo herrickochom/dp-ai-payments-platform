@@ -1,0 +1,6 @@
+register: vulnerabilities
+description: >-
+  Scanner findings. Populated only from real scan output. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: VULN
+records: []

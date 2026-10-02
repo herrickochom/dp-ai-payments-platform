@@ -1,0 +1,6 @@
+register: backup_restore
+description: >-
+  Backup and restore capability state. SIMULATED is not PROVEN in production. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: BK
+records: []

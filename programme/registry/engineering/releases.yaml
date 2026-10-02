@@ -1,0 +1,6 @@
+register: releases
+description: >-
+  Release versions and their controlled promotion state. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: REL
+records: []

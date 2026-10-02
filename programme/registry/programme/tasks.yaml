@@ -1,0 +1,6 @@
+register: tasks
+description: >-
+  Work Breakdown Structure. planned_* are PLANNING BASELINE dates. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: TASK
+records: []

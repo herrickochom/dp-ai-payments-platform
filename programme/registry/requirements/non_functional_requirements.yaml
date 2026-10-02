@@ -1,0 +1,6 @@
+register: non_functional_requirements
+description: >-
+  Quality attributes. A design target is NOT runtime proof. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: NFR
+records: []

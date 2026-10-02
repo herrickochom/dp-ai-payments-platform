@@ -1,0 +1,6 @@
+register: communications
+description: >-
+  Reporting and communication cadence. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: COMM
+records: []

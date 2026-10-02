@@ -1,0 +1,6 @@
+register: evidence
+description: >-
+  PRESENT_EMPTY means the artefact exists but carries no result. EXISTS != PASS. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: EV
+records: []

@@ -1,0 +1,6 @@
+register: apis
+description: >-
+  HTTP API surface exposed by repository services. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: API
+records: []

@@ -1,0 +1,6 @@
+register: environments
+description: >-
+  Deployment environments and their governed classification. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: ENV
+records: []

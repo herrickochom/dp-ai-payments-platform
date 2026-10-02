@@ -1,0 +1,6 @@
+register: monitoring
+description: >-
+  Operational signals and alerting. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: MON
+records: []

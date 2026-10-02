@@ -1,0 +1,6 @@
+register: resources
+description: >-
+  Role-based resources. No personal data required. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: RES
+records: []

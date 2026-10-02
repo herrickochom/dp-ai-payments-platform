@@ -1,0 +1,6 @@
+register: cicd_controls
+description: >-
+  Controls declared in CI contracts and workflow definitions. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: CICD
+records: []

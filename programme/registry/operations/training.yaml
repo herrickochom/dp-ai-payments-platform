@@ -1,0 +1,6 @@
+register: training
+description: >-
+  Knowledge transfer and enablement records. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: TRN
+records: []

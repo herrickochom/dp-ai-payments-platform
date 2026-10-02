@@ -1,0 +1,88 @@
+# ===================================================================
+# Enterprise Programme Control System - controlled configuration
+# ===================================================================
+# This file is the engineering source of truth for the programme control
+# system. The Excel workbook is generated FROM this configuration and the
+# structured registries under programme/registry/.
+#
+# Rules:
+#   - The formal programme baseline start date is 2026-08-01 (01/08/2026).
+#   - Changing the baseline requires a recorded rebaseline decision.
+#   - No secret values belong in this file. Only safe metadata.
+
+programme:
+  id: PDP-AIP
+  name: DP AI Payments Platform Enterprise Programme
+  short_name: DP AI Payments Programme
+  sponsor: "PD M Secretariat / Platform Sponsor"
+  # Unconfirmed where the repository does not record a named owner.
+  programme_manager: "UNASSIGNED"
+  business_owner: "PDM Secretariat"
+  technical_authority: "Technical Architects"
+
+schedule:
+  # Formal programme baseline start date. Do not change without a
+  # recorded, approved rebaseline decision in registry/decisions.yaml.
+  baseline_start: "2026-08-01"
+  baseline_version: "1.0"
+  baseline_status: "APPROVED_BASELINE"
+  baseline_approved_by: "Technical Architects, PDM Secretariat"
+  baseline_approved_on: "2026-08-28"
+  # Planning baseline end used for Gantt extent. This is a PLANNED date,
+  # not an actual or forecast actual.
+  baseline_planned_finish: "2027-07-31"
+  date_format: "DD/MM/YYYY"
+  # Actual dates must never be synthesised by tooling.
+  actual_dates_derived_from: "committed_repository_evidence_only"
+
+workbook:
+  filename: "DP_AI_Payments_Enterprise_Programme_Governance_and_Assurance.xlsx"
+  # Relative to the repository root.
+  path: "programme/output/DP_AI_Payments_Enterprise_Programme_Governance_and_Assurance.xlsx"
+  version: "1.0.0"
+  title: "DP AI Payments - Enterprise Programme Governance and Assurance"
+  organisation: "DP AI Payments Platform Programme"
+  currency: "UGX"
+  # Executive dashboard headline counts are computed, never typed.
+  gantt_granularity: "MONTH"
+
+repository:
+  root_marker: ".git"
+  default_branch: "main"
+
+sources:
+  # Authoritative documentation stays under docs/. The programme system
+  # references it; it never duplicates or relocates it.
+  documentation_roots:
+    - "docs"
+  source_roots:
+    - "services"
+    - "transform"
+    - "platform"
+    - "orchestration"
+    - "infra"
+    - "contracts"
+    - "scripts"
+    - "ops"
+  test_roots:
+    - "tests"
+    - "orchestration/airflow/tests"
+    - "orchestration/job_runner/tests"
+
+evidence:
+  # Directories excluded from evidence scanning (may hold secrets or data).
+  excluded_path_patterns:
+    - ".git"
+    - ".venv"
+    - ".pytest_cache"
+    - "node_modules"
+    - "data"
+    - "target"
+    - "**/.env"
+    - "**/.env.*"
+    - "*.pre-*"
+  # Where collected machine evidence is written.
+  output_dir: "programme/evidence"
+  reports_dir: "programme/reports"
+  # Evidence producers never execute platform workloads.
+  allow_platform_workload_execution: false

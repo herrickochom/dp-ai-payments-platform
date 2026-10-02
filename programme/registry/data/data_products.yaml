@@ -1,0 +1,6 @@
+register: data_products
+description: >-
+  Consumption-layer products consumed by BI, ML or agents. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: DP
+records: []

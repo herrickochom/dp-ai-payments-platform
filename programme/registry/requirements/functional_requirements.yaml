@@ -1,0 +1,6 @@
+register: functional_requirements
+description: >-
+  System behaviour required by the business. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: FR
+records: []

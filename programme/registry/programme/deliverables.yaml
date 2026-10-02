@@ -1,0 +1,6 @@
+register: deliverables
+description: >-
+  Controlled deliverables with acceptance state. Awaiting evidence-based population from the repository.
+population_status: AWAITING_POPULATION
+id_prefix: DELIV
+records: []
