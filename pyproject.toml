@@ -15,6 +15,7 @@ dependencies = [
     "fastapi",
     "httpx2==2.13.0",
     "fastavro",
+    "openpyxl>=3.1.5",
     "pytz",
     "pydantic",
     "PyYAML",

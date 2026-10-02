@@ -1,0 +1,677 @@
+{
+  "as_of": "2026-10-02",
+  "baseline_start": "2026-08-01",
+  "changes": [
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-001",
+      "target": "ADR Register",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-002",
+      "target": "AI Agents",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-003",
+      "target": "AI Authority",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-004",
+      "target": "AI Evaluations",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-005",
+      "target": "AI Models",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-006",
+      "target": "AI Provenance",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-007",
+      "target": "AI RAG",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-008",
+      "target": "AI Risks",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-009",
+      "target": "APIs",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-010",
+      "target": "Acceptance",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-011",
+      "target": "Acceptance Criteria",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-012",
+      "target": "Access Reviews",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-013",
+      "target": "Architecture Components",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-014",
+      "target": "Backup and Restore",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-015",
+      "target": "Benefits",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-016",
+      "target": "Budget",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-017",
+      "target": "Business Requirements",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-018",
+      "target": "CHG-001",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-019",
+      "target": "CI and CD Controls",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-020",
+      "target": "Capacity",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-021",
+      "target": "Certificates",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-022",
+      "target": "Change Log",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-023",
+      "target": "Change Requests",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-024",
+      "target": "Classification",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-025",
+      "target": "Communications",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-026",
+      "target": "Compliance",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-027",
+      "target": "Configuration",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-028",
+      "target": "Data Assets",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-029",
+      "target": "Data Contracts",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-030",
+      "target": "Data Dictionary",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-031",
+      "target": "Data Products",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-032",
+      "target": "Data Quality",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-033",
+      "target": "Decision Log",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-034",
+      "target": "Defects",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-035",
+      "target": "Deliverables",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-036",
+      "target": "Dependencies",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-037",
+      "target": "Dependency Inventory",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-038",
+      "target": "Deployments",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-039",
+      "target": "Disaster Recovery",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-040",
+      "target": "Documentation",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-041",
+      "target": "Environments",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-042",
+      "target": "Evidence Register",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-043",
+      "target": "Functional Requirements",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-044",
+      "target": "Git Evidence",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-045",
+      "target": "Incidents",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-046",
+      "target": "Integrations",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-047",
+      "target": "Lineage",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-048",
+      "target": "Master Tracker",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-049",
+      "target": "Milestones",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-050",
+      "target": "Monitoring",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-051",
+      "target": "Non-Functional Requirements",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-052",
+      "target": "Phases",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-053",
+      "target": "Problems and RCA",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-054",
+      "target": "RACI",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-055",
+      "target": "RAID",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-056",
+      "target": "Releases",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-057",
+      "target": "Resources",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-058",
+      "target": "Retention",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-059",
+      "target": "Runbooks",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-060",
+      "target": "SLA and SLO",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-061",
+      "target": "Secrets Metadata",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-062",
+      "target": "Security Controls",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-063",
+      "target": "Stakeholders",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-064",
+      "target": "Technologies",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-065",
+      "target": "Test Register",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-066",
+      "target": "Threat Register",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-067",
+      "target": "Traceability",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-068",
+      "target": "Training",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "This ID existed in the previous workbook but not in the current register. It was NOT silently deleted; review the register entry.",
+      "id": "CHG-069",
+      "target": "Vulnerabilities",
+      "type": "RETAINED_NOT_DELETED"
+    },
+    {
+      "detail": "Generated 2026-10-02T08:54:46+00:00 by tooling v1.0.0",
+      "id": "CHG-070",
+      "target": "workbook",
+      "type": "REFRESH"
+    }
+  ],
+  "evidence_items": 253,
+  "generated_at": "2026-10-02T08:54:46+00:00",
+  "human_values_preserved": 69,
+  "protected_columns": [
+    "acceptance_criteria_ids",
+    "acceptance_ids",
+    "acceptance_state",
+    "accountable",
+    "activity",
+    "actual_date",
+    "actual_finish",
+    "actual_start",
+    "adr_ids",
+    "affected_scope",
+    "allocation_pct",
+    "approved_amount",
+    "approver_role",
+    "assessment_status",
+    "asset_class",
+    "asset_id",
+    "asset_ids",
+    "audience",
+    "authentication",
+    "author",
+    "author_date",
+    "backend",
+    "basis",
+    "benefit_acceptance",
+    "benefit_acceptance_date",
+    "benefit_accepted_by",
+    "budget_approved",
+    "budget_approver",
+    "business_requirement_id",
+    "business_requirement_ids",
+    "bytes",
+    "cadence",
+    "capability",
+    "change_type",
+    "channel",
+    "classification",
+    "column",
+    "compatibility",
+    "component_id",
+    "component_ids",
+    "conditions",
+    "consulted",
+    "contract_ids",
+    "control",
+    "control_ids",
+    "control_reference",
+    "control_type",
+    "corrective_action",
+    "criterion",
+    "criticality",
+    "currency",
+    "data_product_ids",
+    "decider_role",
+    "decision",
+    "decision_date",
+    "decision_rationale",
+    "definition",
+    "delivered_on",
+    "dependencies",
+    "depends_on",
+    "deployed_on",
+    "design_target",
+    "detail",
+    "dimension",
+    "direction",
+    "document_date",
+    "downstream",
+    "due_date",
+    "end_date",
+    "enforcement",
+    "enforcement_status",
+    "engagement",
+    "environment_id",
+    "evidence_ids",
+    "evidence_required",
+    "expires_on",
+    "forecast_amount",
+    "forecast_date",
+    "framework",
+    "functional_requirement_ids",
+    "gate_criteria",
+    "impact",
+    "implementation",
+    "informed",
+    "kind",
+    "last_reviewed",
+    "last_rotated",
+    "last_tested",
+    "layer",
+    "level",
+    "location",
+    "mapped_control_ids",
+    "masking_required",
+    "measured_value",
+    "measurement",
+    "method",
+    "metric",
+    "metrics",
+    "mitigation_task_ids",
+    "name",
+    "next_due",
+    "non_functional_requirement_ids",
+    "notes",
+    "observed_at",
+    "observed_on",
+    "organisation",
+    "outcome",
+    "owner_component",
+    "ownership",
+    "path",
+    "phase_id",
+    "pipeline",
+    "planned_date",
+    "planned_finish",
+    "planned_start",
+    "predecessor_id",
+    "probability",
+    "product_ids",
+    "protocol",
+    "provider",
+    "purpose",
+    "raised_date",
+    "record_id",
+    "release_ids",
+    "released_on",
+    "remediation",
+    "requester",
+    "requirement_id",
+    "requirement_ids",
+    "residual_risk_acceptance",
+    "resolved_on",
+    "responsible",
+    "retention_days",
+    "review_type",
+    "reviewer_role",
+    "risk_acceptance",
+    "role",
+    "root_cause",
+    "rotation_due",
+    "rpo",
+    "rto",
+    "rule_logic",
+    "runbook_ids",
+    "scenario",
+    "scope",
+    "sha",
+    "sha256",
+    "sheet",
+    "signal_type",
+    "sli_definition",
+    "slo_ids",
+    "source",
+    "source_component",
+    "start_date",
+    "subject",
+    "successor_id",
+    "summary",
+    "target",
+    "target_component",
+    "target_date",
+    "target_metric",
+    "task",
+    "task_ids",
+    "technology_ids",
+    "test_ids",
+    "threat_ids",
+    "top_level",
+    "topic",
+    "type",
+    "upstream",
+    "valid_from",
+    "verification_method",
+    "verification_status",
+    "verified_by",
+    "version_constraint"
+  ],
+  "record_total": 0,
+  "registers": {
+    "acceptance": 0,
+    "acceptance_criteria": 0,
+    "access_reviews": 0,
+    "adrs": 0,
+    "agents": 0,
+    "ai_authority": 0,
+    "ai_evaluations": 0,
+    "ai_provenance": 0,
+    "ai_risks": 0,
+    "apis": 0,
+    "backup_restore": 0,
+    "benefits": 0,
+    "budget": 0,
+    "business_requirements": 0,
+    "capacity": 0,
+    "certificates": 0,
+    "change_requests": 0,
+    "cicd_controls": 0,
+    "communications": 0,
+    "compliance": 0,
+    "components": 0,
+    "configuration": 0,
+    "data_assets": 0,
+    "data_classification": 0,
+    "data_contracts": 0,
+    "data_products": 0,
+    "data_quality": 0,
+    "decisions": 0,
+    "defects": 0,
+    "deliverables": 0,
+    "dependencies": 0,
+    "dependencies_sbom": 0,
+    "deployments": 0,
+    "dr": 0,
+    "environments": 0,
+    "evidence": 0,
+    "functional_requirements": 0,
+    "git_evidence": 0,
+    "incidents": 0,
+    "integrations": 0,
+    "lineage": 0,
+    "milestones": 0,
+    "models": 0,
+    "monitoring": 0,
+    "non_functional_requirements": 0,
+    "phases": 0,
+    "problems": 0,
+    "raci": 0,
+    "rag": 0,
+    "raid": 0,
+    "releases": 0,
+    "resources": 0,
+    "retention": 0,
+    "runbooks": 0,
+    "secrets_metadata": 0,
+    "security_controls": 0,
+    "slos": 0,
+    "stakeholders": 0,
+    "tasks": 0,
+    "technologies": 0,
+    "tests": 0,
+    "threats": 0,
+    "traceability": 0,
+    "training": 0,
+    "vulnerabilities": 0
+  },
+  "sheets": 72,
+  "tool_version": "1.0.0",
+  "workbook": "programme/output/DP_AI_Payments_Enterprise_Programme_Governance_and_Assurance.xlsx"
+}
