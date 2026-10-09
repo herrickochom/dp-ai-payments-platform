@@ -112,3 +112,18 @@ override.tf.json
 # Programme control: generated workbook temps and caches.
 programme/output/.*.tmp.xlsx
 programme/**/__pycache__/
+
+# Docker build output accidentally redirected to files
+sha256:*
+CACHED
+exporting
+extracting
+naming
+reading
+resolve
+resolving
+transferring
+unpacking
+[internal]
+=
+*.before-*
