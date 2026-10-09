@@ -12,6 +12,7 @@ FORBIDDEN_OPERATIONS = frozenset(
         "destructive_lifecycle_execution",
         "recovery_restore_execution",
         "token_link_rematerialisation",
+        "initial_token_link_creation",
         "ml_model_training",
     }
 )

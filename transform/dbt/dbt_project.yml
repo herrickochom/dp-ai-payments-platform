@@ -91,6 +91,30 @@ models:
       +materialized: table
 
 # ------------------------------------------------------------------------------
+# Seed configuration
+#
+# Seeds are static reference tables materialized once per run branch.
+# They are placed in `silver` because:
+#
+#   * The transform runtime provisions exactly the namespaces
+#     {bronze, silver, silver_vault, gold, consumption} on the run branch.
+#   * The profile's default schema is `staging`, which is a DuckDB-local
+#     view namespace and is deliberately not provisioned on the run branch.
+#   * The geographic reference seeds are read by consumption-layer models
+#     that already depend on `silver`-level dimensions.
+#
+# A seed left without explicit configuration would fall back to the
+# profile's default schema and fail with SCHEMA_NOT_FOUND before any
+# model that references it could build.
+# ------------------------------------------------------------------------------
+
+seeds:
+  pdm_platform:
+    +database: iceberg
+    +schema: silver
+    +quote_columns: false
+
+# ------------------------------------------------------------------------------
 # Project variables
 # ------------------------------------------------------------------------------
 

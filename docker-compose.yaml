@@ -36,6 +36,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB:-pdm_platform}
       POSTGRES_MULTIPLE_DATABASES: metabase
+      TRANSFORM_LEDGER_APP_PASSWORD: ${TRANSFORM_LEDGER_APP_PASSWORD:?TRANSFORM_LEDGER_APP_PASSWORD is required}
+      TRANSFORM_LEDGER_MIGRATION_PASSWORD: ${TRANSFORM_LEDGER_MIGRATION_PASSWORD:?TRANSFORM_LEDGER_MIGRATION_PASSWORD is required}
     ports:
     - ${POSTGRES_PORT:-5432}:5432
     volumes:
@@ -135,7 +137,7 @@ services:
     networks:
     - data-platform-network
   minio:
-    image: ${MINIO_SERVER_IMAGE:-quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z}
+    image: ${MINIO_SERVER_IMAGE:-reg.mini.dev/minio@sha256:8450927bb28a0c15572a49acf840b6c1281f135faf97c3c2b4aa547b49bf7bc5}
     container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-minio
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
@@ -168,7 +170,7 @@ services:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.minio-init-mc-buckets
       args:
-        MINIO_MC_IMAGE: ${MINIO_MC_IMAGE:-quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z}
+        MINIO_MC_IMAGE: ${MINIO_MC_IMAGE:-reg.mini.dev/minio-client@sha256:6ffae97b957902e23118625bb84b3d4a32f2d7ee6be2dba5ea4efae2a8452d37}
     container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-minio-init-buckets
     environment:
       MINIO_ENDPOINT: ${S3_ENDPOINT}
@@ -1061,9 +1063,10 @@ services:
     environment:
       DP_SECRET_SOURCE: ${DP_SECRET_SOURCE:-}
       DP_SECRET_DIR: ${DP_SECRET_DIR:-}
-      LAKEHOUSE_TRANSFORM_EXECUTION_ENABLED: 'false'
+      LAKEHOUSE_TRANSFORM_EXECUTION_ENABLED: 'true'
       LAKEHOUSE_TRANSFORM_CONTRACT: /app/orchestration/transform_runtime/contracts/lakehouse_transform.json
       TRANSFORM_RUNTIME_AIRFLOW_TOKEN: ${TRANSFORM_RUNTIME_AIRFLOW_TOKEN:?TRANSFORM_RUNTIME_AIRFLOW_TOKEN is required}
+      TRANSFORM_RUNTIME_BOOTSTRAP_OPERATOR_TOKEN: ${TRANSFORM_RUNTIME_BOOTSTRAP_OPERATOR_TOKEN:?TRANSFORM_RUNTIME_BOOTSTRAP_OPERATOR_TOKEN is required}
       TRANSFORM_RUNTIME_RUNNER_TOKEN: ${TRANSFORM_RUNTIME_RUNNER_TOKEN:?TRANSFORM_RUNTIME_RUNNER_TOKEN is required}
       TRANSFORM_LEDGER_APP_DATABASE_URL: ${TRANSFORM_LEDGER_APP_DATABASE_URL:?TRANSFORM_LEDGER_APP_DATABASE_URL is required}
       NESSIE_ENDPOINT: ${NESSIE_ENDPOINT}
@@ -1097,8 +1100,8 @@ services:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.platform-job-runner
     environment:
-      DP_SECRET_SOURCE: ${DP_SECRET_SOURCE:-}
-      DP_SECRET_DIR: ${DP_SECRET_DIR:-}
+      DP_SECRET_SOURCE: mounted-files
+      DP_SECRET_DIR: /run/secrets/protected-bootstrap
       DBT_DATABASE: ${DBT_DATABASE}
       DBT_STAGING_DATABASE: ${DBT_STAGING_DATABASE}
       DBT_BRONZE_DATABASE: ${DBT_BRONZE_DATABASE}
@@ -1113,8 +1116,8 @@ services:
       WAREHOUSE_URI: ${WAREHOUSE_URI:?WAREHOUSE_URI is required}
       NESSIE_WAREHOUSE: ${NESSIE_WAREHOUSE:?NESSIE_WAREHOUSE is required}
       ICEBERG_CATALOG: ${ICEBERG_CATALOG}
-      PLATFORM_RUNNER_EXECUTION_ENABLED: 'false'
-      PLATFORM_JOB_EXECUTION_ENABLED: 'false'
+      PLATFORM_RUNNER_EXECUTION_ENABLED: 'true'
+      PLATFORM_JOB_EXECUTION_ENABLED: 'true'
       TRANSFORM_RUNTIME_RUNNER_TOKEN: ${TRANSFORM_RUNTIME_RUNNER_TOKEN:?TRANSFORM_RUNTIME_RUNNER_TOKEN is required}
       TRANSFORM_LEDGER_APP_DATABASE_URL: ${TRANSFORM_LEDGER_APP_DATABASE_URL:?TRANSFORM_LEDGER_APP_DATABASE_URL is required}
       ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID: ${ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID:?ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID is required}
@@ -1139,6 +1142,7 @@ services:
       OBJECT_STORE_REGION: ${OBJECT_STORE_REGION:?OBJECT_STORE_REGION is required}
     volumes:
     - ./data/pdmis_ml:/app/data/pdmis_ml:ro
+    - ${PROTECTED_BOOTSTRAP_SECRET_DIR:?PROTECTED_BOOTSTRAP_SECRET_DIR is required}:/run/secrets/protected-bootstrap:ro
     networks:
     - data-platform-network
     restart: unless-stopped
@@ -1492,12 +1496,87 @@ services:
     restart: unless-stopped
     command:
     - triggerer
+
+  platform-transform-worker:
+    profiles:
+    - airflow
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.platform-job-runner
+    working_dir: /app
+    command:
+    - python
+    - -m
+  #  - orchestration.job_runner.transform_worker
+    - job_runner.transform_worker
+    environment:
+      DP_SECRET_SOURCE: mounted-files
+      DP_SECRET_DIR: /run/secrets/protected-bootstrap
+      DBT_DATABASE: ${DBT_DATABASE}
+      DBT_STAGING_DATABASE: ${DBT_STAGING_DATABASE}
+      DBT_BRONZE_DATABASE: ${DBT_BRONZE_DATABASE}
+      DBT_SILVER_DATABASE: ${DBT_SILVER_DATABASE}
+      DBT_SILVER_VAULT_DATABASE: ${DBT_SILVER_VAULT_DATABASE}
+      DBT_GOLD_DATABASE: ${DBT_GOLD_DATABASE}
+      DBT_CONSUMPTION_DATABASE: ${DBT_CONSUMPTION_DATABASE}
+      DBT_S3_URL_STYLE: ${DBT_S3_URL_STYLE}
+      NESSIE_ENDPOINT: ${NESSIE_ENDPOINT}
+      OBJECT_STORE_BUCKET: ${OBJECT_STORE_BUCKET:?OBJECT_STORE_BUCKET is required}
+      WAREHOUSE_PREFIX: ${WAREHOUSE_PREFIX:?WAREHOUSE_PREFIX is required}
+      WAREHOUSE_URI: ${WAREHOUSE_URI:?WAREHOUSE_URI is required}
+      NESSIE_WAREHOUSE: ${NESSIE_WAREHOUSE:?NESSIE_WAREHOUSE is required}
+      ICEBERG_CATALOG: ${ICEBERG_CATALOG}
+      PLATFORM_RUNNER_EXECUTION_ENABLED: 'true'
+      PLATFORM_JOB_EXECUTION_ENABLED: 'true'
+      TRANSFORM_RUNTIME_RUNNER_TOKEN: ${TRANSFORM_RUNTIME_RUNNER_TOKEN:?TRANSFORM_RUNTIME_RUNNER_TOKEN is required}
+      TRANSFORM_LEDGER_APP_DATABASE_URL: ${TRANSFORM_LEDGER_APP_DATABASE_URL:?TRANSFORM_LEDGER_APP_DATABASE_URL is required}
+      ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID: ${ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID:?ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID is required}
+      ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY: ${ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY:?ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY is required}
+      RESTRICTED_TRANSFORM_S3_ACCESS_KEY_ID: ${RESTRICTED_TRANSFORM_S3_ACCESS_KEY_ID:?RESTRICTED_TRANSFORM_S3_ACCESS_KEY_ID is required}
+      RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY: ${RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY:?RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY is required}
+      ML_TRANSFORM_S3_ACCESS_KEY_ID: ${ML_TRANSFORM_S3_ACCESS_KEY_ID:?ML_TRANSFORM_S3_ACCESS_KEY_ID is required}
+      ML_TRANSFORM_S3_SECRET_ACCESS_KEY: ${ML_TRANSFORM_S3_SECRET_ACCESS_KEY:?ML_TRANSFORM_S3_SECRET_ACCESS_KEY is required}
+      NESSIE_TRANSFORM_TOKEN: ${NESSIE_TRANSFORM_TOKEN:?NESSIE_TRANSFORM_TOKEN is required}
+      PLATFORM_RAW_READ_ACCESS_KEY: ${PLATFORM_RAW_READ_ACCESS_KEY:?PLATFORM_RAW_READ_ACCESS_KEY is required}
+      PLATFORM_RAW_READ_SECRET_KEY: ${PLATFORM_RAW_READ_SECRET_KEY:?PLATFORM_RAW_READ_SECRET_KEY is required}
+      MINIO_BUCKET: ${OBJECT_STORE_BUCKET:?OBJECT_STORE_BUCKET is required}
+      RAW_ROOT: ${RAW_ROOT:?RAW_ROOT is required}
+      RAW_VERSION: ${RAW_VERSION:?RAW_VERSION is required}
+      RAW_PREFIX: ${RAW_PREFIX:?RAW_PREFIX is required}
+      S3_ENDPOINT: ${S3_ENDPOINT:?S3_ENDPOINT is required}
+      S3_USE_SSL: ${S3_USE_SSL:?S3_USE_SSL is required}
+      S3_CA_BUNDLE: ${S3_CA_BUNDLE}
+      OBJECT_STORE_REGION: ${OBJECT_STORE_REGION:?OBJECT_STORE_REGION is required}
+      PYTHONPATH: /app:/app/job_runner
+      DBT_TRINO_PASSWORD: ${DBT_TRINO_PASSWORD:?DBT_TRINO_PASSWORD is required}
+      TRINO_S3_ACCESS_KEY_ID: ${TRINO_S3_ACCESS_KEY_ID:?TRINO_S3_ACCESS_KEY_ID is required}
+      TRINO_S3_SECRET_ACCESS_KEY: ${TRINO_S3_SECRET_ACCESS_KEY:?TRINO_S3_SECRET_ACCESS_KEY is required}
+      TRINO_KEYSTORE_PASSWORD: ${TRINO_KEYSTORE_PASSWORD:?TRINO_KEYSTORE_PASSWORD must be supplied by environment}
+      TRINO_INTERNAL_SHARED_SECRET: ${TRINO_INTERNAL_SHARED_SECRET}
+    volumes:
+    - ./data/pdmis_ml:/app/data/pdmis_ml:ro
+    - ${PROTECTED_BOOTSTRAP_SECRET_DIR:?PROTECTED_BOOTSTRAP_SECRET_DIR is required}:/run/secrets/protected-bootstrap:ro
+    - ./.runtime/jna:/var/lib/platform-transform-worker/jna
+    networks:
+    - data-platform-network
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+    - /tmp
+    - /var/lib/platform-job-runner/work:uid=50001,gid=50001,mode=0700
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
+    depends_on:
+      transform-ledger-migrate:
+        condition: service_completed_successfully
   minio-init-iam:
     build:
       context: .
       dockerfile: platform/docker/dockerfiles/Dockerfile.minio-init-iam
       args:
-        MINIO_MC_IMAGE: ${MINIO_MC_IMAGE:-quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z}
+        MINIO_MC_IMAGE: ${MINIO_MC_IMAGE:-reg.mini.dev/minio-client@sha256:6ffae97b957902e23118625bb84b3d4a32f2d7ee6be2dba5ea4efae2a8452d37}
     container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-minio-init-iam
     environment:
       DP_SECRET_SOURCE: environment

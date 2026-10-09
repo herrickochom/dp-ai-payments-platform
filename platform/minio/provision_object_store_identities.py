@@ -159,14 +159,38 @@ def attachment_command(policy: str, access_key: str) -> list[str]:
 
 
 def existing_users(output: str) -> dict[str, set[str]]:
-    users = {}
+    """Parse ``mc admin user list --json`` output.
+
+    The tabular listing truncates long access keys with an ellipsis, which
+    makes the tabular form unusable for exact matching against configured
+    access keys. The JSON form emits the full access key and the attached
+    policy name for each user. The parser therefore requires JSON output
+    and refuses any line that does not decode to a record with the fields
+    it depends on.
+    """
+    users: dict[str, set[str]] = {}
     for line in output.splitlines():
-        parts = line.split()
-        if len(parts) < 2 or parts[0] not in {"enabled", "disabled"}:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            record = json.loads(line)
+        except ValueError as exc:
+            raise ProvisionError("cannot safely parse existing MinIO users") from exc
+        if not isinstance(record, dict):
             raise ProvisionError("cannot safely parse existing MinIO users")
-        if parts[1] in users:
+        access_key = record.get("accessKey")
+        status = record.get("userStatus", record.get("status"))
+        policy = record.get("policyName", record.get("policy", ""))
+        if not isinstance(access_key, str) or not access_key:
+            raise ProvisionError("cannot safely parse existing MinIO users")
+        if status not in {"enabled", "disabled"}:
+            raise ProvisionError("cannot safely parse existing MinIO users")
+        if not isinstance(policy, str):
+            raise ProvisionError("cannot safely parse existing MinIO users")
+        if access_key in users:
             raise ProvisionError("duplicate MinIO user in administrative listing")
-        users[parts[1]] = set(",".join(parts[2:]).split(",")) - {""}
+        users[access_key] = {policy} if policy else set()
     return users
 
 
@@ -175,7 +199,7 @@ def apply(source: dict[str, str]) -> None:
     environment = admin_environment(source)
     # Inspect all associations before mutation. User secrets cannot be read
     # back, so an existing desired key is preserved without credential claims.
-    existing = existing_users(mc(["admin", "user", "ls", ALIAS], environment))
+    existing = existing_users(mc(["admin", "user", "ls", "--json", ALIAS], environment))
     intended_policy_by_key = {source[access]: policy for _, policy, access, _ in IDENTITIES}
     managed_policies = set(POLICY_SCOPE)
     for access_key, policies in existing.items():
@@ -222,7 +246,7 @@ def rotate(source: dict[str, str], identity: str) -> None:
 
     environment = admin_environment(source)
     access_key = source[access_name]
-    existing = existing_users(mc(["admin", "user", "ls", ALIAS], environment))
+    existing = existing_users(mc(["admin", "user", "ls", "--json", ALIAS], environment))
     if access_key not in existing:
         raise ProvisionError("refusing to rotate an identity that does not already exist")
     if policy not in existing[access_key]:

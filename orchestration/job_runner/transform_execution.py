@@ -9,9 +9,9 @@ import signal
 import subprocess
 import threading
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import Mapping
+from typing import Callable, Mapping
 
 try:
     from orchestration.job_runner.transform_trino_runtime import transform_trino_runtime
@@ -41,6 +41,7 @@ REDACTIONS = (
         r"(?i)(password|secret|token|access_key)(\s*[=:]\s*)\S+"
     ),
 )
+POST_CHECK_GATES = frozenset({"SUCCEEDED", "STAGED", "RECONCILIATION_REQUIRED"})
 
 AUTHORITY_ENV = {
     "ordinary_transform": frozenset(
@@ -105,7 +106,7 @@ ML_INPUT = Path(
 )
 
 TRINO_JNA_TMPDIR = "/var/lib/platform-transform-worker/jna"
-TRINO_JAVA_TOOL_OPTIONS = f"-Djna.tmpdir={TRINO_JNA_TMPDIR}"
+TRINO_JAVA_TOOL_OPTIONS = f"-Djna.tmpdir={TRINO_JNA_TMPDIR} --enable-native-access=ALL-UNNAMED"
 
 
 @dataclass(frozen=True)
@@ -211,18 +212,40 @@ def build_transform_command(
             *names,
         )
     else:
-        argv = (
-            os.getenv("DBT_EXECUTABLE", "/opt/dbt/bin/dbt"),
-            "build",
-            "--project-dir",
-            "/app/dbt",
-            "--profiles-dir",
-            "/app/dbt",
-            "--target",
-            "runtime",
-            "--select",
-            *names,
+        # dbt batches run two commands inside a single child process:
+        #
+        #   dbt seed  — materialize static reference tables (idempotent)
+        #   dbt build — build models and run their tests
+        #
+        # Wrapping both in one shell command keeps the batch's lease
+        # heartbeat alive across the seed step. A separate blocking
+        # subprocess for the seed step (as an earlier revision used)
+        # suspended the heartbeat for the duration of the seed run plus
+        # Trino startup, which exceeded the 30-second lease and caused
+        # the parent to orphan the row mid-execution. One child, one
+        # heartbeat loop, covers both.
+        dbt = os.getenv("DBT_EXECUTABLE", "/opt/dbt/bin/dbt")
+        project_dir = "/app/dbt"
+        profiles_dir = "/app/dbt"
+        target = "runtime"
+
+        seed_and_build = " ".join(
+            [
+                dbt, "seed",
+                "--project-dir", project_dir,
+                "--profiles-dir", profiles_dir,
+                "--target", target,
+                "&&",
+                "exec", dbt, "build",
+                "--project-dir", project_dir,
+                "--profiles-dir", profiles_dir,
+                "--target", target,
+                "--indirect-selection", "cautious",
+                "--select", *names,
+            ]
         )
+
+        argv = ("/bin/sh", "-c", seed_and_build)
 
     supplied = dict(source) if source is not None else _ambient_environment()
 
@@ -345,6 +368,7 @@ def build_transform_command(
         "NESSIE_WAREHOUSE",
         "ICEBERG_CATALOG",
         "NESSIE_ENDPOINT",
+        "PYTHONPATH",
     )
 
     environment = {
@@ -436,6 +460,164 @@ def build_transform_command(
     )
 
 
+
+def build_governed_runtime_command(
+    authority: str,
+    operation_id: str,
+    execution_id: str,
+    source: Mapping[str, str] | None = None,
+    *,
+    transform_run_id: str,
+) -> TransformCommand:
+    """Build a governed private-Trino boundary with no dbt batch dependency."""
+    if authority not in AUTHORITY_ENV:
+        raise ValueError("transform authority is not allowlisted")
+    if re.fullmatch(r"be_[a-f0-9]{32}", execution_id) is None:
+        raise ValueError("invalid execution identity")
+    if re.fullmatch(r"tr_[a-f0-9]{32}", transform_run_id) is None:
+        raise ValueError("invalid transform run identity")
+    if re.fullmatch(r"[a-z][a-z0-9_]{2,127}", operation_id) is None:
+        raise ValueError("invalid governed operation identity")
+
+    supplied = dict(_ambient_environment() if source is None else source)
+    missing_authority = sorted(
+        key for key in AUTHORITY_ENV[authority] if not supplied.get(key)
+    )
+    if missing_authority:
+        raise ValueError("required transform authority credentials are unavailable")
+
+    required = (
+        "S3_ENDPOINT", "S3_USE_SSL", "OBJECT_STORE_REGION",
+        "OBJECT_STORE_BUCKET", "RAW_ROOT", "RAW_VERSION", "RAW_PREFIX",
+        "WAREHOUSE_PREFIX", "WAREHOUSE_URI", "DBT_S3_URL_STYLE",
+        "DBT_TRINO_PASSWORD", "NESSIE_WAREHOUSE", "NESSIE_TRANSFORM_TOKEN",
+    )
+    missing = sorted(key for key in required if not supplied.get(key))
+    if missing:
+        raise ValueError("required governed runtime configuration is unavailable")
+
+    validate_object_store_security(
+        supplied["S3_ENDPOINT"],
+        use_ssl=supplied["S3_USE_SSL"],
+        ca_bundle=supplied.get("S3_CA_BUNDLE"),
+    )
+    validate_nessie_security(
+        supplied.get("NESSIE_ENDPOINT", ""),
+        auth_mode=os.getenv("NESSIE_AUTH_MODE", "bearer"),
+        token=supplied["NESSIE_TRANSFORM_TOKEN"],
+    )
+
+    if supplied["RAW_PREFIX"] != f'{supplied["RAW_ROOT"]}/{supplied["RAW_VERSION"]}':
+        raise ValueError("RAW_PREFIX must equal RAW_ROOT + '/' + RAW_VERSION")
+    expected_warehouse = (
+        f's3://{supplied["OBJECT_STORE_BUCKET"]}/{supplied["WAREHOUSE_PREFIX"]}'
+    )
+    if supplied["WAREHOUSE_URI"] != expected_warehouse:
+        raise ValueError("WAREHOUSE_URI must use configured bucket and prefix")
+    if supplied["NESSIE_WAREHOUSE"] != supplied["WAREHOUSE_URI"]:
+        raise ValueError("NESSIE_WAREHOUSE must equal WAREHOUSE_URI")
+
+    access_name, secret_name = AUTHORITY_CREDENTIALS[authority]
+    access = supplied.get(access_name, "")
+    secret = supplied.get(secret_name, "")
+    if not access or not secret:
+        raise ValueError("authority object-store credentials are unavailable")
+
+    work = (
+        Path(os.getenv("TRANSFORM_WORK_ROOT", "/var/lib/platform-job-runner/work"))
+        / execution_id
+    )
+    work_path = str(work)
+    branch = f"transform_{transform_run_id}"
+
+    passthrough = (
+        "S3_ENDPOINT", "S3_USE_SSL", "S3_CA_BUNDLE", "OBJECT_STORE_REGION",
+        "S3_PATH_STYLE_ACCESS", "DBT_S3_URL_STYLE", "DBT_DATABASE",
+        "DBT_STAGING_DATABASE", "DBT_BRONZE_DATABASE", "DBT_SILVER_DATABASE",
+        "DBT_SILVER_VAULT_DATABASE", "DBT_GOLD_DATABASE",
+        "DBT_CONSUMPTION_DATABASE", "OBJECT_STORE_BUCKET", "RAW_ROOT",
+        "RAW_VERSION", "RAW_PREFIX", "WAREHOUSE_PREFIX", "WAREHOUSE_URI",
+        "NESSIE_WAREHOUSE", "ICEBERG_CATALOG", "NESSIE_ENDPOINT", "PYTHONPATH",
+    )
+    environment = {key: supplied[key] for key in passthrough if supplied.get(key)}
+    environment.update({
+        "PATH": "/opt/dbt/bin:/usr/local/bin:/usr/bin",
+        "DBT_LOG_PATH": str(work / "logs"),
+        "DBT_TARGET_PATH": str(work / "target"),
+        "DBT_NESSIE_BRANCH": branch,
+        "DBT_TRINO_HOST": supplied.get("DBT_TRINO_HOST", "127.0.0.1"),
+        "DBT_TRINO_PORT": supplied.get("DBT_TRINO_PORT", "18443"),
+        "DBT_TRINO_USER": supplied.get("DBT_TRINO_USER", "dbt"),
+        "DBT_TRINO_PASSWORD": supplied["DBT_TRINO_PASSWORD"],
+        "TRANSFORM_AUTHORITY": authority,
+        "TRANSFORM_EXECUTION_ID": execution_id,
+        "TRANSFORM_EXECUTION_WORK_PATH": work_path,
+    })
+    trino_environment = {
+        "DBT_NESSIE_BRANCH": branch,
+        "TRINO_S3_ACCESS_KEY_ID": access,
+        "TRINO_S3_SECRET_ACCESS_KEY": secret,
+        "NESSIE_WAREHOUSE": supplied["NESSIE_WAREHOUSE"],
+        "S3_ENDPOINT": supplied["S3_ENDPOINT"],
+        "S3_PATH_STYLE_ACCESS": supplied.get("S3_PATH_STYLE_ACCESS", "true"),
+        "OBJECT_STORE_REGION": supplied["OBJECT_STORE_REGION"],
+        "TRINO_KEYSTORE_PASSWORD": supplied.get("TRINO_KEYSTORE_PASSWORD", ""),
+        "TRINO_INTERNAL_SHARED_SECRET": supplied.get("TRINO_INTERNAL_SHARED_SECRET", ""),
+        "PATH": os.environ.get("PATH", "/usr/local/bin:/usr/bin:/bin"),
+        "JAVA_HOME": os.environ.get("JAVA_HOME", "/usr/lib/jvm/temurin/jdk-24.0.2+12"),
+        "JAVA_TOOL_OPTIONS": TRINO_JAVA_TOOL_OPTIONS,
+    }
+    if FORBIDDEN_ENV.intersection(environment):
+        raise ValueError("root object-store credentials are prohibited")
+
+    return TransformCommand(
+        operation_id,
+        authority,
+        (),
+        environment,
+        trino_environment,
+        hashlib.sha256(
+            f"protected-operation:{operation_id}:{authority}".encode("utf-8")
+        ).hexdigest(),
+        work_path,
+    )
+
+def build_governed_transform_command(
+    batch_id: str,
+    execution_id: str,
+    source: Mapping[str, str] | None = None,
+    *,
+    transform_run_id: str | None = None,
+    post_check: Callable[[TransformCommand], str | None] | None = None,
+) -> TransformCommand:
+    """Build a governed transform command with an attached post-execution check.
+
+    This is the generic governed execution-boundary builder: it reuses the
+    shared ``build_transform_command`` machinery (allowlist validation, secret
+    resolution, Trino child environment construction, RID deterministic
+    prerequisite validation) and attaches a deterministic post-execution check
+    that the worker routes into the durable queue.
+
+    ``build_transform_command("C4_RID_FOUNDATION_03")`` must never be called
+    from a bootstrap path; the only caller of that specific batch id is
+    ``protected_bootstrap_execution.build_protected_bootstrap_command`` which
+    builds the fixed command through this governed builder.
+    """
+    command = build_transform_command(
+        batch_id,
+        execution_id,
+        source,
+        transform_run_id=transform_run_id,
+    )
+    if post_check is not None:
+        command = replace(
+            command,
+            environment=dict(command.environment),
+            trino_environment=dict(command.trino_environment),
+        )
+    return command
+
+
 def validate_ml_input(path: Path = ML_INPUT) -> str:
     if (
         path != ML_INPUT
@@ -478,6 +660,9 @@ def execute(
     output_cap_bytes: int,
     cancel_requested=lambda: False,
     manage_runtime: bool = False,
+    pre_execution_check=None,
+    post_execution_check=None,
+    gate_status=None,
 ) -> ProcessResult:
     if manage_runtime:
         with transform_trino_runtime(
@@ -489,7 +674,25 @@ def execute(
                 os.getenv("TRANSFORM_TRINO_STARTUP_TIMEOUT_SECONDS", "90")
             ),
         ):
-            return execute(command, timeout_seconds=timeout_seconds, termination_grace_seconds=termination_grace_seconds, output_cap_bytes=output_cap_bytes, cancel_requested=cancel_requested)
+            if pre_execution_check is not None:
+                pre_execution_check(command)
+
+            # The batch child (see build_transform_command) now runs
+            # `dbt seed && dbt build` in a single process, so the parent's
+            # lease heartbeat continues across both. No separate seed
+            # step is invoked here; that would suspend the heartbeat
+            # while a blocking subprocess ran and risk lease loss on
+            # longer starts.
+
+            return execute(
+                command,
+                timeout_seconds=timeout_seconds,
+                termination_grace_seconds=termination_grace_seconds,
+                output_cap_bytes=output_cap_bytes,
+                cancel_requested=cancel_requested,
+                manage_runtime=False,
+                post_execution_check=post_execution_check,
+            )
     process = subprocess.Popen(
         list(command.argv),
         shell=False,
@@ -586,12 +789,24 @@ def execute(
             failure,
         )
 
+    if process.returncode != 0:
+        return ProcessResult(
+            "FAILED",
+            process.returncode,
+            safe_output,
+            truncated,
+            "DBT_BUILD_FAILED",
+        )
+
+    status = "SUCCEEDED"
+
+    if post_execution_check is not None:
+        gate_status = post_execution_check(command)
+        if gate_status in POST_CHECK_GATES:
+            status = gate_status
+
     return ProcessResult(
-        (
-            "SUCCEEDED"
-            if process.returncode == 0
-            else "FAILED"
-        ),
+        status,
         process.returncode,
         safe_output,
         truncated,

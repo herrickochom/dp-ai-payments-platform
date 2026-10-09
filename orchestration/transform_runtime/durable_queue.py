@@ -68,6 +68,86 @@ class PostgresDurableQueue:
             self._event(db,row,"CLAIMED",{"worker_id":worker,"lease_token":token})
             return dict(out)
 
+    def claim_protected_bootstrap(self,worker,lease_seconds):
+        token=uuid4().hex
+        with self.tx() as db:
+            row=db.execute("""SELECT * FROM protected_bootstrap_executions
+                WHERE status IN ('QUEUED','RECONCILE_QUEUED') AND cancel_requested=false ORDER BY accepted_at
+                FOR UPDATE SKIP LOCKED LIMIT 1""").fetchone()
+            if not row: return None
+            reconciliation_only=row["status"]=="RECONCILE_QUEUED"
+            out=db.execute("""UPDATE protected_bootstrap_executions SET status='RUNNING',
+                publication_state=%s,started_at=COALESCE(started_at,clock_timestamp()),
+                heartbeat_at=clock_timestamp(),lease_owner=%s,lease_token=%s,
+                lease_expires_at=clock_timestamp()+(%s*interval '1 second')
+                WHERE bootstrap_execution_id=%s AND status IN ('QUEUED','RECONCILE_QUEUED') RETURNING *""",
+                ("RECONCILING" if reconciliation_only else "BUILDING_STAGING",
+                 worker,token,lease_seconds,row["bootstrap_execution_id"])).fetchone()
+            if not out: return None
+            result=dict(out); result["reconciliation_only"]=reconciliation_only
+            return result
+
+    def heartbeat_protected_bootstrap(self,eid,worker,token,lease_seconds):
+        with self.tx() as db:
+            return bool(db.execute("""UPDATE protected_bootstrap_executions SET
+                heartbeat_at=clock_timestamp(),lease_expires_at=clock_timestamp()+(%s*interval '1 second')
+                WHERE bootstrap_execution_id=%s AND lease_owner=%s AND lease_token=%s AND status='RUNNING'
+                AND lease_expires_at>=clock_timestamp() RETURNING bootstrap_execution_id""",
+                (lease_seconds,eid,worker,token)).fetchone())
+
+    def cancel_requested_protected_bootstrap(self,eid,worker,token):
+        with self.tx() as db:
+            row=db.execute("""SELECT cancel_requested FROM protected_bootstrap_executions
+                WHERE bootstrap_execution_id=%s AND lease_owner=%s AND lease_token=%s AND status='RUNNING'""",
+                (eid,worker,token)).fetchone()
+            if not row: raise LeaseLost("worker lease lost")
+            return bool(row["cancel_requested"])
+
+    def request_cancel_protected_bootstrap(self,eid):
+        with self.tx() as db:
+            row=db.execute("SELECT * FROM protected_bootstrap_executions WHERE bootstrap_execution_id=%s FOR UPDATE",(eid,)).fetchone()
+            if not row: raise DurableQueueError("protected bootstrap execution not found")
+            if row["status"] in TERMINAL: return dict(row)
+            if row["status"] in {"ADMITTED","QUEUED"}:
+                return dict(db.execute("""UPDATE protected_bootstrap_executions SET cancel_requested=true,
+                    status='CANCELLED',publication_state='NOT_STARTED',finished_at=clock_timestamp(),
+                    heartbeat_at=clock_timestamp(),failure_class='OPERATOR_CANCELLED'
+                    WHERE bootstrap_execution_id=%s RETURNING *""",(eid,)).fetchone())
+            return dict(db.execute("""UPDATE protected_bootstrap_executions SET cancel_requested=true,
+                publication_state='RECONCILIATION_REQUIRED' WHERE bootstrap_execution_id=%s RETURNING *""",
+                (eid,)).fetchone())
+
+    def request_reconcile_protected_bootstrap(self,eid):
+        with self.tx() as db:
+            row=db.execute("SELECT * FROM protected_bootstrap_executions WHERE bootstrap_execution_id=%s FOR UPDATE",(eid,)).fetchone()
+            if not row: raise DurableQueueError("protected bootstrap execution not found")
+            if row["status"] not in {"ORPHANED","FAILED"} or row["publication_state"]!="RECONCILIATION_REQUIRED":
+                raise DurableQueueError("protected bootstrap does not require reconciliation")
+            return dict(db.execute("""UPDATE protected_bootstrap_executions SET status='RECONCILE_QUEUED',
+                cancel_requested=false,failure_class=NULL,heartbeat_at=clock_timestamp()
+                WHERE bootstrap_execution_id=%s RETURNING *""",(eid,)).fetchone())
+
+    def finish_protected_bootstrap(self,eid,worker,token,status,publication_state,failure_class=None):
+        if status not in TERMINAL: raise DurableQueueError("terminal status required")
+        with self.tx() as db:
+            row=db.execute("SELECT * FROM protected_bootstrap_executions WHERE bootstrap_execution_id=%s FOR UPDATE",(eid,)).fetchone()
+            if not row or row["lease_owner"]!=worker or row["lease_token"]!=token or row["status"]!="RUNNING":
+                raise LeaseLost("worker lease lost")
+            out=db.execute("""UPDATE protected_bootstrap_executions SET status=%s,
+                publication_state=%s,failure_class=%s,finished_at=clock_timestamp(),heartbeat_at=clock_timestamp(),
+                lease_owner=NULL,lease_token=NULL,lease_expires_at=NULL WHERE bootstrap_execution_id=%s
+                AND lease_owner=%s AND lease_token=%s RETURNING *""",
+                (status,publication_state,failure_class,eid,worker,token)).fetchone()
+            if not out: raise LeaseLost("worker lease lost")
+            return dict(out)
+
+    def protected_bootstrap_succeeded(self,run_id,operation_id,version):
+        with self.tx() as db:
+            return bool(db.execute("""SELECT 1 FROM protected_bootstrap_executions
+                WHERE transform_run_id=%s AND operation_id=%s AND operation_version=%s
+                AND status='SUCCEEDED' AND publication_state='PUBLISHED'""",
+                (run_id,operation_id,version)).fetchone())
+
     def record_nessie_branch(self,eid,worker,token,branch):
         with self.tx() as db:
             row=db.execute("SELECT * FROM batch_executions WHERE batch_execution_id=%s FOR UPDATE",(eid,)).fetchone()
@@ -163,6 +243,21 @@ class PostgresDurableQueue:
             self._terminalize_parent_failure(db,row,"ORPHANED",failure_class)
             return True
 
+    def reject_prerequisite_if_owned(self,eid,worker,token,failure_class):
+        """Terminalize only the attempted batch; the existing run remains usable."""
+        with self.tx() as db:
+            row=db.execute("""SELECT * FROM batch_executions WHERE batch_execution_id=%s
+                AND lease_owner=%s AND lease_token=%s AND status IN ('RUNNING','TESTING') FOR UPDATE""",
+                (eid,worker,token)).fetchone()
+            if not row: return False
+            db.execute("""UPDATE batch_executions SET status='ORPHANED',finished_at=clock_timestamp(),
+                heartbeat_at=clock_timestamp(),lease_owner=NULL,lease_token=NULL,lease_expires_at=NULL,
+                failure_class=%s WHERE batch_execution_id=%s""",(failure_class,eid))
+            db.execute("UPDATE batch_attempts SET status='ORPHANED',heartbeat_at=clock_timestamp() WHERE batch_execution_id=%s AND attempt=%s",
+                (eid,row["attempt"]))
+            self._event(db,row,"ORPHANED",{"failure_class":failure_class})
+            return True
+
     def reconcile_expired(self):
         ids=[]
         with self.tx() as db:
@@ -180,4 +275,19 @@ class PostgresDurableQueue:
                            (eid,row["attempt"]))
                 self._event(db,row,"ORPHANED",{"failure_class":"WORKER_LEASE_EXPIRED_REQUIRES_RECONCILIATION"})
                 self._terminalize_parent_failure(db,row,"ORPHANED","WORKER_LEASE_EXPIRED_REQUIRES_RECONCILIATION")
+        return ids
+
+    def reconcile_expired_protected_bootstraps(self):
+        ids=[]
+        with self.tx() as db:
+            bootstraps=db.execute("""SELECT * FROM protected_bootstrap_executions
+                WHERE status='RUNNING' AND lease_expires_at IS NOT NULL AND lease_expires_at<clock_timestamp()
+                FOR UPDATE SKIP LOCKED""").fetchall()
+            for row in bootstraps:
+                eid=row["bootstrap_execution_id"]; ids.append(eid)
+                db.execute("""UPDATE protected_bootstrap_executions SET status='ORPHANED',
+                    publication_state='RECONCILIATION_REQUIRED',finished_at=clock_timestamp(),
+                    heartbeat_at=clock_timestamp(),lease_owner=NULL,lease_token=NULL,lease_expires_at=NULL,
+                    failure_class='WORKER_LEASE_EXPIRED_REQUIRES_RECONCILIATION'
+                    WHERE bootstrap_execution_id=%s""",(eid,))
         return ids

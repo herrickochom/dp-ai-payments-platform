@@ -134,3 +134,66 @@ def test_future_enablement_requires_acceptance():
     assert f["deploy_command_must_be_explicit"] is True
     assert f["approved_scope_required"] is True
     assert f["post_deployment_acceptance_required"] is True
+
+def test_inventory_profiles_match_compose_profiles():
+    import subprocess
+
+    inventory = load(INVENTORY)
+
+    result = subprocess.run(
+        [
+            "docker",
+            "compose",
+            "-f",
+            str(ROOT / "docker-compose.yaml"),
+            "-f",
+            str(ROOT / "docker-compose.transform-execution.yaml"),
+            "config",
+            "--profiles",
+        ],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    compose_profiles = {
+        value.strip()
+        for value in result.stdout.splitlines()
+        if value.strip()
+    }
+
+    governed_profiles = set(inventory["profiles"])
+
+    assert governed_profiles == compose_profiles
+
+
+def test_inventory_default_services_match_compose_default_services():
+    import subprocess
+
+    inventory = load(INVENTORY)
+
+    result = subprocess.run(
+        [
+            "docker",
+            "compose",
+            "-f",
+            str(ROOT / "docker-compose.yaml"),
+            "-f",
+            str(ROOT / "docker-compose.transform-execution.yaml"),
+            "config",
+            "--services",
+        ],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    compose_services = [
+        value.strip()
+        for value in result.stdout.splitlines()
+        if value.strip()
+    ]
+
+    assert set(inventory["default_services"]) == set(compose_services)

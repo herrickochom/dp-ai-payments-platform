@@ -158,6 +158,36 @@ def require_secret(name: str) -> str:
     return value
 
 
+def require_mounted_secret(name: str) -> str:
+    """Return a mandatory secret from the mounted-file source only.
+
+    Unlike :func:`resolve_secret` and :func:`require_secret`, this never
+    consults the environment. A caller that uses it is stating that the
+    mounted file is the sole authoritative source, and that neither a
+    missing file nor an empty file should be satisfied by an ambient
+    environment variable of the same name. Used by the protected-bootstrap
+    child, which must not accept a same-named environment value as a
+    substitute for a key the operator provisioned on the mount, and by
+    callers that resolve key material whose version must match the mount.
+
+    Fails closed when ``DP_SECRET_SOURCE`` is not ``mounted-files``, when
+    ``DP_SECRET_DIR`` is unset or invalid, or when the file is absent or
+    empty.
+    """
+    _require_valid_name(name)
+    if validate_secret_source() != SECRET_SOURCE_MOUNTED_FILES:
+        raise SecretConfigurationError(
+            f"secret {name} requires DP_SECRET_SOURCE=mounted-files"
+        )
+    directory = os.getenv(SECRET_DIR_ENV, "").strip()
+    value = FileSecretProvider(directory).get(name)
+    if not _is_available(value):
+        raise SecretUnavailable(
+            f"secret {name} is not available from the mounted secret source"
+        )
+    return value
+
+
 def _is_available(value: str | None) -> bool:
     """An absent or empty value is unavailable; no other value is altered."""
     return bool(value)

@@ -35,7 +35,20 @@ except ImportError:  # pragma: no cover - container layout fallback
             import os as _os
 
             return _os.environ.get(name)
-from transform_execution import build_transform_command,execute
+try:
+    from orchestration.job_runner.transform_execution import build_transform_command,execute
+except ImportError:
+    from transform_execution import build_transform_command,execute
+try:
+    from protected_bootstrap_execution import build_protected_bootstrap_command
+except ImportError:  # pragma: no cover - package layout fallback
+    from orchestration.job_runner.protected_bootstrap_execution import (
+        build_protected_bootstrap_command,
+    )
+try:
+    from services.shared import materialise_token_link
+except ImportError:
+    import materialise_token_link as materialise_token_link
 
 logger = logging.getLogger(__name__)
 
@@ -199,29 +212,150 @@ def run_once(queue=None,worker=None,*,branch_factory=None):
         except LeaseLost:
             lease_lost[0]=True; return True
     try:
-        r=execute(cmd,timeout_seconds=float(os.getenv("TRANSFORM_BATCH_TIMEOUT_SECONDS","3300")),
-                  termination_grace_seconds=float(os.getenv("TRANSFORM_TERMINATION_GRACE_SECONDS","15")),
-                  output_cap_bytes=int(os.getenv("TRANSFORM_OUTPUT_CAP_BYTES","262144")),cancel_requested=cancel,
-                  manage_runtime=True)
+        r = execute(cmd, timeout_seconds=float(os.getenv("TRANSFORM_BATCH_TIMEOUT_SECONDS", "3300")),
+                   termination_grace_seconds=float(os.getenv("TRANSFORM_TERMINATION_GRACE_SECONDS", "15")),
+                   output_cap_bytes=int(os.getenv("TRANSFORM_OUTPUT_CAP_BYTES", "262144")), cancel_requested=cancel,
+                   manage_runtime=True)
     except BaseException:
-        q.orphan_if_owned(eid,worker,token,"WORKER_EXCEPTION_UNKNOWN_WRITE_STATE"); raise
+        q.orphan_if_owned(eid, worker, token, "WORKER_EXCEPTION_UNKNOWN_WRITE_STATE")
+        raise
     # execute() returns bounded/redacted ProcessResult.output; surface it
-    # without ever logging env vars, credentials, tokens or unredacted output.
+    # at ERROR level so it survives default logger configuration, and
+    # include failure_class for diagnosis. The output is passed through
+    # %r so empty strings and control characters are visible. No env vars,
+    # credentials or tokens are emitted here.
     try:
-        if getattr(r, "output", ""):
-            logger.info("transform dbt output batch_execution_id=%s batch_id=%s status=%s return_code=%s output_truncated=%s output=%s", eid, row.get("batch_id"), r.status, r.return_code, r.output_truncated, r.output)
+        logger.error("transform dbt result batch_execution_id=%s batch_id=%s status=%s return_code=%s output_truncated=%s failure_class=%s output=%r",
+                     eid, row.get("batch_id"), r.status, r.return_code,
+                     r.output_truncated, r.failure_class, r.output)
     except Exception:
         pass
     if lease_lost[0]:
-        q.orphan_if_owned(eid,worker,token,"WORKER_LEASE_LOST_REQUIRES_RECONCILIATION")
+        q.orphan_if_owned(eid, worker, token, "WORKER_LEASE_LOST_REQUIRES_RECONCILIATION")
         return True
-    if r.status=="SUCCEEDED": q.finish(eid,worker,token,"SUCCEEDED",test_status="PASSED")
-    elif r.status=="FAILED": q.finish(eid,worker,token,"FAILED",test_status="NOT_RUN",failure_class=r.failure_class or "DBT_BUILD_FAILED")
-    elif r.status=="CANCELLED": q.finish(eid,worker,token,"CANCELLED",failure_class=r.failure_class or "OPERATOR_CANCELLED")
-    else: q.finish(eid,worker,token,"ORPHANED",failure_class=r.failure_class or "UNKNOWN_WRITE_STATE_REQUIRES_RECONCILIATION")
+    if r.status == "SUCCEEDED":
+        q.finish(eid, worker, token, "SUCCEEDED", test_status="PASSED")
+    elif r.status == "FAILED":
+        q.finish(eid, worker, token, "FAILED", test_status="NOT_RUN",
+                 failure_class=r.failure_class or "DBT_BUILD_FAILED")
+    elif r.status == "CANCELLED":
+        q.finish(eid, worker, token, "CANCELLED", failure_class=r.failure_class or "OPERATOR_CANCELLED")
+    else:
+        q.finish(eid, worker, token, "ORPHANED",
+                 failure_class=r.failure_class or "UNKNOWN_WRITE_STATE_REQUIRES_RECONCILIATION")
     return True
 
+
+def run_once_protected_bootstrap(queue=None,worker=None):
+    """Claim and execute one governed protected-bootstrap operation.
+
+    Mirrors :func:`run_once` for ``protected_bootstrap_executions``. The
+    child is ``materialise_token_link.py``; the row carries the operation
+    identity, the transform run identity, and whether this claim is a
+    first-time create or a reconciliation of a previously orphaned attempt.
+
+    Returns ``True`` when a row was claimed (regardless of outcome), and
+    ``False`` when the queue had nothing to offer. A claimed row always
+    reaches a terminal status: ``SUCCEEDED``/``PUBLISHED`` on success,
+    ``FAILED``/``NOT_STARTED`` on a clean failure, or
+    ``ORPHANED``/``RECONCILIATION_REQUIRED`` on lease loss or unknown
+    write state. The last case is the only one the operator must revisit.
+    """
+    if not enabled(): return False
+    q=queue or PostgresDurableQueue(); worker=worker or f"{socket.gethostname()}:{os.getpid()}"
+    lease=int(os.getenv("TRANSFORM_WORKER_LEASE_SECONDS","30"))
+    row=q.claim_protected_bootstrap(worker,lease)
+    if not row: return False
+    eid=row["bootstrap_execution_id"]; token=row["lease_token"]
+    operation_id=row["operation_id"]; operation_version=int(row["operation_version"])
+    transform_run_id=row["transform_run_id"]
+    reconciliation_only=bool(row.get("reconciliation_only",False))
+    try:
+        cmd=build_protected_bootstrap_command(
+            operation_id,
+            operation_version,
+            eid,
+            transform_run_id,
+            reconciliation_only=reconciliation_only,
+        )
+    except ValueError as exc:
+        # Refusal happens before the child starts: no write state to reconcile.
+        try:
+            q.finish_protected_bootstrap(
+                eid,worker,token,"FAILED","NOT_STARTED",
+                failure_class=f"BOOTSTRAP_COMMAND_REJECTED:{exc}"[:128],
+            )
+        except (DurableQueueError, LeaseLost):
+            pass
+        return True
+    last=[time.monotonic()]; lease_lost=[False]
+    def cancel():
+        if time.monotonic()-last[0]>=max(1,lease//3):
+            if not q.heartbeat_protected_bootstrap(eid,worker,token,lease):
+                lease_lost[0]=True; return True
+            last[0]=time.monotonic()
+        try: return q.cancel_requested_protected_bootstrap(eid,worker,token)
+        except LeaseLost:
+            lease_lost[0]=True; return True
+    try:
+        r = execute(cmd, timeout_seconds=float(os.getenv("TRANSFORM_BATCH_TIMEOUT_SECONDS", "3300")),
+                   termination_grace_seconds=float(os.getenv("TRANSFORM_TERMINATION_GRACE_SECONDS", "15")),
+                   output_cap_bytes=int(os.getenv("TRANSFORM_OUTPUT_CAP_BYTES", "262144")), cancel_requested=cancel,
+                   manage_runtime=True)
+    except BaseException:
+        try:
+            q.finish_protected_bootstrap(
+                eid,worker,token,"ORPHANED","RECONCILIATION_REQUIRED",
+                failure_class="WORKER_EXCEPTION_UNKNOWN_WRITE_STATE",
+            )
+        except (DurableQueueError, LeaseLost):
+            pass
+        raise
+    # execute() returns bounded/redacted ProcessResult.output; surface it
+    # unconditionally at ERROR level so it survives default logger
+    # configuration, and include failure_class for diagnosis. The output
+    # is passed through %r so empty strings and control characters are
+    # visible. No env vars, credentials or tokens are emitted here — the
+    # child's own output is what it chose to print.
+    try:
+        logger.error("protected bootstrap result bootstrap_execution_id=%s operation_id=%s status=%s return_code=%s output_truncated=%s failure_class=%s output=%r",
+                     eid, operation_id, r.status, r.return_code,
+                     r.output_truncated, r.failure_class, r.output)
+    except Exception:
+        pass
+    if lease_lost[0]:
+        try:
+            q.finish_protected_bootstrap(
+                eid,worker,token,"ORPHANED","RECONCILIATION_REQUIRED",
+                failure_class="WORKER_LEASE_LOST_REQUIRES_RECONCILIATION",
+            )
+        except (DurableQueueError, LeaseLost):
+            pass
+        return True
+    if r.status == "SUCCEEDED":
+        q.finish_protected_bootstrap(eid,worker,token,"SUCCEEDED","PUBLISHED")
+    elif r.status == "FAILED":
+        q.finish_protected_bootstrap(
+            eid,worker,token,"FAILED","NOT_STARTED",
+            failure_class=r.failure_class or "BOOTSTRAP_FAILED",
+        )
+    elif r.status == "CANCELLED":
+        q.finish_protected_bootstrap(
+            eid,worker,token,"CANCELLED","NOT_STARTED",
+            failure_class=r.failure_class or "OPERATOR_CANCELLED",
+        )
+    else:
+        q.finish_protected_bootstrap(
+            eid,worker,token,"ORPHANED","RECONCILIATION_REQUIRED",
+            failure_class=r.failure_class or "UNKNOWN_WRITE_STATE_REQUIRES_RECONCILIATION",
+        )
+    return True
+
+
 def main():
+    poll=float(os.getenv("TRANSFORM_WORKER_POLL_SECONDS","1"))
     while True:
-        if not run_once(): time.sleep(float(os.getenv("TRANSFORM_WORKER_POLL_SECONDS","1")))
+        if run_once_protected_bootstrap(): continue
+        if run_once(): continue
+        time.sleep(poll)
 if __name__=="__main__": main()

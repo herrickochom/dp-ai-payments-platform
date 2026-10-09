@@ -56,6 +56,9 @@ def test_command_is_server_owned_and_bounded(batch_id):
         assert "--project-dir" in command.argv
         assert "--profiles-dir" in command.argv
         assert "--select" in command.argv
+        assert "--indirect-selection" in command.argv
+        indirect_index = command.argv.index("--indirect-selection")
+        assert command.argv[indirect_index + 1] == "cautious"
 
         select_index = command.argv.index("--select")
         selected = command.argv[select_index + 1 :]
@@ -75,6 +78,109 @@ def test_command_is_server_owned_and_bounded(batch_id):
     assert "--vars" not in command.argv
     assert "--exclude" not in command.argv
     assert "--selector" not in command.argv
+
+
+def _cautious_test_selection(test_node, selected_models):
+    """Model dbt's cautious indirect-test selection for graph fixtures."""
+    attached_node = test_node.get("attached_node")
+    model_dependencies = {
+        node
+        for node in test_node["depends_on"]["nodes"]
+        if node.startswith("model.")
+    }
+    return (
+        attached_node in selected_models
+        and bool(model_dependencies)
+        and model_dependencies <= selected_models
+    )
+
+
+def test_cautious_selection_keeps_allowlisted_models_and_safe_tests():
+    batch = EXECUTION_BATCHES["C4_ORD_FOUNDATION_04"]
+    command = build_transform_command(
+        batch.batch_id,
+        EXECUTION_ID,
+        credentials_for(batch.authority),
+    )
+    select_index = command.argv.index("--select")
+    selected_names = set(command.argv[select_index + 1 :])
+    expected_names = {
+        node.rsplit(".", 1)[-1]
+        for node in batch.model_allowlist
+    }
+
+    assert selected_names == expected_names
+
+    allowlisted_model, second_allowlisted_model = tuple(
+        sorted(batch.model_allowlist)
+    )[:2]
+    ordinary_test = {
+        "resource_type": "test",
+        "attached_node": allowlisted_model,
+        "depends_on": {
+            "nodes": [allowlisted_model, second_allowlisted_model]
+        },
+    }
+    assert _cautious_test_selection(
+        ordinary_test,
+        set(batch.model_allowlist),
+    )
+
+
+def test_cautious_selection_excludes_test_attached_outside_batch():
+    batch = EXECUTION_BATCHES["C4_ORD_FOUNDATION_04"]
+    in_batch = "model.pdm_platform.slv_pdm_special_groups"
+    out_of_batch = "model.pdm_platform.slv_pdm_beneficiaries"
+    relationship_test = {
+        "resource_type": "test",
+        "attached_node": out_of_batch,
+        "depends_on": {"nodes": [in_batch, out_of_batch]},
+    }
+
+    assert in_batch in batch.model_allowlist
+    assert out_of_batch not in batch.model_allowlist
+    assert not _cautious_test_selection(
+        relationship_test,
+        set(batch.model_allowlist),
+    )
+
+
+def test_cautious_selection_excludes_in_batch_test_with_external_parent():
+    batch = EXECUTION_BATCHES["C4_ORD_FOUNDATION_04"]
+    in_batch = "model.pdm_platform.slv_pdm_special_groups"
+    out_of_batch = "model.pdm_platform.slv_pdm_beneficiaries"
+    relationship_test = {
+        "resource_type": "test",
+        "attached_node": in_batch,
+        "depends_on": {"nodes": [in_batch, out_of_batch]},
+    }
+
+    assert not _cautious_test_selection(
+        relationship_test,
+        set(batch.model_allowlist),
+    )
+
+
+def test_dbt_batch_selectors_cannot_expand_graph_or_tags():
+    for batch_id, batch in EXECUTION_BATCHES.items():
+        if batch.ownership_unit in {"raw_to_bronze", "ml_derived_bronze"}:
+            continue
+
+        command = build_transform_command(
+            batch_id,
+            EXECUTION_ID,
+            credentials_for(batch.authority),
+        )
+        select_index = command.argv.index("--select")
+        selected = command.argv[select_index + 1 :]
+
+        assert selected
+        assert all(re.fullmatch(r"[a-z0-9_]+", value) for value in selected)
+        assert all("+" not in value for value in selected)
+        assert all("@" not in value for value in selected)
+        assert all(":" not in value for value in selected)
+        assert "--selector" not in command.argv
+        assert "--exclude" not in command.argv
 
 
 @pytest.mark.parametrize("batch_id", sorted(EXECUTION_BATCHES))
@@ -134,6 +240,7 @@ def test_raw_to_bronze_is_one_process_with_exactly_24_explicit_models():
     )
     assert "build" not in command.argv
     assert "--select" not in command.argv
+    assert "--indirect-selection" not in command.argv
 
     selected = command.argv[2:]
 

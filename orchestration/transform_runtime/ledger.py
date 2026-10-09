@@ -139,6 +139,88 @@ class TransformLedger:
             raise LedgerError("batch execution not found")
         return dict(row)
 
+    def submit_protected_bootstrap(self, run_id, caller, key, operation):
+        with self.transaction() as db:
+            run = db.execute(
+                "SELECT * FROM transform_runs WHERE transform_run_id=?",
+                (run_id,),
+            ).fetchone()
+            if not run:
+                raise LedgerError("transform run not found")
+            prior = db.execute(
+                "SELECT * FROM protected_bootstrap_executions WHERE caller_identity=? AND idempotency_key=?",
+                (caller, key),
+            ).fetchone()
+            if prior:
+                immutable = (
+                    prior["transform_run_id"], prior["operation_id"],
+                    prior["operation_version"], prior["authority"],
+                )
+                expected = (run_id, operation.operation_id, operation.version, operation.authority)
+                if immutable != expected:
+                    raise LedgerError("idempotency key reused with different semantics")
+                return dict(prior)
+            existing = db.execute(
+                "SELECT * FROM protected_bootstrap_executions WHERE transform_run_id=? AND operation_id=? AND operation_version=?",
+                (run_id, operation.operation_id, operation.version),
+            ).fetchone()
+            if existing:
+                raise LedgerError("protected bootstrap was already admitted")
+            prerequisite = db.execute(
+                "SELECT 1 FROM batch_executions WHERE transform_run_id=? AND batch_id=? AND status='SUCCEEDED' AND test_status='PASSED'",
+                (run_id, operation.prerequisite_batch),
+            ).fetchone()
+            if not prerequisite:
+                raise LedgerError("durable bootstrap prerequisite is incomplete")
+            execution_id = f"be_{uuid4().hex}"
+            accepted = now()
+            branch = f"transform_{run_id}"
+            db.execute(
+                """INSERT INTO protected_bootstrap_executions
+                   (bootstrap_execution_id,transform_run_id,caller_identity,idempotency_key,
+                    operation_id,operation_version,authority,status,publication_state,
+                    nessie_branch,accepted_at,heartbeat_at)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (execution_id, run_id, caller, key, operation.operation_id,
+                 operation.version, operation.authority, "ADMITTED", "NOT_STARTED",
+                 branch, accepted, accepted),
+            )
+            self._event(db, run_id, execution_id, "PROTECTED_BOOTSTRAP_ADMITTED", {
+                "operation_id": operation.operation_id,
+                "operation_version": operation.version,
+                "authority": operation.authority,
+            })
+            return dict(db.execute(
+                "SELECT * FROM protected_bootstrap_executions WHERE bootstrap_execution_id=?",
+                (execution_id,),
+            ).fetchone())
+
+    def get_protected_bootstrap(self, execution_id, caller):
+        row = self.connection.execute(
+            "SELECT * FROM protected_bootstrap_executions WHERE bootstrap_execution_id=? AND caller_identity=?",
+            (execution_id, caller),
+        ).fetchone()
+        if not row:
+            raise LedgerError("protected bootstrap execution not found")
+        return dict(row)
+
+    def queue_protected_bootstrap(self, execution_id):
+        with self.transaction() as db:
+            row = db.execute(
+                "SELECT * FROM protected_bootstrap_executions WHERE bootstrap_execution_id=?",
+                (execution_id,),
+            ).fetchone()
+            if not row or row["status"] != "ADMITTED":
+                raise LedgerError("invalid protected bootstrap state transition")
+            db.execute(
+                "UPDATE protected_bootstrap_executions SET status='QUEUED',heartbeat_at=? WHERE bootstrap_execution_id=?",
+                (now(), execution_id),
+            )
+            return dict(db.execute(
+                "SELECT * FROM protected_bootstrap_executions WHERE bootstrap_execution_id=?",
+                (execution_id,),
+            ).fetchone())
+
     def transition(self, execution_id: str, state: str, *, test_status=None, failure_class=None):
         with self.transaction() as db:
             row = db.execute("SELECT * FROM batch_executions WHERE batch_execution_id=?", (execution_id,)).fetchone()
@@ -519,6 +601,77 @@ class PostgresTransformLedger:
 
             return dict(row)
 
+    def submit_protected_bootstrap(self, run_id, caller, key, operation):
+        with self.transaction() as db:
+            run = db.execute(
+                "SELECT * FROM transform_runs WHERE transform_run_id=%s FOR UPDATE",
+                (run_id,),
+            ).fetchone()
+            if not run:
+                raise LedgerError("transform run not found")
+            prior = db.execute(
+                "SELECT * FROM protected_bootstrap_executions WHERE caller_identity=%s AND idempotency_key=%s",
+                (caller, key),
+            ).fetchone()
+            if prior:
+                immutable = (prior["transform_run_id"], prior["operation_id"], prior["operation_version"], prior["authority"])
+                expected = (run_id, operation.operation_id, operation.version, operation.authority)
+                if immutable != expected:
+                    raise LedgerError("idempotency key reused with different semantics")
+                return dict(prior)
+            if db.execute(
+                "SELECT 1 FROM protected_bootstrap_executions WHERE transform_run_id=%s AND operation_id=%s AND operation_version=%s",
+                (run_id, operation.operation_id, operation.version),
+            ).fetchone():
+                raise LedgerError("protected bootstrap was already admitted")
+            if not db.execute(
+                "SELECT 1 FROM batch_executions WHERE transform_run_id=%s AND batch_id=%s AND status='SUCCEEDED' AND test_status='PASSED'",
+                (run_id, operation.prerequisite_batch),
+            ).fetchone():
+                raise LedgerError("durable bootstrap prerequisite is incomplete")
+            execution_id = f"be_{uuid4().hex}"
+            accepted = now()
+            branch = f"transform_{run_id}"
+            row = db.execute(
+                """INSERT INTO protected_bootstrap_executions
+                   (bootstrap_execution_id,transform_run_id,caller_identity,idempotency_key,
+                    operation_id,operation_version,authority,status,publication_state,
+                    nessie_branch,accepted_at,heartbeat_at)
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,'ADMITTED','NOT_STARTED',%s,%s,%s)
+                   RETURNING *""",
+                (execution_id, run_id, caller, key, operation.operation_id,
+                 operation.version, operation.authority, branch, accepted, accepted),
+            ).fetchone()
+            self._event(db, run_id, execution_id, "PROTECTED_BOOTSTRAP_ADMITTED", {
+                "operation_id": operation.operation_id,
+                "operation_version": operation.version,
+                "authority": operation.authority,
+            })
+            return dict(row)
+
+    def get_protected_bootstrap(self, execution_id, caller):
+        with self.transaction() as db:
+            row = db.execute(
+                "SELECT * FROM protected_bootstrap_executions WHERE bootstrap_execution_id=%s AND caller_identity=%s",
+                (execution_id, caller),
+            ).fetchone()
+            if not row:
+                raise LedgerError("protected bootstrap execution not found")
+            return dict(row)
+
+    def queue_protected_bootstrap(self, execution_id):
+        with self.transaction() as db:
+            row = db.execute(
+                """UPDATE protected_bootstrap_executions
+                   SET status='QUEUED',heartbeat_at=clock_timestamp()
+                   WHERE bootstrap_execution_id=%s AND status='ADMITTED'
+                   RETURNING *""",
+                (execution_id,),
+            ).fetchone()
+            if not row:
+                raise LedgerError("invalid protected bootstrap state transition")
+            return dict(row)
+
     def transition(
         self,
         execution_id: str,
@@ -659,7 +812,7 @@ class PostgresTransformLedger:
 
 
 def _sqlite_schema_version(self):
-    return 3
+    return 4
 
 
 def _pg_schema_version(self):

@@ -6,11 +6,18 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 from fastapi import Depends, FastAPI, HTTPException
-from .auth import require_airflow_identity, runner_headers
+from .auth import require_airflow_identity, require_bootstrap_operator_identity, runner_headers
 from .contract import ContractError, load_contract
 from .execution_plan import EXECUTION_BATCHES
 from .ledger import LedgerError, create_ledger_from_environment, model_fingerprint
-from .models import CreateRunRequest, SubmitBatchRequest, TransformResponse
+from .models import (
+    CreateRunRequest,
+    ProtectedBootstrapResponse,
+    SubmitBatchRequest,
+    SubmitProtectedBootstrapRequest,
+    TransformResponse,
+)
+from .protected_bootstrap import get_protected_bootstrap
 
 CONTRACT_PATH = Path(os.getenv("LAKEHOUSE_TRANSFORM_CONTRACT", "/app/contracts/lakehouse_transform.json"))
 EXECUTION_ENABLED = os.getenv("LAKEHOUSE_TRANSFORM_EXECUTION_ENABLED", "false").lower() == "true"
@@ -25,6 +32,23 @@ def response(row: dict) -> TransformResponse:
     return TransformResponse(accepted=True, transform_run_id=row["transform_run_id"], batch_execution_id=row.get("batch_execution_id"), batch_id=row.get("batch_id"), status=row["status"], accepted_at=row["accepted_at"], started_at=row.get("started_at"), finished_at=row.get("finished_at"), attempt=row.get("attempt"), test_status=row.get("test_status"), failure_class=row.get("failure_class"))
 
 
+def bootstrap_response(row: dict) -> ProtectedBootstrapResponse:
+    return ProtectedBootstrapResponse(
+        accepted=True,
+        transform_run_id=row["transform_run_id"],
+        bootstrap_execution_id=row["bootstrap_execution_id"],
+        operation_id=row["operation_id"],
+        operation_version=row["operation_version"],
+        authority=row["authority"],
+        status=row["status"],
+        publication_state=row["publication_state"],
+        accepted_at=row["accepted_at"],
+        started_at=row.get("started_at"),
+        finished_at=row.get("finished_at"),
+        failure_class=row.get("failure_class"),
+    )
+
+
 
 @app.get("/health")
 def health() -> dict:
@@ -35,7 +59,7 @@ def ready() -> dict:
     try:
         payload, digest = load_contract(CONTRACT_PATH)
         ledger.ping() if hasattr(ledger, "ping") else ledger.connection.execute("SELECT 1").fetchone()
-        if ledger.schema_version() < 2:
+        if ledger.schema_version() < 4:
             raise LedgerError("transform ledger schema is not current")
     except (OSError, ValueError, ContractError, LedgerError) as exc:
         raise HTTPException(status_code=503, detail="transform runtime not ready") from exc
@@ -82,6 +106,96 @@ def submit_batch(run_id: str, request: SubmitBatchRequest, caller: str = Depends
             status_code=503,
             detail="transform execution unavailable",
         ) from exc
+
+
+@app.post(
+    "/v1/runs/{run_id}/protected-bootstraps",
+    response_model=ProtectedBootstrapResponse,
+    status_code=202,
+)
+def submit_protected_bootstrap(
+    run_id: str,
+    request: SubmitProtectedBootstrapRequest,
+    caller: str = Depends(require_bootstrap_operator_identity),
+) -> ProtectedBootstrapResponse:
+    try:
+        operation = get_protected_bootstrap(
+            request.operation_id,
+            request.operation_version,
+        )
+        row = ledger.submit_protected_bootstrap(
+            run_id,
+            caller,
+            request.idempotency_key,
+            operation,
+        )
+        if EXECUTION_ENABLED and row["status"] == "ADMITTED":
+            row = ledger.queue_protected_bootstrap(row["bootstrap_execution_id"])
+        return bootstrap_response(row)
+    except (ValueError, LedgerError) as exc:
+        raise HTTPException(
+            status_code=409,
+            detail="protected bootstrap rejected",
+        ) from exc
+
+
+@app.get(
+    "/v1/protected-bootstraps/{execution_id}",
+    response_model=ProtectedBootstrapResponse,
+)
+def protected_bootstrap_status(
+    execution_id: str,
+    caller: str = Depends(require_bootstrap_operator_identity),
+) -> ProtectedBootstrapResponse:
+    try:
+        return bootstrap_response(
+            ledger.get_protected_bootstrap(execution_id, caller)
+        )
+    except LedgerError as exc:
+        raise HTTPException(
+            status_code=404,
+            detail="protected bootstrap execution not found",
+        ) from exc
+
+
+@app.post(
+    "/v1/protected-bootstraps/{execution_id}/cancel",
+    response_model=ProtectedBootstrapResponse,
+)
+def cancel_protected_bootstrap(
+    execution_id: str,
+    caller: str = Depends(require_bootstrap_operator_identity),
+) -> ProtectedBootstrapResponse:
+    try:
+        ledger.get_protected_bootstrap(execution_id, caller)
+        if not EXECUTION_ENABLED:
+            raise LedgerError("protected bootstrap execution is disabled")
+        from .durable_queue import DurableQueueError, PostgresDurableQueue
+        return bootstrap_response(
+            PostgresDurableQueue().request_cancel_protected_bootstrap(execution_id)
+        )
+    except (LedgerError, DurableQueueError) as exc:
+        raise HTTPException(status_code=409, detail="cancellation rejected") from exc
+
+
+@app.post(
+    "/v1/protected-bootstraps/{execution_id}/reconcile",
+    response_model=ProtectedBootstrapResponse,
+)
+def reconcile_protected_bootstrap(
+    execution_id: str,
+    caller: str = Depends(require_bootstrap_operator_identity),
+) -> ProtectedBootstrapResponse:
+    try:
+        ledger.get_protected_bootstrap(execution_id, caller)
+        if not EXECUTION_ENABLED:
+            raise LedgerError("protected bootstrap execution is disabled")
+        from .durable_queue import DurableQueueError, PostgresDurableQueue
+        return bootstrap_response(
+            PostgresDurableQueue().request_reconcile_protected_bootstrap(execution_id)
+        )
+    except (LedgerError, DurableQueueError) as exc:
+        raise HTTPException(status_code=409, detail="reconciliation rejected") from exc
 
 @app.get("/v1/batches/{execution_id}", response_model=TransformResponse)
 def batch_status(execution_id: str, caller: str = Depends(require_airflow_identity)) -> TransformResponse:

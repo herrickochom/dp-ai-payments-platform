@@ -14,7 +14,7 @@ BASE = (
 )
 
 CONTRACT = BASE / "deployment_command.json"
-INVENTORY = BASE / "compose_inventory.json"
+OPERATIONAL_CORE = BASE / "operational_core.json"
 
 RENDERER = (
     ROOT
@@ -79,12 +79,25 @@ def test_no_recreate_required():
     )
 
 
-def test_core_inventory_is_nonempty_and_unique():
-    inventory = load(INVENTORY)
-    services = inventory["default_services"]
+def test_operational_core_is_nonempty_unique_and_exact():
+    operational_core = load(OPERATIONAL_CORE)
+    services = operational_core["services"]
 
     assert services
     assert len(services) == len(set(services))
+
+    assert set(services) == {
+        "kafka",
+        "minio",
+        "nessie",
+        "payment-consumer-events",
+        "postgres",
+        "redis",
+        "schema-registry",
+    }
+
+    assert "payment-producer" not in services
+    assert all("-init" not in service for service in services)
 
 
 def test_prohibited_mutating_options():

@@ -1,12 +1,12 @@
-"""Regression tests for the Trino password authentication failure.
+"""Regression tests for Trino password authentication and the Superset BI link.
 
-Root cause established from the deployed runtime:
+Two independent root causes are pinned here.
 
-``io.trino.plugin.password.file.EncryptionUtil.getHashingAlgorithm`` rejects any
-BCrypt entry whose cost factor is below 8 and raises
-``HashedPasswordException("Minimum cost of BCrypt password must be 8")``. The
-failure is not reported as a rejected credential; it propagates out of
-``PasswordAuthenticator.authenticate`` and is surfaced to the client as
+**Password store.** ``io.trino.plugin.password.file.EncryptionUtil.
+getHashingAlgorithm`` rejects any BCrypt entry whose cost factor is below 8
+and raises ``HashedPasswordException("Minimum cost of BCrypt password must be
+8")``. The failure is not reported as a rejected credential; it propagates out
+of ``PasswordAuthenticator.authenticate`` and is surfaced to the client as
 
     HTTP 500 java.lang.RuntimeException: Authentication error
 
@@ -15,16 +15,36 @@ failure is not reported as a rejected credential; it propagates out of
 Trino does not support at all. Both failure modes look identical from the
 outside, so the provisioning contract is pinned here.
 
+**BI connection shape.** Three layers in Superset have to agree, and each has
+been the site of a production failure:
+
+* ``dbs.sqlalchemy_uri`` must use the ``trino://`` dialect scheme. The URL
+  scheme resolves to a SQLAlchemy plugin; ``https://`` resolves to
+  ``sqlalchemy.dialects:https``, which does not exist.
+
+* ``dbs.encrypted_extra`` is consumed by ``TrinoEngineSpec.
+  update_params_from_encrypted_extra``, which **overrides** the base class.
+  The override recognises exactly two keys, ``auth_method`` and
+  ``auth_params``; if ``auth_method`` is absent it returns without touching
+  ``params``, silently discarding everything else. On this image, the only way
+  to get ``http_scheme="https"`` into ``connect_args`` is to declare a Trino
+  auth method here.
+
+* The CA bundle path cannot come from ``encrypted_extra`` — the override does
+  not read a ``verify`` value. It goes on the URI query string, JSON-quoted,
+  because the dialect calls ``json.loads()`` on it.
+
 These tests never read a live password database: ``password.db`` is
 gitignored, holds real credentials, and is not present in CI.
 """
 
 from __future__ import annotations
 
+import json
 import re
-from urllib.parse import unquote, urlsplit
 import subprocess
 from pathlib import Path
+from urllib.parse import unquote, urlsplit
 
 import pytest
 import yaml
@@ -34,11 +54,17 @@ ROOT = Path(__file__).resolve().parents[2]
 CATALOG_PROPERTIES = ROOT / "platform" / "trino" / "etc" / "catalog" / "iceberg.properties"
 COMPOSE_PATH = ROOT / "docker-compose.yaml"
 PASSWORD_DB = ROOT / "platform" / "trino" / "etc" / "password.db"
+REGISTRATION_MODULE = ROOT / "platform" / "superset" / "register_bi_connection.py"
 
 #: Minimum cost enforced by Trino's file password authenticator.
 TRINO_MINIMUM_BCRYPT_COST = 8
 
 BCRYPT_ENTRY = re.compile(r"^([^:\s]+):\$2([abxy])\$(\d\d)\$")
+
+
+# ---------------------------------------------------------------------------
+# Password store contract
+# ---------------------------------------------------------------------------
 
 
 def test_trino_enforces_a_minimum_bcrypt_cost() -> None:
@@ -98,6 +124,11 @@ def test_no_password_database_is_committed() -> None:
     )
 
 
+# ---------------------------------------------------------------------------
+# Catalog credential isolation
+# ---------------------------------------------------------------------------
+
+
 def test_iceberg_catalog_has_no_literal_s3_credential() -> None:
     """F9: the catalog credential must be injected, never committed.
 
@@ -117,6 +148,37 @@ def test_iceberg_catalog_has_no_literal_s3_credential() -> None:
         )
 
 
+def test_compose_requires_the_catalog_credential() -> None:
+    """The injected catalog credential must fail closed when absent.
+
+    The Trino catalog must consume the same canonical variables that
+    ``platform/minio/provision_object_store_identities.sh`` provisions for the
+    ``nessie_catalog`` identity. Introducing a second copy of the credential
+    under a private name was tried and reverted: it duplicated a live secret
+    and created a second place for it to drift.
+    """
+    compose = yaml.safe_load(COMPOSE_PATH.read_text(encoding="utf-8"))
+    environment = compose["services"]["trino"]["environment"]
+
+    for key in ("NESSIE_S3_ACCESS_KEY", "NESSIE_S3_SECRET_KEY"):
+        assert key in environment, f"{key} must be passed to the Trino service"
+        assert f"${{{key}:?" in environment[key], (
+            f"SECURITY: {key} must be required, not defaulted, so Trino cannot "
+            "start with an implicit credential"
+        )
+
+    duplicates = [name for name in environment if "CATALOG_S3" in name]
+    assert not duplicates, (
+        "SECURITY: the catalog credential must be supplied only through the "
+        f"canonical NESSIE_S3_* variables, not duplicated: {duplicates}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# MinIO identity provisioning
+# ---------------------------------------------------------------------------
+
+
 def _load_provisioner():
     """Load the provisioning script by path.
 
@@ -127,7 +189,9 @@ def _load_provisioner():
     import importlib.util
 
     path = ROOT / "platform" / "minio" / "provision_object_store_identities.py"
-    spec = importlib.util.spec_from_file_location("provision_object_store_identities", path)
+    spec = importlib.util.spec_from_file_location(
+        "provision_object_store_identities", path
+    )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
@@ -155,7 +219,6 @@ def test_rotation_is_limited_to_the_approved_identities() -> None:
         "ml_prediction_transform",
     }
 
-    # An unapproved identity is rejected before any MinIO contact.
     with pytest.raises(provisioner.ProvisionError):
         provisioner.rotate({}, "not_an_identity")
 
@@ -174,53 +237,22 @@ def test_rotation_target_is_scoped_to_one_identity() -> None:
 
     rows = {row[0]: row for row in provisioner.IDENTITIES}
     _, _, access_name, secret_name = rows["nessie_catalog"]
-    assert (access_name, secret_name) == ("NESSIE_S3_ACCESS_KEY", "NESSIE_S3_SECRET_KEY")
+    assert (access_name, secret_name) == (
+        "NESSIE_S3_ACCESS_KEY",
+        "NESSIE_S3_SECRET_KEY",
+    )
 
-    # The catalog credential and the Trino read credential stay distinct.
     _, _, trino_access, trino_secret = rows["trino_iceberg"]
     assert trino_secret != secret_name
     assert trino_access != access_name
 
-    # Rotation refuses to run without a fully specified administrative
-    # environment, so it cannot silently proceed on partial configuration.
     with pytest.raises(provisioner.ProvisionError):
         provisioner.rotate({}, "nessie_catalog")
 
 
-def test_bi_connection_uri_cannot_be_plaintext() -> None:
-    """The registered BI connection must be authenticated TLS.
-
-    Three separate defects surfaced during runtime provisioning and each is
-    pinned here:
-
-    * the connection defaulted to ``trino://`` on the plaintext listener, which
-      Trino rejects with "TLS/SSL is required for authentication" once
-      ``allow-insecure-over-http`` is false;
-    * the credential is percent-encoded in the URI, because a generated secret
-      may contain ``/`` or ``+`` and an unencoded ``/`` silently truncates the
-      authority (``Port could not be cast to integer value``);
-    * the certificate must be mounted into the service that runs the query,
-      not only into the one-shot initialiser.
-    """
-    compose = yaml.safe_load(COMPOSE_PATH.read_text(encoding="utf-8"))
-
-    # superset-init must be given an explicit URI; it has no default to fall
-    # back to. The webserver does not receive the URI at all - it uses the
-    # connection persisted in the metadata database - but it does need the
-    # certificate, because the webserver is what executes BI queries.
-    assert ":?" in compose["services"]["superset-init"]["environment"]["TRINO_SQLALCHEMY_URI"], (
-        "SECURITY: superset-init must require an explicit BI URI rather than "
-        "defaulting to an unauthenticated connection"
-    )
-
-    for service in ("superset-init", "superset"):
-        assert any(
-            "trino-public.crt" in str(volume)
-            for volume in compose["services"][service]["volumes"]
-        ), (
-            f"SECURITY: {service} needs the coordinator certificate mounted so "
-            "the driver can verify it"
-        )
+# ---------------------------------------------------------------------------
+# BI connection shape
+# ---------------------------------------------------------------------------
 
 
 def _load_bi_registration():
@@ -231,8 +263,9 @@ def _load_bi_registration():
     """
     import importlib.util
 
-    path = ROOT / "platform" / "superset" / "register_bi_connection.py"
-    spec = importlib.util.spec_from_file_location("register_bi_connection", path)
+    spec = importlib.util.spec_from_file_location(
+        "register_bi_connection", REGISTRATION_MODULE
+    )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
@@ -241,10 +274,10 @@ def _load_bi_registration():
 def _executable_source(path: Path) -> str:
     """Return the module source with comments and docstrings removed.
 
-    The rationale for these guards is documented in prose that necessarily names
-    the insecure URI that was removed. Checking raw text would therefore match
-    the documentation rather than the behaviour, so only executable code is
-    inspected.
+    The rationale for these guards is documented in prose that necessarily
+    names the insecure URI that was removed. Checking raw text would therefore
+    match the documentation rather than the behaviour, so only executable code
+    is inspected.
     """
     import ast
 
@@ -265,6 +298,17 @@ def _executable_source(path: Path) -> str:
     return ast.unparse(tree)
 
 
+def _query_value(query: str, key: str) -> str | None:
+    """Return the raw value for ``key`` in a URI query string, or ``None``."""
+    for pair in query.split("&"):
+        if not pair:
+            continue
+        k, _, v = pair.partition("=")
+        if k == key:
+            return v
+    return None
+
+
 def test_registration_has_no_plaintext_or_anonymous_fallback() -> None:
     """The registration step must not embed an insecure default URI.
 
@@ -275,15 +319,13 @@ def test_registration_has_no_plaintext_or_anonymous_fallback() -> None:
     such default.
     """
     module = _load_bi_registration()
-    code = _executable_source(ROOT / "platform" / "superset" / "register_bi_connection.py")
+    code = _executable_source(REGISTRATION_MODULE)
 
-    assert "trino://" not in code, (
-        "SECURITY: BI registration must not contain a plaintext trino:// URI"
-    )
-    assert "os.getenv" not in code or "TRINO_SQLALCHEMY_URI" in code
-    # The only permitted literal scheme is the TLS one.
-    assert set(re.findall(r"""["'](https?|trino)://""", code)) <= {"https"}, (
-        "SECURITY: BI registration may only construct an https:// connection"
+    # The module may construct a ``trino://`` URI (it does so through
+    # ``STORED_SCHEME``) but must not embed an anonymous or plaintext
+    # literal such as ``trino://trino@``.
+    assert "trino://trino@" not in code, (
+        "SECURITY: BI registration must not contain an anonymous trino:// URI"
     )
 
     compose = yaml.safe_load(COMPOSE_PATH.read_text(encoding="utf-8"))
@@ -293,7 +335,47 @@ def test_registration_has_no_plaintext_or_anonymous_fallback() -> None:
         "SECURITY: superset-init must invoke the version-controlled, fail-closed "
         "registration module rather than an inline heredoc"
     )
+
     assert module.BI_TRINO_USER == "superset_bi"
+    assert module.STORED_SCHEME == "trino"
+    # The auth method is the mechanism by which the Trino engine spec sets
+    # ``connect_args["http_scheme"] = "https"``. If this constant changes,
+    # every connection through this module must be re-verified.
+    assert module.TRINO_AUTH_METHOD == "basic"
+
+
+def test_bi_connection_uri_cannot_be_plaintext() -> None:
+    """The registered BI connection must be authenticated TLS.
+
+    Three separate defects surfaced during runtime provisioning and each is
+    pinned here:
+
+    * the connection defaulted to a plaintext listener, which Trino rejects
+      with "TLS/SSL is required for authentication" once
+      ``allow-insecure-over-http`` is false;
+    * the credential is percent-encoded in the URI, because a generated secret
+      may contain ``/`` or ``+`` and an unencoded ``/`` silently truncates the
+      authority (``Port could not be cast to integer value``);
+    * the certificate must be mounted into the service that runs the query,
+      not only into the one-shot initialiser.
+    """
+    compose = yaml.safe_load(COMPOSE_PATH.read_text(encoding="utf-8"))
+
+    assert ":?" in compose["services"]["superset-init"]["environment"][
+        "TRINO_SQLALCHEMY_URI"
+    ], (
+        "SECURITY: superset-init must require an explicit BI URI rather than "
+        "defaulting to an unauthenticated connection"
+    )
+
+    for service in ("superset-init", "superset"):
+        assert any(
+            "trino-public.crt" in str(volume)
+            for volume in compose["services"][service]["volumes"]
+        ), (
+            f"SECURITY: {service} needs the coordinator certificate mounted so "
+            "the driver can verify it"
+        )
 
 
 @pytest.mark.parametrize(
@@ -301,12 +383,21 @@ def test_registration_has_no_plaintext_or_anonymous_fallback() -> None:
     [
         (None, "required"),
         ("", "required"),
-        ("trino://superset_bi:pw@trino:8080/iceberg/consumption", "https"),
-        ("http://superset_bi:pw@trino:8080/iceberg/consumption", "https"),
-        ("https://trino:pw@trino:8443/iceberg/consumption", "superset_bi"),
-        ("https://superset_bi@trino:8443/iceberg/consumption", "superset_bi"),
-        ("https://superset_bi:pw@trino:8443/iceberg/consumption", "verify"),
-        ("https://superset_bi:pw@trino:8443/iceberg/consumption?verify=False", "verify=False"),
+        ("http://superset_bi:pw@trino:8080/iceberg/consumption", "must use one of"),
+        # wrong identity
+        ("https://trino:pw@trino:8443/iceberg/consumption", "must authenticate as"),
+        # correct identity, no credential
+        (
+            "https://superset_bi@trino:8443/iceberg/consumption",
+            "must carry a credential",
+        ),
+        # correct identity and credential, missing verify
+        ("https://superset_bi:pw@trino:8443/iceberg/consumption", "must verify"),
+        # verification explicitly disabled
+        (
+            "https://superset_bi:pw@trino:8443/iceberg/consumption?verify=False",
+            "must not disable certificate verification",
+        ),
     ],
 )
 def test_bi_connection_registration_refuses_insecure_forms(uri, reason: str) -> None:
@@ -331,11 +422,12 @@ def test_bi_connection_credential_is_uri_safe_by_construction() -> None:
     normalised = module.build_bi_connection_uri(raw)
 
     parts = urlsplit(normalised)
+    assert parts.scheme == "trino"
     assert parts.hostname == "trino"
     assert parts.port == 8443
     assert parts.username == "superset_bi"
     assert unquote(parts.password) == "ab/cd+ef"
-    assert "verify=" in parts.query
+    assert _query_value(parts.query, "verify") is not None
 
 
 def test_bi_connection_rejects_unencoded_credential_delimiter() -> None:
@@ -368,27 +460,85 @@ def test_bi_connection_rejection_messages_never_contain_the_credential() -> None
     assert secret not in message
 
 
-def test_compose_requires_the_catalog_credential() -> None:
-    """The injected catalog credential must fail closed when absent.
+def test_bi_connection_stored_uri_uses_trino_scheme_with_bare_host() -> None:
+    """The stored URI must use ``trino://`` with a bare host.
 
-    The Trino catalog must consume the same canonical variables that
-    ``platform/minio/provision_object_store_identities.sh`` provisions for the
-    ``nessie_catalog`` identity. Introducing a second copy of the credential
-    under a private name was tried and reverted: it duplicated a live secret
-    and created a second place for it to drift.
+    ``https://`` as a scheme resolves to ``sqlalchemy.dialects:https``, which
+    does not exist. ``https://`` inside the host field is rejected by
+    ``make_url`` and Superset stores a placeholder. Both failures have been
+    observed in production. The host must be bare; the HTTP scheme is
+    delivered separately, through ``encrypted_extra``.
     """
-    compose = yaml.safe_load(COMPOSE_PATH.read_text(encoding="utf-8"))
-    environment = compose["services"]["trino"]["environment"]
+    module = _load_bi_registration()
 
-    for key in ("NESSIE_S3_ACCESS_KEY", "NESSIE_S3_SECRET_KEY"):
-        assert key in environment, f"{key} must be passed to the Trino service"
-        assert f"${{{key}:?" in environment[key], (
-            f"SECURITY: {key} must be required, not defaulted, so Trino cannot "
-            "start with an implicit credential"
-        )
+    raw = "https://superset_bi:pw@trino:8443/iceberg/consumption?verify=/ca.pem"
+    normalised = module.build_bi_connection_uri(raw)
+    parts = urlsplit(normalised)
 
-    duplicates = [name for name in environment if "CATALOG_S3" in name]
-    assert not duplicates, (
-        "SECURITY: the catalog credential must be supplied only through the "
-        f"canonical NESSIE_S3_* variables, not duplicated: {duplicates}"
+    assert parts.scheme == "trino", (
+        "stored URI must use the trino dialect scheme, not https"
     )
+    assert parts.hostname == "trino", (
+        "stored URI must carry a bare hostname; the HTTP scheme is not "
+        "expressed in the host field"
+    )
+    assert "://" not in (parts.hostname or "")
+
+
+def test_bi_connection_encrypted_extra_declares_trino_auth_method() -> None:
+    """``encrypted_extra`` must declare a Trino auth method.
+
+    ``TrinoEngineSpec.update_params_from_encrypted_extra`` overrides the base
+    class. It recognises exactly two keys, ``auth_method`` and ``auth_params``.
+    If ``auth_method`` is absent, the method returns without touching
+    ``params`` — the DBAPI receives no HTTPS transport instruction, and the
+    connection fails with::
+
+        TrinoAuthError: TLS/SSL is required for authentication
+
+    The failure surfaces three layers away from the cause. Declaring
+    ``auth_method="basic"`` causes the override to set
+    ``connect_args["http_scheme"] = "https"`` and to attach a
+    ``BasicAuthentication`` instance. The base-class ``connect_args`` shape is
+    silently ignored on this image.
+    """
+    module = _load_bi_registration()
+
+    raw = "https://superset_bi:pw@trino:8443/iceberg/consumption?verify=/ca.pem"
+    payload = json.loads(module.build_encrypted_extra(raw))
+
+    assert payload == {"auth_method": "basic", "auth_params": {}}
+    # The base-class shape is silently ignored by the Trino override.
+    assert "connect_args" not in payload
+    assert "engine_params" not in payload
+
+
+def test_bi_connection_uri_carries_json_quoted_verify() -> None:
+    """The CA bundle path must be on the URI as a JSON-encoded string.
+
+    ``TrinoEngineSpec.update_params_from_encrypted_extra`` sets ``http_scheme``
+    but never reads a ``verify`` value. The Trino SQLAlchemy dialect reads
+    ``verify`` from the URL query string and calls ``json.loads()`` on it, so
+    the path must be JSON-quoted when stored.
+
+    Operators may hand the input URI in any of three forms (bare path,
+    JSON-quoted, percent-encoded JSON). All are normalised to the JSON-quoted
+    form on the stored URI.
+    """
+    module = _load_bi_registration()
+
+    for raw in (
+        'https://superset_bi:pw@trino:8443/iceberg/consumption?verify="/etc/ssl/certs/trino-public.crt"',
+        "https://superset_bi:pw@trino:8443/iceberg/consumption?verify=%22%2Fetc%2Fssl%2Fcerts%2Ftrino-public.crt%22",
+        "https://superset_bi:pw@trino:8443/iceberg/consumption?verify=/etc/ssl/certs/trino-public.crt",
+    ):
+        uri = module.build_bi_connection_uri(raw)
+        parts = urlsplit(uri)
+
+        raw_verify = _query_value(parts.query, "verify")
+        assert raw_verify is not None, "verify query parameter must be present"
+
+        # The stored value must be a JSON string literal that json.loads()
+        # accepts, because that is what the dialect does with it.
+        decoded = unquote(raw_verify)
+        assert json.loads(decoded) == "/etc/ssl/certs/trino-public.crt"

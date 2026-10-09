@@ -8,11 +8,14 @@ from __future__ import annotations
 
 import hashlib
 import hmac
-import os
 import re
 from dataclasses import dataclass
 
-from services.shared.security.secret_provider import SecretUnavailable, require_secret
+from services.shared.security.secret_provider import (
+    SecretUnavailable,
+    require_mounted_secret,
+    require_secret,
+)
 
 
 class TokenisationKeyMissing(RuntimeError):
@@ -21,6 +24,9 @@ class TokenisationKeyMissing(RuntimeError):
 
 MISSING_KEY_MESSAGE = (
     "DP_TOKEN_KEY is not configured; tokenisation is mandatory so fail closed"
+)
+MISSING_KEY_VERSION_MESSAGE = (
+    "DP_TOKEN_KEY_VERSION is not configured; tokenisation is mandatory so fail closed"
 )
 
 
@@ -36,8 +42,21 @@ def _required_token_key() -> str:
 
 
 def _active_key() -> tuple[bytes, str]:
+    """Resolve the active key and its version, refusing an unversioned key.
+
+    The version is resolved from the mounted secret source only. Falling
+    back to an ambient environment variable of the same name, or to a
+    literal default, would let a token be produced under a version the
+    operator never provisioned on the mount. A key without a matching
+    version cannot be reconciled or re-derived, so absence fails closed.
+    """
     raw = _required_token_key()
-    version = os.getenv("DP_TOKEN_KEY_VERSION", "v1")
+    try:
+        version = require_mounted_secret("DP_TOKEN_KEY_VERSION")
+    except SecretUnavailable as exc:
+        raise TokenisationKeyMissing(MISSING_KEY_VERSION_MESSAGE) from exc
+    if not version.strip():
+        raise TokenisationKeyMissing(MISSING_KEY_VERSION_MESSAGE)
     return raw.encode("utf-8"), version
 
 

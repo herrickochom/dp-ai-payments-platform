@@ -17,14 +17,14 @@ CONTRACT = (
     / "deployment_command.json"
 )
 
-INVENTORY = (
+OPERATIONAL_CORE = (
     ROOT
     / "infra"
     / "terraform"
     / "targets"
     / "local"
     / "contracts"
-    / "compose_inventory.json"
+    / "operational_core.json"
 )
 
 
@@ -34,9 +34,9 @@ def load(path):
 
 def build_command():
     contract = load(CONTRACT)
-    inventory = load(INVENTORY)
+    operational_core = load(OPERATIONAL_CORE)
 
-    services = inventory["default_services"]
+    services = operational_core["services"]
 
     if not services:
         raise RuntimeError(

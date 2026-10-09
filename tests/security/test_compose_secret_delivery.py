@@ -138,13 +138,37 @@ def test_kafka_tls_paths_are_paths_not_secret_values():
 @pytest.mark.parametrize("service", DP_SEAM_SERVICES)
 def test_secret_provider_callers_receive_dp_secret_source(service):
     env = environment_of(service)
-    assert env.get("DP_SECRET_SOURCE") == "${DP_SECRET_SOURCE:-}"
+    expected = "mounted-files" if service == "platform-job-runner" else "${DP_SECRET_SOURCE:-}"
+    assert env.get("DP_SECRET_SOURCE") == expected
 
 
 @pytest.mark.parametrize("service", DP_SEAM_SERVICES)
 def test_dp_secret_dir_supplyable_but_not_mandatory(service):
     env = environment_of(service)
-    assert env.get("DP_SECRET_DIR") == "${DP_SECRET_DIR:-}"
+    expected = "/run/secrets/protected-bootstrap" if service == "platform-job-runner" else "${DP_SECRET_DIR:-}"
+    assert env.get("DP_SECRET_DIR") == expected
+
+
+def test_token_key_files_are_mounted_only_on_protected_bootstrap_runner():
+    runner = services()["platform-job-runner"]
+    assert any(
+        "/run/secrets/protected-bootstrap:ro" in volume
+        for volume in runner.get("volumes", [])
+    )
+    for name, config in services().items():
+        if name == "platform-job-runner":
+            continue
+        assert all(
+            "/run/secrets/protected-bootstrap" not in volume
+            for volume in config.get("volumes", [])
+        )
+
+
+def test_token_secrets_are_not_declared_as_service_environment_values():
+    for config in services().values():
+        environment = config.get("environment", {})
+        assert "DP_TOKEN_KEY" not in environment
+        assert "DP_TOKEN_KEY_VERSION" not in environment
 
 
 def test_no_required_error_semantics_on_secret_delivery():

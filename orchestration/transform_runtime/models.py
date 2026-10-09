@@ -40,6 +40,33 @@ class SubmitBatchRequest(BaseModel):
     idempotency_key: str = Field(min_length=16, max_length=128)
 
 
+class SubmitProtectedBootstrapRequest(BaseModel):
+    """A closed request surface: no SQL, relation, branch, command or secrets."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    operation_id: Literal["initial_token_link_creation"]
+    operation_version: Literal[1]
+    idempotency_key: str = Field(min_length=16, max_length=128)
+
+
+class ProtectedBootstrapResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    accepted: bool
+    transform_run_id: str
+    bootstrap_execution_id: str
+    operation_id: str
+    operation_version: int
+    authority: str
+    status: str
+    publication_state: str
+    accepted_at: datetime
+    started_at: datetime | None = None
+    finished_at: datetime | None = None
+    failure_class: str | None = None
+
+
 class TransformResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

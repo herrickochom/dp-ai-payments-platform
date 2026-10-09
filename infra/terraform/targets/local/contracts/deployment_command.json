@@ -1,15 +1,12 @@
 {
   "contract_version": 1,
   "name": "pdm_local_deployment_command",
-
   "target": "local",
   "scope": "core",
-
   "authority": {
     "terraform": "DEPLOYMENT_GOVERNANCE_CONTROL_PLANE",
     "docker_compose": "LOCAL_APPLICATION_TOPOLOGY_AUTHORITY"
   },
-
   "execution": {
     "enabled": false,
     "design_only": true,
@@ -17,7 +14,6 @@
     "implicit_default_up_prohibited": true,
     "no_recreate_required": true
   },
-
   "command": {
     "executable": "docker",
     "arguments_prefix": [
@@ -26,14 +22,12 @@
       "-d",
       "--no-recreate"
     ],
-    "service_source": "compose_inventory.default_services"
+    "service_source": "operational_core.services"
   },
-
   "required_flags": [
     "-d",
     "--no-recreate"
   ],
-
   "prohibited_tokens": [
     "--build",
     "--pull",
@@ -47,7 +41,6 @@
     "restart",
     "rm"
   ],
-
   "safety": {
     "existing_containers_may_be_recreated": false,
     "existing_containers_may_be_stopped": false,
@@ -62,7 +55,6 @@
     "token_link_may_be_rematerialised": false,
     "gate3_recovery_may_run": false
   },
-
   "acceptance": {
     "command_may_be_rendered": true,
     "command_may_be_executed": false,

@@ -32,7 +32,7 @@ COPY --from=transform-trino /usr/lib/trino /usr/lib/trino
 COPY --from=transform-trino /usr/lib/jvm/temurin/jdk-24.0.2+12 /usr/lib/jvm/temurin/jdk-24.0.2+12
 COPY --chown=50001:50001 platform/trino/etc/password.db /opt/transform-trino-security/password.db
 COPY platform/trino/etc/rules.json /opt/transform-trino-security/rules.json
-COPY platform/trino/etc/trino-keystore.jks /opt/transform-trino-security/trino-keystore.jks
+COPY --chown=50001:50001 platform/trino/etc/trino-keystore.jks /opt/transform-trino-security/trino-keystore.jks
 
 RUN useradd \
       --uid 50001 \
