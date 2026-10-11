@@ -1,0 +1,128 @@
+###############################################################################
+# Apache Flink — Day-0 session-cluster configuration
+#
+# Scope: STR-002B / B1 (streaming-route substrate infrastructure).
+#
+# This file configures a two-container Flink session cluster
+# (flink-jobmanager + flink-taskmanager) on the Compose network
+# `data-platform-network`.
+#
+# It does NOT configure topic names, schema subjects, canonical lifecycle
+# keys, or job-specific contracts. Those are STR-002B / B2 (contract-bound),
+# and STR-003 onward.
+#
+# No secret values appear in this file. Credentials for MinIO checkpoints
+# and the Prometheus reporter endpoint are supplied at runtime by Compose
+# environment variables, or by the shared secret provider.
+#
+# Conventions follow platform/trino/etc/config.properties:
+#   - Commented sections
+#   - Non-default settings explained inline
+#   - Values that must be supplied at runtime reference an env var name
+###############################################################################
+
+# -----------------------------------------------------------------------------
+# Cluster identity and RPC
+# -----------------------------------------------------------------------------
+# These values are stable for the Day-0 single-node topology on the Compose
+# network. Changing them requires a coordinated update in docker-compose.yaml.
+jobmanager.rpc.address: flink-jobmanager
+jobmanager.rpc.port: 6123
+
+jobmanager.bind-host: 0.0.0.0
+taskmanager.bind-host: 0.0.0.0
+taskmanager.host: flink-taskmanager
+
+# -----------------------------------------------------------------------------
+# Memory
+# -----------------------------------------------------------------------------
+# Day-0 development defaults. Non-functional sizing requirements for
+# production are tracked as risk U12 in docs/streaming/risk-register.md and
+# must be supplied by the platform operations owner before production use.
+jobmanager.memory.process.size: 1024m
+taskmanager.memory.process.size: 2048m
+
+# -----------------------------------------------------------------------------
+# Task slots
+# -----------------------------------------------------------------------------
+# 2 slots per TaskManager is a deliberate Day-0 default: enough to run the
+# skeleton job alongside a stateful stream job without oversubscribing the
+# container. Parallelism per job is bounded by this value until the topology
+# is scaled.
+taskmanager.numberOfTaskSlots: 2
+
+# -----------------------------------------------------------------------------
+# State backend
+# -----------------------------------------------------------------------------
+# RocksDB is chosen per the ADR and the phased plan: lifecycle keyed state
+# can outgrow memory, and RocksDB persists to disk between checkpoints.
+state.backend: rocksdb
+state.backend.incremental: true
+
+# -----------------------------------------------------------------------------
+# Checkpoints
+# -----------------------------------------------------------------------------
+# Storage is MinIO via the S3 filesystem plugin, using a dedicated prefix
+# under the existing object store. This is NOT under raw/ or warehouse/.
+#
+# Credentials are supplied at runtime. The bucket name is set by the
+# OBJECT_STORE_BUCKET environment variable; the endpoint by S3_ENDPOINT.
+# Path is intentionally left as a directory prefix, not a full URI, so the
+# bucket and endpoint come from Compose environment.
+
+execution.checkpointing.mode: EXACTLY_ONCE
+# Day-0 interval. Production intervals are a sizing decision tracked under
+# U12 and STR-003.
+execution.checkpointing.interval: 30s
+execution.checkpointing.min-pause: 10s
+execution.checkpointing.timeout: 10min
+execution.checkpointing.max-concurrent-checkpoints: 1
+execution.checkpointing.externalized-checkpoint-retention: RETAIN_ON_CANCELLATION
+
+# -----------------------------------------------------------------------------
+# Restart strategy
+# -----------------------------------------------------------------------------
+# Fixed-delay restart for Day-0. Production strategy is a STR-003 decision.
+restart-strategy: fixed-delay
+restart-strategy.fixed-delay.attempts: 5
+restart-strategy.fixed-delay.delay: 10s
+
+# -----------------------------------------------------------------------------
+# Metrics — Prometheus reporter
+# -----------------------------------------------------------------------------
+# The Flink Prometheus reporter exposes a scrape endpoint on the
+# TaskManager. Prometheus itself is deployed in STR-008; the reporter is
+# enabled here so that STR-002B/B1 already emits metrics, per cross-cutting
+# workstream WS-2 in the phased plan.
+metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
+metrics.reporter.prom.port: 9249
+
+# -----------------------------------------------------------------------------
+# S3 filesystem (for checkpoint storage)
+# -----------------------------------------------------------------------------
+# The S3 plugin is bundled into the image by Dockerfile.flink. Endpoint,
+# path-style, and credentials are supplied via Compose environment and the
+# Flink S3 filesystem options below.
+s3.path.style.access: true
+s3.connection.maximum: 50
+s3.connection.timeout: 60000
+s3.connection.request.timeout: 60000
+
+# Access keys are supplied via the standard AWS_ACCESS_KEY_ID /
+# AWS_SECRET_ACCESS_KEY environment variables provided by Compose, using a
+# dedicated least-privilege identity. They are NOT written to this file.
+
+# -----------------------------------------------------------------------------
+# Web UI
+# -----------------------------------------------------------------------------
+# The JobManager web UI is published by Compose to a loopback-only host port.
+# This file only configures the in-container bind.
+jobmanager.web.address: 0.0.0.0
+jobmanager.web.port: 8081
+
+# -----------------------------------------------------------------------------
+# Class loading
+# -----------------------------------------------------------------------------
+# Child-first class loading is the Flink default. It is set explicitly so
+# that connector dependencies do not collide with the Flink distribution.
+classloader.resolve-order: child-first

@@ -38,6 +38,7 @@ IDENTITIES = (
     ("ordinary_transform", "ordinary-transform", "ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID", "ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY"),
     ("restricted_identity_transform", "restricted-transform", "RESTRICTED_TRANSFORM_S3_ACCESS_KEY_ID", "RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY"),
     ("ml_prediction_transform", "ml-transform", "ML_TRANSFORM_S3_ACCESS_KEY_ID", "ML_TRANSFORM_S3_SECRET_ACCESS_KEY"),
+    ("flink_checkpoint", "flink-checkpoint", "FLINK_CHECKPOINT_S3_ACCESS_KEY_ID", "FLINK_CHECKPOINT_S3_SECRET_ACCESS_KEY"),
 )
 POLICY_SCOPE = {
     "raw-ingest": ({"raw/v2", "raw/v2/*"}, {RAW: WRITE}),
@@ -48,6 +49,14 @@ POLICY_SCOPE = {
     "ordinary-transform": ({"raw/v2", "raw/v2/*", "warehouse", "warehouse/*"}, {RAW: READ, WAREHOUSE: ICEBERG}),
     "restricted-transform": ({"raw/v2", "raw/v2/*", "warehouse", "warehouse/*"}, {RAW: READ, WAREHOUSE: ICEBERG}),
     "ml-transform": ({"raw/v2", "raw/v2/*", "warehouse", "warehouse/*"}, {RAW: READ, WAREHOUSE: ICEBERG}),
+    "flink-checkpoint": (
+        {"flink/checkpoints", "flink/checkpoints/*",
+         "flink/savepoints",  "flink/savepoints/*"},
+        {
+            f"{BUCKET}/flink/checkpoints/*": ICEBERG,
+            f"{BUCKET}/flink/savepoints/*":  ICEBERG,
+        },
+    ),
 }
 
 
@@ -58,10 +67,10 @@ class ProvisionError(Exception):
 def validate_all() -> None:
     names = [row[0] for row in IDENTITIES]
     policies = [row[1] for row in IDENTITIES]
-    if len(IDENTITIES) != 8 or len(set(names)) != 8 or set(policies) != set(POLICY_SCOPE):
+    if len(IDENTITIES) != 9 or len(set(names)) != 9 or set(policies) != set(POLICY_SCOPE):
         raise ProvisionError("identity/policy mapping is incomplete")
     if {path.name for path in POLICY_DIR.glob("*.json")} != {f"{name}.json" for name in policies}:
-        raise ProvisionError("policy inventory differs from the eight approved policies")
+        raise ProvisionError(f"policy inventory differs from the {len(IDENTITIES)} approved policies")
     for name in policies:
         try:
             document = json.loads((POLICY_DIR / f"{name}.json").read_text())
@@ -219,7 +228,7 @@ def apply(source: dict[str, str]) -> None:
             mc(["admin", "user", "add", ALIAS, access_key, source[secret_name]], environment)
         if policy not in existing.get(access_key, set()):
             mc(attachment_command(policy, access_key), environment)
-    print(f"Reconciled eight service identities; {preserved} existing user secret(s) were not verified or rotated")
+    print(f"Reconciled {len(IDENTITIES)} service identities; {preserved} existing user secret(s) were not verified or rotated")
 
 
 def rotate(source: dict[str, str], identity: str) -> None:
@@ -231,7 +240,7 @@ def rotate(source: dict[str, str], identity: str) -> None:
     means a credential that has leaked through, for example, version control
     cannot be revoked through ``--apply`` at all.
 
-    This mode is the deliberate exception. It is limited to the eight approved
+    This mode is the deliberate exception. It is limited to the approved
     identities, requires the user to already exist, and uses the same
     ``mc admin user add`` call that ``apply`` uses to create a user, which
     replaces the stored secret. The access key, the policy attachment and every
@@ -241,7 +250,7 @@ def rotate(source: dict[str, str], identity: str) -> None:
     require_apply_environment(source)
     rows = {row[0]: row for row in IDENTITIES}
     if identity not in rows:
-        raise ProvisionError("unknown identity; rotation is limited to the eight approved identities")
+        raise ProvisionError(f"unknown identity; rotation is limited to the {len(IDENTITIES)} approved identities")
     _, policy, access_name, secret_name = rows[identity]
 
     environment = admin_environment(source)
@@ -293,7 +302,7 @@ def main(argv: list[str] | None = None, source: dict[str, str] | None = None) ->
     try:
         validate_all()
         if argv == ["--validate"]:
-            print("VALID: eight scoped policies and identity mappings")
+            print("VALID: nine scoped policies and identity mappings")
         elif argv == ["--dry-run"]:
             print("PLAN (offline; no mutation):")
             for identity, policy, _, _ in IDENTITIES:

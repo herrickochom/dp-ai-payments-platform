@@ -926,6 +926,7 @@ services:
       TRINO_PORT: '8080'
       TRINO_CATALOG: iceberg
       TRINO_SCHEMA: consumption
+      TRINO_SQLALCHEMY_URI: ${TRINO_SQLALCHEMY_URI:?TRINO_SQLALCHEMY_URI with superset_bi credentials must be supplied}
       SUPERSET_WEB_WORKERS: ${SUPERSET_WEB_WORKERS:-4}
       SUPERSET_WEB_THREADS: ${SUPERSET_WEB_THREADS:-4}
       SUPERSET_WEBSERVER_TIMEOUT: ${SUPERSET_WEBSERVER_TIMEOUT:-120}
@@ -987,6 +988,7 @@ services:
       TRINO_PORT: '8080'
       TRINO_CATALOG: iceberg
       TRINO_SCHEMA: consumption
+      TRINO_SQLALCHEMY_URI: ${TRINO_SQLALCHEMY_URI:?TRINO_SQLALCHEMY_URI with superset_bi credentials must be supplied}
       SUPERSET_CELERY_WORKERS: ${SUPERSET_CELERY_WORKERS:-2}
     volumes:
     - ./platform/superset/superset_config.py:/app/pythonpath/superset_config.py:ro
@@ -1599,6 +1601,8 @@ services:
       RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY: ${RESTRICTED_TRANSFORM_S3_SECRET_ACCESS_KEY}
       ML_TRANSFORM_S3_ACCESS_KEY_ID: ${ML_TRANSFORM_S3_ACCESS_KEY_ID}
       ML_TRANSFORM_S3_SECRET_ACCESS_KEY: ${ML_TRANSFORM_S3_SECRET_ACCESS_KEY}
+      FLINK_CHECKPOINT_S3_ACCESS_KEY_ID: ${FLINK_CHECKPOINT_S3_ACCESS_KEY_ID}
+      FLINK_CHECKPOINT_S3_SECRET_ACCESS_KEY: ${FLINK_CHECKPOINT_S3_SECRET_ACCESS_KEY}
     depends_on:
       minio:
         condition: service_healthy
@@ -1609,6 +1613,78 @@ services:
     restart: 'no'
     networks:
     - data-platform-network
+  flink-jobmanager:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.flink
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-flink-jobmanager
+    hostname: flink-jobmanager
+    profiles:
+    - streaming
+    environment:
+      FLINK_PROPERTIES: |
+
+        state.checkpoints.dir: s3://${OBJECT_STORE_BUCKET}/flink/checkpoints
+        state.savepoints.dir: s3://${OBJECT_STORE_BUCKET}/flink/savepoints
+        s3.endpoint: ${S3_ENDPOINT}
+        s3.path.style.access: true
+      AWS_ACCESS_KEY_ID: ${FLINK_CHECKPOINT_S3_ACCESS_KEY_ID:?FLINK_CHECKPOINT_S3_ACCESS_KEY_ID is required}
+      AWS_SECRET_ACCESS_KEY: ${FLINK_CHECKPOINT_S3_SECRET_ACCESS_KEY:?FLINK_CHECKPOINT_S3_SECRET_ACCESS_KEY is required}
+      JVM_ARGS: "--add-opens=java.base/java.util=ALL-UNNAMED"
+    command: jobmanager
+    ports:
+    - 127.0.0.1:${FLINK_JOBMANAGER_UI_PORT:-8082}:8081
+    depends_on:
+      kafka:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      postgres-healthcheck:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    networks:
+    - data-platform-network
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - curl -fsS http://localhost:8081/overview >/dev/null || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+  flink-taskmanager:
+    build:
+      context: .
+      dockerfile: platform/docker/dockerfiles/Dockerfile.flink
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-pdm-ai-platform}-flink-taskmanager
+    hostname: flink-taskmanager
+    profiles:
+    - streaming
+    environment:
+      FLINK_PROPERTIES: |
+
+        state.checkpoints.dir: s3://${OBJECT_STORE_BUCKET}/flink/checkpoints
+        state.savepoints.dir: s3://${OBJECT_STORE_BUCKET}/flink/savepoints
+        s3.endpoint: ${S3_ENDPOINT}
+        s3.path.style.access: true
+      AWS_ACCESS_KEY_ID: ${FLINK_CHECKPOINT_S3_ACCESS_KEY_ID:?FLINK_CHECKPOINT_S3_ACCESS_KEY_ID is required}
+      AWS_SECRET_ACCESS_KEY: ${FLINK_CHECKPOINT_S3_SECRET_ACCESS_KEY:?FLINK_CHECKPOINT_S3_SECRET_ACCESS_KEY is required}
+      JVM_ARGS: "--add-opens=java.base/java.util=ALL-UNNAMED"
+    command: taskmanager
+    depends_on:
+      flink-jobmanager:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+    - data-platform-network
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - curl -fsS http://localhost:9249/ >/dev/null || exit 0
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 networks:
   data-platform-network:
     name: ${DOCKER_NETWORK:-data-platform-network}
@@ -1630,3 +1706,4 @@ volumes:
   airflow-logs: null
   airflow-config: null
   platform-job-audit-data: null
+  flink-data: null

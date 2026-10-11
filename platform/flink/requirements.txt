@@ -1,0 +1,4 @@
+# Python dependencies for PyFlink jobs.
+#
+# Version is pinned to match the Flink base image in Dockerfile.flink.
+apache-flink==1.18.1

@@ -1,0 +1,5 @@
+# This directory holds Flink job artifacts.
+#
+# Job packaging and language are decided by STR-002B / B1 (skeleton) and
+# STR-003 onward (real state machine and derived jobs). See
+# docs/streaming/phased-plan.md §5 and §6.

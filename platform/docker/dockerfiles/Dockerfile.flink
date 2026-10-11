@@ -1,0 +1,103 @@
+# ==============================================================================
+# Apache Flink — PDM streaming route
+# ==============================================================================
+# Pinned release for reproducible builds. Avoid :latest in a controlled stack.
+#
+# Scope: STR-002B / B1.
+#
+# This image adds:
+#   - Python 3 and PyFlink (for job development)
+#   - A `python` symlink to `python3` (PyFlink invokes `python` literally)
+#   - The Flink S3 filesystem plugin (from the base image's opt/ directory)
+#   - The Flink Prometheus metrics reporter (fetched from Maven Central at a
+#     pinned version, because the Docker Official Image no longer ships it)
+#   - The Flink Kafka connector (fetched from Maven Central; PyFlink's
+#     KafkaSource and KafkaSink require the Java connector on the classpath)
+#
+# It does NOT add:
+#   - Schema Registry client libraries (added per-job if needed)
+#   - Any secret value
+# ==============================================================================
+
+FROM flink:1.18.1-scala_2.12-java17
+
+# Pinned versions. Must match the Flink distribution.
+ARG FLINK_VERSION=1.18.1
+ARG KAFKA_CONNECTOR_VERSION=3.1.0-1.18
+
+USER root
+
+# ------------------------------------------------------------------------------
+# System packages
+# ------------------------------------------------------------------------------
+# Python is needed for PyFlink. curl is used for healthchecks and Maven
+# downloads below. The `python` symlink is required because PyFlink's driver
+# invokes `python` (no version suffix), and the Debian slim base provides
+# only `python3`.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+        python3 \
+        python3-pip \
+        python3-venv \
+        curl \
+ && ln -sf /usr/bin/python3 /usr/local/bin/python \
+ && rm -rf /var/lib/apt/lists/*
+
+# ------------------------------------------------------------------------------
+# Python dependencies for PyFlink jobs
+# ------------------------------------------------------------------------------
+COPY platform/flink/requirements.txt /tmp/requirements.txt
+RUN python3 -m pip install --no-cache-dir --upgrade pip \
+ && python3 -m pip install --no-cache-dir -r /tmp/requirements.txt \
+ && rm /tmp/requirements.txt
+
+# ------------------------------------------------------------------------------
+# Flink plugins — S3 filesystem and Prometheus reporter
+# ------------------------------------------------------------------------------
+# The S3 filesystem plugin is present in the base image's opt/ directory.
+# The Prometheus reporter is not; it is fetched from Maven Central at a
+# version matching the Flink distribution.
+RUN mkdir -p /opt/flink/plugins/s3-fs-hadoop \
+ && cp /opt/flink/opt/flink-s3-fs-hadoop-*.jar /opt/flink/plugins/s3-fs-hadoop/ \
+ && mkdir -p /opt/flink/plugins/metrics-prometheus \
+ && curl -fsSL -o /opt/flink/plugins/metrics-prometheus/flink-metrics-prometheus-${FLINK_VERSION}.jar \
+        "https://repo1.maven.org/maven2/org/apache/flink/flink-metrics-prometheus/${FLINK_VERSION}/flink-metrics-prometheus-${FLINK_VERSION}.jar" \
+ && test -s /opt/flink/plugins/metrics-prometheus/flink-metrics-prometheus-${FLINK_VERSION}.jar
+
+# ------------------------------------------------------------------------------
+# Kafka connector — required by PyFlink's KafkaSource and KafkaSink
+# ------------------------------------------------------------------------------
+# The Flink base image ships the runtime but not connector JARs. PyFlink
+# wraps the Java KafkaSource class, which must be on the Flink classpath at
+# submission time. The shaded flink-sql-connector-kafka JAR includes the
+# Kafka client and is the supported artifact for PyFlink.
+#
+# Placed in /opt/flink/lib/ so it is loaded by every job submitted to this
+# cluster. For per-job isolation, the JAR could instead be passed via
+# `flink run --jarfile`, but a baked-in connector is simpler and matches
+# how the connector is expected to be available to all jobs in this route.
+RUN curl -fsSL -o /opt/flink/lib/flink-sql-connector-kafka-${KAFKA_CONNECTOR_VERSION}.jar \
+        "https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-kafka/${KAFKA_CONNECTOR_VERSION}/flink-sql-connector-kafka-${KAFKA_CONNECTOR_VERSION}.jar" \
+ && test -s /opt/flink/lib/flink-sql-connector-kafka-${KAFKA_CONNECTOR_VERSION}.jar
+
+# ------------------------------------------------------------------------------
+# Configuration and jobs
+# ------------------------------------------------------------------------------
+# The conf directory is COPYed at build time as a fallback, but Compose
+# mounts it read-only at runtime so config changes do not require a rebuild.
+COPY platform/flink/conf/ /opt/flink/conf/
+
+# Jobs are baked into the image.
+COPY platform/flink/jobs/ /opt/flink/jobs/
+
+# ------------------------------------------------------------------------------
+# Ownership and user
+# ------------------------------------------------------------------------------
+RUN chown -R flink:flink /opt/flink/conf /opt/flink/jobs /opt/flink/lib
+
+USER flink
+
+# ------------------------------------------------------------------------------
+# Ports
+# ------------------------------------------------------------------------------
+EXPOSE 8081 6123 9249
