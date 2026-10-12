@@ -1,0 +1,20 @@
+{
+  "type": "record", "name": "LifecycleState", "namespace": "com.payments.platform",
+  "fields": [
+    {"name":"correlation_id","type":"string"},
+    {"name":"current_stage","type":"string"},
+    {"name":"current_status","type":"string"},
+    {"name":"last_event_id","type":"string"},
+    {"name":"last_event_timestamp","type":"string"},
+    {"name":"last_processing_timestamp","type":"string"},
+    {"name":"first_seen_at","type":"string"},
+    {"name":"updated_at","type":"string"},
+    {"name":"stage_history","type":{"type":"array","items":"string"}},
+    {"name":"retry_count","type":"int"},
+    {"name":"sla_deadline","type":["null","string"],"default":null},
+    {"name":"sla_breached","type":"boolean","default":false},
+    {"name":"end_to_end_id","type":["null","string"],"default":null},
+    {"name":"instruction_id","type":["null","string"],"default":null},
+    {"name":"schema_version","type":"string","default":"1.0.0"}
+  ]
+}

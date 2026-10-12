@@ -1,0 +1,17 @@
+{
+  "type": "record", "name": "LifecycleDeadLetter", "namespace": "com.payments.platform",
+  "fields": [
+    {"name":"dlq_id","type":"string"},
+    {"name":"correlation_id","type":["null","string"],"default":null},
+    {"name":"reason_code","type":"string"},
+    {"name":"reason_detail","type":["null","string"],"default":null},
+    {"name":"original_topic","type":"string"},
+    {"name":"original_partition","type":"int"},
+    {"name":"original_offset","type":"long"},
+    {"name":"original_event_id","type":["null","string"],"default":null},
+    {"name":"quarantined_at","type":"string"},
+    {"name":"job_id","type":"string"},
+    {"name":"raw_bytes_reference","type":["null","string"],"default":null},
+    {"name":"schema_version","type":"string","default":"1.0.0"}
+  ]
+}

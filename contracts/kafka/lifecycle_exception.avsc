@@ -1,0 +1,17 @@
+{
+  "type": "record", "name": "LifecycleException", "namespace": "com.payments.platform",
+  "fields": [
+    {"name":"exception_id","type":"string"},
+    {"name":"correlation_id","type":["null","string"],"default":null},
+    {"name":"exception_type","type":"string"},
+    {"name":"severity","type":"string"},
+    {"name":"details","type":{"type":"map","values":"string"}},
+    {"name":"detected_at","type":"string"},
+    {"name":"source_event_id","type":["null","string"],"default":null},
+    {"name":"source_topic","type":"string"},
+    {"name":"source_partition","type":["null","int"],"default":null},
+    {"name":"source_offset","type":["null","long"],"default":null},
+    {"name":"job_id","type":"string"},
+    {"name":"schema_version","type":"string","default":"1.0.0"}
+  ]
+}

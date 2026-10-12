@@ -1,0 +1,14 @@
+{
+  "type": "record", "name": "LifecycleAudit", "namespace": "com.payments.platform",
+  "fields": [
+    {"name":"audit_id","type":"string"},
+    {"name":"correlation_id","type":["null","string"],"default":null},
+    {"name":"action","type":"string"},
+    {"name":"actor","type":"string"},
+    {"name":"details","type":{"type":"map","values":"string"}},
+    {"name":"recorded_at","type":"string"},
+    {"name":"job_id","type":["null","string"],"default":null},
+    {"name":"checkpoint_id","type":["null","string"],"default":null},
+    {"name":"schema_version","type":"string","default":"1.0.0"}
+  ]
+}
