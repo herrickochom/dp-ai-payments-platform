@@ -76,9 +76,15 @@ Cross-reference: `docs/streaming/phased-plan.md` §8 (STR-005).
 ### STR-006 — PostgreSQL projections
 Cross-reference: `docs/streaming/phased-plan.md` §9 (STR-006).
 
+**Pre-STR-006 provision.** The database (`payments_operations`), schema
+(`payment_lifecycle`), and four least-privilege roles are provisioned ahead of
+STR-006 by explicit owner approval. STR-006 will design the tables, the
+projection writer, and the formal migration mechanism.
+
 | Path | Change type | Purpose | Notes |
 |---|---|---|---|
 | `docs/streaming/` | New (proposed) | Hold projection use cases, ownership, retention, and rebuild contracts. | Exact filename uncertain; ADR §4 and §8 U8. |
+| `platform/postgres/migrations/001_create_payments_operations.sql` | New | Idempotent SQL to create the `payments_operations` database, `payment_lifecycle` schema, and four streaming roles. Applied once manually, adopted by STR-006's migration mechanism. | Verified; created during pre-STR-006 approval. |
 | `platform/postgres/initdb/` | New numbered file in existing directory (proposed) | Hold an approved streaming-owned schema/role bootstrap only if STR-006 selects PostgreSQL. | Exact filename and whether init is appropriate are uncertain; discovery T7. |
 | `docker-compose.yaml` | Modify | Supply approved projection connection variables and service dependency only if required. | Verified; secret values remain outside the file; discovery T9. |
 | `orchestration/transform_runtime/migrations/` | Frozen | Preserve transform-service ownership; streaming projections must not use these migrations. | Verified existing directory; ADR §3.B and §4 boundary rules. |
