@@ -13,7 +13,7 @@ SQLAlchemy resolves the URL scheme to a dialect plugin. ``https://`` maps to
 The URL must use the ``trino://`` scheme. The HTTP transport is not expressed
 by the URL scheme.
 
-**Layer 2 — the HTTP transport (``dbs.encrypted_extra``).**
+**Layer 2 — the HTTP transport and credentials (``dbs.encrypted_extra``).**
 Superset's ``BaseEngineSpec.update_params_from_encrypted_extra`` performs
 ``params.update(json.loads(encrypted_extra))`` — a shallow merge. That
 contract is what the docs describe, and it is what ``TrinoEngineSpec`` used to
@@ -39,8 +39,23 @@ silent no-op on this image, and the DBAPI receives no HTTPS instruction::
     has no scheme, pass http_scheme='https'.
 
 The failure surfaces in the dashboard builder, three layers away from the
-cause. Declaring ``auth_method="basic"`` triggers the override, which sets
-``http_scheme="https"`` on ``connect_args`` as a side effect.
+cause.
+
+**Credentials must travel in ``auth_params``.** The engine spec calls
+``trino_auth(**auth_params)`` with ``trino_auth`` bound to
+``trino.auth.BasicAuthentication`` (for ``auth_method == "basic"``).
+``BasicAuthentication.__init__`` requires positional ``username`` and
+``password``; it does **not** read them from the SQLAlchemy URI. Passing an
+empty ``auth_params`` therefore fails at engine construction::
+
+    TypeError: BasicAuthentication.__init__() missing 2 required positional
+    arguments: 'username' and 'password'
+
+An earlier revision of this module asserted that the credential lives only in
+the URI. That assertion is true for the trino-python-client dialect, but false
+for this engine spec: the override intercepts the auth path before the
+dialect can construct ``BasicAuthentication`` from the URI. The credential
+must be present in ``auth_params``.
 
 **Layer 3 — the CA bundle (``dbs.sqlalchemy_uri`` query string).**
 ``TrinoEngineSpec.update_params_from_encrypted_extra`` sets ``http_scheme``
@@ -52,22 +67,26 @@ must be JSON-quoted::
 
 An unquoted path produces ``json.decoder.JSONDecodeError: Expecting value``.
 
-The canonical stored shape, verified end-to-end against Trino 477 and the
-dialect shipped in this image, is therefore:
+The canonical stored shape, verified against the engine spec on this image, is:
 
 * ``dbs.sqlalchemy_uri``::
 
     trino://superset_bi:<pw>@trino:8443/iceberg/consumption?verify=%22...%22
 
   Scheme ``trino``, bare host ``trino`` (not ``https://trino``), password
-  percent-encoded, ``verify`` JSON-quoted.
+  percent-encoded, ``verify`` JSON-quoted. The credential is present in the
+  URI so the dialect's connection-string parser accepts the URL shape, but
+  the engine spec does not consume it from there.
 
 * ``dbs.encrypted_extra``::
 
-    {"auth_method":"basic","auth_params":{}}
+    {"auth_method":"basic","auth_params":{"username":"superset_bi","password":"<pw>"}}
 
-  This exists to trigger the Trino engine spec's ``http_scheme="https"``
-  side effect. The credential itself lives in the URI, not here.
+  This triggers the engine spec's ``http_scheme="https"`` side effect and
+  supplies the credential to ``BasicAuthentication``. The credential is
+  therefore present in both fields; the URI copy satisfies the dialect's
+  URL grammar, the ``auth_params`` copy is what the engine spec actually
+  reads.
 
 This module reads an operator-supplied ``TRINO_SQLALCHEMY_URI``, validates it,
 normalises both fields into the shape above, and verifies the connection
@@ -108,9 +127,8 @@ VERIFY_KEY: Final[str] = "verify"
 DEFAULT_VERIFY_PATH: Final[str] = "/etc/ssl/certs/trino-public.crt"
 
 #: Authentication method recognised by ``TrinoEngineSpec``. Its presence is
-#: what causes the engine spec to set ``connect_args["http_scheme"]="https"``.
-#: The credential itself is read from the URI's userinfo by
-#: ``BasicAuthentication``.
+#: what causes the engine spec to set ``connect_args["http_scheme"]="https"``
+#: and to construct ``trino.auth.BasicAuthentication`` from ``auth_params``.
 TRINO_AUTH_METHOD: Final[str] = "basic"
 
 
@@ -164,16 +182,11 @@ def _normalise_verify_path(raw_value: str | None) -> str:
     return decoded or DEFAULT_VERIFY_PATH
 
 
-def build_bi_connection_uri(raw: str | None) -> str:
-    """Validate and normalise an operator-supplied connection URI.
+def _parse_bi_uri(raw: str | None) -> tuple[str, str, str, str]:
+    """Validate the operator-supplied URI and return its parts.
 
-    Returns the URI to write into ``dbs.sqlalchemy_uri``::
-
-        trino://superset_bi:<pw>@trino:8443/iceberg/consumption?verify=%22...%22
-
-    The host is bare (``trino``, not ``https://trino``). ``http_scheme`` is
-    *not* placed in the URI; it is delivered through ``encrypted_extra``, via
-    the Trino engine spec's handling of ``auth_method``.
+    Returns ``(username, password, host, port)``. Rejects every malformed
+    input with an explicit, non-credential-bearing error message.
     """
     if not raw:
         raise BiConnectionRejected("TRINO_SQLALCHEMY_URI is required")
@@ -222,17 +235,38 @@ def build_bi_connection_uri(raw: str | None) -> str:
             "BI connection must not disable certificate verification"
         )
 
-    port = parts.port or DEFAULT_TLS_PORT
+    return parts.username, parts.password, parts.hostname, str(parts.port or DEFAULT_TLS_PORT)
+
+
+def build_bi_connection_uri(raw: str | None) -> str:
+    """Validate and normalise an operator-supplied connection URI.
+
+    Returns the URI to write into ``dbs.sqlalchemy_uri``::
+
+        trino://superset_bi:<pw>@trino:8443/iceberg/consumption?verify=%22...%22
+
+    The host is bare (``trino``, not ``https://trino``). ``http_scheme`` is
+    *not* placed in the URI; it is delivered through ``encrypted_extra``, via
+    the Trino engine spec's handling of ``auth_method``.
+
+    The credential remains in the URI so the dialect's URL grammar is
+    satisfied, even though the engine spec on this image reads it from
+    ``auth_params`` (see :func:`build_encrypted_extra`).
+    """
+    username, password, host, port = _parse_bi_uri(raw)
+    assert raw is not None  # guaranteed by _parse_bi_uri
+    parts = urlsplit(raw.strip())
 
     # Decode-then-encode round trip: operators may hand us a credential that
     # is already percent-encoded, already raw, or a mix. This produces a
     # single canonical encoding that the SQLAlchemy URL parser will decode
     # back to the original credential bytes.
-    encoded_password = quote(unquote(parts.password), safe="")
-    verify_path = _normalise_verify_path(verify_raw)
+    encoded_password = quote(unquote(password), safe="")
+    verify_path = _normalise_verify_path(
+        _extract_query_value(parts.query, VERIFY_KEY)
+    )
     encoded_verify = quote(json.dumps(verify_path), safe="")
 
-    host = parts.hostname
     path = parts.path or ""
     netloc = f"{BI_TRINO_USER}:{encoded_password}@{host}:{port}"
 
@@ -258,25 +292,25 @@ def build_encrypted_extra(raw: str | None) -> str:
         connect_args["auth"] = trino_auth(**auth_params)
 
     Declaring ``auth_method="basic"`` causes the override to set
-    ``connect_args["http_scheme"] = "https"`` as a side effect and to attach a
-    ``BasicAuthentication`` instance. ``BasicAuthentication`` reads the user
-    and password from the URI's userinfo, so ``auth_params`` is empty.
+    ``connect_args["http_scheme"] = "https"`` and to construct
+    ``trino.auth.BasicAuthentication(**auth_params)``. ``BasicAuthentication``
+    requires positional ``username`` and ``password``; it does not read them
+    from the URI. ``auth_params`` must therefore carry both.
 
     Writing the base-class shape here — ``{"connect_args": {"http_scheme":
     "https", ...}}`` — is a silent no-op on this image. The DBAPI receives no
     HTTPS instruction and the connection fails with ``TrinoAuthError:
     TLS/SSL is required for authentication``. The failure surfaces three
     layers away from the cause, which is why the shape is pinned by a test.
-
-    ``raw`` is accepted for symmetry with :func:`build_bi_connection_uri` and
-    to allow the URI to influence the payload if a future version needs it.
-    Nothing in the current contract requires it.
     """
-    del raw  # see docstring: signature kept for symmetry, value not consumed
+    username, password, _host, _port = _parse_bi_uri(raw)
     return json.dumps(
         {
             "auth_method": TRINO_AUTH_METHOD,
-            "auth_params": {},
+            "auth_params": {
+                "username": username,
+                "password": unquote(password),
+            },
         },
         separators=(",", ":"),
     )
