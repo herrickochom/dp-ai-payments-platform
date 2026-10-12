@@ -80,6 +80,21 @@ RUN curl -fsSL -o /opt/flink/lib/flink-sql-connector-kafka-${KAFKA_CONNECTOR_VER
         "https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-kafka/${KAFKA_CONNECTOR_VERSION}/flink-sql-connector-kafka-${KAFKA_CONNECTOR_VERSION}.jar" \
  && test -s /opt/flink/lib/flink-sql-connector-kafka-${KAFKA_CONNECTOR_VERSION}.jar
 
+ # ------------------------------------------------------------------------------
+# Avro support — Schema Registry wire format and Avro payload decoding
+# ------------------------------------------------------------------------------
+# The technical lifecycle topics carry Avro-encoded values prefixed by the
+# Confluent Schema Registry wire header (magic byte 0x00 + 4-byte schema ID).
+# The Kafka connector's value deserializer needs the Avro classes available on
+# the classpath, and the Python-side decode uses confluent-kafka[avro].
+ARG AVRO_VERSION=1.18.1
+RUN curl -fsSL -o /opt/flink/lib/flink-avro-${AVRO_VERSION}.jar \
+        "https://repo1.maven.org/maven2/org/apache/flink/flink-avro/${AVRO_VERSION}/flink-avro-${AVRO_VERSION}.jar" \
+ && test -s /opt/flink/lib/flink-avro-${AVRO_VERSION}.jar \
+ && curl -fsSL -o /opt/flink/lib/flink-avro-confluent-registry-${AVRO_VERSION}.jar \
+        "https://repo1.maven.org/maven2/org/apache/flink/flink-avro-confluent-registry/${AVRO_VERSION}/flink-avro-confluent-registry-${AVRO_VERSION}.jar" \
+ && test -s /opt/flink/lib/flink-avro-confluent-registry-${AVRO_VERSION}.jar
+
 # ------------------------------------------------------------------------------
 # Configuration and jobs
 # ------------------------------------------------------------------------------

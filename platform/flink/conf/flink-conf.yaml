@@ -26,6 +26,17 @@
 # -----------------------------------------------------------------------------
 # These values are stable for the Day-0 single-node topology on the Compose
 # network. Changing them requires a coordinated update in docker-compose.yaml.
+#
+# jobmanager.rpc.address is the hostname the TASKMANAGER uses to find the
+# RESOURCE MANAGER, which runs inside the JobManager container. It must be
+# `flink-jobmanager`, never `flink-taskmanager`. If this value points at the
+# TaskManager hostname, the TaskManager will try to register itself with
+# itself, hit a RegistrationTimeoutException after 5 minutes, and terminate.
+# The JobManager will then have zero TaskManagers and any submitted job will
+# fail with NoResourceAvailableException.
+#
+# The hostname `flink-jobmanager` resolves on the Compose network via the
+# `hostname:` field on the flink-jobmanager service in docker-compose.yaml.
 jobmanager.rpc.address: flink-jobmanager
 jobmanager.rpc.port: 6123
 
@@ -69,7 +80,6 @@ state.backend.incremental: true
 # OBJECT_STORE_BUCKET environment variable; the endpoint by S3_ENDPOINT.
 # Path is intentionally left as a directory prefix, not a full URI, so the
 # bucket and endpoint come from Compose environment.
-
 execution.checkpointing.mode: EXACTLY_ONCE
 # Day-0 interval. Production intervals are a sizing decision tracked under
 # U12 and STR-003.
