@@ -343,6 +343,7 @@ services:
     volumes:
     - ${SCHEMA_REGISTRY_CERT_DIR:-/etc/schema-registry/certs}:/etc/schema-registry/certs:ro
     - ./platform/kafka/configure-schema-registry.sh:/configure-schema-registry.sh:ro
+    - ./contracts/kafka:/contracts/kafka:ro
     entrypoint:
     - /bin/sh
     - /configure-schema-registry.sh
