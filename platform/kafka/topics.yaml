@@ -225,3 +225,49 @@ topics:
     partitions: 3
     replication: 1
     retention_ms: 604800000   # 7 days; local POC policy, production Terraform-managed
+
+  # ==========================================================================
+  # 8. Streaming-route derived topics (STR-002B/B2)
+  # ==========================================================================
+  # Outputs of the Flink streaming-route jobs. Consumed by downstream
+  # processors (projection writer, Grafana drill-down, alerting) and by
+  # audit/replay procedures.
+  #
+  # The lifecycle.state topic is the first compacted topic in this
+  # platform. It overrides the file default cleanup_policy=delete with
+  # compact, because Kappa requires the latest state per key to be
+  # retained indefinitely.
+  #
+  # No producer for these topics exists yet. They are declared ahead of
+  # use so that kafka-init creates them, since auto-create is disabled.
+
+  - name: payments.lifecycle.transitions.v1
+    partitions: 6
+    replication: 1
+    retention_ms: 2592000000   # 30 days
+    description: "Immutable lifecycle transition records (append-only)"
+
+  - name: payments.lifecycle.state.v1
+    partitions: 6
+    replication: 1
+    retention_ms: -1            # infinite
+    cleanup_policy: compact
+    description: "Compacted current lifecycle state per journey key"
+
+  - name: payments.lifecycle.exceptions.v1
+    partitions: 6
+    replication: 1
+    retention_ms: 2592000000   # 30 days
+    description: "Operational lifecycle exceptions (SLA, gap, invalid)"
+
+  - name: payments.lifecycle.dlq.v1
+    partitions: 6
+    replication: 1
+    retention_ms: 7776000000   # 90 days
+    description: "Streaming-route dead-letter queue for quarantined events"
+
+  - name: payments.lifecycle.audit.v1
+    partitions: 6
+    replication: 1
+    retention_ms: 31536000000  # 365 days
+    description: "Lifecycle audit trail and replay provenance"
