@@ -7,11 +7,11 @@ string in parsed_event_data, so this job:
 
   1. Declares only the envelope columns it needs.
   2. Parses parsed_event_data in Python and drops rows without a usable
-     correlation_id or event_id, counting them rather than logging each one.
+     event_id or correlation_id, counting them rather than logging each one.
   3. Keys the stream on the inner correlation_id and deduplicates by event_id
      within each correlation_id. A repeated event is counted and dropped.
-  4. Emits one JSON transition record per distinct event, with previous and
-     current state.
+  4. Emits one JSON transition record per distinct event, carrying the
+     envelope event_type (PMN or PLM), previous state, and current state.
 
 Known limits (this is a skeleton, not the state machine):
   - Dedup state (seen event_ids per correlation_id) is unbounded. Bounding it
@@ -20,6 +20,8 @@ Known limits (this is a skeleton, not the state machine):
     is B2 item 3 and needs the STR-003 output contract.
   - The input is the raw-route topics, read through a read-only consumer group.
     This is a development fixture, not the lifecycle input contract.
+  - updated_at uses wall-clock time, so a replay produces different values for
+    that field. Event-time semantics are STR-003 scope.
 """
 
 from __future__ import annotations
@@ -121,9 +123,8 @@ CREATE TABLE {TABLE_NAME} (
 class ParseEnvelope(ProcessFunction):
     """Extract the technical event from parsed_event_data.
 
-    Emits a normalised JSON string for each valid event. Rows with invalid
-    JSON, a missing event_id, or no usable correlation_id are counted and
-    dropped.
+    Emits a normalised JSON string for each valid event. Rows with a missing
+    event_id, invalid JSON, or no usable correlation_id are counted and dropped.
     """
 
     def __init__(self) -> None:
@@ -242,6 +243,7 @@ class LifecycleSkeleton(KeyedProcessFunction):
         yield json.dumps(
             {
                 "correlation_id": event["correlation_id"],
+                "event_type": event["event_type"],
                 "previous": previous,
                 "current": current,
             },
