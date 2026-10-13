@@ -66,7 +66,7 @@ The plan does not name B1 and B2 as sub-tickets; this report does, because the w
 
 **Status:**
 1. **DONE.** JobManager and TaskManager both reach `healthy`. The UI is on `127.0.0.1:8082`. One TaskManager is registered with 2 slots.
-2. **PARTIAL.** The skeleton job submits and runs. Job `5866dafb939974cefc34783809e56c20` is `RUNNING` with no exceptions. It does not yet produce to the lifecycle topic; that clause is deferred to STR-003 per plan §6 (J1/J2).
+2. **PARTIAL.** The skeleton job submits and runs. Job `5866dafb939974cefc34783809e56c20` was `RUNNING` with no exceptions and was stopped cleanly with a savepoint on 2026-10-13 (see STR-002B/B2 savepoint recovery). It does not yet produce to the lifecycle topic; that clause is deferred to STR-003 per plan §6 (J1/J2).
 3. **DONE.** Flink exposes Prometheus metrics on port 9249. The `flink_j1_*` counters are visible there.
 4. **DONE.** Verified in `docs/streaming/STR-002B-smoke-test.md`.
 5. **DONE.** `.env` gained `FLINK_CHECKPOINT_S3_ACCESS_KEY_ID`, `FLINK_CHECKPOINT_S3_SECRET_ACCESS_KEY`, `FLINK_JOBMANAGER_UI_PORT`.
@@ -84,27 +84,39 @@ The plan does not name B1 and B2 as sub-tickets; this report does, because the w
 **Status:**
 1. **DONE.** Five topics are declared in `platform/kafka/topics.yaml`. `payments.lifecycle.state.v1` is verified as `cleanup.policy=compact`, `retention.ms=-1`. The topics were recreated by `kafka-init` after the environment rebuild.
 2. **DONE.** Five subjects are registered in Schema Registry: `payments.lifecycle.{state,transitions,audit,dlq,exceptions}.v1-value`. `payments.lifecycle.state.v1-value` is version 1, schema id 3. Registration was done before the STR-004 contract was defined; see Deviations.
-3. **PARTIAL.** `platform/flink/jobs/j1_lifecycle_state_skeleton.py` reads the raw-route topics `icmn.pmn.pain001` (PMN) and `cpo.plm.pain002` (PLM) through the Table API `avro-confluent` format, through a read-only consumer group. It is not reading the lifecycle topics.
-   - It parses `parsed_event_data` in Python, keys on `correlation_id`, and deduplicates by `event_id` within each correlation ID.
-   - It emits one transition record per distinct event, including `event_type`, `previous`, and `current`.
-   - It writes to stdout, not `payments.lifecycle.state.v1`.
-   - Verified on job `5866dafb939974cefc34783809e56c20` against 952 raw messages from two producer runs:
+3. **PARTIAL.** `platform/flink/jobs/j1_lifecycle_state_skeleton.py` reads the raw-route topics `icmn.pmn.pain001` (PMN) and `cpo.plm.pain002` (PLM) through the Table API `avro-confluent` format, through a read-only consumer group. It is not reading the lifecycle topics. It parses `parsed_event_data` in Python, keys on `correlation_id`, and deduplicates by `event_id` within each correlation ID. It emits one transition record per distinct event, including `event_type`, `previous`, and `current`. It writes to stdout, not `payments.lifecycle.state.v1`.
+   - **Consumption and dedup verified on job `5866dafb939974cefc34783809e56c20`** against 952 raw messages from two producer runs:
      - 476 transitions: 238 PMN and 238 PLM.
      - 238 correlation IDs, each with one first-seen record and one later record.
      - 476 duplicates dropped by `flink_j1_duplicate_events_total`.
      - Stage split: PMN `payment-routing` 225, PMN `payment-validation` 13; PLM `mobile-money-credit` 225, PLM `payment-validation` 13.
      - 4 checkpoints completed, 0 failed.
-   - Not verified: checkpoint recovery (a killed job restored from its last checkpoint), and any output to `payments.lifecycle.state.v1`.
+   - **Checkpoint recovery verified on 2026-10-13.** See "Savepoint recovery test" below.
+   - **Still open.** Output binding to `payments.lifecycle.state.v1`; J1 input contract (raw topics as a development fixture vs. a lifecycle topic with a producer).
 4. **DONE.** No existing service affected.
 
 **Evidence:**
 - Commits: `70fd9e6` (B2 schema registration), `4c8fdc9` (TaskManager registration override and Table API skeleton, WIP), `326c382` (plan-status correction), `ff5b07e` (dedup by `event_id`), `0b4d8b3` (`event_type` in output).
 - Runtime counters and the stage split above, taken from the Flink REST API, the TaskManager metrics endpoint, and the job's output.
+- Savepoint recovery evidence: JobManager log lines from 2026-10-13 19:58:08 and the TaskManager metrics endpoint; see below.
+
+**Savepoint recovery test — 2026-10-13**
+
+- Job before stop: `5866dafb939974cefc34783809e56c20` (j1-lifecycle-state-skeleton)
+- Savepoint path: `s3://dp-ai-payment/flink/savepoints/savepoint-5866da-bce114c4effb`
+- Job after restore: `a0712758d09923274281a5506439b38b`
+- Producer runs during test: 1 (5267 events delivered across all topics; 476 technical events on `icmn.pmn.pain001` + `cpo.plm.pain002`, matching the frozen raw-set count)
+- New transitions emitted by restored job: 0
+- `previous=null` records from restored job: 0
+- `flink_j1_duplicate_events_total` (restored job): 476
+- Restore mechanism: `SplitEnumerator` restored from checkpoint; no `--allowNonRestoredState` required; no operator mismatch.
+- **Result: PASS.** Kappa recovery claim evidenced for J1.
 
 **Deviations:**
 - The state topic schema (`payments.lifecycle.state.v1-value`) was registered as part of B2, ahead of the STR-004 contract. The STR-004 contract has not been reviewed against the registered schema.
 - The raw topics hold duplicate messages from two producer runs (19:15 and 19:22 on 2026-10-13). The job deduplicates them, but the topics themselves were not cleared. Clearing them is a frozen-set exception and has not been approved.
 - The environment was rebuilt from scratch on 2026-10-13 (volumes, images, and build cache removed). `./data` was regenerated by the generator service and verified against pre-deletion checksums for seven source folders. The `data/pdmis_ml` folder was not regenerated, because those files come from the `pdm-ml` services, which are not part of this run.
+- During the savepoint stop, the JobManager log recorded a benign S3A `Access denied when looking for parent directory s3://dp-ai-payment/flink/savepoints` line from the committer's pre-flight check at 2026-10-13 19:57:12. The savepoint committed and restored correctly. This is object-store semantics on MinIO, not a regression. Recorded here so it is not re-investigated.
 
 ---
 
@@ -118,11 +130,11 @@ The plan does not name B1 and B2 as sub-tickets; this report does, because the w
 **Status:** **BLOCKED** on STR-002B/B2 item 3. The J1 output binding to `payments.lifecycle.state.v1` and the J1 input contract are not yet defined.
 
 **Notes:**
-- Deduplication by `event_id` is implemented in the skeleton and verified. What remains for STR-003 is the dedup TTL, the event-time contract, watermark and late-event policy, and the production output binding.
+- Deduplication by `event_id` is implemented in the skeleton and verified, including across a savepoint restore (see STR-002B/B2). What remains for STR-003 is the dedup TTL, the event-time contract, watermark and late-event policy, and the production output binding.
 - The dedup state is currently unbounded per correlation ID. A state TTL matched to the maximum lifecycle duration is required.
 - `updated_at` in the output is wall-clock time, so replays produce different values for that field. Event-time semantics belong to this ticket.
 - STR-002A-DEV §5.5 and §7 already anticipate parts of this ticket (idempotency key, transition rules, terminal conditions).
-- Unit tests for J1 and J2 are not yet written. The current verification is an integration run, not unit tests.
+- Unit tests for J1 and J2 are not yet written. The current verification is an integration run plus a savepoint recovery test, not unit tests.
 
 ---
 
@@ -216,9 +228,13 @@ The plan does not name B1 and B2 as sub-tickets; this report does, because the w
 2. Sign-off recorded in the ADR's approval block.
 3. ADR status updated to reflect validation.
 
-**Status:** **NOT STARTED.**
+**Status:** **PARTIAL.**
 
-**Notes:** Recovery from a checkpoint, replay, and projection rebuild are all STR-009 tests. None has been run.
+1. **PARTIAL.** Kappa recovery for J1 has been tested and passed (see STR-002B/B2 savepoint recovery, 2026-10-13). Remaining STR-009 tests not yet run: replay isolation, projection rebuild, DLQ replay, and any end-to-end lifecycle test that exercises the real output binding. No documented exceptions with owner and remediation yet, because the remaining tests have not been attempted.
+2. **NOT STARTED.** ADR approval block unchanged.
+3. **NOT STARTED.** ADR status unchanged.
+
+**Notes:** The savepoint recovery test is the first STR-009 evidence recorded. It was executed as the STR-002B/B2 checkpoint-recovery sub-item and doubles as the STR-009 Kappa recovery test. The two governance items (sign-off, ADR status) are unchanged and remain the gate on STR-009 closure.
 
 ---
 
@@ -228,15 +244,15 @@ The plan does not name B1 and B2 as sub-tickets; this report does, because the w
 |---|---|---|
 | STR-001 | Complete | Documents complete; sign-off open |
 | STR-002A | Complete | DEV drafted; PROD open |
-| STR-002B/B1 | Complete | Verified, evidenced; one job running |
-| STR-002B/B2 | Complete | Topics and subjects done; J1 reads raw topics, dedups by `event_id`, verified 476 transitions; stdout only; not bound to the lifecycle topic |
+| STR-002B/B1 | Complete | Verified, evidenced; one job was running and is now stopped after savepoint |
+| STR-002B/B2 | **PARTIAL** | Topics and subjects done; J1 reads raw topics, dedups by `event_id`, verified 476 transitions; savepoint recovery PASS; stdout only; not bound to the lifecycle topic |
 | STR-003 | Not started | Blocked on B2 item 3 (output binding and input contract) |
 | STR-004 | Not started | Topic and state schema pre-empted; replay and tombstone open |
 | STR-005 | Not started | Flink metrics present; SLA and gap metrics not defined |
 | STR-006 | Not started | Provisioning done ahead of ticket and re-run after rebuild; tables and writer open |
 | STR-007 | Not started | Topic and schema pre-empted; classification and replay open |
 | STR-008 | Not started | Flink metrics ready to scrape; no observability services |
-| STR-009 | Not started | Recovery, replay, and rebuild tests not run |
+| STR-009 | **PARTIAL** | Kappa recovery PASS; replay, projection rebuild, DLQ replay, and ADR sign-off open |
 
 ---
 
@@ -246,7 +262,7 @@ The single ticket in flight is STR-002B/B2 item 3. Two open issues:
 
 **1. TaskManager registration (worked around, root cause open).** `platform/flink/conf/flink-conf.yaml` in the repository has `jobmanager.rpc.address: flink-jobmanager`. The `flink-conf.yaml` inside the TaskManager image still contained `flink-taskmanager` after a `--no-cache` rebuild. Registration now works through a `FLINK_PROPERTIES` override on `flink-taskmanager` in `docker-compose.yaml`, committed in `4c8fdc9`. The root cause, why the image holds a stale file, has not been identified. Candidates: `.dockerignore`, the build context, or a Flink entrypoint rewrite. The plan requires `platform/flink/conf/` to be mounted read-only, which would remove the image copy and the need for the override. The mount is currently commented out in `docker-compose.yaml`.
 
-**2. J1 output and input binding (open).** The skeleton reads the raw-route topics and writes to stdout. It is not bound to `payments.lifecycle.state.v1`, and the input contract is not defined. Resolving this is B2 item 3 and belongs to the STR-003 J1 contract. Recovery from a checkpoint has not been tested.
+**2. J1 output and input binding (open).** The skeleton reads the raw-route topics and writes to stdout. It is not bound to `payments.lifecycle.state.v1`, and the input contract is not defined. Resolving this is B2 item 3 and belongs to the STR-003 J1 contract. Checkpoint recovery from a savepoint has been tested and passed; the savepoint path and evidence are recorded under STR-002B/B2 above.
 
 ---
 
@@ -265,12 +281,24 @@ A revision pass on `docs/streaming/phased-plan.md` should incorporate these befo
 
 ---
 
+## Open governance items
+
+These are decisions, not code changes. They are recorded here so they are not lost between sessions.
+
+1. **STR-002B/B2 item 3 should be PARTIAL in the plan**, not complete. This report already marks it PARTIAL. The plan itself still reads Complete.
+2. **STR-002A DEV sufficiency for B2.** Decide whether the DEV event contract is sufficient for B2 to close, or whether B2 waits for the PROD contract.
+3. **STR-004 schema pre-emption.** Ratify or reverse the decision to register `payments.lifecycle.state.v1-value` before the STR-004 contract was defined.
+4. **J1 input contract.** Decide whether the raw topics are a development fixture only, or whether J1 reads a lifecycle topic with a producer. This determines whether B2 item 3 can close without a producer change.
+
+---
+
 ## Open verification
 
 Before this report is relied on, confirm the following:
 
 - The evidence files cited above exist in `docs/streaming/`: `STR-002A-DEV-event-contract.md`, `STR-002B-smoke-test.md`, `STR-002B-preflight.md`, `STR-002B-minio-iam-discovery.md`, `STR-002B-pyflink-java17-investigation.md`, and `STR-006-postgres-provisioning-evidence.md`.
 - `STR-006-postgres-provisioning-evidence.md` is updated with the 2026-10-13 re-provisioning.
+- The savepoint path recorded under STR-002B/B2 still exists in MinIO. If it has been cleaned up, the evidence stands on the metrics recorded at test time, but the raw savepoint is no longer available for re-inspection.
 
 ---
 
@@ -280,3 +308,17 @@ Before this report is relied on, confirm the following:
 - The risk register. Risks are tracked in `docs/streaming/risk-register.md`.
 - The file plan. Files are tracked in `docs/streaming/file-plan.md`.
 - Governance sign-offs. Those are recorded in the relevant documents' approval blocks.
+
+---
+
+## Session log
+
+A short, chronological record of sessions that changed the plan state. Kept here so the evidence is discoverable without re-reading logs.
+
+### 2026-10-13 — Savepoint recovery test
+
+- **Scope:** STR-002B/B2 item 3 checkpoint-recovery sub-clause, doubling as STR-009 Kappa recovery test.
+- **Action:** Stopped job `5866dafb939974cefc34783809e56c20` with a savepoint. Restored from `s3://dp-ai-payment/flink/savepoints/savepoint-5866da-bce114c4effb` as job `a0712758d09923274281a5506439b38b`. Ran the payment producer exactly once to replay the frozen raw set.
+- **Result:** PASS. 0 new transitions, 0 `previous=null` records, `flink_j1_duplicate_events_total` = 476 for the restored job. SplitEnumerator restored from checkpoint; no operator mismatch; no `--allowNonRestoredState`.
+- **Plan state changes:** STR-002B/B2 item 3 remains PARTIAL, with the checkpoint-recovery sub-clause closed. STR-009 moves from NOT STARTED to PARTIAL.
+- **Governance items opened this session:** none new. The four items in "Open governance items" above were carried in from the prior session.
