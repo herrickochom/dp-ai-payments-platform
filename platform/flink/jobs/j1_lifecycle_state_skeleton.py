@@ -7,9 +7,19 @@ string in parsed_event_data, so this job:
 
   1. Declares only the envelope columns it needs.
   2. Parses parsed_event_data in Python and drops rows without a usable
-     correlation_id, counting them rather than logging each one.
-  3. Keys the stream on the inner correlation_id and emits one JSON transition
-     record per event (previous and current state).
+     correlation_id or event_id, counting them rather than logging each one.
+  3. Keys the stream on the inner correlation_id and deduplicates by event_id
+     within each correlation_id. A repeated event is counted and dropped.
+  4. Emits one JSON transition record per distinct event, with previous and
+     current state.
+
+Known limits (this is a skeleton, not the state machine):
+  - Dedup state (seen event_ids per correlation_id) is unbounded. Bounding it
+    with a state TTL or a sliding window is STR-003 scope.
+  - Output goes to stdout via print(). Writing to payments.lifecycle.state.v1
+    is B2 item 3 and needs the STR-003 output contract.
+  - The input is the raw-route topics, read through a read-only consumer group.
+    This is a development fixture, not the lifecycle input contract.
 """
 
 from __future__ import annotations
@@ -27,7 +37,7 @@ from pyflink.datastream import (
     RuntimeContext,
     StreamExecutionEnvironment,
 )
-from pyflink.datastream.state import ValueStateDescriptor
+from pyflink.datastream.state import MapStateDescriptor, ValueStateDescriptor
 from pyflink.metrics import Counter
 from pyflink.table import StreamTableEnvironment
 
@@ -75,6 +85,13 @@ ENVELOPE_COLUMNS: list[tuple[str, str]] = [
     ("parsed_event_data", "STRING"),
 ]
 
+# Projection order must match ENVELOPE_COLUMNS, because ParseEnvelope indexes
+# the row by position.
+PROJECTION_SQL = (
+    "SELECT event_id, message_id, event_type, source_system, parsed_event_data "
+    f"FROM {TABLE_NAME}"
+)
+
 
 def build_source_ddl() -> str:
     """Return the CREATE TABLE statement for the Kafka source.
@@ -98,14 +115,6 @@ CREATE TABLE {TABLE_NAME} (
 """
 
 
-# Row layout must match ENVELOPE_COLUMNS order for the indices used in
-# ParseEnvelope.process_element.
-PROJECTION_SQL = (
-    "SELECT event_id, message_id, event_type, source_system, parsed_event_data "
-    f"FROM {TABLE_NAME}"
-)
-
-
 # ------------------------------------------------------------------------------
 # Step 1: parse the technical event out of the envelope
 # ------------------------------------------------------------------------------
@@ -113,7 +122,8 @@ class ParseEnvelope(ProcessFunction):
     """Extract the technical event from parsed_event_data.
 
     Emits a normalised JSON string for each valid event. Rows with invalid
-    JSON or no usable correlation_id are counted and dropped.
+    JSON, a missing event_id, or no usable correlation_id are counted and
+    dropped.
     """
 
     def __init__(self) -> None:
@@ -126,11 +136,24 @@ class ParseEnvelope(ProcessFunction):
         self._seen = metrics.counter("flink_j1_envelopes_seen_total")
         self._invalid = metrics.counter("flink_j1_events_missing_key_total")
 
+    def _drop(self, reason: str, event_id, message_id) -> None:
+        self._invalid.inc()
+        self._invalid_local += 1
+        if self._invalid_local % INVALID_LOG_EVERY == 1:
+            LOG.warning(
+                "dropped %d envelope(s); latest reason=%s event_id=%s message_id=%s",
+                self._invalid_local, reason, event_id, message_id,
+            )
+
     def process_element(self, row, ctx):  # type: ignore[override]
         event_id, message_id, event_type, source_system, parsed_event_data = (
             row[0], row[1], row[2], row[3], row[4],
         )
         self._seen.inc()
+
+        if not event_id:
+            self._drop("missing_event_id", event_id, message_id)
+            return
 
         body = None
         if parsed_event_data:
@@ -141,19 +164,12 @@ class ParseEnvelope(ProcessFunction):
 
         correlation_id = body.get("correlation_id") if isinstance(body, dict) else None
         if not correlation_id or correlation_id == UNKNOWN_KEY:
-            self._invalid.inc()
-            self._invalid_local += 1
-            if self._invalid_local % INVALID_LOG_EVERY == 1:
-                LOG.warning(
-                    "dropped %d envelope(s) without usable correlation_id; "
-                    "latest event_id=%s message_id=%s",
-                    self._invalid_local, event_id, message_id,
-                )
+            self._drop("missing_correlation_id", event_id, message_id)
             return
 
         normalised = {
             "correlation_id": str(correlation_id),
-            "event_id": event_id,
+            "event_id": str(event_id),
             "message_id": message_id,
             "event_type": event_type,
             "source_system": source_system,
@@ -169,29 +185,44 @@ def correlation_key(normalised_json: str) -> str:
 
 
 # ------------------------------------------------------------------------------
-# Step 2: lifecycle state per correlation_id
+# Step 2: lifecycle state per correlation_id, with event_id deduplication
 # ------------------------------------------------------------------------------
 class LifecycleSkeleton(KeyedProcessFunction):
     """Track last-seen stage and status per correlation_id.
 
-    Emits one JSON transition record per event, with previous and current state.
+    Each correlation_id keeps a MapState of event_ids it has already applied.
+    A repeated event_id is counted as a duplicate and produces no output and no
+    state change. A new event_id updates the last-seen state and emits one
+    transition record.
     """
 
     def __init__(self) -> None:
         self._state = None
+        self._seen_event_ids = None
         self._events_seen: Counter | None = None
         self._state_records: Counter | None = None
+        self._duplicates: Counter | None = None
 
     def open(self, runtime_context: RuntimeContext) -> None:
         self._state = runtime_context.get_state(
             ValueStateDescriptor("last_seen", Types.STRING())
         )
+        self._seen_event_ids = runtime_context.get_map_state(
+            MapStateDescriptor("seen_event_ids", Types.STRING(), Types.BOOLEAN())
+        )
         metrics = runtime_context.get_metrics_group()
         self._events_seen = metrics.counter("flink_j1_events_seen_total")
         self._state_records = metrics.counter("flink_j1_state_records_total")
+        self._duplicates = metrics.counter("flink_j1_duplicate_events_total")
 
     def process_element(self, value, ctx):  # type: ignore[override]
         event = json.loads(value)
+        event_id = event["event_id"]
+
+        if self._seen_event_ids.contains(event_id):
+            self._duplicates.inc()
+            return
+        self._seen_event_ids.put(event_id, True)
 
         raw_previous = self._state.value()
         previous = json.loads(raw_previous) if raw_previous else None
