@@ -2,6 +2,7 @@
 
 - Status: Draft for approval
 - Date: 2026-10-12
+- Last revised: 2026-10-13 (§8.1 J1 input contract decided)
 - Ticket: STR-002A-DEV
 - Related: ADR-STR-001-003, STR-002A Checkpoint A report,
   Kafka -> Flink -> Kafka directive, STR-001 discovery report
@@ -30,6 +31,11 @@ The contract does not authorize the creation of any new Kafka topic,
 schema subject, PostgreSQL table, Flink job, or Docker service. It
 records the interface that later tickets (STR-002B/B2, STR-003 onward)
 will implement against.
+
+The J1 input contract — which topics J1 reads, under what consumer
+identity, and for how long the raw topics are treated as a development
+fixture — is decided and recorded in §8.1. Read §8 before reading §3 or
+§5, because §8.1 governs both.
 
 ## 2. Source topics
 
@@ -63,12 +69,13 @@ group.
 
 | Attribute | Value |
 |---|---|
-| Consumer group ID | `flink-lifecycle-consumer` |
+| Consumer group ID | `flink-lifecycle-consumer` (configurable via `J1_GROUP_ID`) |
 | Starting offsets | `earliest` on first start |
 | Offset commit mode | Flink checkpointed offsets only; no auto-commit |
 | Isolation from existing consumers | Distinct group ID from `payment-events-consumer` |
 | Topic subscription | Both topics, single subscription |
 | Assignment strategy | Standard Kafka range assignment; no custom partitioner |
+| Access mode | Read-only on both source topics; no produce, no truncate, no clear |
 
 **Isolation rule.** The Flink consumer group must never reuse the group
 ID of any existing consumer. The existing `payment-events-consumer`
@@ -90,6 +97,12 @@ not through Kafka's `enable.auto.commit`. This means:
 **Re-consumption.** If Flink is reset to an earlier checkpoint, it will
 re-consume events from the input topics. Idempotency (Section 5.5)
 ensures that duplicates do not corrupt state.
+
+**Read-only rule.** J1 never writes to `icmn.pmn.pain001` or
+`cpo.plm.pain002`. It never truncates them, never deletes records, and
+never clears them as part of a test or reset. Clearing the raw topics is
+a frozen-set exception; see §8.1 for the fixture designation that this
+rule protects.
 
 ## 4. Schema contract
 
@@ -138,6 +151,7 @@ string field in the Avro schema.
 | Required | yes (non-null in Avro schema) |
 | Scope | journey-level: one value per synthetic payment journey |
 | Provision | provisional; subject to confirmation by STR-002A-PROD |
+| Input contract | decided; see §8.1 |
 | Never permitted | `"unknown"`, empty string, or any placeholder as a shared key |
 
 ### 5.2 Fallback and quarantine
@@ -355,6 +369,55 @@ clearly label it as synthetic in development. Dashboards, alerts, and
 reports must not present synthetic lifecycle data as production
 telemetry. This is a hard requirement from the consolidated directive.
 
+### 8.1 J1 input contract — decision (2026-10-13)
+
+**Decision.** J1 reads the raw-route topics `icmn.pmn.pain001` (PMN) and
+`cpo.plm.pain002` (PLM) as an explicit **development fixture**. It does
+not read a lifecycle topic, and no producer writes to a lifecycle topic
+for J1.
+
+**Consumer identity.** J1 reads through a dedicated read-only consumer
+group (`flink-lifecycle-consumer`, group id configurable via
+`J1_GROUP_ID`). It does not join any producer-side group, and it commits
+offsets only under its own group id. The raw topics are not modified,
+truncated, or cleared by J1.
+
+**Rationale.** §1 of this contract records that no real emitter is
+present in the repository. The synthetic `TechnicalPaymentEvent`
+generator is the only source. Building J1 against a lifecycle topic
+would require inventing a producer for a topic whose consumer does not
+yet exist, which inverts the Kappa direction of the route. The raw
+topics are the actual input the production route will see once
+STR-002A-PROD confirms a real emitter, so J1's consumption logic is
+exercised against the real shape from day one.
+
+**Expiry condition.** This fixture designation ends at the earlier of:
+
+1. STR-002A-PROD confirming a real production emitter and its topic, at
+   which point J1's input is re-evaluated against that emitter's
+   contract; or
+2. The STR-003 output contract being signed off, at which point J1's
+   input and output bindings are reviewed together as one contract.
+
+Whichever comes first, this subsection is superseded and the input
+contract is restated against the production emitter or the signed-off
+STR-003 contract.
+
+**What this decision does not settle.** The dedup TTL, the event-time
+and watermark policy, the late-event policy, and the output binding to
+`payments.lifecycle.state.v1` all remain STR-003 deliverables. This
+decision fixes only the input side: which topics J1 reads, under what
+consumer identity, and until when the raw topics are treated as a
+fixture.
+
+**Consistency with §3.** §3 already states that J1 reads both topics
+under a single isolated consumer group, that offsets are committed
+through Flink checkpoints only, and that re-consumption is handled by
+idempotency rather than offset resets. §8.1 confirms those rules and
+adds the read-only and fixture-designation clauses. No conflict; §8.1 is
+the authoritative statement of the input contract, and §3 is its
+consumer-level detail.
+
 ## 9. Open questions for STR-002A-PROD
 
 The following must be resolved by STR-002A-PROD before this contract can
@@ -424,3 +487,10 @@ requires:
 
 Changes to Sections 1, 2, 8, 9, 10, 11, or 12 do not require
 re-approval.
+
+### Change log
+
+| Date | Change | Sections | Re-approval required |
+|---|---|---|---|
+| 2026-10-12 | Initial draft | all | yes (draft) |
+| 2026-10-13 | J1 input contract decided; added §8.1; added read-only rule to §3; added input-contract row to §5.1; added pointer in §1 | 1, 3, 5.1, 8 | no (§8 is not a re-approval section) |
