@@ -43,11 +43,11 @@ This report is refreshed whenever a ticket closes or the plan is revised.
 3. Stage vocabulary signed off.
 
 **Status:**
-1. **DONE.** `docs/streaming/STR-002A-DEV-event-contract.md` documents that no real emitter is present in the repository, that the route is built against the synthetic `TechnicalPaymentEvent` generator, and that STR-002A-PROD remains open for production emitter confirmation. §8 of that document records the boundary.
+1. **DONE.** `docs/streaming/STR-002A-DEV-event-contract.md` documents that no real emitter is present in the repository, that the route is built against the synthetic `TechnicalPaymentEvent` generator, and that STR-002A-PROD remains open for production emitter confirmation. §8 of that document records the boundary; §8.1 records the J1 input-contract decision of 2026-10-13.
 2. **PARTIAL.** `correlation_id` is named as the canonical development key in STR-002A-DEV §5.1. Owner sign-off is not yet recorded. The registered `payments.lifecycle.state.v1` schema also uses `correlation_id` as its key field.
 3. **DONE.** The stage vocabulary is defined in STR-002A-DEV §6: `payment-validation`, `payment-routing`, `mobile-money-credit`, `agent-cashout`. Sourced from `services/payment-xml-generator/generator_common.py`. The live raw topics confirmed this vocabulary: PMN carries `payment-routing` and `payment-validation`, and PLM carries `mobile-money-credit` and `payment-validation` (see STR-002B/B2 item 3).
 
-**Notes:** The consolidated directive of 2026-10-12 split STR-002A into DEV and PROD. The DEV half is drafted. The PROD half remains open and is tracked separately.
+**Notes:** The consolidated directive of 2026-10-12 split STR-002A into DEV and PROD. The DEV half is drafted. The PROD half remains open and is tracked separately. The J1 input contract is now decided and recorded in STR-002A-DEV §8.1: J1 reads the raw-route topics as an explicit development fixture, through a read-only consumer group, with an expiry condition tied to STR-002A-PROD or the STR-003 output contract, whichever comes first.
 
 ---
 
@@ -92,11 +92,11 @@ The plan does not name B1 and B2 as sub-tickets; this report does, because the w
      - Stage split: PMN `payment-routing` 225, PMN `payment-validation` 13; PLM `mobile-money-credit` 225, PLM `payment-validation` 13.
      - 4 checkpoints completed, 0 failed.
    - **Checkpoint recovery verified on 2026-10-13.** See "Savepoint recovery test" below.
-   - **Still open.** Output binding to `payments.lifecycle.state.v1`; J1 input contract (raw topics as a development fixture vs. a lifecycle topic with a producer).
+   - **Still open.** Output binding to `payments.lifecycle.state.v1`. The J1 input contract is decided: the raw topics are a development fixture, see STR-002A-DEV §8.1. The remaining PARTIAL on item 3 is now the output binding alone.
 4. **DONE.** No existing service affected.
 
 **Evidence:**
-- Commits: `70fd9e6` (B2 schema registration), `4c8fdc9` (TaskManager registration override and Table API skeleton, WIP), `326c382` (plan-status correction), `ff5b07e` (dedup by `event_id`), `0b4d8b3` (`event_type` in output).
+- Commits: `70fd9e6` (B2 schema registration), `4c8fdc9` (TaskManager registration override and Table API skeleton, WIP), `326c382` (plan-status correction), `ff5b07e` (dedup by `event_id`), `0b4d8b3` (`event_type` in output), `b19b289` (J1 input contract decision in STR-002A-DEV §8.1).
 - Runtime counters and the stage split above, taken from the Flink REST API, the TaskManager metrics endpoint, and the job's output.
 - Savepoint recovery evidence: JobManager log lines from 2026-10-13 19:58:08 and the TaskManager metrics endpoint; see below.
 
@@ -127,7 +127,7 @@ The plan does not name B1 and B2 as sub-tickets; this report does, because the w
 2. J1 and J2 pass unit tests for transition, dedup, late-event, and watermark cases.
 3. J1 and J2 expose Prometheus metrics for events processed, late events, DLQ routes, and transition failures.
 
-**Status:** **BLOCKED** on STR-002B/B2 item 3. The J1 output binding to `payments.lifecycle.state.v1` and the J1 input contract are not yet defined.
+**Status:** **IN PROGRESS.** The J1 input contract is decided (STR-002A-DEV §8.1). The remaining blocker is the output binding to `payments.lifecycle.state.v1`, which cannot start until the STR-003 output contract is agreed. Deliverables that are not gated on the output contract — J1 state machine, J2 gap detector, dedup TTL, event-time and watermark policy, unit tests — can begin now.
 
 **Notes:**
 - Deduplication by `event_id` is implemented in the skeleton and verified, including across a savepoint restore (see STR-002B/B2). What remains for STR-003 is the dedup TTL, the event-time contract, watermark and late-event policy, and the production output binding.
@@ -246,7 +246,7 @@ The plan does not name B1 and B2 as sub-tickets; this report does, because the w
 | STR-002A | Complete | DEV drafted; PROD open |
 | STR-002B/B1 | Complete | Verified, evidenced; one job was running and is now stopped after savepoint |
 | STR-002B/B2 | **PARTIAL** | Topics and subjects done; J1 reads raw topics, dedups by `event_id`, verified 476 transitions; savepoint recovery PASS; stdout only; not bound to the lifecycle topic |
-| STR-003 | Not started | Blocked on B2 item 3 (output binding and input contract) |
+| STR-003 | Not started | **IN PROGRESS**; input contract decided (STR-002A-DEV §8.1); remaining blocker is the output binding to `payments.lifecycle.state.v1` |
 | STR-004 | Not started | Topic and state schema pre-empted; replay and tombstone open |
 | STR-005 | Not started | Flink metrics present; SLA and gap metrics not defined |
 | STR-006 | Not started | Provisioning done ahead of ticket and re-run after rebuild; tables and writer open |
@@ -262,7 +262,7 @@ The single ticket in flight is STR-002B/B2 item 3. Two open issues:
 
 **1. TaskManager registration (worked around, root cause open).** `platform/flink/conf/flink-conf.yaml` in the repository has `jobmanager.rpc.address: flink-jobmanager`. The `flink-conf.yaml` inside the TaskManager image still contained `flink-taskmanager` after a `--no-cache` rebuild. Registration now works through a `FLINK_PROPERTIES` override on `flink-taskmanager` in `docker-compose.yaml`, committed in `4c8fdc9`. The root cause, why the image holds a stale file, has not been identified. Candidates: `.dockerignore`, the build context, or a Flink entrypoint rewrite. The plan requires `platform/flink/conf/` to be mounted read-only, which would remove the image copy and the need for the override. The mount is currently commented out in `docker-compose.yaml`.
 
-**2. J1 output and input binding (open).** The skeleton reads the raw-route topics and writes to stdout. It is not bound to `payments.lifecycle.state.v1`, and the input contract is not defined. Resolving this is B2 item 3 and belongs to the STR-003 J1 contract. Checkpoint recovery from a savepoint has been tested and passed; the savepoint path and evidence are recorded under STR-002B/B2 above.
+**2. J1 output binding (open).** The skeleton reads the raw-route topics and writes to stdout. The input contract is now decided (STR-002A-DEV §8.1): the raw topics are an explicit development fixture, with an expiry condition tied to STR-002A-PROD or the STR-003 output contract. What remains is the output binding to `payments.lifecycle.state.v1`, which cannot be added until the STR-003 output contract is agreed. Checkpoint recovery from a savepoint has been tested and passed; the savepoint path and evidence are recorded under STR-002B/B2 above.
 
 ---
 
@@ -275,9 +275,9 @@ The consolidated directive of 2026-10-12 introduced changes the plan does not ye
 3. **Explicit Kafka → Flink → Kafka pattern.** The plan's §5 does not name this as the required architecture.
 4. **Projection-writer scope in STR-006.** The plan's §9 predates the directive's requirement for a decoupled writer.
 5. **Per-ticket Lambda/Kappa responsibility mapping.** §12 of the directive requires this; the plan's tickets do not include it.
-6. **Raw-route input for J1.** The plan's §5 says the skeleton consumes "the lifecycle topic." The current skeleton reads the raw-route topics read-only through a development consumer group. This is a development fixture and should be recorded as one until STR-003 settles the input.
+6. **Raw-route input for J1.** The plan's §5 says the skeleton consumes "the lifecycle topic." The current skeleton reads the raw-route topics read-only through a development consumer group. This is a development fixture; the decision is recorded in STR-002A-DEV §8.1 and should be reflected in the plan when it is revised.
 
-A revision pass on `docs/streaming/phased-plan.md` should incorporate these before STR-003 begins.
+A revision pass on `docs/streaming/phased-plan.md` should incorporate these before STR-003's output-contract work begins.
 
 ---
 
@@ -288,7 +288,7 @@ These are decisions, not code changes. They are recorded here so they are not lo
 1. **STR-002B/B2 item 3 should be PARTIAL in the plan**, not complete. This report already marks it PARTIAL. The plan itself still reads Complete.
 2. **STR-002A DEV sufficiency for B2.** Decide whether the DEV event contract is sufficient for B2 to close, or whether B2 waits for the PROD contract.
 3. **STR-004 schema pre-emption.** Ratify or reverse the decision to register `payments.lifecycle.state.v1-value` before the STR-004 contract was defined.
-4. **J1 input contract.** Decide whether the raw topics are a development fixture only, or whether J1 reads a lifecycle topic with a producer. This determines whether B2 item 3 can close without a producer change.
+4. **J1 input contract — decided 2026-10-13.** The raw topics are an explicit development fixture; see STR-002A-DEV §8.1. B2 item 3 narrows to the output binding alone.
 
 ---
 
@@ -322,3 +322,10 @@ A short, chronological record of sessions that changed the plan state. Kept here
 - **Result:** PASS. 0 new transitions, 0 `previous=null` records, `flink_j1_duplicate_events_total` = 476 for the restored job. SplitEnumerator restored from checkpoint; no operator mismatch; no `--allowNonRestoredState`.
 - **Plan state changes:** STR-002B/B2 item 3 remains PARTIAL, with the checkpoint-recovery sub-clause closed. STR-009 moves from NOT STARTED to PARTIAL.
 - **Governance items opened this session:** none new. The four items in "Open governance items" above were carried in from the prior session.
+
+### 2026-10-13 — J1 input contract decided
+
+- **Scope:** STR-002A-DEV §8, open governance item 4.
+- **Decision:** J1 reads `icmn.pmn.pain001` and `cpo.plm.pain002` as an explicit development fixture, through a read-only consumer group, with an expiry condition tied to STR-002A-PROD or the STR-003 output contract, whichever comes first. Recorded in STR-002A-DEV §8.1, committed as `b19b289`.
+- **Plan state changes:** STR-002B/B2 item 3 narrows to the output binding alone. STR-003 moves from BLOCKED to IN PROGRESS. Governance item 4 closes.
+- **Governance items opened this session:** none.
