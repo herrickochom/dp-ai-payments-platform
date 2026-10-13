@@ -37,6 +37,7 @@
 #
 # The hostname `flink-jobmanager` resolves on the Compose network via the
 # `hostname:` field on the flink-jobmanager service in docker-compose.yaml.
+# jobmanager.rpc.address: flink-jobmanager
 jobmanager.rpc.address: flink-jobmanager
 jobmanager.rpc.port: 6123
 
@@ -136,3 +137,6 @@ jobmanager.web.port: 8081
 # Child-first class loading is the Flink default. It is set explicitly so
 # that connector dependencies do not collide with the Flink distribution.
 classloader.resolve-order: child-first
+
+env.java.opts.all: --add-opens java.base/java.net=ALL-UNNAMED
+env.java.opts.client: --add-opens java.base/java.net=ALL-UNNAMED

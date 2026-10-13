@@ -1,8 +1,15 @@
 # Python dependencies for PyFlink jobs.
 #
 # apache-flink is pinned to match the Flink base image in Dockerfile.flink.
-# confluent-kafka provides the Avro deserializer and Schema Registry client
-# used to decode the technical lifecycle events. fastavro is a transitive
-# dependency used by confluent-kafka[avro].
+# It depends on avro-python3 (not avro), and its Python harness imports
+# AvroTypeException from avro.io. Installing the modern `avro` package
+# (via confluent-kafka[avro]) shadows avro-python3 and breaks that import.
+#
+# To avoid the conflict:
+# - confluent-kafka is installed WITHOUT the [avro] extra.
+# - The Avro decode is done with fastavro, which is already a dependency
+#   of apache-flink, plus a direct HTTP call to Schema Registry.
 apache-flink==1.18.1
-confluent-kafka[avro]==2.5.0
+confluent-kafka==2.5.0
+fastavro==1.9.4
+requests==2.32.3

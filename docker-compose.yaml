@@ -1632,8 +1632,9 @@ services:
       AWS_ACCESS_KEY_ID: ${FLINK_CHECKPOINT_S3_ACCESS_KEY_ID:?FLINK_CHECKPOINT_S3_ACCESS_KEY_ID is required}
       AWS_SECRET_ACCESS_KEY: ${FLINK_CHECKPOINT_S3_SECRET_ACCESS_KEY:?FLINK_CHECKPOINT_S3_SECRET_ACCESS_KEY is required}
       JVM_ARGS: "--add-opens=java.base/java.util=ALL-UNNAMED"
-    volumes:
-    - ./platform/flink/conf/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml:ro
+  #  volumes:
+  #  - ./platform/flink/conf/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml:ro
+  #  - ./flink-libs:/opt/flink/lib
     command: jobmanager
     ports:
     - 127.0.0.1:${FLINK_JOBMANAGER_UI_PORT:-8082}:8081
@@ -1665,7 +1666,7 @@ services:
     - streaming
     environment:
       FLINK_PROPERTIES: |
-
+        jobmanager.rpc.address: flink-jobmanager
         state.checkpoints.dir: s3://${OBJECT_STORE_BUCKET}/flink/checkpoints
         state.savepoints.dir: s3://${OBJECT_STORE_BUCKET}/flink/savepoints
         s3.endpoint: ${S3_ENDPOINT}
@@ -1673,8 +1674,9 @@ services:
       AWS_ACCESS_KEY_ID: ${FLINK_CHECKPOINT_S3_ACCESS_KEY_ID:?FLINK_CHECKPOINT_S3_ACCESS_KEY_ID is required}
       AWS_SECRET_ACCESS_KEY: ${FLINK_CHECKPOINT_S3_SECRET_ACCESS_KEY:?FLINK_CHECKPOINT_S3_SECRET_ACCESS_KEY is required}
       JVM_ARGS: "--add-opens=java.base/java.util=ALL-UNNAMED"
-    volumes:
-    - ./platform/flink/conf/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml:ro
+  #  volumes:
+  #  - ./platform/flink/conf/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml:ro
+  #  - ./flink-libs:/opt/flink/lib
     command: taskmanager
     depends_on:
       flink-jobmanager:
