@@ -14,8 +14,9 @@ string in parsed_event_data, so this job:
      envelope event_type (PMN or PLM), previous state, and current state.
 
 Known limits (this is a skeleton, not the state machine):
-  - Dedup state (seen event_ids per correlation_id) is unbounded. Bounding it
-    with a state TTL or a sliding window is STR-003 scope.
+  - Dedup state (seen event_ids per correlation_id) is bounded by a 24-hour
+    TTL, configurable via J1_DEDUP_TTL_HOURS. The value is provisional until
+    STR-002A-PROD confirms the maximum lifecycle duration.
   - Output goes to stdout via print(). Writing to payments.lifecycle.state.v1
     is B2 item 3 and needs the STR-003 output contract.
   - The input is the raw-route topics, read through a read-only consumer group.
@@ -32,6 +33,7 @@ import os
 from datetime import datetime, timezone
 
 from pyflink.common import Types
+from pyflink.common.time import Time
 from pyflink.datastream import (
     CheckpointingMode,
     KeyedProcessFunction,
@@ -39,7 +41,11 @@ from pyflink.datastream import (
     RuntimeContext,
     StreamExecutionEnvironment,
 )
-from pyflink.datastream.state import MapStateDescriptor, ValueStateDescriptor
+from pyflink.datastream.state import (
+    MapStateDescriptor,
+    StateTtlConfig,
+    ValueStateDescriptor,
+)
 from pyflink.metrics import Counter
 from pyflink.table import StreamTableEnvironment
 
@@ -66,6 +72,28 @@ STARTUP_MODE = _env("J1_STARTUP_MODE", "earliest-offset")
 PARALLELISM = int(_env("J1_PARALLELISM", "1"))
 CHECKPOINT_INTERVAL_MS = int(_env("J1_CHECKPOINT_INTERVAL_MS", "30000"))
 INVALID_LOG_EVERY = int(_env("J1_INVALID_LOG_EVERY", "1000"))
+
+# Dedup state TTL.
+#
+# The dedup state is keyed by correlation_id and, within each key, holds the
+# set of event_ids already applied. Without a TTL this set grows without
+# bound for the life of the job. The TTL bounds it to event_ids seen within
+# the window.
+#
+# Value: 24 hours. Chosen to exceed any plausible payment lifecycle duration
+# in the synthetic data, and conservatively in production. Provisional:
+# STR-002A-PROD must confirm the real maximum lifecycle duration and the
+# value is revised against that. Exposed as an environment variable so the
+# revision does not require a code change.
+#
+# Update type: OnCreateAndWrite. A dedup entry is written once, when the
+# event_id is first seen, and never updated. OnCreateAndWrite matches that
+# and avoids refreshing the clock on read.
+#
+# Visibility: NeverReturnExpired. An expired event_id must not satisfy a
+# dedup check; if it did, a legitimate re-emission after the TTL window
+# would be silently treated as a duplicate and dropped.
+J1_DEDUP_TTL_HOURS = int(_env("J1_DEDUP_TTL_HOURS", "24"))
 
 INPUT_TOPICS = [
     _env("J1_INPUT_TOPIC_1", "icmn.pmn.pain001"),
@@ -195,6 +223,11 @@ class LifecycleSkeleton(KeyedProcessFunction):
     A repeated event_id is counted as a duplicate and produces no output and no
     state change. A new event_id updates the last-seen state and emits one
     transition record.
+
+    The dedup MapState carries a TTL (J1_DEDUP_TTL_HOURS, default 24h) so that
+    the set of seen event_ids does not grow without bound. The last_seen
+    ValueState is intentionally left without a TTL: it is bounded by the number
+    of live correlation IDs, not by event count.
     """
 
     def __init__(self) -> None:
@@ -208,9 +241,23 @@ class LifecycleSkeleton(KeyedProcessFunction):
         self._state = runtime_context.get_state(
             ValueStateDescriptor("last_seen", Types.STRING())
         )
-        self._seen_event_ids = runtime_context.get_map_state(
-            MapStateDescriptor("seen_event_ids", Types.STRING(), Types.BOOLEAN())
+
+        # TTL applies to the dedup MapState only. See the module-level
+        # comment on J1_DEDUP_TTL_HOURS for the value, rationale, and the
+        # provisional status of the value.
+        ttl_config = (
+            StateTtlConfig.new_builder(Time.hours(J1_DEDUP_TTL_HOURS))
+            .set_update_type(StateTtlConfig.UpdateType.OnCreateAndWrite)
+            .set_state_visibility(StateTtlConfig.StateVisibility.NeverReturnExpired)
+            .cleanup_incrementally(10, True)
+            .build()
         )
+        seen_event_ids_descriptor = MapStateDescriptor(
+            "seen_event_ids", Types.STRING(), Types.BOOLEAN()
+        )
+        seen_event_ids_descriptor.enable_time_to_live(ttl_config)
+        self._seen_event_ids = runtime_context.get_map_state(seen_event_ids_descriptor)
+
         metrics = runtime_context.get_metrics_group()
         self._events_seen = metrics.counter("flink_j1_events_seen_total")
         self._state_records = metrics.counter("flink_j1_state_records_total")
