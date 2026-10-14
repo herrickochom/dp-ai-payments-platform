@@ -1,6 +1,6 @@
 # STR-002A-DEV Development Event Contract
 
-- Status: Draft for approval
+- Status: Approved 2026-10-14
 - Date: 2026-10-12
 - Last revised: 2026-10-13 (§8.1 J1 input contract decided)
 - Ticket: STR-002A-DEV
@@ -126,9 +126,12 @@ compatible; renaming, retyping, or removing fields is not.
 
 **Deserialization.** The Flink job must use a Schema Registry-aware Avro
 deserializer configured with the Schema Registry endpoint. The current
-skeleton's `SimpleStringSchema` and `json.loads` approach is NOT
-compatible with the producer's Avro wire format and must be replaced in
-STR-003.
+skeleton reads the raw topics through the Flink Table API with the
+`avro-confluent` format. Its `json.loads` call parses only the JSON-encoded
+`parsed_event_data` field inside the decoded Avro envelope; it does not parse
+the wire format. The proposed output subjects, Avro mappings, time semantics,
+and delivery gates are defined in `docs/streaming/STR-003-output-contract.md`,
+which remains a draft pending approval and sink implementation.
 
 **Schema Registry endpoint.** The Flink job reads the endpoint from an
 environment variable. The value is the existing `schema-registry`
@@ -469,8 +472,13 @@ dashboard built on this contract must be treated as development-only.
 
 | Role | Name | Date | Status |
 |---|---|---|---|
-| Platform architecture owner | -- | -- | pending |
-| Payment platform owner | -- | -- | pending |
+| Platform architecture owner | Herrick OCHOM | 2026-10-14 | approved |
+| Payment platform owner | Herrick OCHOM | 2026-10-14 | approved |
+
+**Approval note.** The §4 change of 2026-10-14 (Table API
+`avro-confluent` input decoding correction and STR-003 output contract
+link) is ratified by this approval. The contract becomes binding on
+STR-002B/B2 and STR-003.
 
 The contract becomes binding on STR-002B/B2 and STR-003 when both
 approvers sign this section. Until then it is a draft.
@@ -494,3 +502,5 @@ re-approval.
 |---|---|---|---|
 | 2026-10-12 | Initial draft | all | yes (draft) |
 | 2026-10-13 | J1 input contract decided; added §8.1; added read-only rule to §3; added input-contract row to §5.1; added pointer in §1 | 1, 3, 5.1, 8 | no (§8 is not a re-approval section) |
+| 2026-10-14 | Corrected §4 to reflect Table API `avro-confluent` input decoding and linked the draft STR-003 output contract and approval gate | 4 | yes (§4 change; approvals remain pending) |
+| 2026-10-14 | Approval recorded. §4 change of 2026-10-14 ratified. | 4, 11, 12 | closed |
