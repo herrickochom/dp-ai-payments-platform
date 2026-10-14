@@ -12,8 +12,18 @@
 # and STR-003 onward.
 #
 # No secret values appear in this file. Credentials for MinIO checkpoints
-# and the Prometheus reporter endpoint are supplied at runtime by Compose
-# environment variables, or by the shared secret provider.
+# are supplied at runtime by Compose environment variables, or by the shared
+# secret provider.
+#
+# Configuration delivery note:
+#   This file is mounted into the containers from the host. The Flink
+#   entrypoint rewrites flink-conf.yaml with sed -i at startup, which means
+#   the mount must be writable — a read-only mount causes the entrypoint to
+#   fail silently and FLINK_PROPERTIES is not merged into the effective
+#   configuration. Any setting that must take effect belongs in this file.
+#   Environment-derived values that cannot be static here should be
+#   delivered through a mechanism other than FLINK_PROPERTIES, or the mount
+#   should be made writable.
 #
 # Conventions follow platform/trino/etc/config.properties:
 #   - Commented sections
@@ -37,7 +47,6 @@
 #
 # The hostname `flink-jobmanager` resolves on the Compose network via the
 # `hostname:` field on the flink-jobmanager service in docker-compose.yaml.
-# jobmanager.rpc.address: flink-jobmanager
 jobmanager.rpc.address: flink-jobmanager
 jobmanager.rpc.port: 6123
 
@@ -77,10 +86,14 @@ state.backend.incremental: true
 # Storage is MinIO via the S3 filesystem plugin, using a dedicated prefix
 # under the existing object store. This is NOT under raw/ or warehouse/.
 #
-# Credentials are supplied at runtime. The bucket name is set by the
-# OBJECT_STORE_BUCKET environment variable; the endpoint by S3_ENDPOINT.
-# Path is intentionally left as a directory prefix, not a full URI, so the
-# bucket and endpoint come from Compose environment.
+# state.checkpoints.dir and state.savepoints.dir are static for the Day-0
+# Compose stack. They were previously delivered through FLINK_PROPERTIES,
+# but that mechanism does not merge into a read-only mounted conf file, so
+# the values are declared here and the FLINK_PROPERTIES block in
+# docker-compose.yaml no longer carries them.
+#
+# The bucket name is dp-ai-payment. If the bucket is ever renamed, this
+# file and docker-compose.yaml must be updated together.
 execution.checkpointing.mode: EXACTLY_ONCE
 # Day-0 interval. Production intervals are a sizing decision tracked under
 # U12 and STR-003.
@@ -89,6 +102,9 @@ execution.checkpointing.min-pause: 10s
 execution.checkpointing.timeout: 10min
 execution.checkpointing.max-concurrent-checkpoints: 1
 execution.checkpointing.externalized-checkpoint-retention: RETAIN_ON_CANCELLATION
+
+state.checkpoints.dir: s3://dp-ai-payment/flink/checkpoints
+state.savepoints.dir: s3://dp-ai-payment/flink/savepoints
 
 # -----------------------------------------------------------------------------
 # Restart strategy
@@ -111,13 +127,52 @@ metrics.reporter.prom.port: 9249
 # -----------------------------------------------------------------------------
 # S3 filesystem (for checkpoint storage)
 # -----------------------------------------------------------------------------
-# The S3 plugin is bundled into the image by Dockerfile.flink. Endpoint,
-# path-style, and credentials are supplied via Compose environment and the
-# Flink S3 filesystem options below.
+# The S3 plugin is bundled into the image by Dockerfile.flink.
+#
+# s3.endpoint is REQUIRED. Without it, the Hadoop S3A client defaults to
+# https://s3.amazonaws.com and every S3 request fails with 403 Forbidden,
+# because the MinIO-issued credentials are unknown to AWS. The failure
+# surfaces during JobMaster initialization as an AccessDeniedException on
+# getFileStatus for the savepoint path.
+#
+# The endpoint is static for the Day-0 Compose stack. It is declared here
+# rather than in FLINK_PROPERTIES because the entrypoint does not merge
+# environment-supplied settings into a read-only mounted conf file.
+#
+# s3.path.style.access is required for MinIO. s3.connection.* tune the
+# underlying HTTP client.
+s3.endpoint: http://minio:9000
 s3.path.style.access: true
 s3.connection.maximum: 50
 s3.connection.timeout: 60000
 s3.connection.request.timeout: 60000
+
+# S3A committer configuration.
+#
+# The default S3A committer performs a bulk delete of the parent prefix
+# after every checkpoint or savepoint commit. The flink-checkpoint MinIO
+# identity is scoped to flink/checkpoints/* and flink/savepoints/* (see
+# platform/minio/policies/flink-checkpoint.json) and does not grant delete
+# on the parent flink/ prefix. The bulk delete is therefore denied with
+# AccessDenied, and the denial blocks the task's checkpoint listener. On a
+# session cluster with a single TaskManager, the stalled checkpoint loop
+# also stalls the Kafka consumer in the same task, which then disconnects
+# from the broker and never reconnects.
+#
+# The directory committer does not perform the parent-prefix bulk delete.
+# It stages each task's output in a task-specific directory and renames on
+# commit. Both operations stay within the granted prefix scope, so the
+# checkpoint commits without the AccessDenied warning.
+#
+# Do NOT change this to the magic or file committer without also widening
+# the flink-checkpoint policy to include the flink/ parent prefix and the
+# s3:DeleteObjectVersion, s3:AbortMultipartUpload, and
+# s3:ListMultipartUploadParts actions. The provisioning script
+# (platform/minio/provision_object_store_identities.py) enforces the
+# narrower scope and will reject a policy that includes those actions.
+fs.s3a.committer.name: directory
+fs.s3a.committer.staging.conflict-mode: append
+fs.s3a.committer.staging.unique-filenames: true
 
 # Access keys are supplied via the standard AWS_ACCESS_KEY_ID /
 # AWS_SECRET_ACCESS_KEY environment variables provided by Compose, using a

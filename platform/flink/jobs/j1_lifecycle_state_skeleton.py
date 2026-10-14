@@ -23,6 +23,15 @@ Known limits (this is a skeleton, not the state machine):
     This is a development fixture, not the lifecycle input contract.
   - updated_at uses wall-clock time, so a replay produces different values for
     that field. Event-time semantics are STR-003 scope.
+
+Operational dependency:
+  - Checkpoints and savepoints are written to S3 via the Flink S3 filesystem
+    plugin. The flink-checkpoint MinIO identity is scoped to
+    flink/checkpoints/* and flink/savepoints/*, so flink-conf.yaml must set
+    fs.s3a.committer.name=directory. The default magic committer performs a
+    parent-prefix bulk delete that the policy denies, which stalls the task's
+    checkpoint listener and drags the Kafka consumer down with it. See
+    platform/flink/conf/flink-conf.yaml for the full note.
 """
 
 from __future__ import annotations
