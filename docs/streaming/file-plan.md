@@ -161,7 +161,7 @@ No directory is created by this document other than the already-authorised `docs
 | `contracts/kafka/<streaming-event>.avsc` | Subject, envelope, format, and whether an existing schema can evolve are undecided. | STR-002A / STR-002B | phased-plan §5 |
 | `platform/docker/dockerfiles/Dockerfile.<flink>` | Custom image need, base image, packaging, and exact filename are undecided. | STR-002B | phased-plan §5 (STR-002B) |
 | `platform/flink/<job-or-config>` | Language, build system, job split, state backend, and deployment layout are undecided. | STR-002B / STR-003 | phased-plan §5–§6 |
-| `docs/streaming/<event-time-contract>.md` | J1/J2 boundaries and contract names await STR-003. | STR-003 | phased-plan §6 |
+| `docs/streaming/STR-003-output-contract.md` | J1 output binding to the state and transitions topics; filename fixed 2026-10-14. Remaining STR-003 contracts for watermarks, late events, and J2 may require a separately governed document. | STR-003 | phased-plan §6 |
 | `docs/streaming/<state-contract>.md` | J3/J4, topic, key/value, retention, and tombstone decisions await STR-004. | STR-004 | phased-plan §7 |
 | `docs/streaming/<metrics-contract>.md` | SLA/gap vocabulary and metric names/cardinality are undecided. | STR-005 | phased-plan §8 |
 | `platform/postgres/initdb/<number>_<streaming-schema>.sh` | Schema/database choice, roles, numbering, migration method, and upgrade behavior are undecided. | STR-006 | phased-plan §9 |
