@@ -43,8 +43,10 @@ This report is refreshed whenever a ticket closes or the plan is revised.
 3. Stage vocabulary signed off.
 
 **Status:**
+Approval recorded 2026-10-14. See §11 of STR-002A-DEV.
+
 1. **DONE.** `docs/streaming/STR-002A-DEV-event-contract.md` documents that no real emitter is present in the repository, that the route is built against the synthetic `TechnicalPaymentEvent` generator, and that STR-002A-PROD remains open for production emitter confirmation. §8 of that document records the boundary; §8.1 records the J1 input-contract decision of 2026-10-13.
-2. **PARTIAL.** `correlation_id` is named as the canonical development key in STR-002A-DEV §5.1. Owner sign-off is not yet recorded. The registered `payments.lifecycle.state.v1` schema also uses `correlation_id` as its key field.
+2. **DONE.** `correlation_id` is named as the canonical development key in STR-002A-DEV §5.1. Owner sign-off was recorded on 2026-10-14 in §11 of that contract. The registered `payments.lifecycle.state.v1` schema also uses `correlation_id` as its key field.
 3. **DONE.** The stage vocabulary is defined in STR-002A-DEV §6: `payment-validation`, `payment-routing`, `mobile-money-credit`, `agent-cashout`. Sourced from `services/payment-xml-generator/generator_common.py`. The live raw topics confirmed this vocabulary: PMN carries `payment-routing` and `payment-validation`, and PLM carries `mobile-money-credit` and `payment-validation` (see STR-002B/B2 item 3).
 
 **Notes:** The consolidated directive of 2026-10-12 split STR-002A into DEV and PROD. The DEV half is drafted. The PROD half remains open and is tracked separately. The J1 input contract is now decided and recorded in STR-002A-DEV §8.1: J1 reads the raw-route topics as an explicit development fixture, through a read-only consumer group, with an expiry condition tied to STR-002A-PROD or the STR-003 output contract, whichever comes first.
@@ -83,7 +85,7 @@ The plan does not name B1 and B2 as sub-tickets; this report does, because the w
 
 **Status:**
 1. **DONE.** Five topics are declared in `platform/kafka/topics.yaml`. `payments.lifecycle.state.v1` is verified as `cleanup.policy=compact`, `retention.ms=-1`. The topics were recreated by `kafka-init` after the environment rebuild.
-2. **DONE.** Five subjects are registered in Schema Registry: `payments.lifecycle.{state,transitions,audit,dlq,exceptions}.v1-value`. `payments.lifecycle.state.v1-value` is version 1, schema id 3. Registration was done before the STR-004 contract was defined; see Deviations.
+2. **DONE.** Five subjects are registered in Schema Registry: `payments.lifecycle.{state,transitions,audit,dlq,exceptions}.v1-value`. Read-only verification on 2026-10-14 confirmed `payments.lifecycle.state.v1-value` version 1, schema ID 2, and `payments.lifecycle.transitions.v1-value` version 1, schema ID 1. Registration was done before the STR-004 contract was defined; see Deviations.
 3. **PARTIAL.** `platform/flink/jobs/j1_lifecycle_state_skeleton.py` reads the raw-route topics `icmn.pmn.pain001` (PMN) and `cpo.plm.pain002` (PLM) through the Table API `avro-confluent` format, through a read-only consumer group. It is not reading the lifecycle topics. It parses `parsed_event_data` in Python, keys on `correlation_id`, and deduplicates by `event_id` within each correlation ID. It emits one transition record per distinct event, including `event_type`, `previous`, and `current`. It writes to stdout, not `payments.lifecycle.state.v1`.
    - **Consumption and dedup verified on job `5866dafb939974cefc34783809e56c20`** against 952 raw messages from two producer runs:
      - 476 transitions: 238 PMN and 238 PLM.
@@ -99,6 +101,21 @@ The plan does not name B1 and B2 as sub-tickets; this report does, because the w
 - Commits: `70fd9e6` (B2 schema registration), `4c8fdc9` (TaskManager registration override and Table API skeleton, WIP), `326c382` (plan-status correction), `ff5b07e` (dedup by `event_id`), `0b4d8b3` (`event_type` in output), `b19b289` (J1 input contract decision in STR-002A-DEV §8.1).
 - Runtime counters and the stage split above, taken from the Flink REST API, the TaskManager metrics endpoint, and the job's output.
 - Savepoint recovery evidence: JobManager log lines from 2026-10-13 19:58:08 and the TaskManager metrics endpoint; see below.
+
+**STR-003 output contract — 2026-10-14**
+
+`docs/streaming/STR-003-output-contract.md` now defines J1's proposed output
+binding to `payments.lifecycle.state.v1` and
+`payments.lifecycle.transitions.v1`. It records the verified Registry context
+(`LifecycleState`: subject version 1/schema ID 2;
+`LifecycleTransition`: subject version 1/schema ID 1;
+`BACKWARD_TRANSITIVE` compatibility), terminal-state behavior, time and
+delivery semantics, state/savepoint compatibility, observability, and
+acceptance gates. The contract is reconstructed from repository evidence; no
+committed fuller draft was recovered.
+
+Approval remains pending for the streaming architect and payment platform
+owner. The sinks are not implemented, so STR-002B/B2 item 3 remains PARTIAL.
 
 **Savepoint recovery test — 2026-10-13**
 
@@ -127,7 +144,7 @@ The plan does not name B1 and B2 as sub-tickets; this report does, because the w
 2. J1 and J2 pass unit tests for transition, dedup, late-event, and watermark cases.
 3. J1 and J2 expose Prometheus metrics for events processed, late events, DLQ routes, and transition failures.
 
-**Status:** **IN PROGRESS.** The J1 input contract is decided (STR-002A-DEV §8.1). The remaining blocker is the output binding to `payments.lifecycle.state.v1`, which cannot start until the STR-003 output contract is agreed. Deliverables that are not gated on the output contract — J1 state machine, J2 gap detector, dedup TTL, event-time and watermark policy, unit tests — can begin now.
+**Status:** **IN PROGRESS.** The J1 input contract is decided (STR-002A-DEV §8.1). The output contract is drafted and approved (`docs/streaming/STR-003-output-contract.md`, approved 2026-10-14). The design gate for the output binding is closed. Implementation remains gated by §12 of the output contract — ten acceptance gates still open. The remaining STR-003 deliverables are: J1 state machine, J2 gap detector, dedup TTL confirmation, event-time and watermark policy, deterministic event-order comparator, Kafka sink implementation, and unit tests.
 
 **Notes:**
 - Deduplication by `event_id` is implemented in the skeleton and verified, including across a savepoint restore (see STR-002B/B2). What remains for STR-003 is the dedup TTL, the event-time contract, watermark and late-event policy, and the production output binding.
@@ -286,8 +303,8 @@ A revision pass on `docs/streaming/phased-plan.md` should incorporate these befo
 These are decisions, not code changes. They are recorded here so they are not lost between sessions.
 
 1. **STR-002B/B2 item 3 should be PARTIAL in the plan**, not complete. This report already marks it PARTIAL. The plan itself still reads Complete.
-2. **STR-002A DEV sufficiency for B2.** Decide whether the DEV event contract is sufficient for B2 to close, or whether B2 waits for the PROD contract.
-3. **STR-004 schema pre-emption.** Ratify or reverse the decision to register `payments.lifecycle.state.v1-value` before the STR-004 contract was defined.
+2. **CLOSED 2026-10-14.** STR-002A DEV sufficiency for B2 — resolved by approval of STR-002A-DEV.
+3. **CLOSED 2026-10-14.** STR-004 schema pre-emption — ratified by approval of STR-003 §4. The registered schemas are the contract.
 4. **J1 input contract — decided 2026-10-13.** The raw topics are an explicit development fixture; see STR-002A-DEV §8.1. B2 item 3 narrows to the output binding alone.
 
 ---
@@ -329,3 +346,41 @@ A short, chronological record of sessions that changed the plan state. Kept here
 - **Decision:** J1 reads `icmn.pmn.pain001` and `cpo.plm.pain002` as an explicit development fixture, through a read-only consumer group, with an expiry condition tied to STR-002A-PROD or the STR-003 output contract, whichever comes first. Recorded in STR-002A-DEV §8.1, committed as `b19b289`.
 - **Plan state changes:** STR-002B/B2 item 3 narrows to the output binding alone. STR-003 moves from BLOCKED to IN PROGRESS. Governance item 4 closes.
 - **Governance items opened this session:** none.
+
+### 2026-10-14 — STR-003 output contract reconstructed and aligned
+
+- **Scope:** Documentation and governance for STR-002B/B2 item 3 and the
+  STR-003 output boundary; no runtime or sink change.
+- **Action:** Expanded `docs/streaming/STR-003-output-contract.md` from the
+  short draft using repository evidence and read-only Registry verification.
+  Defined the state and transition topic contracts, schema and time semantics,
+  terminal handling, state compatibility, conditional Kafka delivery
+  guarantees, observability, and acceptance gates. Reconciled the supplied
+  frozen baseline as 1,428 envelopes, 476 logical events, 238 distinct state
+  keys, and 952 duplicates; these are expectations, not a sink test result.
+- **Result:** Contract ready for review, with both required approvals pending.
+  No committed fuller draft was recovered. The externally supplied
+  `StateMigrationException` incident was recorded as unverified repository
+  history, and `savepoint-acd4d3-c410490ac202` is prohibited for restore.
+- **Plan state changes:** STR-002B/B2 item 3 remains PARTIAL because the Kafka
+  sinks are not implemented or verified. STR-003 remains IN PROGRESS.
+- **Remaining gate:** Streaming architect and payment platform owner approval,
+  followed by a separate sink implementation and acceptance session.
+
+### 2026-10-14 — STR-002A-DEV and STR-003 approvals recorded
+
+- **Scope:** Contract approvals.
+- **Action:** Both signatories signed the STR-002A-DEV and STR-003
+  contracts. STR-002A-DEV §11 and STR-003 §13 approval blocks filled.
+- **Result:** Both contracts become binding. STR-002A-DEV's §4 change
+  of 2026-10-14 is ratified. STR-003's design gate is closed.
+- **Plan state changes:**
+  - STR-002A item 2 (canonical key sign-off) flips PARTIAL → DONE.
+  - STR-003 remains IN PROGRESS; contract gate closed, implementation
+    gate open.
+  - STR-002B/B2 item 3 remains PARTIAL.
+- **Governance items opened this session:** none.
+- **Governance items closed this session:** item 2 (STR-002A DEV
+  sufficiency for B2) — closed by the approval of STR-002A-DEV.
+  Item 3 (STR-004 schema pre-emption) — closed by the approval of
+  STR-003 §4, which ratifies the registered schemas as-is.
