@@ -124,10 +124,22 @@ ENVELOPE_COLUMNS: list[tuple[str, str]] = [
     ("parsed_event_data", "STRING"),
 ]
 
+# Kafka record metadata columns, exposed as virtual columns through the
+# Table API Kafka connector. These are not part of the Avro envelope; the
+# connector populates them from the Kafka record itself. They are
+# required to populate LifecycleTransition.source_topic,
+# source_partition, and source_offset, per STR-003-output-contract §4.2.
+METADATA_COLUMNS_SQL = """
+  `kafka_topic` STRING METADATA FROM 'topic' VIRTUAL,
+  `kafka_partition` INT METADATA FROM 'partition' VIRTUAL,
+  `kafka_offset` BIGINT METADATA FROM 'offset' VIRTUAL
+"""
+
 # Projection order must match ENVELOPE_COLUMNS, because ParseEnvelope indexes
 # the row by position.
 PROJECTION_SQL = (
-    "SELECT event_id, message_id, event_type, source_system, parsed_event_data "
+    "SELECT event_id, message_id, event_type, source_system, parsed_event_data, "
+    "kafka_topic, kafka_partition, kafka_offset "
     f"FROM {TABLE_NAME}"
 )
 
@@ -137,11 +149,16 @@ def build_source_ddl() -> str:
 
     'topic' takes a semicolon-separated list. The 'avro-confluent' format
     fetches each message's writer schema from Schema Registry by schema ID.
+
+    Three Kafka metadata columns (topic, partition, offset) are declared
+    as virtual columns. They are populated by the connector from the
+    Kafka record and are required to fill LifecycleTransition.source_*.
     """
     columns = ",\n  ".join(f"`{name}` {sql_type}" for name, sql_type in ENVELOPE_COLUMNS)
     return f"""
 CREATE TABLE {TABLE_NAME} (
-  {columns}
+  {columns},
+{METADATA_COLUMNS_SQL}
 ) WITH (
   'connector' = 'kafka',
   'topic' = '{";".join(INPUT_TOPICS)}',
@@ -184,8 +201,17 @@ class ParseEnvelope(ProcessFunction):
             )
 
     def process_element(self, row, ctx):  # type: ignore[override]
-        event_id, message_id, event_type, source_system, parsed_event_data = (
-            row[0], row[1], row[2], row[3], row[4],
+        (
+            event_id,
+            message_id,
+            event_type,
+            source_system,
+            parsed_event_data,
+            kafka_topic,
+            kafka_partition,
+            kafka_offset,
+        ) = (
+            row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7],
         )
         self._seen.inc()
 
@@ -214,6 +240,9 @@ class ParseEnvelope(ProcessFunction):
             "technical_stage": body.get("technical_stage") or "",
             "technical_status": body.get("technical_status") or "",
             "event_timestamp": body.get("event_timestamp") or "",
+            "kafka_topic": kafka_topic,
+            "kafka_partition": kafka_partition,
+            "kafka_offset": kafka_offset,
         }
         yield json.dumps(normalised, sort_keys=True)
 
@@ -299,9 +328,13 @@ class LifecycleSkeleton(KeyedProcessFunction):
         yield json.dumps(
             {
                 "correlation_id": event["correlation_id"],
+                "event_id": event["event_id"],
                 "event_type": event["event_type"],
                 "previous": previous,
                 "current": current,
+                "kafka_topic": event.get("kafka_topic"),
+                "kafka_partition": event.get("kafka_partition"),
+                "kafka_offset": event.get("kafka_offset"),
             },
             sort_keys=True,
         )
