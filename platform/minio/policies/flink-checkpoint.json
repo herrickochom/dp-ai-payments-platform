@@ -9,17 +9,7 @@
       ],
       "Resource": [
         "arn:aws:s3:::dp-ai-payment"
-      ],
-      "Condition": {
-        "StringLike": {
-          "s3:prefix": [
-            "flink/checkpoints",
-            "flink/checkpoints/*",
-            "flink/savepoints",
-            "flink/savepoints/*"
-          ]
-        }
-      }
+      ]
     },
     {
       "Sid": "FlinkCheckpointObjectAccess",

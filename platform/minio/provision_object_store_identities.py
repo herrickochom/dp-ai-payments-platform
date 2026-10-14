@@ -99,11 +99,22 @@ def validate_all() -> None:
                 if action_set != {"s3:ListBucket"} or resource_set != {BUCKET}:
                     raise ProvisionError(f"unscoped bucket listing: {name}")
                 condition = statement.get("Condition")
-                if condition is None and name == "nessie-catalog":
-                    # Nessie 0.108.4 performs HeadBucket during object-store
-                    # readiness. HeadBucket has no s3:prefix, so this identity
-                    # requires bucket-level ListBucket on the canonical bucket.
-                    # Object authority remains restricted to warehouse/*.
+                if condition is None and name in ("nessie-catalog", "flink-checkpoint"):
+                    # Two identities require bucket-level ListBucket without
+                    # an s3:prefix condition:
+                    #
+                    #   - nessie-catalog: Nessie 0.108.4 performs HeadBucket
+                    #     during object-store readiness. HeadBucket has no
+                    #     s3:prefix, so a conditioned ListBucket does not
+                    #     cover it. Object authority remains restricted to
+                    #     warehouse/*.
+                    #
+                    #   - flink-checkpoint: S3A's getFileStatus on a
+                    #     savepoint directory key issues a HEAD, then falls
+                    #     back to a LIST only on a 404. MinIO returns 403
+                    #     instead of 404 when the identity lacks bucket-level
+                    #     ListBucket, so the fallback never runs. Object
+                    #     authority remains restricted to flink/*.
                     prefixes.update(expected_prefixes)
                 else:
                     if not isinstance(condition, dict) or set(condition) != {"StringLike"}:

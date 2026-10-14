@@ -1623,18 +1623,20 @@ services:
     profiles:
     - streaming
     environment:
+      # FLINK_PROPERTIES is merged into the mounted flink-conf.yaml by the
+      # Flink entrypoint at container start. Only settings whose values must
+      # be computed from Compose environment variables live here. Static
+      # settings live in platform/flink/conf/flink-conf.yaml, which is
+      # mounted below.
       FLINK_PROPERTIES: |
-
         state.checkpoints.dir: s3://${OBJECT_STORE_BUCKET}/flink/checkpoints
         state.savepoints.dir: s3://${OBJECT_STORE_BUCKET}/flink/savepoints
         s3.endpoint: ${S3_ENDPOINT}
-        s3.path.style.access: true
       AWS_ACCESS_KEY_ID: ${FLINK_CHECKPOINT_S3_ACCESS_KEY_ID:?FLINK_CHECKPOINT_S3_ACCESS_KEY_ID is required}
       AWS_SECRET_ACCESS_KEY: ${FLINK_CHECKPOINT_S3_SECRET_ACCESS_KEY:?FLINK_CHECKPOINT_S3_SECRET_ACCESS_KEY is required}
       JVM_ARGS: "--add-opens=java.base/java.util=ALL-UNNAMED"
-  #  volumes:
-  #  - ./platform/flink/conf/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml:ro
-  #  - ./flink-libs:/opt/flink/lib
+    volumes:
+    - ./platform/flink/conf/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml:ro
     command: jobmanager
     ports:
     - 127.0.0.1:${FLINK_JOBMANAGER_UI_PORT:-8082}:8081
@@ -1665,18 +1667,20 @@ services:
     profiles:
     - streaming
     environment:
+      # jobmanager.rpc.address is retained here as an explicit override. It
+      # matches the value in the mounted flink-conf.yaml, and it was the
+      # override that resolved the earlier TaskManager registration problem.
+      # It can be removed once the mounted config is verified end-to-end.
       FLINK_PROPERTIES: |
         jobmanager.rpc.address: flink-jobmanager
         state.checkpoints.dir: s3://${OBJECT_STORE_BUCKET}/flink/checkpoints
         state.savepoints.dir: s3://${OBJECT_STORE_BUCKET}/flink/savepoints
         s3.endpoint: ${S3_ENDPOINT}
-        s3.path.style.access: true
       AWS_ACCESS_KEY_ID: ${FLINK_CHECKPOINT_S3_ACCESS_KEY_ID:?FLINK_CHECKPOINT_S3_ACCESS_KEY_ID is required}
       AWS_SECRET_ACCESS_KEY: ${FLINK_CHECKPOINT_S3_SECRET_ACCESS_KEY:?FLINK_CHECKPOINT_S3_SECRET_ACCESS_KEY is required}
       JVM_ARGS: "--add-opens=java.base/java.util=ALL-UNNAMED"
-  #  volumes:
-  #  - ./platform/flink/conf/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml:ro
-  #  - ./flink-libs:/opt/flink/lib
+    volumes:
+    - ./platform/flink/conf/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml:ro
     command: taskmanager
     depends_on:
       flink-jobmanager:
@@ -1687,7 +1691,7 @@ services:
     healthcheck:
       test:
       - CMD-SHELL
-      - curl -fsS http://localhost:9249/ >/dev/null || exit 0
+      - curl -fsS http://localhost:9249/ >/dev/null || exit 1
       interval: 15s
       timeout: 5s
       retries: 10
