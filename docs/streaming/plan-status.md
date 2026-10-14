@@ -306,6 +306,12 @@ These are decisions, not code changes. They are recorded here so they are not lo
 2. **CLOSED 2026-10-14.** STR-002A DEV sufficiency for B2 — resolved by approval of STR-002A-DEV.
 3. **CLOSED 2026-10-14.** STR-004 schema pre-emption — ratified by approval of STR-003 §4. The registered schemas are the contract.
 4. **J1 input contract — decided 2026-10-13.** The raw topics are an explicit development fixture; see STR-002A-DEV §8.1. B2 item 3 narrows to the output binding alone.
+5. **STR-003 implementation decisions (opened 2026-10-14).** Five
+   decisions must be recorded before sink implementation can
+   satisfy STR-003 §12 gate 2: watermark delay, event-order
+   comparator, dedup TTL, delivery guarantee, state/transition
+   atomicity. Owner: streaming architect (same person as payment
+   platform owner in the current single-approver arrangement).
 
 ---
 
@@ -384,3 +390,35 @@ A short, chronological record of sessions that changed the plan state. Kept here
   sufficiency for B2) — closed by the approval of STR-002A-DEV.
   Item 3 (STR-004 schema pre-emption) — closed by the approval of
   STR-003 §4, which ratifies the registered schemas as-is.
+
+### 2026-10-14 — Task close: contract approval work complete
+
+- **Scope:** Close-out of the contract-approval work item opened
+  this session.
+- **Deliverables completed:**
+  - STR-002A-DEV §11 approved by both named signatories.
+  - STR-003 §13 approved by both named signatories.
+  - STR-003-output-contract.md added to version control and
+    approved in the same commit (`966706c2`).
+  - Governance items 2 and 3 closed.
+  - STR-002A item 2 (canonical key sign-off) flipped to DONE.
+- **Plan state after close:**
+  - STR-002A-DEV: DONE.
+  - STR-003: IN PROGRESS. Contract gate closed; implementation
+    gate open. Blocked on five decisions and the ten §12
+    acceptance gates.
+  - STR-002B/B2 item 3: PARTIAL, unchanged.
+  - STR-004 through STR-009: unchanged.
+- **Open decisions required before sink implementation:**
+  1. Watermark delay and late-event policy.
+  2. Deterministic event-order comparator.
+  3. Final dedup TTL.
+  4. Delivery guarantee (exactly-once vs at-least-once).
+  5. State/transition atomicity design.
+- **Governance items opened this session:** one — item 5 in the
+  Open governance items list below.
+- **Governance items closed this session:** none additional
+  (items 2 and 3 were closed in the preceding entry).
+- **Working-tree note:** see Step 2 decision recorded above.
+- **Handoff:** Next session begins by recording the five
+  decisions, then implementing the Kafka sink against STR-003 §12.
