@@ -1634,7 +1634,7 @@ services:
         s3.endpoint: ${S3_ENDPOINT}
       AWS_ACCESS_KEY_ID: ${FLINK_CHECKPOINT_S3_ACCESS_KEY_ID:?FLINK_CHECKPOINT_S3_ACCESS_KEY_ID is required}
       AWS_SECRET_ACCESS_KEY: ${FLINK_CHECKPOINT_S3_SECRET_ACCESS_KEY:?FLINK_CHECKPOINT_S3_SECRET_ACCESS_KEY is required}
-      JVM_ARGS: "--add-opens=java.base/java.util=ALL-UNNAMED"
+      JVM_ARGS: "--add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED"
     volumes:
     - ./platform/flink/conf/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml:ro
     command: jobmanager
@@ -1678,7 +1678,7 @@ services:
         s3.endpoint: ${S3_ENDPOINT}
       AWS_ACCESS_KEY_ID: ${FLINK_CHECKPOINT_S3_ACCESS_KEY_ID:?FLINK_CHECKPOINT_S3_ACCESS_KEY_ID is required}
       AWS_SECRET_ACCESS_KEY: ${FLINK_CHECKPOINT_S3_SECRET_ACCESS_KEY:?FLINK_CHECKPOINT_S3_SECRET_ACCESS_KEY is required}
-      JVM_ARGS: "--add-opens=java.base/java.util=ALL-UNNAMED"
+      JVM_ARGS: "--add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED"
     volumes:
     - ./platform/flink/conf/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml:ro
     command: taskmanager

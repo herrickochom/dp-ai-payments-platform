@@ -371,3 +371,61 @@ STR-002B/B2 item 3; implementation and verification remain required.
 | 2026-10-14 | Initial short draft created. | all | Draft; no approvals recorded. |
 | 2026-10-14 | Reconstructed and completed from repository evidence; added delivery, state-compatibility, observability, baseline reconciliation, and approval gates. | all | Full review required. |
 | 2026-10-14 | Approval recorded. | 13, 14 | Closed. |
+
+## 15. Implementation verification — 2026-10-15
+
+This section records runtime evidence obtained after the contract approval.
+It does not supersede the approved requirements or constitute approval of
+all ten implementation acceptance gates in section 12.
+
+### Kafka output binding
+
+J1 publishes to:
+
+- `payments.lifecycle.state.v1`, Confluent Avro schema ID 2.
+- `payments.lifecycle.transitions.v1`, Confluent Avro schema ID 1.
+
+Both outputs use the UTF-8 `correlation_id` Kafka key. The observed
+output snapshot contained 476 state records across 238 distinct keys
+and 476 transition records.
+
+### Source-to-output reconciliation
+
+A read-only reconciliation compared transition provenance against
+the original Kafka records in `icmn.pmn.pain001` and
+`cpo.plm.pain002`, using source topic, partition and offset.
+
+Verified results:
+
+| Measurement | Actual |
+|---|---:|
+| Source physical envelopes | 1,428 |
+| Distinct logical source events | 476 |
+| Published transitions | 476 |
+| Distinct published transition identities | 476 |
+| Missing transitions | 0 |
+| Unexpected transitions | 0 |
+| Duplicate logical transitions | 0 |
+| Source/output field mismatches | 0 |
+
+The comparison verified source `event_id`, inner `correlation_id`,
+technical stage, technical status, event timestamp and output Kafka key.
+
+Result: `SOURCE_TO_OUTPUT_RECONCILIATION=PASS`.
+
+### Regression verification
+
+The post-Row-change J1 schema-binding regression runner completed
+17 tests with zero failures or errors and process exit code 0.
+
+### Acceptance boundary
+
+This evidence verifies the implemented development Kafka output binding,
+schema serialization, key mapping, transition identity and source
+provenance for the observed snapshot.
+
+It does not establish completion of STR-003 section 12 as a whole.
+Ordering and late-event policies, terminal-state handling, delivery
+guarantees, failure/restart behavior, publication atomicity and
+compatible recovery remain subject to their respective acceptance
+requirements. The development-only boundary remains unchanged.

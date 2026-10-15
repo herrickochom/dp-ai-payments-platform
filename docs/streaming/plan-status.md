@@ -86,7 +86,18 @@ The plan does not name B1 and B2 as sub-tickets; this report does, because the w
 **Status:**
 1. **DONE.** Five topics are declared in `platform/kafka/topics.yaml`. `payments.lifecycle.state.v1` is verified as `cleanup.policy=compact`, `retention.ms=-1`. The topics were recreated by `kafka-init` after the environment rebuild.
 2. **DONE.** Five subjects are registered in Schema Registry: `payments.lifecycle.{state,transitions,audit,dlq,exceptions}.v1-value`. Read-only verification on 2026-10-14 confirmed `payments.lifecycle.state.v1-value` version 1, schema ID 2, and `payments.lifecycle.transitions.v1-value` version 1, schema ID 1. Registration was done before the STR-004 contract was defined; see Deviations.
-3. **PARTIAL.** `platform/flink/jobs/j1_lifecycle_state_skeleton.py` reads the raw-route topics `icmn.pmn.pain001` (PMN) and `cpo.plm.pain002` (PLM) through the Table API `avro-confluent` format, through a read-only consumer group. It is not reading the lifecycle topics. It parses `parsed_event_data` in Python, keys on `correlation_id`, and deduplicates by `event_id` within each correlation ID. It emits one transition record per distinct event, including `event_type`, `previous`, and `current`. It writes to stdout, not `payments.lifecycle.state.v1`.
+**2026-10-15 implementation update for item 3:** The previously
+outstanding Kafka output binding has now been implemented and verified
+against a bounded development snapshot. Both state and transition
+topics contain 476 decoded Avro records, with 238 distinct state keys.
+All 476 transition records reconcile to original Kafka source records,
+with zero missing, unexpected, duplicate or mismatched logical events.
+The post-Row-change regression suite passed 17/17 tests.
+
+**Scope:** Output binding is verified. Full STR-003 implementation
+acceptance remains open under its section 12 requirements.
+
+3. **DONE — development output binding verified 2026-10-15.** `platform/flink/jobs/j1_lifecycle_state_skeleton.py` reads the raw-route topics `icmn.pmn.pain001` (PMN) and `cpo.plm.pain002` (PLM) through the Table API `avro-confluent` format, through a read-only consumer group. It is not reading the lifecycle topics. It parses `parsed_event_data` in Python, keys on `correlation_id`, and deduplicates by `event_id` within each correlation ID. The original skeleton emitted diagnostic transitions to stdout. The current implementation publishes governed Avro records to `payments.lifecycle.state.v1` and `payments.lifecycle.transitions.v1`; see the 2026-10-15 verification evidence above.
    - **Consumption and dedup verified on job `5866dafb939974cefc34783809e56c20`** against 952 raw messages from two producer runs:
      - 476 transitions: 238 PMN and 238 PLM.
      - 238 correlation IDs, each with one first-seen record and one later record.
@@ -94,7 +105,7 @@ The plan does not name B1 and B2 as sub-tickets; this report does, because the w
      - Stage split: PMN `payment-routing` 225, PMN `payment-validation` 13; PLM `mobile-money-credit` 225, PLM `payment-validation` 13.
      - 4 checkpoints completed, 0 failed.
    - **Checkpoint recovery verified on 2026-10-13.** See "Savepoint recovery test" below.
-   - **Still open.** Output binding to `payments.lifecycle.state.v1`. The J1 input contract is decided: the raw topics are a development fixture, see STR-002A-DEV §8.1. The remaining PARTIAL on item 3 is now the output binding alone.
+   - **Closed 2026-10-15.** Development Kafka output binding verified for both lifecycle output topics. The J1 input contract is decided: the raw topics are a development fixture, see STR-002A-DEV §8.1. The development output-binding requirement is closed. Outstanding STR-003 section 12 acceptance requirements remain tracked separately.
 4. **DONE.** No existing service affected.
 
 **Evidence:**
@@ -422,3 +433,17 @@ A short, chronological record of sessions that changed the plan state. Kept here
 - **Working-tree note:** see Step 2 decision recorded above.
 - **Handoff:** Next session begins by recording the five
   decisions, then implementing the Kafka sink against STR-003 §12.
+
+### 2026-10-15 — STR-003 Kafka output binding verification
+
+- **Scope:** STR-002B/B2 item 3 Kafka output binding.
+- **Runtime:** J1 Kafka → Flink → Kafka development pipeline.
+- **Output:** 476 state records, 238 state keys, 476 transitions.
+- **Schemas:** State ID 2, transitions ID 1; registered version 1.
+- **Reconciliation:** 1,428 source envelopes, 476 distinct source
+  events, 476 published transitions, zero mismatches.
+- **Regression:** 17/17 post-Row-change tests passed.
+- **Result:** Output binding verified.
+- **Remaining:** STR-003 section 12 policy, delivery, failure,
+  recovery and full implementation acceptance gates.
+- **Boundary:** Synthetic development data only; no production claim.
