@@ -104,6 +104,20 @@ class NessiePublisher:
     def ensure_namespaces(self, branch, warehouse):
         allowlist = {"bronze", "silver", "silver_vault", "gold", "consumption"}
         # Fail-closed check: exact match against allowlist; reject staging or any unknown name before HTTP
+        # Warehouse identity check: the Iceberg REST prefix requires the
+        # catalog warehouse NAME (e.g. 'payments', the server default in
+        # platform/nessie/config/application.properties). A location URI such
+        # as 's3://dp-ai-payment/warehouse' addresses a different warehouse
+        # scope, so namespaces created under it are invisible to the private
+        # Trino boundary that binds the default warehouse. Reject URIs here
+        # rather than creating namespaces no reader will see.
+        if not isinstance(warehouse, str) or not warehouse.strip():
+            raise NessiePublicationError("Nessie warehouse name is required")
+        if "://" in warehouse or "/" in warehouse:
+            raise NessiePublicationError(
+                "Nessie warehouse must be the catalog warehouse name "
+                "(e.g. 'payments'), not a location URI"
+            )
         prefix = f"{branch}|{warehouse}"
         # Fetch current namespaces
         data = self._iceberg_request("GET", prefix, "/namespaces")
