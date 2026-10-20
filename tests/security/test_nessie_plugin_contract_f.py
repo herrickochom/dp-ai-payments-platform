@@ -53,6 +53,13 @@ def test_worker_ensures_branch_before_dbt(monkeypatch, caplog):
             return branch_arg
         def orphan_if_owned(self, *a):
             raise AssertionError("must not orphan on success")
+
+        def heartbeat(self, *a, **k):
+            return True
+
+        def cancel_requested(self, *a, **k):
+            return False
+
         def finish(self, *a, **k):
             finished["ok"] = True
             finished_args["a"] = a
@@ -67,10 +74,10 @@ def test_worker_ensures_branch_before_dbt(monkeypatch, caplog):
         return types.SimpleNamespace(status="SUCCEEDED", return_code=0, output="dbt build ok", output_truncated=False, failure_class=None)
     monkeypatch.setattr(worker, "execute", _fake_execute)
     # run_once builds the real dbt command (needs authority creds); supply
-    # synthetic source creds by monkeypatching ambient env resolution.
-    import transform_execution as texec
-    real_ambient = texec._ambient_environment
-    monkeypatch.setattr(texec, "_ambient_environment", lambda: {"ML_TRANSFORM_S3_ACCESS_KEY_ID": "k", "ML_TRANSFORM_S3_SECRET_ACCESS_KEY": "s", "NESSIE_TRANSFORM_TOKEN": "t", "NESSIE_ENDPOINT": "http://nessie:19120", "S3_ENDPOINT": "http://minio:9000", "S3_USE_SSL": "false", "OBJECT_STORE_REGION": "us-east-1", "OBJECT_STORE_BUCKET": "dp-ai-payment", "RAW_ROOT": "raw", "RAW_VERSION": "v2", "RAW_PREFIX": "raw/v2", "WAREHOUSE_PREFIX": "warehouse", "WAREHOUSE_URI": "s3://dp-ai-payment/warehouse", "NESSIE_WAREHOUSE": "s3://dp-ai-payment/warehouse", "DBT_TRINO_PASSWORD": "test-trino-password", "DBT_S3_URL_STYLE": "path"})
+    # synthetic source creds by monkeypatching ambient env resolution on the
+    # exact module object the worker's builder executes against.
+    texec_mod = sys.modules[worker.build_transform_command.__module__]
+    monkeypatch.setattr(texec_mod, "_ambient_environment", lambda: {"ML_TRANSFORM_S3_ACCESS_KEY_ID": "k", "ML_TRANSFORM_S3_SECRET_ACCESS_KEY": "s", "NESSIE_TRANSFORM_TOKEN": "t", "NESSIE_ENDPOINT": "http://nessie:19120", "S3_ENDPOINT": "http://minio:9000", "S3_USE_SSL": "false", "OBJECT_STORE_REGION": "us-east-1", "OBJECT_STORE_BUCKET": "dp-ai-payment", "RAW_ROOT": "raw", "RAW_VERSION": "v2", "RAW_PREFIX": "raw/v2", "WAREHOUSE_PREFIX": "warehouse", "WAREHOUSE_URI": "s3://dp-ai-payment/warehouse", "NESSIE_WAREHOUSE": "s3://dp-ai-payment/warehouse", "DBT_TRINO_PASSWORD": "test-trino-password", "DBT_S3_URL_STYLE": "path"})
     assert worker.ensure_nessie_branch(run_id, publisher_factory=FakePublisher()) == branch
     assert [o[0] for o in order] == ["get", "create"]
     ns_calls.clear(); order.clear()
@@ -91,7 +98,7 @@ def test_worker_ensures_branch_before_dbt(monkeypatch, caplog):
         assert identifier in branch_msg
     for secret in ("test-trino-password", "NESSIE_TRANSFORM_TOKEN", "lease_token"):
         assert secret not in branch_msg
-    recs = [r for r in caplog.records if "transform dbt output" in r.getMessage()]
+    recs = [r for r in caplog.records if "transform dbt result" in r.getMessage()]
     assert recs
     _msg = recs[0].getMessage()
     for _f in ("be_" + "d" * 32, "C4_ML_01", "SUCCEEDED", "return_code=0", "output_truncated=False", "dbt build ok"):
@@ -174,6 +181,13 @@ def test_worker_surfaces_redacted_output_preserves_failed_state(monkeypatch, cap
             return branch_arg
         def orphan_if_owned(self, *a):
             raise AssertionError("must not orphan")
+
+        def heartbeat(self, *a, **k):
+            return True
+
+        def cancel_requested(self, *a, **k):
+            return False
+
         def finish(self, *a, **k):
             done["a"] = a
             done["k"] = k
@@ -184,14 +198,14 @@ def test_worker_surfaces_redacted_output_preserves_failed_state(monkeypatch, cap
     monkeypatch.setenv("NESSIE_WAREHOUSE", "s3://dp-ai-payment/warehouse")
     redacted = "dbt done [REDACTED]"
     monkeypatch.setattr(worker, "execute", lambda cmd, **k: types.SimpleNamespace(status="FAILED", return_code=1, output=redacted, output_truncated=True, failure_class="DBT_BUILD_FAILED"))
-    import transform_execution as texec
-    monkeypatch.setattr(texec, "_ambient_environment", lambda: {"ML_TRANSFORM_S3_ACCESS_KEY_ID": "k", "ML_TRANSFORM_S3_SECRET_ACCESS_KEY": "s", "NESSIE_TRANSFORM_TOKEN": "t", "NESSIE_ENDPOINT": "http://nessie:19120", "S3_ENDPOINT": "http://minio:9000", "S3_USE_SSL": "false", "OBJECT_STORE_REGION": "us-east-1", "OBJECT_STORE_BUCKET": "dp-ai-payment", "RAW_ROOT": "raw", "RAW_VERSION": "v2", "RAW_PREFIX": "raw/v2", "WAREHOUSE_PREFIX": "warehouse", "WAREHOUSE_URI": "s3://dp-ai-payment/warehouse", "NESSIE_WAREHOUSE": "s3://dp-ai-payment/warehouse", "DBT_TRINO_PASSWORD": "test-trino-password", "DBT_S3_URL_STYLE": "path"})
+    texec_mod = sys.modules[worker.build_transform_command.__module__]
+    monkeypatch.setattr(texec_mod, "_ambient_environment", lambda: {"ML_TRANSFORM_S3_ACCESS_KEY_ID": "k", "ML_TRANSFORM_S3_SECRET_ACCESS_KEY": "s", "NESSIE_TRANSFORM_TOKEN": "t", "NESSIE_ENDPOINT": "http://nessie:19120", "S3_ENDPOINT": "http://minio:9000", "S3_USE_SSL": "false", "OBJECT_STORE_REGION": "us-east-1", "OBJECT_STORE_BUCKET": "dp-ai-payment", "RAW_ROOT": "raw", "RAW_VERSION": "v2", "RAW_PREFIX": "raw/v2", "WAREHOUSE_PREFIX": "warehouse", "WAREHOUSE_URI": "s3://dp-ai-payment/warehouse", "NESSIE_WAREHOUSE": "s3://dp-ai-payment/warehouse", "DBT_TRINO_PASSWORD": "test-trino-password", "DBT_S3_URL_STYLE": "path"})
     import logging as _logging
     with caplog.at_level(_logging.INFO, logger=worker.__name__):
         assert worker.run_once(queue=_Q(), worker="w", branch_factory=_Pub()) is True
     assert done["a"][3] == "FAILED"
     assert done["k"].get("test_status") == "NOT_RUN"
-    recs = [r for r in caplog.records if "transform dbt output" in r.getMessage()]
+    recs = [r for r in caplog.records if "transform dbt result" in r.getMessage()]
     assert recs
     _logged = recs[0].getMessage()
     assert redacted in _logged and "output_truncated=True" in _logged

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import sys
+import types
 import urllib.parse
 from pathlib import Path
 import pytest
@@ -84,6 +85,125 @@ def test_idempotent_namespace_bootstrap_posts_missing_then_verifies():
     posts = [c for c in calls if c[0] == "POST"]
     assert len(posts) == 1
     assert posts[0][3] == {"namespace": ["gold"], "properties": {}}
+
+
+def test_uri_warehouse_rejected_before_namespace_creation():
+    p = NessiePublisher("http://nessie:19120", "token")
+    with pytest.raises(NessiePublicationError, match="catalog warehouse name"):
+        p.ensure_namespaces("transform_tr_a" * 16, "s3://dp-ai-payment/warehouse")
+    with pytest.raises(NessiePublicationError, match="catalog warehouse name"):
+        p.ensure_namespaces("transform_tr_a" * 16, "http://nessie:19120/payments")
+    # Main-branch caller with the catalog name: HTTP stubbed so the test
+    # never touches the live Nessie server.
+    p._iceberg_request = lambda *a, **k: {
+        "namespaces": [
+            ["bronze"], ["silver"], ["silver_vault"], ["gold"], ["consumption"],
+        ]
+    }
+    res = p.ensure_namespaces("main", "payments")
+    assert res == {"bronze", "silver", "silver_vault", "gold", "consumption"}
+
+
+def test_ordering_branch_and_namespaces_run_first(monkeypatch):
+    """The per-run branch is created and namespaces ensured before any dbt run.
+
+    This is the regression that catches the original trap: if namespace
+    creation or its verification ran after the private Trino child had
+    already bound the catalog, the worker would still launch dbt against a
+    run branch whose bronze namespace had not been created, reproducing
+    'Schema bronze not found' on the exact C4_RAW_02 path.
+    """
+    run_id = "tr_" + "c" * 32
+    branch = "transform_" + run_id
+    order = []
+    orphaned = []
+    finished = []
+
+    class OrderingPublisher:
+        def get_reference(self, name):
+            order.append(("get", name))
+            return {"name": name, "hash": "base-hash"}
+
+        def create_run_branch(self, rid, base_ref, base_hash):
+            order.append(("create", rid, base_ref, base_hash))
+            assert (rid, base_ref, base_hash) == (run_id, "main", "base-hash")
+            return {"name": branch, "hash": "new-hash"}
+
+        def ensure_namespaces(self, branch_arg, warehouse):
+            order.append(("ensure-ns", branch_arg, warehouse))
+            assert branch_arg == branch
+            return {"bronze", "silver", "silver_vault", "gold", "consumption"}
+
+    def fake_execute(cmd, **_k):
+        order.append(("dbt", cmd.environment.get("DBT_NESSIE_BRANCH")))
+        return types.SimpleNamespace(
+            status="SUCCEEDED", return_code=0,
+            output="dbt build ok", output_truncated=False, failure_class=None,
+        )
+
+    class OrderingQueue:
+        def reconcile_expired(self):
+            pass
+
+        def claim(self, w, lease):
+            return {
+                "batch_execution_id": "be_" + "d" * 32,
+                "lease_token": "tok",
+                "batch_id": "C4_ML_01",
+                "transform_run_id": run_id,
+            }
+
+        def record_nessie_branch(self, eid, worker_id, token, branch_arg):
+            return branch_arg
+
+        def orphan_if_owned(self, eid, worker_id, token, failure):
+            orphaned.append(failure)
+            return True
+
+        def heartbeat(self, eid, worker_id, token, lease):
+            return True
+
+        def cancel_requested(self, eid, worker_id, token):
+            return False
+
+        def finish(self, *args, **kwargs):
+            finished.append((args, kwargs))
+            return {}
+
+    texec_mod = sys.modules[worker.build_transform_command.__module__]
+    monkeypatch.setattr(texec_mod, "_ambient_environment", lambda: {
+        "ML_TRANSFORM_S3_ACCESS_KEY_ID": "k",
+        "ML_TRANSFORM_S3_SECRET_ACCESS_KEY": "s",
+        "NESSIE_TRANSFORM_TOKEN": "t",
+        "NESSIE_ENDPOINT": "http://nessie:19120",
+        "S3_ENDPOINT": "http://minio:9000",
+        "S3_USE_SSL": "false",
+        "OBJECT_STORE_REGION": "us-east-1",
+        "OBJECT_STORE_BUCKET": "dp-ai-payment",
+        "RAW_ROOT": "raw",
+        "RAW_VERSION": "v2",
+        "RAW_PREFIX": "raw/v2",
+        "WAREHOUSE_PREFIX": "warehouse",
+        "WAREHOUSE_URI": "s3://dp-ai-payment/warehouse",
+        "NESSIE_WAREHOUSE": "s3://dp-ai-payment/warehouse",
+        "DBT_TRINO_PASSWORD": "test-trino-password",
+        "DBT_S3_URL_STYLE": "path",
+    })
+    monkeypatch.setattr(worker, "execute", fake_execute)
+    monkeypatch.setenv("PLATFORM_RUNNER_EXECUTION_ENABLED", "true")
+    monkeypatch.setenv("PLATFORM_JOB_EXECUTION_ENABLED", "true")
+    monkeypatch.setenv("NESSIE_BASE_HASH", "")
+    monkeypatch.setenv("NESSIE_WAREHOUSE", "s3://dp-ai-payment/warehouse")
+
+    worker.run_once(
+        queue=OrderingQueue(), worker="w", branch_factory=OrderingPublisher(),
+    )
+    assert not orphaned, orphaned
+    assert [o[0] for o in order][:4] == [
+        "get", "create", "ensure-ns", "dbt",
+    ]
+    assert order[3][1] == branch
+    assert finished, "success path must reach finish()"
 
 
 def test_iceberg_request_url_shape_uses_percent_encoded_pipe():
@@ -184,6 +304,17 @@ def test_fail_closed_worker_orphans_on_post_network_failure(monkeypatch):
     assert len(orphaned) == 1
     assert orphaned[0] == "NESSIE_NAMESPACE_UNAVAILABLE:NessieUnknownWriteState"
     assert not dbt_invoked
+
+
+def test_namespace_cannot_be_ensured_on_main_for_run_paths():
+    # Worker-level guard: run paths must target the per-run branch, never
+    # main. The refusal happens before any publisher or HTTP interaction.
+    with pytest.raises(NessiePublicationError, match="non-run branch"):
+        worker.ensure_nessie_namespaces("main", "payments")
+    with pytest.raises(NessiePublicationError, match="non-run branch"):
+        worker.ensure_nessie_namespaces(
+            "transform_tr_" + "a" * 32 + "x", "payments"
+        )
 
 
 def test_token_not_present_in_error_or_url():

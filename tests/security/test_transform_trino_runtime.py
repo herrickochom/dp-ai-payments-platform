@@ -14,6 +14,7 @@ def runtime_environment(access="authority-access", secret="authority-secret", br
         "TRINO_S3_ACCESS_KEY_ID": access,
         "TRINO_S3_SECRET_ACCESS_KEY": secret,
         "NESSIE_WAREHOUSE": "s3://dp-ai-payment/warehouse",
+        "NESSIE_CATALOG_WAREHOUSE": "payments",
         "S3_ENDPOINT": "http://minio:9000",
         "S3_PATH_STYLE_ACCESS": "true",
         "OBJECT_STORE_REGION": "us-east-1",
@@ -26,10 +27,26 @@ def test_catalog_binds_exact_claimed_branch_and_selected_authority(tmp_path):
     config = _runtime_config(str(tmp_path), runtime_environment())
     catalog = (config / "catalog/iceberg.properties").read_text()
     assert "iceberg.nessie-catalog.ref=${ENV:DBT_NESSIE_BRANCH}" in catalog
+    assert "iceberg.nessie-catalog.warehouse=payments" in catalog
     assert "s3.aws-access-key=${ENV:TRINO_S3_ACCESS_KEY_ID}" in catalog
     assert "s3.aws-secret-key=${ENV:TRINO_S3_SECRET_ACCESS_KEY}" in catalog
     assert "main" not in catalog
     assert not {"MINIO_ROOT_USER", "MINIO_ROOT_PASSWORD", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"}.intersection(runtime_environment())
+
+
+def test_catalog_warehouse_must_be_a_name_not_a_location_uri(tmp_path):
+    # Regression: a location URI in the catalog warehouse binding made
+    # CREATE TABLE fail with "Schema bronze not found" because namespace
+    # provisioning and the private Trino catalog resolved different scopes.
+    environment = runtime_environment()
+    environment["NESSIE_CATALOG_WAREHOUSE"] = "s3://dp-ai-payment/warehouse"
+    with pytest.raises(ValueError, match="warehouse name"):
+        _runtime_config(str(tmp_path), environment)
+    environment["NESSIE_CATALOG_WAREHOUSE"] = ""
+    with pytest.raises(
+        ValueError, match="configuration is unavailable|warehouse name"
+    ):
+        _runtime_config(str(tmp_path), environment)
 
 
 @pytest.mark.parametrize("branch", ["", "main", "transform_main", "transform_tr_invalid"])
@@ -135,6 +152,7 @@ def test_runtime_waits_until_authenticated_readiness(monkeypatch, tmp_path):
         "TRINO_S3_ACCESS_KEY_ID": "test-access",
         "TRINO_S3_SECRET_ACCESS_KEY": "test-secret",
         "NESSIE_WAREHOUSE": "s3://test/warehouse",
+        "NESSIE_CATALOG_WAREHOUSE": "payments",
         "S3_ENDPOINT": "http://minio:9000",
         "S3_PATH_STYLE_ACCESS": "true",
         "OBJECT_STORE_REGION": "us-east-1",
@@ -213,6 +231,7 @@ def test_runtime_readiness_uses_explicit_credentials_and_select_one(
         "TRINO_S3_ACCESS_KEY_ID": "test-access",
         "TRINO_S3_SECRET_ACCESS_KEY": "test-secret",
         "NESSIE_WAREHOUSE": "s3://test/warehouse",
+        "NESSIE_CATALOG_WAREHOUSE": "payments",
         "S3_ENDPOINT": "http://minio:9000",
         "S3_PATH_STYLE_ACCESS": "true",
         "OBJECT_STORE_REGION": "us-east-1",
@@ -231,7 +250,10 @@ def test_runtime_readiness_uses_explicit_credentials_and_select_one(
     assert captured["port"] == 18443
     assert captured["user"] == "dbt"
     assert captured["http_scheme"] == "https"
-    assert captured["verify"] is False
+    # TLS verification is enabled against the pinned private Trino
+    # certificate.  The certificate's SAN covers IP 127.0.0.1, so
+    # hostname verification is valid against the private endpoint.
+    assert captured["verify"] == "/etc/ssl/certs/trino-public.crt"
     assert captured["sql"] == "SELECT 1"
 
     # dbt credentials remain outside the Trino child-process environment.

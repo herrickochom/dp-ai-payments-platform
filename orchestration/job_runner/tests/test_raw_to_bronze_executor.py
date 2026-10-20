@@ -329,11 +329,12 @@ def test_column_mismatch_fails():
 def test_first_publication_writes_registers_and_verifies(monkeypatch):
     configure_storage(monkeypatch)
     cursor = ScriptedCursor([
-        [(0,)],
+        [[0]],
+        [[1]],
         [(f"CREATE TABLE x WITH (location = '{LOCATION}')",)],
         [],
         [("event_id", "varchar")],
-        [(3,)],
+        [[3]],
     ])
     calls = []
     monkeypatch.setattr(
@@ -361,10 +362,54 @@ def test_first_publication_writes_registers_and_verifies(monkeypatch):
     assert calls == [("write", PARQUET), ("register", PARQUET)]
 
 
+def test_missing_bronze_schema_fails_closed_before_create(monkeypatch):
+    # Regression for the C4_RAW_02 "Schema bronze not found" incident:
+    # when the bound catalog/branch does not expose the bronze namespace,
+    # execute_model must fail closed BEFORE CREATE TABLE and before any
+    # Parquet write.
+    configure_storage(monkeypatch)
+    cursor = ScriptedCursor([
+        [[0]],
+        [[0]],
+    ])
+    monkeypatch.setattr(
+        executor,
+        "transformation_metadata",
+        lambda *_: ("select 1", 3, (("event_id", "VARCHAR"),)),
+    )
+    created = []
+    monkeypatch.setattr(
+        executor,
+        "_create_table",
+        lambda *args: created.append(args[1]),
+    )
+    with pytest.raises(RuntimeError, match="Schema bronze not found"):
+        executor.execute_model(object(), cursor, MODEL)
+    assert created == []
+
+
+def test_ambiguous_bronze_schema_state_fails_closed(monkeypatch):
+    configure_storage(monkeypatch)
+    cursor = ScriptedCursor([
+        [[0]],
+        [[2]],
+    ])
+    monkeypatch.setattr(
+        executor,
+        "transformation_metadata",
+        lambda *_: ("select 1", 3, (("event_id", "VARCHAR"),)),
+    )
+    with pytest.raises(
+        executor.AmbiguousPublicationState, match="bronze namespace"
+    ):
+        executor.execute_model(object(), cursor, MODEL)
+
+
 def test_existing_permanent_file_before_registration_fails(monkeypatch):
     configure_storage(monkeypatch)
     cursor = ScriptedCursor([
-        [(0,)],
+        [[0]],
+        [[1]],
         [(f"CREATE TABLE x WITH (location = '{LOCATION}')",)],
         [],
     ])

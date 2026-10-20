@@ -20,6 +20,7 @@ _REQUIRED = frozenset(
         "TRINO_S3_ACCESS_KEY_ID",
         "TRINO_S3_SECRET_ACCESS_KEY",
         "NESSIE_WAREHOUSE",
+        "NESSIE_CATALOG_WAREHOUSE",
         "TRINO_KEYSTORE_PASSWORD",
         "TRINO_INTERNAL_SHARED_SECRET",
     }
@@ -85,6 +86,16 @@ def _runtime_config(work_path: str, environment: Mapping[str, str]) -> Path:
         f"node.data-dir={root / 'data'}\n",
     )
 
+    catalog_warehouse = environment["NESSIE_CATALOG_WAREHOUSE"].strip()
+    if (
+        not catalog_warehouse
+        or "://" in catalog_warehouse
+        or "/" in catalog_warehouse
+    ):
+        raise ValueError(
+            "NESSIE_CATALOG_WAREHOUSE must be the catalog warehouse name"
+        )
+
     _write(
         root / "jvm.config",
         "-server\n"
@@ -114,6 +125,10 @@ def _runtime_config(work_path: str, environment: Mapping[str, str]) -> Path:
         "iceberg.catalog.type=nessie\n"
         "iceberg.nessie-catalog.uri=http://nessie:19120/api/v2\n"
         "iceberg.nessie-catalog.ref=${ENV:DBT_NESSIE_BRANCH}\n"
+        # Bind the catalog warehouse NAME, not the physical warehouse dir:
+        # private Trino and REST namespace provisioning must resolve the
+        # same scope or CREATE TABLE targets a schema Trino cannot see.
+        f"iceberg.nessie-catalog.warehouse={catalog_warehouse}\n"
         "iceberg.nessie-catalog.default-warehouse-dir=${ENV:NESSIE_WAREHOUSE}\n"
         "fs.native-s3.enabled=true\n"
         "s3.endpoint=${ENV:S3_ENDPOINT}\n"
@@ -259,7 +274,7 @@ def transform_trino_runtime(
                             readiness_user,
                             readiness_password,
                         ),
-                        verify=False,
+                        verify="/etc/ssl/certs/trino-public.crt",
                     )
 
                     cursor = connection.cursor()

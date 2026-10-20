@@ -200,7 +200,7 @@ def _trino_connection():
         user=user,
         http_scheme="https",
         auth=BasicAuthentication(user, password),
-        verify=False,
+        verify="/etc/ssl/certs/trino-public.crt",
     )
 
 
@@ -308,6 +308,27 @@ def permanent_parquet_path(location: str, model_name: str) -> str:
     _table_name(model_name)
     location = validate_table_location(location)
     return f"{location}/data/{execution_id}-{model_name}.parquet"
+
+
+def _bronze_schema_ready(cursor) -> bool:
+    """Return True only when the governed bronze namespace is visible.
+
+    Called after private-Trino readiness and before any CREATE TABLE: the
+    failed C4_RAW_02 run reached _create_table with no bronze schema in the
+    bound catalog/branch, producing Trino NOT_FOUND 'Schema bronze not
+    found'. Failing closed here keeps that outcome classified and prevents
+    partial Parquet writes for a run whose catalog scope is wrong.
+    """
+    cursor.execute(
+        "SELECT count(*) FROM iceberg.information_schema.schemata "
+        "WHERE schema_name = 'bronze'"
+    )
+    rows = cursor.fetchall()
+    if rows in ([[1]], [(1,)]):
+        return True
+    if rows in ([[0]], [(0,)]):
+        return False
+    raise AmbiguousPublicationState("ambiguous bronze namespace state")
 
 
 def _table_exists(cursor, model_name: str) -> bool:
@@ -474,6 +495,12 @@ def execute_model(
 
     exists = _table_exists(cursor, model_name)
     if not exists:
+        if not _bronze_schema_ready(cursor):
+            raise RuntimeError(
+                "Schema bronze not found: private Trino catalog/branch did not "
+                "see the governed bronze namespace. Namespace provisioning and "
+                "Trino catalog warehouse binding are scoped differently."
+            )
         _create_table(cursor, model_name, columns)
         print(f"RAW_TO_BRONZE_TABLE_CREATED model={model_name}")
 

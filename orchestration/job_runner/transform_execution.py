@@ -93,6 +93,15 @@ FORBIDDEN_ENV = frozenset(
 
 AUTHORITY_SECRET_NAMES = frozenset().union(*AUTHORITY_ENV.values())
 
+#: Iceberg REST catalog warehouse NAME bound by the private Trino boundary
+#: (Nessie server default; see platform/nessie/config/application.properties
+#: `nessie.catalog.default-warehouse=payments`). Namespace provisioning must
+#: address this same name: the worker's NESSIE_WAREHOUSE location URI stays
+#: the physical warehouse dir, but the REST prefix and the Trino catalog both
+#: bind the name. Kept as a literal so a rename fails closed at build time
+#: rather than silently scoping namespaces to an unreadable warehouse.
+NESSIE_CATALOG_WAREHOUSE = "payments"
+
 CHILD_SECRET_NAMES = AUTHORITY_SECRET_NAMES | frozenset(
     {
         "DBT_TRINO_PASSWORD",
@@ -107,6 +116,8 @@ ML_INPUT = Path(
 
 TRINO_JNA_TMPDIR = "/var/lib/platform-transform-worker/jna"
 TRINO_JAVA_TOOL_OPTIONS = f"-Djna.tmpdir={TRINO_JNA_TMPDIR} --enable-native-access=ALL-UNNAMED"
+PRIVATE_TRINO_HOST = "127.0.0.1"
+PRIVATE_TRINO_PORT = "18443"
 
 
 @dataclass(frozen=True)
@@ -151,6 +162,26 @@ def _ambient_environment() -> dict[str, str]:
             environment[name] = value
 
     return environment
+
+
+def _private_trino_endpoint(source: Mapping[str, str]) -> tuple[str, str]:
+    """Return the only endpoint allowed for a worker-managed runtime.
+
+    ``execute(..., manage_runtime=True)`` creates an execution-private Trino
+    listener in the worker network namespace.  Accepting an inherited dbt
+    endpoint here silently sends writes to a different catalog/ref, which is
+    exactly the routing failure observed during the October recovery attempt.
+    The endpoint is therefore an execution-boundary invariant, not a
+    deployment preference.
+    """
+
+    host = source.get("DBT_TRINO_HOST", PRIVATE_TRINO_HOST).strip()
+    port = source.get("DBT_TRINO_PORT", PRIVATE_TRINO_PORT).strip()
+    if (host, port) != (PRIVATE_TRINO_HOST, PRIVATE_TRINO_PORT):
+        raise ValueError(
+            "worker-managed transform must use the private Trino endpoint"
+        )
+    return host, port
 
 
 def build_transform_command(
@@ -212,42 +243,17 @@ def build_transform_command(
             *names,
         )
     else:
-        # dbt batches run two commands inside a single child process:
-        #
-        #   dbt seed  — materialize static reference tables (idempotent)
-        #   dbt build — build models and run their tests
-        #
-        # Wrapping both in one shell command keeps the batch's lease
-        # heartbeat alive across the seed step. A separate blocking
-        # subprocess for the seed step (as an earlier revision used)
-        # suspended the heartbeat for the duration of the seed run plus
-        # Trino startup, which exceeded the 30-second lease and caused
-        # the parent to orphan the row mid-execution. One child, one
-        # heartbeat loop, covers both.
-        dbt = os.getenv("DBT_EXECUTABLE", "/opt/dbt/bin/dbt")
-        project_dir = "/app/dbt"
-        profiles_dir = "/app/dbt"
-        target = "runtime"
-
-        seed_and_build = " ".join(
-            [
-                dbt, "seed",
-                "--project-dir", project_dir,
-                "--profiles-dir", profiles_dir,
-                "--target", target,
-                "&&",
-                "exec", dbt, "build",
-                "--project-dir", project_dir,
-                "--profiles-dir", profiles_dir,
-                "--target", target,
-                "--indirect-selection", "cautious",
-                "--select", *names,
-            ]
+        # The wrapper runs the fixed seed command then execs the fixed build
+        # command.  It is one lease-owned process group without using a shell:
+        # no command string is constructed from selectors or environment.
+        argv = (
+            os.getenv("PYTHON_EXECUTABLE", "/usr/local/bin/python"),
+            "/app/job_runner/dbt_batch_executor.py",
+            *names,
         )
 
-        argv = ("/bin/sh", "-c", seed_and_build)
-
     supplied = dict(source) if source is not None else _ambient_environment()
+    private_trino_host, private_trino_port = _private_trino_endpoint(supplied)
 
     required_authority = AUTHORITY_ENV[batch.authority]
 
@@ -393,14 +399,8 @@ def build_transform_command(
                 f"transform_{effective_transform_run_id}"
             ),
 
-            "DBT_TRINO_HOST": supplied.get(
-                "DBT_TRINO_HOST",
-                "127.0.0.1",
-            ),
-            "DBT_TRINO_PORT": supplied.get(
-                "DBT_TRINO_PORT",
-                "18443",
-            ),
+            "DBT_TRINO_HOST": private_trino_host,
+            "DBT_TRINO_PORT": private_trino_port,
             "DBT_TRINO_USER": supplied.get(
                 "DBT_TRINO_USER",
                 "dbt",
@@ -428,6 +428,7 @@ def build_transform_command(
         "TRINO_S3_ACCESS_KEY_ID": supplied[access_key_name],
         "TRINO_S3_SECRET_ACCESS_KEY": supplied[secret_key_name],
         "NESSIE_WAREHOUSE": nessie_warehouse,
+        "NESSIE_CATALOG_WAREHOUSE": NESSIE_CATALOG_WAREHOUSE,
         "S3_ENDPOINT": supplied["S3_ENDPOINT"],
         "S3_PATH_STYLE_ACCESS": supplied.get("S3_PATH_STYLE_ACCESS", "true"),
         "OBJECT_STORE_REGION": supplied["OBJECT_STORE_REGION"],
@@ -480,6 +481,7 @@ def build_governed_runtime_command(
         raise ValueError("invalid governed operation identity")
 
     supplied = dict(_ambient_environment() if source is None else source)
+    private_trino_host, private_trino_port = _private_trino_endpoint(supplied)
     missing_authority = sorted(
         key for key in AUTHORITY_ENV[authority] if not supplied.get(key)
     )
@@ -545,8 +547,8 @@ def build_governed_runtime_command(
         "DBT_LOG_PATH": str(work / "logs"),
         "DBT_TARGET_PATH": str(work / "target"),
         "DBT_NESSIE_BRANCH": branch,
-        "DBT_TRINO_HOST": supplied.get("DBT_TRINO_HOST", "127.0.0.1"),
-        "DBT_TRINO_PORT": supplied.get("DBT_TRINO_PORT", "18443"),
+        "DBT_TRINO_HOST": private_trino_host,
+        "DBT_TRINO_PORT": private_trino_port,
         "DBT_TRINO_USER": supplied.get("DBT_TRINO_USER", "dbt"),
         "DBT_TRINO_PASSWORD": supplied["DBT_TRINO_PASSWORD"],
         "TRANSFORM_AUTHORITY": authority,
@@ -558,6 +560,7 @@ def build_governed_runtime_command(
         "TRINO_S3_ACCESS_KEY_ID": access,
         "TRINO_S3_SECRET_ACCESS_KEY": secret,
         "NESSIE_WAREHOUSE": supplied["NESSIE_WAREHOUSE"],
+        "NESSIE_CATALOG_WAREHOUSE": NESSIE_CATALOG_WAREHOUSE,
         "S3_ENDPOINT": supplied["S3_ENDPOINT"],
         "S3_PATH_STYLE_ACCESS": supplied.get("S3_PATH_STYLE_ACCESS", "true"),
         "OBJECT_STORE_REGION": supplied["OBJECT_STORE_REGION"],
