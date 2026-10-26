@@ -153,7 +153,7 @@ Production readiness requires separate approval.
 
 The following diagrams illustrate the architectural decision and its relevant data flows.
 
-- [Hybrid reference architecture](../architecture/gcp/diagrams/hybrid-reference.dot)
+- [Hybrid reference architecture](../architecture/gcp/diagrams/hybrid-reference.svg)
 - [End-to-end data flow](../architecture/gcp/diagrams/end-to-end-data-flow.svg)
 
 **Deployment status:** Diagrams distinguish existing local components from proposed or future GCP services. They do not authorise cloud provisioning.
