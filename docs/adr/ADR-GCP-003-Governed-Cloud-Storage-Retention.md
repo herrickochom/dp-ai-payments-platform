@@ -111,3 +111,31 @@ integration are required before enforcement.
 - IAM implementation.
 - Terraform remote state.
 - Deployment approval.
+
+## Proposed Baseline Retention Schedule.
+
+| Dataset | Storage class | Retention |
+|---|---|---|
+| Temporary test data | Standard | 30 days |
+| Operational events | Standard | 60 days |
+| Historical analytics | Nearline | 90 days |
+| Historical payment records | Coldline | 365 days |
+| Long-term financial archives | Archive | 3600 days |
+| Audit evidence | Archive | 3600 days |
+| Iceberg tables | Standard | Snapshot-governed |
+| Flink recovery state | Existing MinIO | Recovery-governed |
+
+These periods are proposed defaults and require
+records-owner and compliance approval.
+
+Storage-class minimum durations are billing
+conditions, not legal retention requirements.
+
+Automatic deletion remains disabled until the
+relevant schedule and disposal controls are approved.
+
+Iceberg maintenance must remain snapshot-aware.
+Flink recovery state must remain protected.
+
+Retention locks require separate explicit approval.
+

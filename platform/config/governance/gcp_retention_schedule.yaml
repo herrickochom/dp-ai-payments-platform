@@ -1,66 +1,81 @@
 version: 1
 policy_id: GCP-RETENTION-001
 status: proposed
-description: Governed retention schedule for GCP data storage.
-
+description: Governed GCP storage retention schedule.
 defaults:
   storage_class: STANDARD
   retention_days: null
   automatic_deletion: false
   legal_hold_supported: true
   require_approved_schedule: true
-
 storage_classes:
   standard: STANDARD
   nearline: NEARLINE
   coldline: COLDLINE
   archive: ARCHIVE
-
 policy_parameters:
   review_intervals_days:
-    - 30
-    - 60
-    - 90
-    - 3600
-
+  - 30
+  - 60
+  - 90
+  - 3600
 datasets:
   payment_transactions:
     classification: confidential
     retention_days: null
     retention_basis: approved_financial_records_schedule
     automatic_deletion: false
-
   audit_evidence:
     classification: restricted
-    retention_days: null
+    retention_days: 3600
     retention_basis: approved_audit_compliance_schedule
     automatic_deletion: false
-
+    storage_class: ARCHIVE
+    approval_status: proposed
   operational_events:
     classification: internal
-    retention_days: null
+    retention_days: 60
     retention_basis: approved_operational_schedule
     automatic_deletion: false
-
+    storage_class: STANDARD
+    approval_status: proposed
   historical_analytics:
     classification: internal
-    retention_days: null
+    retention_days: 90
     retention_basis: approved_analytics_schedule
     automatic_deletion: false
-
+    storage_class: NEARLINE
+    approval_status: proposed
   iceberg_tables:
     classification: governed
     retention_days: null
     retention_basis: snapshot_aware_maintenance
     automatic_deletion: false
     lifecycle_transition_enabled: false
-
+    storage_class: STANDARD
+    approval_status: proposed
   temporary_test_data:
     classification: non_sensitive
-    retention_days: null
+    retention_days: 30
     retention_basis: approved_test_schedule
     automatic_deletion: false
-
+    storage_class: STANDARD
+    approval_status: proposed
+  historical_payment_records:
+    storage_class: COLDLINE
+    retention_days: 365
+    automatic_deletion: false
+    approval_status: proposed
+  long_term_financial_archives:
+    storage_class: ARCHIVE
+    retention_days: 3600
+    automatic_deletion: false
+    approval_status: proposed
+  flink_recovery_state:
+    storage_class: STANDARD
+    retention_days: null
+    automatic_deletion: false
+    approval_status: proposed
 governance:
   legal_hold_blocks_disposal: true
   require_disposal_authorisation: true
