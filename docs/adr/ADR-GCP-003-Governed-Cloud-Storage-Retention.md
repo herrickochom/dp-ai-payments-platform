@@ -139,3 +139,10 @@ Flink recovery state must remain protected.
 
 Retention locks require separate explicit approval.
 
+## Architecture and Data-Flow Diagrams
+
+The following diagrams illustrate the architectural decision and its relevant data flows.
+
+- [Governed storage architecture](../architecture/gcp/diagrams/governed-storage.svg)
+
+**Deployment status:** Diagrams distinguish existing local components from proposed or future GCP services. They do not authorise cloud provisioning.

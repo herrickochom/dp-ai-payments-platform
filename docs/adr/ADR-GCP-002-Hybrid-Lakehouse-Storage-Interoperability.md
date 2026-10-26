@@ -165,3 +165,12 @@ The following remain subject to separate review:
 - Full-cloud deployment topology.
 
 Production adoption requires separate approval.
+
+## Architecture and Data-Flow Diagrams
+
+The following diagrams illustrate the architectural decision and its relevant data flows.
+
+- [Iceberg lakehouse interoperability](../architecture/gcp/diagrams/iceberg-lakehouse.svg)
+- [End-to-end data flow](../architecture/gcp/diagrams/end-to-end-data-flow.svg)
+
+**Deployment status:** Diagrams distinguish existing local components from proposed or future GCP services. They do not authorise cloud provisioning.

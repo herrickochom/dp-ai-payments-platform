@@ -1,0 +1,65 @@
+digraph EnterprisePlatform {
+  graph [
+    label="Payments Data AI Platform | Enterprise Architecture"
+    labelloc=t
+    fontsize=20
+    rankdir=LR
+    bgcolor=white
+    compound=true
+  ];
+
+  node [shape=box style="rounded,filled" fillcolor="#EAF2FA"
+        color="#24476A" fontname="Arial"];
+  edge [color="#536779" fontname="Arial"];
+
+  subgraph cluster_local {
+    label="Existing Local Platform";
+    style=rounded;
+    color="#2C6E49";
+
+    sources [label="Payment Source Systems"];
+    kafka [label="Apache Kafka"];
+    flink [label="Apache Flink"];
+    minio [label="MinIO Object Storage"];
+    iceberg [label="Apache Iceberg"];
+    nessie [label="Nessie Catalogue"];
+    trino [label="Trino + dbt"];
+    airflow [label="Airflow Orchestration"];
+    postgres [label="PostgreSQL"];
+    superset [label="Superset / Data Products"];
+    monitoring [label="Grafana / Monitoring"];
+
+    sources -> kafka -> flink -> minio;
+    minio -> iceberg;
+    nessie -> iceberg [style=dashed];
+    iceberg -> trino -> superset;
+    airflow -> trino [style=dashed];
+    flink -> postgres [style=dashed];
+    monitoring -> airflow [style=dotted];
+  }
+
+  subgraph cluster_gcp {
+    label="Proposed / Future GCP Services | Not Deployed";
+    style="rounded,dashed";
+    color="#B57925";
+
+    gcs [label="Cloud Storage"];
+    bigquery [label="BigQuery / BigLake"];
+    dataplex [label="Dataplex Universal Catalog"];
+    kms [label="Cloud KMS"];
+    cloudsql [label="Cloud SQL PostgreSQL"];
+    bigtable [label="Bigtable (Conditional)"];
+
+    gcs -> bigquery [style=dashed];
+    dataplex -> bigquery [style=dotted];
+    kms -> gcs [style=dotted];
+  }
+
+  minio -> gcs [
+    label="Bounded governed exchange"
+    style=dashed
+  ];
+
+  postgres -> cloudsql [style=dashed label="Evaluate"];
+  flink -> bigtable [style=dashed label="Evaluate"];
+}

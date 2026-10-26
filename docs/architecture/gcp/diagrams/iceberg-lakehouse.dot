@@ -1,0 +1,50 @@
+digraph IcebergLakehouse {
+  graph [
+    label="Hybrid Apache Iceberg Interoperability"
+    labelloc=t
+    fontsize=20
+    rankdir=LR
+    bgcolor=white
+  ];
+
+  node [shape=box style="rounded,filled"
+        fillcolor="#EAF2FA" color="#24476A"
+        fontname="Arial"];
+  edge [color="#536779" fontname="Arial"];
+
+  subgraph cluster_existing {
+    label="Existing Local Lakehouse";
+    color="#2C6E49";
+    style=rounded;
+
+    minio [label="MinIO\nData and Metadata Objects"];
+    nessie [label="Nessie\nIceberg Catalogue"];
+    trino [label="Trino / dbt"];
+    minio -> trino;
+    nessie -> trino [style=dashed label="Catalogue"];
+  }
+
+  subgraph cluster_proposed {
+    label="Proposed GCP Interoperability";
+    color="#B57925";
+    style="rounded,dashed";
+
+    gcs [label="Isolated GCS Test Location"];
+    validation [label="Object / Metadata\nCompatibility Validation"];
+    catalog [label="BigLake Metastore or\nCompatible Iceberg Catalogue\n(Evaluation)"];
+    bq [label="BigQuery\n(Evaluation)"];
+
+    gcs -> validation -> catalog [style=dashed];
+    catalog -> bq [style=dashed];
+  }
+
+  minio -> gcs [
+    style=dashed
+    label="Bounded approved exchange"
+  ];
+
+  nessie -> catalog [
+    style=dotted
+    label="Catalogue interoperability assessment"
+  ];
+}

@@ -1,0 +1,38 @@
+digraph DataFlow {
+  graph [
+    label="Payments Data AI | End-to-End Data Flow"
+    labelloc=t
+    fontsize=20
+    rankdir=LR
+    bgcolor=white
+  ];
+
+  node [shape=box style="rounded,filled"
+        fillcolor="#EAF2FA" color="#24476A"
+        fontname="Arial"];
+  edge [color="#536779" fontname="Arial"];
+
+  source [label="Payment Events / Source Data"];
+  kafka [label="Kafka Topics"];
+  flink [label="Flink Streaming Processing"];
+  bronze [label="Bronze / Raw Data"];
+  silver [label="Silver / Governed Data"];
+  gold [label="Gold / Data Products"];
+  consume [label="Trino / Superset / AI"];
+  state [label="Operational State / PostgreSQL"];
+
+  gcs [label="GCS Isolated Test Objects\n(Proposed)"
+       fillcolor="#FFF1D8"];
+  bq [label="BigQuery Analytics\n(Future)"
+      fillcolor="#FFF1D8"];
+  governance [label="Metadata / Lineage / Quality\n(Proposed)"
+              fillcolor="#FFF1D8"];
+
+  source -> kafka -> flink;
+  flink -> bronze -> silver -> gold -> consume;
+  flink -> state;
+  silver -> gcs [style=dashed label="Approved bounded export"];
+  gcs -> bq [style=dashed label="Validation"];
+  governance -> silver [style=dotted];
+  governance -> bq [style=dotted];
+}

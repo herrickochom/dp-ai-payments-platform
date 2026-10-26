@@ -1,0 +1,39 @@
+digraph GovernedStorage {
+  graph [
+    label="GCP Governed Storage | Proposed Design"
+    labelloc=t
+    fontsize=20
+    rankdir=TB
+    bgcolor=white
+  ];
+
+  node [shape=box style="rounded,filled"
+        fillcolor="#EAF2FA" color="#24476A"
+        fontname="Arial"];
+  edge [color="#536779" fontname="Arial"];
+
+  policy [label="Retention Policy Catalogue\nStatus: Proposed"];
+  approval [label="Records Owner / Compliance Approval"];
+  controls [label="IAM / Audit / Legal Holds\nDisposal Authorisation"];
+
+  standard [label="STANDARD\nTemporary: 30 days\nEvents: 60 days"];
+  nearline [label="NEARLINE\nHistorical Analytics: 90 days"];
+  coldline [label="COLDLINE\nHistorical Payments: 365 days"];
+  archive [label="ARCHIVE\nFinancial / Audit: 3600 days"];
+
+  protected [label="Protected Workloads\nActive Iceberg Snapshots\nFlink Recovery State"
+             fillcolor="#E6F4EA"];
+
+  policy -> approval [style=dashed];
+  approval -> controls [style=dashed];
+
+  controls -> standard [style=dashed];
+  controls -> nearline [style=dashed];
+  controls -> coldline [style=dashed];
+  controls -> archive [style=dashed];
+
+  policy -> protected [
+    style=dotted
+    label="No generic age-based deletion"
+  ];
+}

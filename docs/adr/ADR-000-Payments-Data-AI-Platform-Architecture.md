@@ -121,3 +121,12 @@ silently supersede previously accepted decisions.
 Digital Assets and Smart Ledgers remain a future
 workstream and are outside the current GCP
 implementation milestone.
+
+## Architecture and Data-Flow Diagrams
+
+The following diagrams illustrate the architectural decision and its relevant data flows.
+
+- [Enterprise platform architecture](../architecture/gcp/diagrams/enterprise-platform.svg)
+- [End-to-end data flow](../architecture/gcp/diagrams/end-to-end-data-flow.svg)
+
+**Deployment status:** Diagrams distinguish existing local components from proposed or future GCP services. They do not authorise cloud provisioning.
