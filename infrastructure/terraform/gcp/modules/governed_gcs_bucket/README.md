@@ -35,8 +35,14 @@ cleanup requires a separately approved policy.
 
 ## Deployment.
 
-This module is not referenced by the development
-environment. Creating these files provisions no resources.
+The development environment references this module through
+GCP-006C governed storage domain integration. Deployment is
+disabled by default through
+`enable_governed_storage_deployment = false`.
+The `governance_approved` input also defaults to false.
+These configuration gates do not replace independent
+deployment authorisation. No resources are provisioned
+merely by defining or validating the configuration.
 
 Future integration requires:
 
