@@ -1,5 +1,8 @@
 import importlib.util
 import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -23,7 +26,47 @@ def _generator():
     return module
 
 
-def test_generator_keeps_pure_deterministic_contract():
+@pytest.fixture
+def isolated_mdm_sources(tmp_path, monkeypatch):
+    data_root = tmp_path / "data"
+    generator_dir = ROOT / "services/payment-xml-generator"
+
+    env = os.environ.copy()
+    env["DATA_ROOT"] = str(data_root)
+
+    subprocess.run(
+        [
+            sys.executable,
+            str(generator_dir / "pdmis_generator.py"),
+            "--count", "20",
+            "--seed", "20260903",
+            "--start-date", "2024-01-01",
+            "--as-of-date", "2026-09-08",
+            "--output-root", str(data_root / "pdmis"),
+        ],
+        env=env,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    subprocess.run(
+        [
+            sys.executable,
+            str(generator_dir / "agent_network_generator.py"),
+            "--count", "20",
+        ],
+        env=env,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    monkeypatch.setenv("DATA_ROOT", str(data_root))
+    return data_root
+
+
+def test_generator_keeps_pure_deterministic_contract(isolated_mdm_sources):
     generator = _generator()
     assert generator.beneficiary_sources() == generator.beneficiary_sources()
     datasets = generator.build_resolved_mdm()
@@ -33,7 +76,9 @@ def test_generator_keeps_pure_deterministic_contract():
     assert all("nin" not in row for row in datasets["source_crosswalk"])
 
 
-def test_json_export_remains_explicit_and_complete(tmp_path):
+def test_json_export_remains_explicit_and_complete(
+    tmp_path, isolated_mdm_sources
+):
     generator = _generator()
     generator.MDM_ROOT = tmp_path
     generator.materialise_resolved_mdm()
