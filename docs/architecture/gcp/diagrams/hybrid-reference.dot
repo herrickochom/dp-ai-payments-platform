@@ -1,0 +1,46 @@
+digraph HybridPlatform {
+  graph [
+    rankdir=LR,
+    fontname="Arial",
+    label="Payments Data AI Platform - Incremental Hybrid GCP Reference",
+    labelloc=t,
+    fontsize=18,
+    pad=0.3
+  ];
+
+  node [shape=box, style=rounded, fontname="Arial"];
+  edge [fontname="Arial"];
+
+  subgraph cluster_local {
+    label="Local Open-Source Platform";
+    style=rounded;
+
+    sources [label="Source Systems / CDC"];
+    kafka [label="Kafka"];
+    flink [label="Flink"];
+    lakehouse [label="MinIO / Iceberg / Nessie"];
+    analytics [label="Trino / dbt / Analytics"];
+
+    sources -> kafka;
+    kafka -> flink;
+    flink -> lakehouse;
+    lakehouse -> analytics;
+  }
+
+  subgraph cluster_gcp {
+    label="Google Cloud - Planned";
+    style="rounded,dashed";
+
+    security [label="IAM / Security"];
+    infrastructure [label="Approved GCP Infrastructure"];
+    operations [label="Observability / Cost Controls"];
+
+    security -> infrastructure;
+    operations -> infrastructure;
+  }
+
+  lakehouse -> infrastructure [
+    style=dashed,
+    label="Future controlled integration"
+  ];
+}
