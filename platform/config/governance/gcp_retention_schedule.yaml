@@ -25,6 +25,8 @@ datasets:
     retention_days: null
     retention_basis: approved_financial_records_schedule
     automatic_deletion: false
+    storage_class: STANDARD
+    approval_status: proposed
   audit_evidence:
     classification: restricted
     retention_days: 3600
@@ -66,16 +68,22 @@ datasets:
     retention_days: 365
     automatic_deletion: false
     approval_status: proposed
+    classification: confidential
+    retention_basis: approved_financial_records_schedule
   long_term_financial_archives:
     storage_class: ARCHIVE
     retention_days: 3600
     automatic_deletion: false
     approval_status: proposed
+    classification: restricted
+    retention_basis: approved_financial_archive_schedule
   flink_recovery_state:
     storage_class: STANDARD
     retention_days: null
     automatic_deletion: false
     approval_status: proposed
+    classification: operational
+    retention_basis: recovery_lifecycle_policy
 governance:
   legal_hold_blocks_disposal: true
   require_disposal_authorisation: true
