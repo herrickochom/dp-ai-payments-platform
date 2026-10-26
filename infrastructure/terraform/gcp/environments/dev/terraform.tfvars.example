@@ -1,0 +1,4 @@
+project_id    = "project-e48f194e-f44f-458d-b4f"
+region        = "europe-west2"
+environment   = "dev"
+platform_name = "dp-pdm-ai-platform"
