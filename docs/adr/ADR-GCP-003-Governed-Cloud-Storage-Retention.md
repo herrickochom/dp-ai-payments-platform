@@ -1,5 +1,19 @@
 # ADR-GCP-003: Governed Cloud Storage and Retention.
 
+<!-- architecture-navigation:start -->
+
+[Architecture Overview](../architecture/gcp/README.md) · [Architecture Diagrams](../architecture/gcp/README.md#architecture-diagrams) · [Decision Records](../architecture/gcp/README.md#architecture-decision-records)
+
+> **Status:** Proposed  
+> **Deployment:** Design and validation only  
+> **Cloud provisioning:** Not authorised
+
+**Decision at a glance.** Dataset-specific proposed retention schedules, storage classification, approval-gated disposal and protection of Iceberg and Flink recovery state.
+
+---
+
+<!-- architecture-navigation:end -->
+
 **Status:** Proposed.
 **Parent:** ADR-000.
 **Related:** ADR-GCP-001 and ADR-GCP-002.
@@ -141,8 +155,13 @@ Retention locks require separate explicit approval.
 
 ## Architecture and Data-Flow Diagrams
 
-The following diagrams illustrate the architectural decision and its relevant data flows.
+These diagrams form part of the architecture decision and are displayed inline for review.
 
-- [Governed storage architecture](../architecture/gcp/diagrams/governed-storage.svg)
+### Governed Storage Architecture.
 
-**Deployment status:** Diagrams distinguish existing local components from proposed or future GCP services. They do not authorise cloud provisioning.
+![Governed Storage Architecture](../architecture/gcp/diagrams/governed-storage.svg)
+
+[Open full-size SVG](../architecture/gcp/diagrams/governed-storage.svg) · [View editable Graphviz source](../architecture/gcp/diagrams/governed-storage.dot)
+
+> **Architecture boundary:** Existing local capabilities and proposed GCP integrations
+> must not be confused with deployed cloud resources. These diagrams do not authorise provisioning.

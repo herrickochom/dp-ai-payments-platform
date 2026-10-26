@@ -1,5 +1,19 @@
 # ADR-000: Payments Data AI Platform Architecture.
 
+<!-- architecture-navigation:start -->
+
+[Architecture Overview](../architecture/gcp/README.md) · [Architecture Diagrams](../architecture/gcp/README.md#architecture-diagrams) · [Decision Records](../architecture/gcp/README.md#architecture-decision-records)
+
+> **Status:** Proposed  
+> **Deployment:** Design and validation only  
+> **Cloud provisioning:** Not authorised
+
+**Decision at a glance.** Modular, event-driven, open-source-first enterprise architecture for governed payment data products and AI-enabled intelligence.
+
+---
+
+<!-- architecture-navigation:end -->
+
 **Status:** Proposed.
 **Classification:** Parent Architecture Decision Record.
 **Scope:** Enterprise data platform.
@@ -124,9 +138,19 @@ implementation milestone.
 
 ## Architecture and Data-Flow Diagrams
 
-The following diagrams illustrate the architectural decision and its relevant data flows.
+These diagrams form part of the architecture decision and are displayed inline for review.
 
-- [Enterprise platform architecture](../architecture/gcp/diagrams/enterprise-platform.svg)
-- [End-to-end data flow](../architecture/gcp/diagrams/end-to-end-data-flow.svg)
+### Enterprise Platform Architecture.
 
-**Deployment status:** Diagrams distinguish existing local components from proposed or future GCP services. They do not authorise cloud provisioning.
+![Enterprise Platform Architecture](../architecture/gcp/diagrams/enterprise-platform.svg)
+
+[Open full-size SVG](../architecture/gcp/diagrams/enterprise-platform.svg) · [View editable Graphviz source](../architecture/gcp/diagrams/enterprise-platform.dot)
+
+### End-to-End Data Flow.
+
+![End-to-End Data Flow](../architecture/gcp/diagrams/end-to-end-data-flow.svg)
+
+[Open full-size SVG](../architecture/gcp/diagrams/end-to-end-data-flow.svg) · [View editable Graphviz source](../architecture/gcp/diagrams/end-to-end-data-flow.dot)
+
+> **Architecture boundary:** Existing local capabilities and proposed GCP integrations
+> must not be confused with deployed cloud resources. These diagrams do not authorise provisioning.

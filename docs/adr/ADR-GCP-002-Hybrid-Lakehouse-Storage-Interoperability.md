@@ -1,5 +1,19 @@
 # ADR-GCP-002: Hybrid Lakehouse Storage Interoperability.
 
+<!-- architecture-navigation:start -->
+
+[Architecture Overview](../architecture/gcp/README.md) · [Architecture Diagrams](../architecture/gcp/README.md#architecture-diagrams) · [Decision Records](../architecture/gcp/README.md#architecture-decision-records)
+
+> **Status:** Proposed  
+> **Deployment:** Design and validation only  
+> **Cloud provisioning:** Not authorised
+
+**Decision at a glance.** Phased validation of bounded object exchange followed by separate Apache Iceberg metadata, catalogue and query interoperability tests.
+
+---
+
+<!-- architecture-navigation:end -->
+
 **Status:** Proposed.
 **Classification:** Child Architecture Decision Record.
 **Parent:** ADR-000.
@@ -168,9 +182,19 @@ Production adoption requires separate approval.
 
 ## Architecture and Data-Flow Diagrams
 
-The following diagrams illustrate the architectural decision and its relevant data flows.
+These diagrams form part of the architecture decision and are displayed inline for review.
 
-- [Iceberg lakehouse interoperability](../architecture/gcp/diagrams/iceberg-lakehouse.svg)
-- [End-to-end data flow](../architecture/gcp/diagrams/end-to-end-data-flow.svg)
+### Iceberg Lakehouse Interoperability.
 
-**Deployment status:** Diagrams distinguish existing local components from proposed or future GCP services. They do not authorise cloud provisioning.
+![Iceberg Lakehouse Interoperability](../architecture/gcp/diagrams/iceberg-lakehouse.svg)
+
+[Open full-size SVG](../architecture/gcp/diagrams/iceberg-lakehouse.svg) · [View editable Graphviz source](../architecture/gcp/diagrams/iceberg-lakehouse.dot)
+
+### End-to-End Data Flow.
+
+![End-to-End Data Flow](../architecture/gcp/diagrams/end-to-end-data-flow.svg)
+
+[Open full-size SVG](../architecture/gcp/diagrams/end-to-end-data-flow.svg) · [View editable Graphviz source](../architecture/gcp/diagrams/end-to-end-data-flow.dot)
+
+> **Architecture boundary:** Existing local capabilities and proposed GCP integrations
+> must not be confused with deployed cloud resources. These diagrams do not authorise provisioning.

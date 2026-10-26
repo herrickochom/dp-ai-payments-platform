@@ -1,5 +1,19 @@
 # ADR-GCP-001: Incremental Hybrid GCP Reference Deployment.
 
+<!-- architecture-navigation:start -->
+
+[Architecture Overview](../architecture/gcp/README.md) · [Architecture Diagrams](../architecture/gcp/README.md#architecture-diagrams) · [Decision Records](../architecture/gcp/README.md#architecture-decision-records)
+
+> **Status:** Proposed  
+> **Deployment:** Design and validation only  
+> **Cloud provisioning:** Not authorised
+
+**Decision at a glance.** Incremental Terraform-led Google Cloud reference deployment, preserving the existing local platform and requiring explicit deployment approval.
+
+---
+
+<!-- architecture-navigation:end -->
+
 **Status:** Proposed.
 **Classification:** Child Architecture Decision Record.
 **Parent:** ADR-000.
@@ -151,9 +165,19 @@ Production readiness requires separate approval.
 
 ## Architecture and Data-Flow Diagrams
 
-The following diagrams illustrate the architectural decision and its relevant data flows.
+These diagrams form part of the architecture decision and are displayed inline for review.
 
-- [Hybrid reference architecture](../architecture/gcp/diagrams/hybrid-reference.svg)
-- [End-to-end data flow](../architecture/gcp/diagrams/end-to-end-data-flow.svg)
+### Hybrid Reference Architecture.
 
-**Deployment status:** Diagrams distinguish existing local components from proposed or future GCP services. They do not authorise cloud provisioning.
+![Hybrid Reference Architecture](../architecture/gcp/diagrams/hybrid-reference.svg)
+
+[Open full-size SVG](../architecture/gcp/diagrams/hybrid-reference.svg) · [View editable Graphviz source](../architecture/gcp/diagrams/hybrid-reference.dot)
+
+### End-to-End Data Flow.
+
+![End-to-End Data Flow](../architecture/gcp/diagrams/end-to-end-data-flow.svg)
+
+[Open full-size SVG](../architecture/gcp/diagrams/end-to-end-data-flow.svg) · [View editable Graphviz source](../architecture/gcp/diagrams/end-to-end-data-flow.dot)
+
+> **Architecture boundary:** Existing local capabilities and proposed GCP integrations
+> must not be confused with deployed cloud resources. These diagrams do not authorise provisioning.
