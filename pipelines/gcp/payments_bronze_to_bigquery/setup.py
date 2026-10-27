@@ -5,6 +5,6 @@ from setuptools import setup
 setup(
     name="dp-payments-bronze-to-bigquery",
     version="0.1.0",
-    py_modules=["transform"],
+    py_modules=["transform", "routing"],
     python_requires=">=3.10",
 )
