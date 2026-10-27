@@ -1,0 +1,67 @@
+name: GCP Payments Terraform Validation
+
+on:
+  push:
+    branches:
+      - feature/gcp-data-platform
+    paths:
+      - 'infrastructure/terraform/gcp/**'
+      - 'pipelines/gcp/payments_bronze_to_bigquery/**'
+      - '.github/workflows/gcp-payments-validation.yml'
+
+  pull_request:
+    paths:
+      - 'infrastructure/terraform/gcp/**'
+      - 'pipelines/gcp/payments_bronze_to_bigquery/**'
+      - '.github/workflows/gcp-payments-validation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  payments-validation:
+    name: Payments Terraform and Beam Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.16.3'
+          terraform_wrapper: false
+
+      - name: Terraform formatting
+        run: terraform fmt -check -recursive
+        working-directory: infrastructure/terraform/gcp
+
+      - name: Initialise payments Terraform
+        run: terraform init -backend=false -input=false -lockfile=readonly
+        working-directory: infrastructure/terraform/gcp/experiments/pubsub_payments
+
+      - name: Validate payments Terraform
+        run: terraform validate -no-color
+        working-directory: infrastructure/terraform/gcp/experiments/pubsub_payments
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run payment contract tests
+        run: |
+          python -m unittest discover \
+            -s pipelines/gcp/payments_bronze_to_bigquery \
+            -p 'test_contract.py' \
+            -v
+
+      - name: Validate Python packaging
+        run: |
+          python -m pip install setuptools
+          python -m compileall -q \
+            pipelines/gcp/payments_bronze_to_bigquery
+          cd pipelines/gcp/payments_bronze_to_bigquery
+          python setup.py sdist \
+            --dist-dir "$RUNNER_TEMP/payments-dist"
