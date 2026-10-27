@@ -7,12 +7,16 @@ on:
     paths:
       - 'infrastructure/terraform/gcp/**'
       - 'pipelines/gcp/payments_bronze_to_bigquery/**'
+      - 'transform/dbt_gcp/**'
+      - 'tests/ci/validate_gcp_dbt.py'
       - '.github/workflows/gcp-payments-validation.yml'
 
   pull_request:
     paths:
       - 'infrastructure/terraform/gcp/**'
       - 'pipelines/gcp/payments_bronze_to_bigquery/**'
+      - 'transform/dbt_gcp/**'
+      - 'tests/ci/validate_gcp_dbt.py'
       - '.github/workflows/gcp-payments-validation.yml'
 
 permissions:
@@ -57,6 +61,37 @@ jobs:
             -p 'test_contract.py' \
             -v
 
+      - name: Run Silver identity contract tests
+        run: |
+          python -m unittest discover \
+            -s transform/dbt_gcp/tests \
+            -p 'test_*.py' \
+            -v
+
+      - name: Verify Silver SQL integrity tests
+        run: |
+          python - <<'PYTEST'
+          from pathlib import Path
+
+          root = Path("transform/dbt_gcp/tests")
+          required = [
+              "assert_trusted_identity_unique.sql",
+              "assert_trusted_conflict_disjoint.sql",
+              "assert_identity_observation_reconciliation.sql",
+              "assert_identity_partition.sql",
+          ]
+
+          missing = [
+              name for name in required
+              if not (root / name).is_file()
+          ]
+
+          if missing:
+              raise SystemExit(f"Missing SQL tests: {missing}")
+
+          print("All four Silver SQL integrity tests present.")
+          PYTEST
+
       - name: Validate Python packaging
         run: |
           python -m pip install setuptools
@@ -65,3 +100,25 @@ jobs:
           cd pipelines/gcp/payments_bronze_to_bigquery
           python setup.py sdist \
             --dist-dir "$RUNNER_TEMP/payments-dist"
+
+
+  gcp-dbt-offline-validation:
+    name: GCP dbt offline validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pinned dbt BigQuery adapter
+        run: |
+          python -m pip install "dbt-core==1.12.6" "dbt-bigquery==1.10.2"
+
+      - name: Validate GCP dbt project offline
+        run: |
+          python tests/ci/validate_gcp_dbt.py

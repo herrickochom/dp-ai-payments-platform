@@ -1,0 +1,27 @@
+version: 2
+
+sources:
+  - name: payments_landing
+    database: "{{ env_var('GCP_PROJECT_ID') }}"
+    schema: pdm_payments_dev
+    tables:
+      - name: payment_events
+
+models:
+  - name: slv_payment_event_identity_status
+    description: >
+      Deterministic classification of payment event identities
+      using all six governed business fields.
+    columns:
+      - name: event_id
+        tests:
+          - not_null
+          - unique
+      - name: identity_status
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - IDENTITY_VERIFIED
+                  - IDENTITY_CONFLICT

@@ -1,0 +1,11 @@
+pdm_gcp:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: "{{ env_var('GCP_PROJECT_ID') }}"
+      dataset: pdm_payments_dev
+      location: europe-west2
+      threads: 1
+      priority: batch

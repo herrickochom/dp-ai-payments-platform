@@ -1,0 +1,22 @@
+name: 'pdm_gcp'
+version: '1.0.0'
+config-version: 2
+
+profile: 'pdm_gcp'
+
+model-paths: ['models']
+test-paths: ['tests']
+macro-paths: ['macros']
+
+models:
+  pdm_gcp:
+    +materialized: view
+    silver:
+      +schema: silver
+      +materialized: table
+    gold:
+      +schema: gold
+      +materialized: table
+    consumption:
+      +schema: consumption
+      +materialized: view
