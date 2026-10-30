@@ -129,3 +129,10 @@ unpacking
 *.before-*
 .runtime/
 .secrets/
+
+# GCP local development and generated artefacts
+.venv-*/
+stage10-current-source-*.zip
+**/.terraform/
+*.tfvars
+*.tfvars.json
