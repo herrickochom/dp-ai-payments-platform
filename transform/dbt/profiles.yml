@@ -1,41 +1,17 @@
-# /home/hochom/projects/dp-ai-payments-platform/transform/dbt/profiles.yml
-#
-# Governed dbt execution profile.
-#
-# dbt executes through the dedicated transform Trino boundary.
-# Trino, not dbt, owns the Nessie REST and S3 configuration.
-#
-# The transform Trino catalog is bound at startup to:
-#
-#   transform_<run>|<NESSIE_WAREHOUSE>
-#
-# Therefore dbt must never connect directly to Nessie or MinIO and must
-# never select or default to the Nessie main branch.
-
+# GCP-only dbt profile. Local configuration; no cloud operation during setup.
+# Authentication: existing Google Application Default Credentials (ADC).
+# Set DBT_GCP_PROJECT to the approved GCP project ID before dbt execution.
+# Set DBT_GCP_LOCATION to the actual dataset location (default europe-west2).
+# IMPORTANT: Standard dbt-bigquery table materialization is NOT native BigLake Iceberg V2 publication.
+# Do not run models until the guarded Iceberg publication implementation is validated.
 pdm_platform:
-  target: runtime
-
+  target: gcp
   outputs:
-    runtime:
-      type: trino
-
-      # Trino PASSWORD authentication.
-      method: ldap
-      user: "{{ env_var('DBT_TRINO_USER') }}"
-      password: "{{ env_var('DBT_TRINO_PASSWORD') }}"
-
-      # Dedicated transform Trino service.
-      host: "{{ env_var('DBT_TRINO_HOST') }}"
-      port: "{{ env_var('DBT_TRINO_PORT', '8443') | int }}"
-      http_scheme: https
-
-      # The transform Trino exposes the run-scoped Nessie catalog as
-      # the normal logical Iceberg catalog.
-      database: iceberg
-
-      # Default dbt schema. Individual models may override this through
-      # their existing dbt configuration.
-      schema: staging
-
-      # Keep governed transform execution conservative.
+    gcp:
+      type: bigquery
+      method: oauth
+      project: "{{ env_var('DBT_GCP_PROJECT') }}"
+      dataset: staging
+      location: "{{ env_var('DBT_GCP_LOCATION', 'europe-west2') }}"
       threads: 1
+      priority: interactive

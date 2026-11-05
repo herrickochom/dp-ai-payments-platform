@@ -2,7 +2,7 @@ version: 2
 
 sources:
   - name: bronze
-    database: iceberg
+    database: "{{ env_var('DBT_GCP_PROJECT') }}"
     schema: bronze
     description: >
       Physical Bronze Iceberg tables written by the governed Raw-to-Bronze
@@ -25,15 +25,7 @@ sources:
           Physical Bronze Iceberg table written by the governed
           Raw-to-Bronze ingestion runtime.
 
-        description: >
-          Physical Bronze Iceberg table written by the governed
-          Raw-to-Bronze ingestion runtime.
-
       - name: br_pdm_cpo_psn_pain002
-        description: >
-          Physical Bronze Iceberg table written by the governed
-          Raw-to-Bronze ingestion runtime.
-
         description: >
           Physical Bronze Iceberg table written by the governed
           Raw-to-Bronze ingestion runtime.
