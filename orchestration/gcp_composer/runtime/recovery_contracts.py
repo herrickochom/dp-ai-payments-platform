@@ -85,5 +85,5 @@ def orchestration_tick(store, provider, verifier, worker='stage9-reconciler'):
 
     Scheduler is external; no manual production triggering is intended.
     """
-    from stage9_offline_orchestrator import tick
+    from recovery_orchestrator import tick
     return tick(store,provider,verifier,worker=worker)

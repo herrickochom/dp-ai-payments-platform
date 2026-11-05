@@ -4,7 +4,7 @@ from pathlib import Path
 import unittest
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'orchestration/gcp_composer/runtime'))
-from stage9fghi_contracts import JobIdentity,classify_jobs,verified_evidence,UnsafeToDeploy,deployment_gate,orchestration_tick
+from recovery_contracts import JobIdentity,classify_jobs,verified_evidence,UnsafeToDeploy,deployment_gate,orchestration_tick
 
 E='a'*64
 D='b'*64
@@ -35,10 +35,10 @@ class Contracts(unittest.TestCase):
         keys=deployment_gate({})['missing']
         self.assertIn('explicit_gcp_approval',keys)
     def test_no_remote_submission_code(self):
-        source=(ROOT/'orchestration/gcp_composer/runtime/stage9fghi_contracts.py').read_text()
+        source=(ROOT/'orchestration/gcp_composer/runtime/recovery_contracts.py').read_text()
         self.assertNotIn('jobs.create(',source)
         self.assertNotIn('google.cloud',source)
     def test_existing_migrations_untouched(self):
-        for n in ('007_gcp_payment_execution_ledger.sql','008_gcp_dataflow_submission_outbox.sql','009_gcp_stage9_recovery_leases.sql'):
+        for n in ('001_payment_execution_ledger.sql','002_dataflow_submission_outbox.sql','003_dataflow_recovery_leases.sql'):
             self.assertTrue((ROOT/'orchestration/gcp_composer/migrations'/n).exists())
 if __name__=='__main__': unittest.main()

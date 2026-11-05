@@ -2,8 +2,8 @@ import importlib.util
 from pathlib import Path
 import unittest
 
-P = Path(__file__).resolve().parents[2] / 'orchestration/gcp_composer/runtime/stage9_recovery_policy.py'
-spec = importlib.util.spec_from_file_location('stage9_recovery_policy', P)
+P = Path(__file__).resolve().parents[2] / 'orchestration/gcp_composer/runtime/recovery_policy.py'
+spec = importlib.util.spec_from_file_location('recovery_policy', P)
 mod = importlib.util.module_from_spec(spec)
 import sys
 sys.modules[spec.name] = mod

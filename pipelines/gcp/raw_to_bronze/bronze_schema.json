@@ -1,0 +1,28 @@
+{
+  "fields": [
+    {"name": "event_id",                 "type": "STRING",    "mode": "REQUIRED"},
+    {"name": "message_id",               "type": "STRING",    "mode": "NULLABLE"},
+    {"name": "event_timestamp",          "type": "STRING",    "mode": "REQUIRED"},
+    {"name": "source_system",            "type": "STRING",    "mode": "REQUIRED"},
+    {"name": "message_type",             "type": "STRING",    "mode": "REQUIRED"},
+    {"name": "event_family",             "type": "STRING",    "mode": "NULLABLE"},
+    {"name": "payload_amount",           "type": "FLOAT",     "mode": "NULLABLE"},
+    {"name": "payload_currency",         "type": "STRING",    "mode": "NULLABLE"},
+    {"name": "payload_debtor",           "type": "STRING",    "mode": "NULLABLE"},
+    {"name": "payload_creditor",         "type": "STRING",    "mode": "NULLABLE"},
+    {"name": "payload_status",           "type": "STRING",    "mode": "NULLABLE"},
+    {"name": "payload_x_attributes",     "type": "JSON",      "mode": "NULLABLE"},
+    {"name": "event_data",               "type": "STRING",    "mode": "NULLABLE"},
+    {"name": "parsed_event_data",        "type": "STRING",    "mode": "NULLABLE"},
+    {"name": "_kafka_topic",             "type": "STRING",    "mode": "REQUIRED"},
+    {"name": "_kafka_partition",         "type": "INT64",     "mode": "REQUIRED"},
+    {"name": "_kafka_offset",            "type": "INT64",     "mode": "REQUIRED"},
+    {"name": "_kafka_timestamp",         "type": "TIMESTAMP", "mode": "REQUIRED"},
+    {"name": "_kafka_category",          "type": "STRING",    "mode": "NULLABLE"},
+    {"name": "_kafka_source_group",      "type": "STRING",    "mode": "NULLABLE"},
+    {"name": "_kafka_source_system",     "type": "STRING",    "mode": "NULLABLE"},
+    {"name": "_raw_object_path",         "type": "STRING",    "mode": "REQUIRED"},
+    {"name": "_bronze_pipeline_version", "type": "STRING",    "mode": "REQUIRED"},
+    {"name": "_bronze_loaded_at",        "type": "TIMESTAMP", "mode": "REQUIRED"}
+  ]
+}

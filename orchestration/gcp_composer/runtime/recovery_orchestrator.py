@@ -1,7 +1,7 @@
 """Stage 9E offline scheduler tick. No GCP SDK, network, or background daemon.
 Production scheduling must invoke tick automatically with a governed provider adapter.
 """
-from stage9_transactional_recovery import RecoveryStore
+from transactional_recovery import RecoveryStore
 
 class UnsafeProvider(RuntimeError): pass
 

@@ -3,7 +3,7 @@ import importlib.util
 import pathlib
 import sys
 
-source = pathlib.Path(__file__).resolve().parents[2] / "platform/gcp/stage9/durable_dataflow.py"
+source = pathlib.Path(__file__).resolve().parents[2] / "platform/gcp/dataflow_recovery/durable_dataflow.py"
 spec = importlib.util.spec_from_file_location("stage9_durable_dataflow", source)
 module = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = module

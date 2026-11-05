@@ -3,8 +3,8 @@ from pathlib import Path
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
-MIG = ROOT / 'orchestration/gcp_composer/migrations/008_gcp_dataflow_submission_outbox.sql'
-BASE = ROOT / 'orchestration/gcp_composer/migrations/007_gcp_payment_execution_ledger.sql'
+MIG = ROOT / 'orchestration/gcp_composer/migrations/002_dataflow_submission_outbox.sql'
+BASE = ROOT / 'orchestration/gcp_composer/migrations/001_payment_execution_ledger.sql'
 
 class Stage9PostgresContract(unittest.TestCase):
     @classmethod

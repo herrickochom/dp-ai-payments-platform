@@ -55,7 +55,10 @@ locals {
 module "governed_storage_domains" {
   source = "../../modules/governed_gcs_bucket"
 
-  for_each = var.enable_governed_storage_deployment ? local.storage_domains : {}
+  for_each = var.enable_governed_storage_deployment ? {
+    for name, config in local.storage_domains : name => config
+    if contains(var.gcp_kp001u_enabled_storage_domains, name)
+  } : {}
 
   project_id  = var.project_id
   bucket_name = lower("${local.resource_prefix}-${replace(each.key, "_", "-")}")

@@ -2,3 +2,5 @@ confluent-kafka==2.3.0
 avro==1.11.3
 fastavro==1.9.4
 requests==2.31.0
+boto3==1.43.122
+botocore==1.43.122

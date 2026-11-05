@@ -103,7 +103,18 @@ class KafkaArchitectureTests(unittest.TestCase):
     def test_topic_manifest_is_authoritative_and_complete(self):
         topics = topic_admin.load_manifest(str(ROOT / "platform/kafka/topics.yaml"))
         names = {item["name"] for item in topics}
-        self.assertEqual(33, len(topics))
+        self.assertEqual(38, len(topics))
+        self.assertEqual(len(topics), len(names))
+
+        # STR-002B/B2: governed streaming lifecycle topics.
+        for topic in (
+            "payments.lifecycle.audit.v1",
+            "payments.lifecycle.dlq.v1",
+            "payments.lifecycle.exceptions.v1",
+            "payments.lifecycle.state.v1",
+            "payments.lifecycle.transitions.v1",
+        ):
+            self.assertIn(topic, names)
         self.assertIn("cdc.pdm_mdm.mdm.sacco_master_sources", names)
         self.assertIn("payment-events.retry", names)
         self.assertIn("payment-events.dlq", names)

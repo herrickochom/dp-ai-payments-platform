@@ -10,3 +10,5 @@ override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
+# Terraform saved execution plans without a .tfplan extension
+tfplan

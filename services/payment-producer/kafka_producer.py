@@ -14,6 +14,8 @@ import logging
 import time
 import uuid
 import json
+import hashlib
+from datetime import date, datetime
 from pathlib import Path
 
 from services.shared.security.runtime_security import (
@@ -124,7 +126,7 @@ BUSINESS_KEY_FIELDS = {
     "pdmis.saccos": ("sacco_id",),
     "pdmis.households": ("household_id",),
     "pdmis.business_plans": ("business_plan_id",),
-    "pdmis.special_groups": ("special_group_id",),
+    "pdmis.special_groups": ("group_code",),
     "agent.transactions": ("agent_id", "transaction_id", "payment_id"),
     "agent.profiles": ("agent_id",),
     "agent.locations": ("agent_id",),
@@ -579,8 +581,20 @@ def parse_event(file_path: str) -> Optional[Dict[str, Any]]:
         or os.path.basename(file_path)
     )
 
+    if topic == "agent.transactions" and root_name == "AgentTransaction":
+        transaction_id = payload.get("transaction_id")
+        if not isinstance(transaction_id, str) or not transaction_id.strip():
+            logger.error(
+                "Missing authoritative Agent transaction ID: %s",
+                file_path
+            )
+            return None
+        source_event_id = transaction_id.strip()
+    else:
+        source_event_id = payload.get("event_id") or str(uuid.uuid4())
+
     event = {
-        "event_id": str(payload.get("event_id") or uuid.uuid4()),
+        "event_id": str(source_event_id),
         "message_id": str(message_id),
         "event_type": payload.get("event_type", msg_type),
         "event_family": event_family,
@@ -601,20 +615,83 @@ def parse_event(file_path: str) -> Optional[Dict[str, Any]]:
     
     return event
 
+PDMIS_SNAPSHOT_KEYS = {
+    "pdmis.loans": ("loan_id", "as_of_date"),
+    "pdmis.beneficiaries": ("beneficiary_id", "updated_at"),
+    "pdmis.households": ("household_id", "updated_at"),
+    "pdmis.saccos": ("sacco_id", "updated_at"),
+    "pdmis.business_plans": ("business_plan_id", None),
+    "pdmis.special_groups": ("group_code", None),
+}
+
+
+def pdmis_snapshot_identity(topic: str, record: Dict[str, Any]) -> tuple[str, str]:
+    """Return a replay-stable observation ID and canonical content fingerprint."""
+    entity_field, observation_field = PDMIS_SNAPSHOT_KEYS[topic]
+    entity_id = record.get(entity_field)
+    observation = record.get(observation_field)
+
+    if not isinstance(entity_id, str) or not entity_id.strip():
+        raise ValueError(f"{topic}: missing {entity_field}")
+    if observation_field is not None:
+        if not isinstance(observation, str) or not observation.strip():
+            raise ValueError(f"{topic}: missing {observation_field}")
+
+    if observation_field is not None:
+        try:
+            if observation_field == "as_of_date":
+                observation_date = date.fromisoformat(observation).isoformat()
+            else:
+                timestamp = datetime.fromisoformat(observation)
+                if timestamp.tzinfo is None or timestamp.utcoffset() is None:
+                    raise ValueError("timezone required")
+                observation_date = timestamp.date().isoformat()
+        except ValueError as exc:
+            raise ValueError(
+                f"{topic}: invalid observation date in {observation_field}"
+            ) from exc
+    else:
+        observation_date = None
+
+    canonical = json.dumps(
+        record, sort_keys=True, separators=(",", ":"),
+        ensure_ascii=False, allow_nan=False,
+    )
+    fingerprint = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+    identity_input = json.dumps(
+        [
+            topic,
+            entity_id.strip(),
+            observation_date if observation_date is not None else fingerprint,
+        ],
+        separators=(",", ":"),
+    )
+    digest = hashlib.sha256(identity_input.encode("utf-8")).hexdigest()
+    return f"PDMIS-SNAPSHOT-{digest}", fingerprint
+
+
+class SourceValidationError(ValueError):
+    """A source file cannot be safely converted into Kafka events."""
+
+
 def parse_json_events(file_path: str) -> list[Dict[str, Any]]:
     """Create one Kafka event per JSON object for Agent, Wendi or PDMIS feeds."""
     system, msg_type, topic = detect_system_from_path(file_path)
     if topic == "unknown" or topic not in TOPIC_MAPPINGS:
-        logger.warning(f"Unknown JSON system/topic for {file_path}, skipping")
-        return []
+        raise SourceValidationError(
+            f"Unknown JSON system/topic for {file_path}"
+        )
     try:
         document = json.loads(Path(file_path).read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        logger.error(f"Unable to parse JSON source {file_path}: {exc}")
-        return []
+        raise SourceValidationError(
+            f"Unable to parse JSON source {file_path}: {exc}"
+        ) from exc
 
     records = document if isinstance(document, list) else [document]
     events = []
+    snapshot_fingerprints = {}
     id_candidates = (
         "transaction_id", "payment_id", "loan_id", "beneficiary_id", "household_id",
         "sacco_id", "business_plan_id", "special_group_id", "agent_id", "event_id", "id"
@@ -624,9 +701,12 @@ def parse_json_events(file_path: str) -> list[Dict[str, Any]]:
         "disbursement_date", "updated_at"
     )
 
-    for record in records:
+    for record_index, record in enumerate(records):
         if not isinstance(record, dict):
-            continue
+            raise SourceValidationError(
+                f"Non-object JSON record at index={record_index} "
+                f"source={file_path}"
+            )
         message_id = next(
             (str(record[key]) for key in id_candidates if record.get(key) is not None),
             f"{system.upper()}-{msg_type}-{uuid.uuid4().hex[:8]}",
@@ -645,8 +725,53 @@ def parse_json_events(file_path: str) -> list[Dict[str, Any]]:
             amount = 0.0
 
         raw = json.dumps(record, separators=(",", ":"), ensure_ascii=False)
+
+        if topic in PDMIS_SNAPSHOT_KEYS:
+            try:
+                snapshot_event_id, fingerprint = pdmis_snapshot_identity(
+                    topic, record
+                )
+            except ValueError as exc:
+                raise SourceValidationError(
+                    f"Invalid PDMIS snapshot in {file_path}: {exc}"
+                ) from exc
+
+            previous = snapshot_fingerprints.setdefault(
+                snapshot_event_id, fingerprint
+            )
+            if previous != fingerprint:
+                raise SourceValidationError(
+                    f"Conflicting PDMIS snapshots for "
+                    f"identity={snapshot_event_id} source={file_path}"
+                )
+        else:
+            snapshot_event_id = None
+
+        if topic == "wendi.transactions":
+            source_event_id = record.get("event_id")
+        elif topic == "pdmis.repayments":
+            source_event_id = record.get("repayment_event_id")
+        elif topic in PDMIS_SNAPSHOT_KEYS:
+            source_event_id = snapshot_event_id
+        else:
+            source_event_id = None
+
+        if topic in ("wendi.transactions", "pdmis.repayments"):
+            if not isinstance(source_event_id, str) or not source_event_id.strip():
+                raise SourceValidationError(
+                    f"Missing authoritative event ID for "
+                    f"topic={topic} source={file_path}"
+                )
+
         events.append({
-            "event_id": str(uuid.uuid4()),
+            "event_id": (
+                source_event_id
+                if topic in (
+                    "wendi.transactions", "pdmis.repayments",
+                    *PDMIS_SNAPSHOT_KEYS,
+                )
+                else str(uuid.uuid4())
+            ),
             "message_id": message_id,
             "event_type": msg_type,
             "event_family": "PAYMENT_BUSINESS_EVENT",
@@ -754,8 +879,16 @@ def main() -> int:
             files_by_topic[topic].append(file_path)
 
     json_events_by_topic = {}
+    failed = 0
     for file_path in json_files:
-        for event in parse_json_events(file_path):
+        try:
+            events = parse_json_events(file_path)
+        except SourceValidationError as exc:
+            logger.error("JSON source rejected: %s", exc)
+            failed += 1
+            continue
+
+        for event in events:
             topic = event.pop("_topic")
             json_events_by_topic.setdefault(topic, []).append(event)
     
@@ -767,7 +900,6 @@ def main() -> int:
     
     # Produce events
     queued = 0
-    failed = 0
     
     for topic, files in files_by_topic.items():
         logger.info(f"📤 Producing to topic: {topic}")

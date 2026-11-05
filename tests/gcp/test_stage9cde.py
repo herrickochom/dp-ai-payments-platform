@@ -7,8 +7,8 @@ ROOT=Path(__file__).resolve().parents[2]
 BASE=ROOT/'orchestration/gcp_composer/runtime'
 import sys
 sys.path.insert(0,str(BASE))
-from stage9_transactional_recovery import RecoveryStore, Fenced
-from stage9_offline_orchestrator import tick
+from transactional_recovery import RecoveryStore, Fenced
+from recovery_orchestrator import tick
 
 class FakeStore:
     def __init__(self,state='PREPARED'):
@@ -56,11 +56,11 @@ class Stage9CDE(unittest.TestCase):
         s=FakeStore('OBSERVING'); j={'id':'j','name':'pdm-x','project':'p','region':'r','spec_digest':'d'*64,'state':'JOB_STATE_FAILED'}
         self.assertEqual(tick(s,Provider([j]),Verifier(None)),'QUARANTINED_TERMINAL')
     def test_sql_uses_server_clock_and_skip_locked(self):
-        src=(BASE/'stage9_transactional_recovery.py').read_text()
+        src=(BASE/'transactional_recovery.py').read_text()
         self.assertIn('FOR UPDATE OF i SKIP LOCKED',src)
         self.assertIn('lease_expires_at>=clock_timestamp()',src)
     def test_no_cloud_submission_in_orchestrator(self):
-        src=(BASE/'stage9_offline_orchestrator.py').read_text()
+        src=(BASE/'recovery_orchestrator.py').read_text()
         self.assertNotIn('provider.submit(',src)
     def test_invalid_completion_rejected(self):
         with self.assertRaises(ValueError):

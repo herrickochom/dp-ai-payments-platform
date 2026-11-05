@@ -83,6 +83,12 @@ jobs:
       - name: Terraform validate
         run: terraform -chdir=infra/terraform validate -no-color
 
+      - name: Prepare synthetic Compose validation environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tests/ci/generate_compose_validation_env.py >> "$GITHUB_ENV"
+
       - name: Terraform governance tests
         run: python -m pytest -q tests/terraform
 
@@ -109,6 +115,14 @@ jobs:
       - name: CDC and MDM regression tests
         run: python -m pytest -q tests/cdc tests/mdm
 
+      - name: Install orchestration test dependencies
+        run: |
+          python -m pip install \
+            "fastapi==0.115.12" \
+            "pydantic==2.5.0" \
+            "httpx==0.24.1" \
+            "trino==0.329.0"
+
       - name: Orchestration regression tests
         run: python -m pytest -q orchestration/airflow/tests
 
@@ -121,6 +135,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Prepare synthetic Compose validation environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tests/ci/generate_compose_validation_env.py >> "$GITHUB_ENV"
 
       - name: Validate Compose configuration
         run: docker compose config --quiet
