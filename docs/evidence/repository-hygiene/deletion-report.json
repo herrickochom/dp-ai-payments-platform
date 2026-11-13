@@ -1,0 +1,234 @@
+{
+  "timestamp_utc": "2026-11-13T11:44:20.298529+00:00",
+  "mode": "APPLY",
+  "delete_files": [
+    "orchestration/job_runner/api.py",
+    "orchestration/job_runner/raw_readiness.py",
+    "orchestration/transform_runtime/models.py",
+    "orchestration/transform_runtime/nessie_publication.py",
+    "services/agent-api/bi_adapter.py",
+    "services/agent-api/builder_models.py",
+    "services/agent-api/governance_models.py",
+    "services/agent-api/knowledge_models.py",
+    "services/agent-api/models.py",
+    "services/agent-api/orchestration_models.py",
+    "services/agent-api/orchestrator.py",
+    "services/agent-api/quality_models.py",
+    "services/kafka-consumer-events/kafka_consumer_events.py",
+    "services/kafka-consumer-events/raw_data_healthcheck.py",
+    "tests/cdc/test_cdc_final_hardening.py",
+    "tests/live_red_invariant_test.py",
+    "tests/test_agent_phase2.py",
+    "tests/test_agent_phase7.py"
+  ],
+  "edit_files": [
+    "pyproject.toml",
+    "requirements.txt",
+    "services/payment-producer/requirements.txt"
+  ],
+  "unresolved": [
+    {
+      "file": "remove_unused_gcp_technologies.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "complete_gcp_repository_cleanup.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "ops/check_data.sh",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/test_replay_ledger_demo.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/test_canonical_object_store_config.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/test_replay_ledger.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "programme/tooling/programme_control/secrets.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "programme/tooling/programme_control/collectors/compose_inventory.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "platform/config/governance/governance_policies.yaml",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "platform/flink/jobs/j1_lifecycle_state_skeleton.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "platform/flink/conf/flink-conf.yaml",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "platform/gcp/bronze_exporter/exporter.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/terraform/test_deployment_targets.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/terraform/test_ci_dependency_boundary.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/terraform/test_local_deployment_command.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/ci/generate_compose_validation_env.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/security/test_transform_secret_migration.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/security/test_secret_provider_contract.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/security/test_transform_trino_runtime.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/security/test_object_store_runtime_contract.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/security/test_raw_healthcheck_c103d.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/security/test_trino_password_authentication.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/security/test_object_store_service_credentials.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/security/test_nessie_plugin_contract_e.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/security/test_object_store_policies.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/security/test_compose_secret_delivery.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/security/test_transform_trino_child_environment.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/security/test_nessie_auth_contract.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/security/test_remaining_secret_callers.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/security/test_object_store_provisioning.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/security/test_object_store_transport_security.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/security/test_nessie_namespace_bootstrap_contract.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/security/test_runtime_security_contract.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/security/test_nessie_plugin_contract_f.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/security/test_nessie_plugin_contract_c.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/security/test_nessie_plugin_contract_a.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "tests/gcp/test_runtime_boundary.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "transform/dbt/models/staging/_sources.yml",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "orchestration/job_runner/transform_trino_runtime.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "orchestration/job_runner/transform_worker.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "orchestration/job_runner/platform_preflight.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "orchestration/job_runner/transform_execution.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "orchestration/job_runner/nessie_iceberg_plugin.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "orchestration/job_runner/raw_to_bronze_executor.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "orchestration/transform_runtime/durable_queue.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "orchestration/job_runner/tests/test_raw_to_bronze_executor.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": ".github/workflows/ci.yml",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "services/agent-api/authority.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "services/agent-api/tools.py",
+      "reason": "remaining legacy reference after planned changes"
+    },
+    {
+      "file": "services/shared/security/runtime_security.py",
+      "reason": "remaining legacy reference after planned changes"
+    }
+  ],
+  "warning": "Deleting Pydantic-backed AI agent modules and other legacy modules may break callers; historical evidence is intentionally retained.",
+  "git_diff_check": 0,
+  "git_cached_diff_check": 0
+}

@@ -1,0 +1,75 @@
+{
+  "mode": "APPLY",
+  "files": {
+    "tests/security/test_secret_provider_contract.py": {
+      "removed": [
+        "obsolete import: orchestration.job_runner.transform_execution",
+        "obsolete test: test_19_split_authority_constants_remain_unchanged"
+      ],
+      "remaining": [],
+      "changed": true
+    },
+    "tests/security/test_postgres_production_contract.py": {
+      "removed": [
+        "obsolete test: test_c8_lease_and_unknown_write_safety_remain_in_place"
+      ],
+      "remaining": [],
+      "changed": true
+    },
+    "tests/security/test_runtime_security_contract.py": {
+      "removed": [
+        "obsolete imported symbol(s): validate_nessie_security"
+      ],
+      "remaining": [],
+      "changed": true
+    }
+  },
+  "blocked": [],
+  "git_diff_check": {
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "git_cached_diff_check": {
+    "command": [
+      "git",
+      "diff",
+      "--cached",
+      "--check"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "syntax_check": {
+    "command": [
+      "/home/hochom/projects/dp-ai-payments-platform-gcp/.venv/bin/python",
+      "-B",
+      "-c",
+      "import ast,pathlib; files=['tests/security/test_secret_provider_contract.py', 'tests/security/test_postgres_production_contract.py', 'tests/security/test_runtime_security_contract.py']; [ast.parse(pathlib.Path(p).read_text()) for p in files]; print(\"Three test modules parse successfully\")"
+    ],
+    "exit_code": 0,
+    "stdout": "Three test modules parse successfully\n",
+    "stderr": ""
+  },
+  "targeted_pytest": {
+    "command": [
+      "/home/hochom/projects/dp-ai-payments-platform-gcp/.venv/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/security/test_secret_provider_contract.py",
+      "tests/security/test_postgres_production_contract.py",
+      "tests/security/test_runtime_security_contract.py"
+    ],
+    "exit_code": 1,
+    "stdout": ".........................................................F.............. [ 87%]\n..........                                                               [100%]\n=================================== FAILURES ===================================\n_________ test_runtime_and_migration_database_authorities_are_separate _________\n\n    def test_runtime_and_migration_database_authorities_are_separate():\n        root = Path(__file__).resolve().parents[2]\n    \n        compose = (root / \"docker-compose.yaml\").read_text()\n        queue = (\n            root / \"orchestration/transform_runtime/durable_queue.py\"\n        ).read_text()\n        ledger = (\n            root / \"orchestration/transform_runtime/ledger.py\"\n        ).read_text()\n        migrate = (\n            root / \"orchestration/transform_runtime/migrate.py\"\n        ).read_text()\n    \n        assert \"TRANSFORM_LEDGER_APP_DATABASE_URL\" in queue\n        assert \"TRANSFORM_LEDGER_MIGRATION_DATABASE_URL\" not in queue\n    \n        assert \"TRANSFORM_LEDGER_APP_DATABASE_URL\" in ledger\n        assert \"TRANSFORM_LEDGER_MIGRATION_DATABASE_URL\" not in ledger\n    \n        assert \"TRANSFORM_LEDGER_MIGRATION_DATABASE_URL\" in migrate\n        assert \"TRANSFORM_LEDGER_APP_DATABASE_URL\" not in migrate\n    \n>       runtime = compose.split(\n            \"  transform-runtime:\\n\", 1\n        )[1].split(\n            \"\\n  platform-job-runner:\", 1\n        )[0]\nE       IndexError: list index out of range\n\ntests/security/test_postgres_production_contract.py:61: IndexError\n=========================== short test summary info ============================\nFAILED tests/security/test_postgres_production_contract.py::test_runtime_and_migration_database_authorities_are_separate\n1 failed, 81 passed in 0.39s\n",
+    "stderr": ""
+  }
+}
