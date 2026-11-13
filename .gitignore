@@ -141,3 +141,35 @@ stage10-current-source-*.zip
 /runtime/
 dp-ai-payments-platform-gcp.code-workspace
 [internal]/
+
+# ── Build artefacts ─────────────────────────────────
+transform/dbt/target/
+transform/dbt/logs/
+**/logs/
+*.log
+
+# ── Terraform ───────────────────────────────────────
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan
+
+# ── IDE / personal ──────────────────────────────────
+.vscode/
+*.code-workspace
+
+# ── Root debris (defensive) ─────────────────────────
+/=
+/CACHED
+/exporting
+/reading
+/resolving
+/transferring
+/unpacking
+/naming
+/resolve
+
+# ── Binaries ────────────────────────────────────────
+*.jar
+*.joblib
