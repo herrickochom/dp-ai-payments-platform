@@ -86,7 +86,7 @@
     "orchestration": "orchestration/airflow/tests",
     "terraform": "tests/terraform"
   },
-  "repository": "herrickochom/dp-pdm-ai-platform",
+  "repository": "herrickochom/dp-ai-payments-platform",
   "source_quality_policy": {
     "change_boundary": "event_base_to_head",
     "checkout_fetch_depth": 0,

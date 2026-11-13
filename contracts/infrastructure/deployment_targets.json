@@ -1,0 +1,87 @@
+{
+  "contract_version": 1,
+  "name": "pdm_multi_target_deployment",
+
+  "architecture_policy": {
+    "provider_neutral_core_required": true,
+    "single_logical_platform_architecture": true,
+    "provider_specific_architecture_forks_allowed": false,
+    "direct_kafka_to_bronze_allowed": false,
+    "raw_first_ingestion_required": true,
+    "cdc_activation_by_deployment_default": false,
+    "token_link_rematerialisation_by_deployment_allowed": false
+  },
+
+  "targets": {
+    "local": {
+      "enabled": true,
+      "implementation_order": 1,
+      "classification": "REFERENCE_INTEGRATION_ENVIRONMENT",
+      "production_environment": false,
+      "terraform_target_required": true,
+      "cloud_credentials_required": false,
+      "remote_state_required": false,
+      "high_availability_claim_allowed": false,
+      "production_dr_claim_allowed": false,
+      "purpose": [
+        "architecture_conformance",
+        "integration_testing",
+        "terraform_deployment_validation",
+        "developer_validation",
+        "production_semantics_simulation"
+      ]
+    },
+
+    "aws": {
+      "enabled": true,
+      "implementation_order": 2,
+      "classification": "CLOUD_DEPLOYMENT_TARGET",
+      "production_capable": true,
+      "terraform_target_required": true,
+      "provider": "aws",
+      "remote_state_required_for_production": true,
+      "production_iam_required": true,
+      "production_kms_required": true,
+      "production_network_encryption_required": true,
+      "production_observability_required": true,
+      "production_backup_dr_required": true
+    },
+
+    "gcp": {
+      "enabled": true,
+      "implementation_order": 3,
+      "classification": "CLOUD_DEPLOYMENT_TARGET",
+      "production_capable": true,
+      "terraform_target_required": true,
+      "provider": "google",
+      "remote_state_required_for_production": true,
+      "production_iam_required": true,
+      "production_kms_required": true,
+      "production_network_encryption_required": true,
+      "production_observability_required": true,
+      "production_backup_dr_required": true
+    },
+
+    "azure": {
+      "enabled": true,
+      "implementation_order": 4,
+      "classification": "CLOUD_DEPLOYMENT_TARGET",
+      "production_capable": true,
+      "terraform_target_required": true,
+      "provider": "azurerm",
+      "remote_state_required_for_production": true,
+      "production_iam_required": true,
+      "production_kms_required": true,
+      "production_network_encryption_required": true,
+      "production_observability_required": true,
+      "production_backup_dr_required": true
+    }
+  },
+
+  "implementation_order": [
+    "local",
+    "aws",
+    "gcp",
+    "azure"
+  ]
+}

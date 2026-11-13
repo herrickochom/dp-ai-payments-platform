@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""KP-014B BigQuery Bronze -> local JSONL. Offline default; --live is explicit and billable."""
+"""Guarded BigQuery Bronze -> local JSONL. Offline default; --live is explicit and billable."""
 import argparse
 import datetime as dt
 import hashlib
@@ -9,7 +9,7 @@ from pathlib import Path
 import sys
 
 PROJECT = 'project-e48f194e-f44f-458d-b4f'
-TABLE = f'{PROJECT}.bronze.payments_raw_v2'
+TABLE = f'{PROJECT}.bronze.payments_raw_v1'
 FIELDS = ('event_id message_id event_timestamp source_system message_type event_family '
           'payload_amount payload_currency payload_debtor payload_creditor payload_status '
           'payload_x_attributes event_data parsed_event_data _kafka_topic _kafka_partition '

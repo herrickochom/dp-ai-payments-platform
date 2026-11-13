@@ -1,6 +1,0 @@
-ARG MINIO_MC_IMAGE=reg.mini.dev/minio-client@sha256:6ffae97b957902e23118625bb84b3d4a32f2d7ee6be2dba5ea4efae2a8452d37
-FROM ${MINIO_MC_IMAGE}
-
-COPY --chmod=0755 platform/minio/minio-init-mc-buckets.sh /app/init.sh
-
-ENTRYPOINT ["/app/init.sh"]

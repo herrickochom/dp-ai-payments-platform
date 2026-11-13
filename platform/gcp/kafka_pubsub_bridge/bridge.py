@@ -126,7 +126,7 @@ if __name__ == '__main__':
 
 
 def encode_wire_envelope(message):
-    """Raw v2 transport preserves original Confluent wire bytes and Kafka provenance."""
+    """Raw v1 transport preserves original Confluent wire bytes and Kafka provenance."""
     import base64
     import hashlib
     wire=message.value()

@@ -1,0 +1,282 @@
+{
+  "contract_version": 1,
+  "routes": {
+    "agent.locations": {
+      "category": "agent_network",
+      "format": "confluent_avro",
+      "processing_mode": "streaming",
+      "source_group": "agent",
+      "source_system": "agent",
+      "status": "legacy_payment_event"
+    },
+    "agent.profiles": {
+      "category": "agent_network",
+      "format": "confluent_avro",
+      "processing_mode": "batch",
+      "source_group": "agent",
+      "source_system": "agent",
+      "status": "legacy_payment_event"
+    },
+    "agent.transactions": {
+      "category": "agent_network",
+      "format": "confluent_avro",
+      "processing_mode": "streaming",
+      "source_group": "agent",
+      "source_system": "agent",
+      "status": "legacy_payment_event"
+    },
+    "cdc.pdm_mdm.mdm.sacco_master_sources": {
+      "category": "mdm",
+      "format": "json",
+      "processing_mode": "streaming",
+      "source_group": "cdc",
+      "source_system": "pdm_mdm",
+      "status": "contract_only"
+    },
+    "cpo.plm.pain002": {
+      "category": "cpo",
+      "format": "confluent_avro",
+      "processing_mode": "real-time",
+      "source_group": "cpo",
+      "source_system": "plm",
+      "status": "legacy_payment_event"
+    },
+    "cpo.psn.pain002": {
+      "category": "cpo",
+      "format": "confluent_avro",
+      "processing_mode": "real-time",
+      "source_group": "cpo",
+      "source_system": "psn",
+      "status": "legacy_payment_event"
+    },
+    "icmn.pmn.pain001": {
+      "category": "icmn",
+      "format": "confluent_avro",
+      "processing_mode": "real-time",
+      "source_group": "icmn",
+      "source_system": "pmn",
+      "status": "legacy_payment_event"
+    },
+    "icmn.vpm.pain001": {
+      "category": "icmn",
+      "format": "confluent_avro",
+      "processing_mode": "real-time",
+      "source_group": "icmn",
+      "source_system": "vpm",
+      "status": "legacy_payment_event"
+    },
+    "mdm.agent.golden": {
+      "format": "unverified",
+      "processing_mode": "streaming",
+      "status": "blocked_unverified_format"
+    },
+    "mdm.beneficiary.golden.restricted": {
+      "format": "unverified",
+      "processing_mode": "real-time",
+      "status": "blocked_restricted"
+    },
+    "mdm.beneficiary.identity-alert.restricted": {
+      "format": "unverified",
+      "processing_mode": "real-time",
+      "status": "blocked_restricted"
+    },
+    "mdm.crosswalk.restricted": {
+      "format": "unverified",
+      "processing_mode": "real-time",
+      "status": "blocked_restricted"
+    },
+    "mdm.geography.golden": {
+      "format": "unverified",
+      "processing_mode": "real-time",
+      "status": "blocked_unverified_format"
+    },
+    "mdm.sacco.golden": {
+      "format": "unverified",
+      "processing_mode": "streaming",
+      "status": "blocked_unverified_format"
+    },
+    "mobile.airtel.pacs002": {
+      "category": "mobile_networks",
+      "format": "confluent_avro",
+      "processing_mode": "real-time",
+      "source_group": "mobile",
+      "source_system": "airtel",
+      "status": "legacy_payment_event"
+    },
+    "mobile.airtel.pacs008": {
+      "category": "mobile_networks",
+      "format": "confluent_avro",
+      "processing_mode": "real-time",
+      "source_group": "mobile",
+      "source_system": "airtel",
+      "status": "legacy_payment_event"
+    },
+    "mobile.mtn.pacs002": {
+      "category": "mobile_networks",
+      "format": "confluent_avro",
+      "processing_mode": "real-time",
+      "source_group": "mobile",
+      "source_system": "mtn",
+      "status": "legacy_payment_event"
+    },
+    "mobile.mtn.pacs008": {
+      "category": "mobile_networks",
+      "format": "confluent_avro",
+      "processing_mode": "streaming",
+      "source_group": "mobile",
+      "source_system": "mtn",
+      "status": "legacy_payment_event"
+    },
+    "payment-events.dlq": {
+      "category": "operations",
+      "format": "json",
+      "processing_mode": "streaming",
+      "source_group": "payment_events",
+      "source_system": "payment_events",
+      "status": "contract_only"
+    },
+    "payment-events.retry": {
+      "category": "operations",
+      "format": "json",
+      "processing_mode": "streaming",
+      "source_group": "payment_events",
+      "source_system": "payment_events",
+      "status": "contract_only"
+    },
+    "payments.lifecycle.audit.v1": {
+      "format": "unverified",
+      "processing_mode": "real-time",
+      "status": "blocked_unverified_format"
+    },
+    "payments.lifecycle.dlq.v1": {
+      "format": "unverified",
+      "processing_mode": "real-time",
+      "status": "blocked_unverified_format"
+    },
+    "payments.lifecycle.exceptions.v1": {
+      "format": "unverified",
+      "processing_mode": "real-time",
+      "status": "blocked_unverified_format"
+    },
+    "payments.lifecycle.state.v1": {
+      "category": "lifecycle",
+      "format": "confluent_avro",
+      "processing_mode": "real-time",
+      "source_group": "payments",
+      "source_system": "flink",
+      "status": "contract_only"
+    },
+    "payments.lifecycle.transitions.v1": {
+      "category": "lifecycle",
+      "format": "confluent_avro",
+      "processing_mode": "real-time",
+      "source_group": "payments",
+      "source_system": "flink",
+      "status": "contract_only"
+    },
+    "pdmis.beneficiaries": {
+      "category": "pdmis",
+      "format": "confluent_avro",
+      "processing_mode": "batch",
+      "source_group": "pdmis",
+      "source_system": "pdmis",
+      "status": "legacy_payment_event"
+    },
+    "pdmis.business_plans": {
+      "category": "pdmis",
+      "format": "confluent_avro",
+      "processing_mode": "batch",
+      "source_group": "pdmis",
+      "source_system": "pdmis",
+      "status": "legacy_payment_event"
+    },
+    "pdmis.households": {
+      "category": "pdmis",
+      "format": "confluent_avro",
+      "processing_mode": "batch",
+      "source_group": "pdmis",
+      "source_system": "pdmis",
+      "status": "legacy_payment_event"
+    },
+    "pdmis.loans": {
+      "category": "pdmis",
+      "format": "confluent_avro",
+      "processing_mode": "batch",
+      "source_group": "pdmis",
+      "source_system": "pdmis",
+      "status": "legacy_payment_event"
+    },
+    "pdmis.repayments": {
+      "category": "pdmis",
+      "format": "confluent_avro",
+      "processing_mode": "streaming",
+      "source_group": "pdmis",
+      "source_system": "pdmis",
+      "status": "legacy_payment_event"
+    },
+    "pdmis.saccos": {
+      "category": "pdmis",
+      "format": "confluent_avro",
+      "processing_mode": "batch",
+      "source_group": "pdmis",
+      "source_system": "pdmis",
+      "status": "legacy_payment_event"
+    },
+    "pdmis.special_groups": {
+      "category": "pdmis",
+      "format": "confluent_avro",
+      "processing_mode": "batch",
+      "source_group": "pdmis",
+      "source_system": "pdmis",
+      "status": "legacy_payment_event"
+    },
+    "wendi.camt052": {
+      "category": "wendi",
+      "format": "confluent_avro",
+      "processing_mode": "streaming",
+      "source_group": "wendi",
+      "source_system": "wendi",
+      "status": "legacy_payment_event"
+    },
+    "wendi.camt053": {
+      "category": "wendi",
+      "format": "confluent_avro",
+      "processing_mode": "streaming",
+      "source_group": "wendi",
+      "source_system": "wendi",
+      "status": "legacy_payment_event"
+    },
+    "wendi.camt054": {
+      "category": "wendi",
+      "format": "confluent_avro",
+      "processing_mode": "streaming",
+      "source_group": "wendi",
+      "source_system": "wendi",
+      "status": "legacy_payment_event"
+    },
+    "wendi.pain001": {
+      "category": "wendi",
+      "format": "confluent_avro",
+      "processing_mode": "real-time",
+      "source_group": "wendi",
+      "source_system": "wendi",
+      "status": "legacy_payment_event"
+    },
+    "wendi.pain002": {
+      "category": "wendi",
+      "format": "confluent_avro",
+      "processing_mode": "real-time",
+      "source_group": "wendi",
+      "source_system": "wendi",
+      "status": "legacy_payment_event"
+    },
+    "wendi.transactions": {
+      "category": "wendi",
+      "format": "confluent_avro",
+      "processing_mode": "streaming",
+      "source_group": "wendi",
+      "source_system": "wendi",
+      "status": "legacy_payment_event"
+    }
+  }
+}

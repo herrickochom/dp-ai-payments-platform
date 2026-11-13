@@ -6,7 +6,7 @@ output "zones" {
 }
 output "assets" {
   value = concat(
-    [google_dataplex_asset.gcs_raw_v2.name],
+    [google_dataplex_asset.gcs_raw_v1.name],
     [for k, v in google_dataplex_asset.bq : v.name]
   )
 }

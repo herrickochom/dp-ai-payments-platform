@@ -31,7 +31,7 @@ def test_repository_and_default_branch():
 
     assert (
         doc["repository"]
-        == "herrickochom/dp-pdm-ai-platform"
+        == "herrickochom/dp-ai-payments-platform"
     )
 
     assert doc["default_branch"] == "main"

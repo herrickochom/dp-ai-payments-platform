@@ -8,7 +8,7 @@ import sqlite3
 from pathlib import Path
 
 EXPECTED_SHA = 'b78d55895754312a25392706b5bc2072be9f48ce74ba7905bd1807ddb8483654'
-DEFAULT_ROOT = Path('evidence/iceberg-catalogue-and-commit-validation')
+DEFAULT_ROOT = Path('runtime/iceberg-catalogue-validation')
 CONTRACT = {
     'catalogue_name': 'pdm-payments-iceberg-dev',
     'namespace': 'bronze',
@@ -73,7 +73,7 @@ def build(root=DEFAULT_ROOT, ledger=None):
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--ledger',type=Path,default=Path('evidence/iceberg-catalogue-and-commit-validation/kp014d-offline-ledger.sqlite3'))
+    p.add_argument('--ledger',type=Path,default=Path('runtime/iceberg-catalogue-validation/kp014d-offline-ledger.sqlite3'))
     p.add_argument('--output',type=Path,help='new JSON file only; default prints to stdout')
     a=p.parse_args()
     result=build(ledger=a.ledger)

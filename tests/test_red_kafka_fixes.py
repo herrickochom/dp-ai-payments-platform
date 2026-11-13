@@ -270,9 +270,9 @@ class Red2DuplicateSafeReplayTests(unittest.TestCase):
 
     def test_existing_deterministic_minio_replay_identity_unchanged(self):
         stamp = datetime(2026, 9, 10, tzinfo=timezone.utc)
-        with patch.dict(os.environ, {"RAW_ROOT": "raw", "RAW_VERSION": "v2", "RAW_PREFIX": "raw/v2"}):
+        with patch.dict(os.environ, {"RAW_ROOT": "raw", "RAW_VERSION": "v1", "RAW_PREFIX": "raw/v1"}):
             self.assertEqual(
-                "raw/v2/category=pdmis/source_group=pdmis/source_system=pdmis/year=2026/month=09/"
+                "raw/v1/category=pdmis/source_group=pdmis/source_system=pdmis/year=2026/month=09/"
                 "day=10/topic=pdmis.loans/partition=2/offset=81/record.avro",
                 consumer.deterministic_s3_key("pdmis.loans", 2, 81, stamp))
 

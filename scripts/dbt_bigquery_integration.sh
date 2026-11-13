@@ -53,7 +53,7 @@ echo "  KP-011 status:"
 JOB_STATE=$(gcloud dataflow jobs list --region="$REGION" --project="$PROJECT" --limit=1 --format='value(state)' 2>/dev/null)
 echo "    Dataflow job: ${JOB_STATE:-none}"
 BRONZE_ROWS=$(bq --project_id="$PROJECT" query --use_legacy_sql=false --format=csv \
-    "SELECT COUNT(*) FROM \`$PROJECT.bronze.payments_raw_v2\`" 2>/dev/null | tail -1 || echo "0")
+    "SELECT COUNT(*) FROM \`$PROJECT.bronze.payments_raw_v1\`" 2>/dev/null | tail -1 || echo "0")
 BRONZE_ROWS=$(echo "$BRONZE_ROWS" | tr -d '[:space:]')
 echo "    Bronze rows: ${BRONZE_ROWS:-0}"
 
@@ -73,7 +73,7 @@ fi
 # Get Bronze schema (proper error handling)
 echo
 echo "  Bronze schema:"
-bq --project_id="$PROJECT" show --schema --format=prettyjson "$PROJECT:bronze.payments_raw_v2" 2>/tmp/bq_err.txt > /tmp/bq_schema.json || {
+bq --project_id="$PROJECT" show --schema --format=prettyjson "$PROJECT:bronze.payments_raw_v1" 2>/tmp/bq_err.txt > /tmp/bq_schema.json || {
     echo "    ✗ could not read schema"
     echo "    stderr: $(head -2 /tmp/bq_err.txt)"
     exit 3
@@ -172,7 +172,7 @@ sources:
     schema: bronze
     description: KP-011 Bronze layer
     tables:
-      - name: payments_raw_v2
+      - name: payments_raw_v1
         description: 20403 records across 24 Kafka topics
         columns:
           - name: event_id
@@ -210,7 +210,7 @@ select
     safe_cast({{ json_str('parsed_event_data', '\$.approval_date') }} as date) as approval_date,
     safe_cast({{ json_str('parsed_event_data', '\$.disbursement_date') }} as date) as disbursement_date,
     _kafka_topic, _kafka_partition, _kafka_offset, _kafka_timestamp, _raw_object_path
-from {{ source('bronze', 'payments_raw_v2') }}
+from {{ source('bronze', 'payments_raw_v1') }}
 where _kafka_topic = 'pdmis.loans'
 "
 
@@ -230,7 +230,7 @@ select
     {{ json_str('parsed_event_data', '\$.special_group') }} as special_group,
     safe_cast({{ json_str('parsed_event_data', '\$.nin_verified') }} as bool) as nin_verified,
     _kafka_topic, _kafka_partition, _kafka_offset, _kafka_timestamp, _raw_object_path
-from {{ source('bronze', 'payments_raw_v2') }}
+from {{ source('bronze', 'payments_raw_v1') }}
 where _kafka_topic = 'pdmis.beneficiaries'
 "
 
@@ -251,7 +251,7 @@ select
     {{ json_str('parsed_event_data', '\$.destination_account') }} as destination_account,
     safe_cast({{ json_str('parsed_event_data', '\$.event_timestamp') }} as timestamp) as wendi_event_timestamp,
     _kafka_topic, _kafka_partition, _kafka_offset, _kafka_timestamp, _raw_object_path
-from {{ source('bronze', 'payments_raw_v2') }}
+from {{ source('bronze', 'payments_raw_v1') }}
 where _kafka_topic = 'wendi.transactions'
 "
 
@@ -271,7 +271,7 @@ with base as (
              else cast(round(payload_amount * 100) as int64) end as amount_minor,
         payload_currency as currency,
         event_timestamp
-    from {{ source('bronze', 'payments_raw_v2') }}
+    from {{ source('bronze', 'payments_raw_v1') }}
     where event_id is not null
 ),
 variants as (
@@ -305,7 +305,7 @@ select
     b.event_timestamp,
     b.source_system,
     b._kafka_topic, b._kafka_partition, b._kafka_offset, b._kafka_timestamp, b._raw_object_path
-from {{ source('bronze', 'payments_raw_v2') }} b
+from {{ source('bronze', 'payments_raw_v1') }} b
 inner join v using (event_id)
 "
 
@@ -319,7 +319,7 @@ variants as (
            coalesce(b.message_type, b.event_family, 'UNKNOWN') as event_type,
            case when b.payload_amount is null then null else cast(round(b.payload_amount * 100) as int64) end as amount_minor,
            b.payload_currency as currency, b.event_timestamp, count(*) as variant_observation_count
-    from {{ source('bronze', 'payments_raw_v2') }} b inner join c using (event_id)
+    from {{ source('bronze', 'payments_raw_v1') }} b inner join c using (event_id)
     group by 1,2,3,4,5,6
 )
 select v.*, c.observation_count, c.distinct_payload_count
@@ -469,8 +469,8 @@ dbt test --select source:* --profiles-dir ~/.dbt 2>&1 | tail -5 || echo "  (expe
 cd ~/projects/dp-ai-payments-platform-gcp
 
 # ── Evidence ──
-mkdir -p evidence/dbt-transformation-validation
-cat > evidence/dbt-transformation-validation/setup_report.json <<JSON
+mkdir -p runtime/dbt-validation
+cat > runtime/dbt-validation/setup_report.json <<JSON
 {
   "ran_utc": "$(date -Iseconds)",
   "mode": "$([ $LIVE -eq 0 ] && echo OFFLINE || echo LIVE)",
@@ -503,7 +503,7 @@ else
     echo "  BLOCKED          ⚠  Bronze empty (${BRONZE_ROWS:-0} rows) — fix KP-011 first"
 fi
 echo
-echo "  Evidence: evidence/dbt-transformation-validation/setup_report.json"
+echo "  Evidence: runtime/dbt-validation/setup_report.json"
 echo "  Origin transform/dbt/ modified: $(git status --porcelain transform/dbt/ 2>/dev/null | wc -l | tr -d ' ') files (must be 0)"
 echo
 echo "  Next:"
@@ -512,7 +512,7 @@ if [ "${BRONZE_READY:-0}" = "1" ]; then
 else
     echo "    1. Fix KP-011 IAM (compute SA → bigquery.dataEditor on bronze dataset)"
     echo "    2. Re-run Dataflow: bash /tmp/kp011_live.sh"
-    echo "    3. Verify: bq query 'SELECT COUNT(*) FROM bronze.payments_raw_v2'"
+    echo "    3. Verify: bq query 'SELECT COUNT(*) FROM bronze.payments_raw_v1'"
     echo "    4. Then re-run this script with --live --approve-live"
 fi
 echo "════════════════════════════════════════════════════════════════════════"

@@ -136,3 +136,6 @@ stage10-current-source-*.zip
 **/.terraform/
 *.tfvars
 *.tfvars.json
+
+# Local generated runtime data; never commit
+/runtime/

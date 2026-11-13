@@ -82,7 +82,7 @@ evidence:
     - "**/.env.*"
     - "*.pre-*"
   # Where collected machine evidence is written.
-  output_dir: "programme/evidence"
+  output_dir: "runtime/programme"
   reports_dir: "programme/reports"
   # Evidence producers never execute platform workloads.
   allow_platform_workload_execution: false

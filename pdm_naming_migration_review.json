@@ -1,0 +1,156 @@
+{
+  "mode": "READ_ONLY",
+  "policy": "PROPOSAL ONLY: no automatic rename; verify dependencies, Terraform state, retention and message backlog",
+  "proposed_names": {
+    "pdm-native-events-poc-v1": "pdm-dev-payments-source-events-v1",
+    "pdm-native-events-poc-sub-v1": "pdm-dev-payments-raw-ingestion-sub",
+    "pdm-dev-payment-events": "pdm-dev-payments-processing-events-v1",
+    "pdm-dev-payment-events-dataflow-sub": "pdm-dev-payments-dataflow-ingestion-sub",
+    "pdm-payments-poc-v1": null
+  },
+  "git_branch": "feature/gcp-data-platform",
+  "git_status": [
+    " D data/geospatial/uganda_superset.geojson",
+    " D docker-compose.plugin-dev.yaml",
+    " D docker-compose.production-tls.yaml",
+    " D docker-compose.transform-execution.yaml",
+    " M docker-compose.yaml",
+    " M infra/terraform/targets/local/contracts/compose_inventory.json",
+    "?? dp-ai-payments-platform-gcp.code-workspace",
+    "?? evidence/"
+  ],
+  "tracked_reference_inventory": [
+    {
+      "file": "infrastructure/terraform/gcp/environments/dev/pubsub_foundation.tf",
+      "references": [
+        {
+          "line": 3,
+          "existing": "pdm-dev-payment-events",
+          "proposed": "pdm-dev-payments-processing-events-v1",
+          "text": "name    = \"pdm-dev-payment-events\""
+        },
+        {
+          "line": 15,
+          "existing": "pdm-dev-payment-events",
+          "proposed": "pdm-dev-payments-processing-events-v1",
+          "text": "name    = \"pdm-dev-payment-events-dataflow-sub\""
+        },
+        {
+          "line": 15,
+          "existing": "pdm-dev-payment-events-dataflow-sub",
+          "proposed": "pdm-dev-payments-dataflow-ingestion-sub",
+          "text": "name    = \"pdm-dev-payment-events-dataflow-sub\""
+        }
+      ]
+    },
+    {
+      "file": "infrastructure/terraform/gcp/environments/dev/storage_resource_adoption.tf",
+      "references": [
+        {
+          "line": 4,
+          "existing": "pdm-native-events-poc-v1",
+          "proposed": "pdm-dev-payments-source-events-v1",
+          "text": "name                       = \"pdm-native-events-poc-v1\""
+        },
+        {
+          "line": 16,
+          "existing": "pdm-native-events-poc-sub-v1",
+          "proposed": "pdm-dev-payments-raw-ingestion-sub",
+          "text": "name                       = \"pdm-native-events-poc-sub-v1\""
+        }
+      ]
+    },
+    {
+      "file": "infrastructure/terraform/gcp/experiments/pubsub_payments/main.tf",
+      "references": [
+        {
+          "line": 10,
+          "existing": "pdm-payments-poc-v1",
+          "proposed": null,
+          "text": "topic_name        = \"pdm-payments-poc-v1\""
+        }
+      ]
+    },
+    {
+      "file": "platform/gcp/dataflow_ingestion/native_24_topic_bridge.py",
+      "references": [
+        {
+          "line": 14,
+          "existing": "pdm-native-events-poc-v1",
+          "proposed": "pdm-dev-payments-source-events-v1",
+          "text": "EXPECTED_TOPIC = 'pdm-native-events-poc-v1'"
+        }
+      ]
+    },
+    {
+      "file": "platform/gcp/kafka_pubsub_bridge/bridge.py",
+      "references": [
+        {
+          "line": 73,
+          "existing": "pdm-payments-poc-v1",
+          "proposed": null,
+          "text": "if args.topic != 'pdm-payments-poc-v1':"
+        },
+        {
+          "line": 113,
+          "existing": "pdm-payments-poc-v1",
+          "proposed": null,
+          "text": "p.add_argument('--topic', default='pdm-payments-poc-v1')"
+        }
+      ]
+    },
+    {
+      "file": "platform/gcp/kafka_pubsub_bridge/native_envelope_runtime.py",
+      "references": [
+        {
+          "line": 105,
+          "existing": "pdm-payments-poc-v1",
+          "proposed": null,
+          "text": "if args.topic_id == 'pdm-payments-poc-v1':"
+        },
+        {
+          "line": 157,
+          "existing": "pdm-native-events-poc-v1",
+          "proposed": "pdm-dev-payments-source-events-v1",
+          "text": "parser.add_argument('--topic-id', default='pdm-native-events-poc-v1')"
+        }
+      ]
+    },
+    {
+      "file": "platform/gcp/kafka_pubsub_bridge/raw_v1_bridge_live.py",
+      "references": [
+        {
+          "line": 49,
+          "existing": "pdm-native-events-poc-v1",
+          "proposed": "pdm-dev-payments-source-events-v1",
+          "text": "p.add_argument('--topic',default='pdm-native-events-poc-v1')"
+        },
+        {
+          "line": 56,
+          "existing": "pdm-native-events-poc-v1",
+          "proposed": "pdm-dev-payments-source-events-v1",
+          "text": "if args.topic!='pdm-native-events-poc-v1': raise SystemExit('STOP: unapproved Pub/Sub topic')"
+        }
+      ]
+    },
+    {
+      "file": "scripts/execute_guarded_pipeline.py",
+      "references": [
+        {
+          "line": 26,
+          "existing": "pdm-native-events-poc-v1",
+          "proposed": "pdm-dev-payments-source-events-v1",
+          "text": "PUBSUB_TOPIC = \"pdm-native-events-poc-v1\""
+        }
+      ]
+    }
+  ],
+  "required_migration_gates": [
+    "Confirm authoritative event schema and exact publisher/subscriber owners",
+    "Confirm Dataflow topic/subscription use and Bronze output",
+    "Confirm Terraform ownership/state and uncommitted modifications",
+    "Check unacknowledged messages, topic retention and consumer offsets",
+    "Approve creation of replacement resources and controlled cutover",
+    "Validate end-to-end reconciliation before retirement of old resources"
+  ]
+}

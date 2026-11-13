@@ -190,7 +190,7 @@ def test_tombstone_is_processed_without_payment_deserialiser(
         **kwargs,
     ):
         captured["record"] = record
-        return "raw/v2/cdc/tombstone.avro"
+        return "raw/v1/cdc/tombstone.avro"
 
     monkeypatch.setattr(
         module,
@@ -210,7 +210,7 @@ def test_tombstone_is_processed_without_payment_deserialiser(
     )
 
     assert result == (
-        "raw/v2/cdc/tombstone.avro"
+        "raw/v1/cdc/tombstone.avro"
     )
 
     record = captured["record"]
@@ -252,7 +252,7 @@ def test_change_event_separates_database_and_kafka_positions(
         **kwargs,
     ):
         captured["record"] = record
-        return "raw/v2/cdc/change.avro"
+        return "raw/v1/cdc/change.avro"
 
     monkeypatch.setattr(
         module,

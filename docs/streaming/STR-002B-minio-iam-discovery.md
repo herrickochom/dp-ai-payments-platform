@@ -39,7 +39,7 @@ from services.shared.security.secret_provider import resolve_secret  # noqa: E40
 POLICY_DIR = Path(__file__).resolve().parent / "policies"
 ALIAS = "c10_object_store_provision"
 BUCKET = "arn:aws:s3:::dp-ai-payment"
-RAW = f"{BUCKET}/raw/v2/*"
+RAW = f"{BUCKET}/raw/v1/*"
 QUARANTINE = f"{BUCKET}/restricted/cdc-quarantine/v1/*"
 WAREHOUSE = f"{BUCKET}/warehouse/*"
 READ = frozenset({"s3:GetObject"})
@@ -58,14 +58,14 @@ IDENTITIES = (
     ("ml_prediction_transform", "ml-transform", "ML_TRANSFORM_S3_ACCESS_KEY_ID", "ML_TRANSFORM_S3_SECRET_ACCESS_KEY"),
 )
 POLICY_SCOPE = {
-    "raw-ingest": ({"raw/v2", "raw/v2/*"}, {RAW: WRITE}),
+    "raw-ingest": ({"raw/v1", "raw/v1/*"}, {RAW: WRITE}),
     "cdc-quarantine": ({"restricted/cdc-quarantine/v1", "restricted/cdc-quarantine/v1/*"}, {QUARANTINE: WRITE}),
-    "platform-raw-read": ({"raw/v2", "raw/v2/*"}, {RAW: READ}),
+    "platform-raw-read": ({"raw/v1", "raw/v1/*"}, {RAW: READ}),
     "nessie-catalog": ({"warehouse", "warehouse/*"}, {WAREHOUSE: ICEBERG}),
     "trino-iceberg-read": ({"warehouse", "warehouse/*"}, {WAREHOUSE: READ}),
-    "ordinary-transform": ({"raw/v2", "raw/v2/*", "warehouse", "warehouse/*"}, {RAW: READ, WAREHOUSE: ICEBERG}),
-    "restricted-transform": ({"raw/v2", "raw/v2/*", "warehouse", "warehouse/*"}, {RAW: READ, WAREHOUSE: ICEBERG}),
-    "ml-transform": ({"raw/v2", "raw/v2/*", "warehouse", "warehouse/*"}, {RAW: READ, WAREHOUSE: ICEBERG}),
+    "ordinary-transform": ({"raw/v1", "raw/v1/*", "warehouse", "warehouse/*"}, {RAW: READ, WAREHOUSE: ICEBERG}),
+    "restricted-transform": ({"raw/v1", "raw/v1/*", "warehouse", "warehouse/*"}, {RAW: READ, WAREHOUSE: ICEBERG}),
+    "ml-transform": ({"raw/v1", "raw/v1/*", "warehouse", "warehouse/*"}, {RAW: READ, WAREHOUSE: ICEBERG}),
 }
 
 
@@ -372,9 +372,9 @@ CMD ["--apply"]
 
 | Identity label | Custom policy | Access/secret variables | Scope and actions |
 |---|---|---|---|
-| `raw_ingest` | `raw-ingest` | `RAW_INGEST_S3_ACCESS_KEY_ID` / `RAW_INGEST_S3_SECRET_ACCESS_KEY` | `raw/v2/*`: Get, Put |
+| `raw_ingest` | `raw-ingest` | `RAW_INGEST_S3_ACCESS_KEY_ID` / `RAW_INGEST_S3_SECRET_ACCESS_KEY` | `raw/v1/*`: Get, Put |
 | `cdc_quarantine` | `cdc-quarantine` | `CDC_QUARANTINE_S3_ACCESS_KEY_ID` / `CDC_QUARANTINE_S3_SECRET_ACCESS_KEY` | `restricted/cdc-quarantine/v1/*`: Get, Put |
-| `platform_raw_read` | `platform-raw-read` | `PLATFORM_RAW_READ_ACCESS_KEY` / `PLATFORM_RAW_READ_SECRET_KEY` | `raw/v2/*`: Get |
+| `platform_raw_read` | `platform-raw-read` | `PLATFORM_RAW_READ_ACCESS_KEY` / `PLATFORM_RAW_READ_SECRET_KEY` | `raw/v1/*`: Get |
 | `nessie_catalog` | `nessie-catalog` | `NESSIE_S3_ACCESS_KEY` / `NESSIE_S3_SECRET_KEY` | `warehouse/*`: Get, Put, Delete; bucket listing is unconditioned for health checks |
 | `trino_iceberg` | `trino-iceberg-read` | `TRINO_S3_ACCESS_KEY_ID` / `TRINO_S3_SECRET_ACCESS_KEY` | `warehouse/*`: Get |
 | `ordinary_transform` | `ordinary-transform` | `ORDINARY_TRANSFORM_S3_ACCESS_KEY_ID` / `ORDINARY_TRANSFORM_S3_SECRET_ACCESS_KEY` | raw: Get; warehouse: Get, Put, Delete |
@@ -384,7 +384,7 @@ CMD ["--apply"]
 Mappings and approved scopes: `platform/minio/provision_object_store_identities.py:23-51`. Policy documents: `platform/minio/policies/raw-ingest.json:1-34`, `cdc-quarantine.json:1-25`, `platform-raw-read.json:1-33`, `nessie-catalog.json:1-27`, `trino-iceberg-read.json:1-32`, `ordinary-transform.json:1-47`, `restricted-transform.json:1-47`, and `ml-transform.json:1-47`.
 
 - All eight are custom policies; no canned `readwrite`, `readonly`, `writeonly`, or `diagnostics` policy is attached (`platform/minio/provision_object_store_identities.py:31-51,150-159`).
-- Apart from Nessie's documented health-check exception, listing is bucket-level with an `s3:prefix` condition and object authority is prefix-scoped with ARNs such as `arn:aws:s3:::dp-ai-payment/raw/v2/*` (`platform/minio/provision_object_store_identities.py:89-114`; `platform/minio/policies/raw-ingest.json:5-31`).
+- Apart from Nessie's documented health-check exception, listing is bucket-level with an `s3:prefix` condition and object authority is prefix-scoped with ARNs such as `arn:aws:s3:::dp-ai-payment/raw/v1/*` (`platform/minio/provision_object_store_identities.py:89-114`; `platform/minio/policies/raw-ingest.json:5-31`).
 
 **Confidence: High.** The validated mapping and every companion JSON policy were inspected.
 
@@ -410,7 +410,7 @@ Mappings and approved scopes: `platform/minio/provision_object_store_identities.
 
 ## T7 — Repository state for `flink/`
 
-- No repository declaration sets a MinIO lifecycle, versioning, or quota rule for `flink/`. The existing policy inventory covers only `raw/v2`, CDC quarantine, and `warehouse` (`platform/minio/provision_object_store_identities.py:23-51`).
+- No repository declaration sets a MinIO lifecycle, versioning, or quota rule for `flink/`. The existing policy inventory covers only `raw/v1`, CDC quarantine, and `warehouse` (`platform/minio/provision_object_store_identities.py:23-51`).
 - Outside the two Compose service blocks, the same checkpoint/savepoint prefixes occur in the source configuration at `platform/flink/conf/flink-conf.yaml:72-73`; Compose references them at `docker-compose.yaml:1627-1628,1675-1676`.
 - No attempt was made to list or create the runtime prefix.
 

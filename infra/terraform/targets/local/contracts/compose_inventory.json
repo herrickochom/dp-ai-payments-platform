@@ -33,6 +33,7 @@
     "metabase",
     "ml",
     "pgadmin",
+    "streaming",
     "superset",
     "trino"
   ],

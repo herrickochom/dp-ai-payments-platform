@@ -1,16 +1,16 @@
-"""GCP-KP-011: Raw v2 -> BigQuery Bronze Dataflow pipeline.
+"""GCP-KP-011: Raw v1 -> BigQuery Bronze Dataflow pipeline.
 
-Reads Avro OCF objects from gs://<bucket>/raw/v2/**/record.avro,
+Reads Avro OCF objects from gs://<bucket>/raw/v1/**/record.avro,
 validates schema and lineage, deduplicates by (topic, partition, offset),
-writes to a staging table (WRITE_APPEND) then MERGEs into Bronze.
+has a staging sink placeholder; live staging/MERGE is not yet enabled.
 
 Quarantine: invalid records go to a quarantine table.
 
-Idempotency: staging is always truncated per run; MERGE on Kafka identity
-means a re-run is a no-op for records already in Bronze.
+Idempotency: in-run Kafka identity deduplication only. Durable staging/MERGE
+and reconciliation must be implemented and approved before live operation.
 
-Offline mode (runner=DirectRunner, --output_jsonl): writes to local JSONL,
-no BigQuery writes.
+Offline mode (default; DirectRunner, --output_jsonl) accepts local files only.
+Live mode fails closed until separately approved and implemented.
 """
 import argparse, json, sys
 from datetime import datetime, timezone
@@ -68,6 +68,9 @@ class Validate(beam.DoFn):
             if not record.get(f):
                 errors.append(f"missing_{f}")
         km = record.get("_kafka_metadata") or {}
+        if not isinstance(km, dict):
+            errors.append("invalid_kafka_metadata_type")
+            km = {}
         for f in self.BQ_REQUIRED_IN_KAFKA:
             if km.get(f) in (None, ""):
                 errors.append(f"missing_kafka_{f}")
@@ -85,7 +88,26 @@ class Validate(beam.DoFn):
             })
             return
 
-        payload = record.get("payload") or {}
+        try:
+            partition = int(km["partition"])
+            offset = int(km["offset"])
+            if isinstance(km["partition"], bool) or isinstance(km["offset"], bool) or partition < 0 or offset < 0:
+                raise ValueError("negative or boolean Kafka identity")
+            if not isinstance(km["topic"], str) or not km["topic"].strip():
+                raise ValueError("invalid Kafka topic")
+            payload = record.get("payload") or {}
+            if not isinstance(payload, dict):
+                raise ValueError("invalid payload type")
+        except (TypeError, ValueError, KeyError) as exc:
+            yield beam.pvalue.TaggedOutput("quarantine", {
+                "event_id": str(record.get("event_id")) if record.get("event_id") is not None else None,
+                "source_path": str(record.get("_raw_object_path") or "?"),
+                "reason": f"invalid_record: {exc}",
+                "record_json": json.dumps(record, default=str)[:9000],
+                "_quarantined_at": datetime.now(timezone.utc).isoformat(),
+                "_pipeline_version": "kp011-v1",
+            })
+            return
         yield {
             "event_id": record["event_id"],
             "message_id": record.get("message_id"),
@@ -102,8 +124,8 @@ class Validate(beam.DoFn):
             "event_data": record.get("event_data"),
             "parsed_event_data": record.get("parsed_event_data"),
             "_kafka_topic": km["topic"],
-            "_kafka_partition": int(km["partition"]),
-            "_kafka_offset": int(km["offset"]),
+            "_kafka_partition": partition,
+            "_kafka_offset": offset,
             "_kafka_timestamp": km["timestamp"],
             "_kafka_category": km.get("category"),
             "_kafka_source_group": km.get("source_group"),
@@ -120,7 +142,7 @@ def run(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--project", required=True)
     ap.add_argument("--raw_pattern", required=True,
-                    help="glob, e.g. gs://bucket/raw/v2/**/record.avro")
+                    help="glob, e.g. gs://bucket/raw/v1/**/record.avro")
     ap.add_argument("--bronze_table", default=None,
                     help="project:dataset.table (live only)")
     ap.add_argument("--quarantine_table", default=None,
@@ -128,10 +150,26 @@ def run(argv=None):
     ap.add_argument("--output_jsonl", default=None,
                     help="offline DirectRunner output path")
     ap.add_argument("--runner", default="DirectRunner")
+    ap.add_argument("--execution_mode", choices=("offline", "live"), default="offline")
+    ap.add_argument("--allow_gcp_operations", action="store_true")
+    ap.add_argument("--staging_table", default=None, help="isolated BigQuery staging table, live only")
     ap.add_argument("--region", default="europe-west2")
     ap.add_argument("--temp_location", default=None)
     ap.add_argument("--staging_location", default=None)
     known, pipeline_args = ap.parse_known_args(argv)
+    if known.execution_mode == "offline":
+        if known.allow_gcp_operations or known.runner != "DirectRunner" or not known.output_jsonl:
+            ap.error("offline requires DirectRunner and --output_jsonl; GCP operations forbidden")
+        if known.raw_pattern.startswith("gs://") or known.output_jsonl.startswith("gs://"):
+            ap.error("offline mode requires local input and output paths")
+        if known.bronze_table or known.staging_table or known.quarantine_table:
+            ap.error("offline mode forbids BigQuery table arguments")
+        if any(x.startswith(("--project=", "--temp_location=gs://", "--staging_location=gs://")) for x in pipeline_args):
+            ap.error("unexpected cloud pipeline option")
+    else:
+        # Live mode is intentionally disabled pending separate cloud approval,
+        # audited staging lifecycle, merge orchestration, and reconciliation.
+        ap.error("live mode BLOCKED: Stage 14E authorises offline tests only")
 
     options = PipelineOptions(
         pipeline_args,
@@ -174,7 +212,7 @@ def run(argv=None):
             | "TakeFirst" >> beam.Map(lambda kv: sorted(kv[1], key=lambda r: r["_raw_object_path"])[0])
         )
 
-        if known.output_jsonl:
+        if known.execution_mode == "offline":
             (deduped
              | "ToJson" >> beam.Map(lambda r: json.dumps(r, default=str))
              | "WriteJsonl" >> beam.io.WriteToText(
@@ -185,7 +223,7 @@ def run(argv=None):
                  known.output_jsonl + "_quarantine", num_shards=1, file_name_suffix=".jsonl"))
         else:
             (deduped | "WriteBronzeStaging" >> WriteToBigQuery(
-                table=known.bronze_table,
+                table=known.staging_table,
                 schema=bronze_schema,
                 create_disposition=BigQueryDisposition.CREATE_IF_NEEDED,
                 write_disposition=BigQueryDisposition.WRITE_APPEND,

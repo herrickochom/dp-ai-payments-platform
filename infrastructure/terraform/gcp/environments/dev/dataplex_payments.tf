@@ -1,4 +1,4 @@
-# KP-013 — Dataplex lake/zones/assets, no discovery, no scans.
+# Dataplex lake, zones and assets; discovery and scans disabled.
 # Written by dataplex_configuration_correction.sh; safe to remove.
 module "dataplex_payments" {
   source = "../../modules/dataplex_payments"

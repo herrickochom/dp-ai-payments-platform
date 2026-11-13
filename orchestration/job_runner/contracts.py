@@ -21,12 +21,6 @@ class JobContract:
 
 
 JOBS = {
-    "platform_preflight": JobContract(
-        name="platform_preflight",
-        risk=JobRisk.READ_ONLY,
-        scheduled=True,
-        description="Verify required platform services are available.",
-    ),
     "raw_readiness": JobContract(
         name="raw_readiness",
         risk=JobRisk.READ_ONLY,

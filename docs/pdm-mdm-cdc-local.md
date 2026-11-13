@@ -15,6 +15,6 @@ The repository has no approved Debezium/Kafka Connect version pin or compatibili
 1. Materialize synthetic MDM data into `pdm-source-postgres`; use pgAdmin to verify a SACCO source row.
 2. Verify the PostgreSQL logical slot and its LSN, then activate the approved Debezium connector through the governed source and allowlist process.
 3. Use Kafka UI to inspect `cdc.pdm_mdm.mdm.sacco_master_sources`: topic, partition, Kafka offset, operation, and source metadata. PostgreSQL **LSN and Kafka offset are different coordinates**.
-4. Verify that the existing CDC consumer and Debezium normalizer write canonical CDC Avro beneath `raw/v2/cdc/` before committing Kafka offsets, followed by the governed downstream path.
+4. Verify that the existing CDC consumer and Debezium normalizer write canonical CDC Avro beneath `raw/v1/cdc/` before committing Kafka offsets, followed by the governed downstream path.
 
 Use SACCO, not restricted beneficiary identity, for the first acceptance run. Kafka UI login is not per-topic authorization.

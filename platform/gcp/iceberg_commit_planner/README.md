@@ -1,4 +1,4 @@
-# KP-014D offline transaction admission simulator
+# Offline Iceberg transaction admission simulator
 
 This is **not an Apache Iceberg writer**, BigLake integration, snapshot creation, or a production distributed lock. It verifies the previously reconciled full export and Parquet, then optionally records source and Kafka/event identity reservations in a **local SQLite database**. A repeated source digest is idempotent in this one ledger; conflicting identities are rejected transactionally. PREPARED is not a cloud commit; never promote to committed without an actual catalogue commit protocol.
 

@@ -39,8 +39,8 @@ DEFAULT_TEST_ROOTS = (
 
 # Committed JUnit XML locations, if the repository records any.
 JUNIT_GLOBS = (
-    "programme/evidence/test-results/*.xml",
-    "evidence/test-results/*.xml",
+    "runtime/programme/test-results/*.xml",
+    "runtime/test-results/*.xml",
     "junit/*.xml",
 )
 
@@ -205,9 +205,9 @@ def collect_tests(root: Path) -> CollectorResult:
             evidence_id="EV-TESTRUN-LAST",
             kind=KIND_TEST,
             title="Last committed test run result",
-            location="programme/evidence/test-results",
+            location="runtime/programme/test-results",
             status=PRESENT if junit_items else "MISSING",
-            source_path="programme/evidence/test-results",
+            source_path="runtime/programme/test-results",
             observed_at=observed,
             detail={
                 "test_result": result.facts["test_result"],

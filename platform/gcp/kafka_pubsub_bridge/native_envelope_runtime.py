@@ -154,7 +154,7 @@ def main():
     parser.add_argument('--bootstrap', default=os.getenv('KAFKA_BOOTSTRAP_SERVERS', ''))
     parser.add_argument('--schema-registry-url', default=os.getenv('SCHEMA_REGISTRY_URL', ''))
     parser.add_argument('--project', default='project-e48f194e-f44f-458d-b4f')
-    parser.add_argument('--topic-id', default='pdm-native-events-poc-v1')
+    parser.add_argument('--topic-id', default='pdm-dev-payments-source-events-v1')
     parser.add_argument('--source-topic', required=True)
     parser.add_argument('--subject', required=True)
     parser.add_argument('--schema-id', type=int, required=True)

@@ -148,24 +148,6 @@ class PostgresDurableQueue:
                 AND status='SUCCEEDED' AND publication_state='PUBLISHED'""",
                 (run_id,operation_id,version)).fetchone())
 
-    def record_nessie_branch(self,eid,worker,token,branch):
-        with self.tx() as db:
-            row=db.execute("SELECT * FROM batch_executions WHERE batch_execution_id=%s FOR UPDATE",(eid,)).fetchone()
-            if not row or row["lease_owner"]!=worker or row["lease_token"]!=token or row["status"] not in ACTIVE:
-                raise LeaseLost("worker lease lost")
-            persisted=row.get("nessie_branch")
-            if persisted is not None and persisted!=branch:
-                raise DurableQueueError("Nessie branch conflicts with persisted branch")
-            out=db.execute("""UPDATE batch_executions SET nessie_branch=%s
-                              WHERE batch_execution_id=%s AND lease_owner=%s AND lease_token=%s
-                                AND status IN ('RUNNING','TESTING')
-                                AND lease_expires_at>=clock_timestamp()
-                                AND (nessie_branch IS NULL OR nessie_branch=%s)
-                              RETURNING nessie_branch""",
-                           (branch,eid,worker,token,branch)).fetchone()
-            if not out or out["nessie_branch"]!=branch:
-                raise LeaseLost("worker lease lost")
-            return branch
 
     def heartbeat(self,eid,worker,token,lease_seconds):
         with self.tx() as db:

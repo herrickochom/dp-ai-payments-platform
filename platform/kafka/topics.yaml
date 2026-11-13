@@ -10,12 +10,14 @@ topics:
   # 1. ICMN Topics (Interbank Customer Messaging Network)
   # ==========================================================================
   - name: icmn.vpm.pain001
+    processing_mode: real-time
     partitions: 6
     replication: 1
     retention_ms: 604800000   # 7 days
     description: "VPM Business Payment Initiation"
 
   - name: icmn.pmn.pain001
+    processing_mode: real-time
     partitions: 6
     replication: 1
     retention_ms: 604800000   # 7 days
@@ -25,12 +27,14 @@ topics:
   # 2. CPO Topics (Cloud Payment Orchestrator)
   # ==========================================================================
   - name: cpo.psn.pain002
+    processing_mode: real-time
     partitions: 6
     replication: 1
     retention_ms: 604800000   # 7 days
     description: "PSN Business Status"
 
   - name: cpo.plm.pain002
+    processing_mode: real-time
     partitions: 6
     replication: 1
     retention_ms: 604800000   # 7 days
@@ -40,36 +44,42 @@ topics:
   # 3. Wendi Topics (PostBank Digital Wallet)
   # ==========================================================================
   - name: wendi.camt053
+    processing_mode: streaming
     partitions: 4
     replication: 1
     retention_ms: 2592000000  # 30 days
     description: "End-of-Day Bank Statements"
 
   - name: wendi.camt052
+    processing_mode: streaming
     partitions: 4
     replication: 1
     retention_ms: 86400000    # 1 day
     description: "Intraday Account Reports"
 
   - name: wendi.camt054
+    processing_mode: streaming
     partitions: 8
     replication: 1
     retention_ms: 604800000   # 7 days
     description: "Transaction Notifications"
 
   - name: wendi.transactions
+    processing_mode: streaming
     partitions: 8
     replication: 1
     retention_ms: 604800000   # 7 days
     description: "Wendi Platform Transactions"
 
   - name: wendi.pain001
+    processing_mode: real-time
     partitions: 6
     replication: 1
     retention_ms: 604800000
     description: "Wendi Business Payment Initiations"
 
   - name: wendi.pain002
+    processing_mode: real-time
     partitions: 6
     replication: 1
     retention_ms: 604800000
@@ -79,24 +89,28 @@ topics:
   # 4. Mobile Networks Topics
   # ==========================================================================
   - name: mobile.mtn.pacs008
+    processing_mode: streaming
     partitions: 6
     replication: 1
     retention_ms: 604800000   # 7 days
     description: "MTN Interbank Settlement"
 
   - name: mobile.mtn.pacs002
+    processing_mode: real-time
     partitions: 4
     replication: 1
     retention_ms: 604800000   # 7 days
     description: "MTN Interbank Status"
 
   - name: mobile.airtel.pacs008
+    processing_mode: real-time
     partitions: 6
     replication: 1
     retention_ms: 604800000   # 7 days
     description: "Airtel Interbank Settlement"
 
   - name: mobile.airtel.pacs002
+    processing_mode: real-time
     partitions: 4
     replication: 1
     retention_ms: 604800000   # 7 days
@@ -106,18 +120,21 @@ topics:
   # 5. Agent Network Topics
   # ==========================================================================
   - name: agent.transactions
+    processing_mode: streaming
     partitions: 8
     replication: 1
     retention_ms: 2592000000  # 30 days
     description: "Agent Cash-out Transactions"
 
   - name: agent.profiles
+    processing_mode: batch
     partitions: 4
     replication: 1
     retention_ms: 604800000   # 7 days
     description: "Agent Profiles"
 
   - name: agent.locations
+    processing_mode: streaming
     partitions: 4
     replication: 1
     retention_ms: 604800000   # 7 days
@@ -127,42 +144,49 @@ topics:
   # 6. PDMIS Topics (Government System)
   # ==========================================================================
   - name: pdmis.beneficiaries
+    processing_mode: batch
     partitions: 8
     replication: 1
     retention_ms: 604800000   # 7 days
     description: "Beneficiary Data"
 
   - name: pdmis.loans
+    processing_mode: batch
     partitions: 8
     replication: 1
     retention_ms: 604800000   # 7 days
     description: "Loan Data"
 
   - name: pdmis.repayments
+    processing_mode: streaming
     partitions: 8
     replication: 1
     retention_ms: 604800000
     description: "Repayment Event Data"
 
   - name: pdmis.saccos
+    processing_mode: batch
     partitions: 4
     replication: 1
     retention_ms: 604800000   # 7 days
     description: "SACCO Data"
 
   - name: pdmis.households
+    processing_mode: batch
     partitions: 4
     replication: 1
     retention_ms: 604800000   # 7 days
     description: "Household Data"
 
   - name: pdmis.business_plans
+    processing_mode: batch
     partitions: 4
     replication: 1
     retention_ms: 604800000   # 7 days
     description: "Business Plans"
 
   - name: pdmis.special_groups
+    processing_mode: batch
     partitions: 4
     replication: 1
     retention_ms: 604800000
@@ -170,6 +194,7 @@ topics:
 
   # Configured ordinary CDC topic; connector and Raw subscription remain dormant.
   - name: cdc.pdm_mdm.mdm.sacco_master_sources
+    processing_mode: streaming
     partitions: 4
     replication: 1
     retention_ms: 604800000
@@ -179,12 +204,14 @@ topics:
   # 7. Shared operational failure topics
   # ==========================================================================
   - name: payment-events.retry
+    processing_mode: streaming
     partitions: 8
     replication: 1
     retention_ms: 604800000   # 7 days
     description: "Audit trail for bounded transient processing retries"
 
   - name: payment-events.dlq
+    processing_mode: streaming
     partitions: 8
     replication: 1
     retention_ms: 2592000000  # 30 days
@@ -197,31 +224,37 @@ topics:
 # ------------------------------------------------------------------
 
   - name: mdm.beneficiary.golden.restricted
+    processing_mode: real-time
     partitions: 3
     replication: 1
     retention_ms: 604800000   # 7 days; local POC policy, production Terraform-managed
 
   - name: mdm.beneficiary.identity-alert.restricted
+    processing_mode: real-time
     partitions: 3
     replication: 1
     retention_ms: 604800000   # 7 days; local POC policy, production Terraform-managed
 
   - name: mdm.crosswalk.restricted
+    processing_mode: real-time
     partitions: 3
     replication: 1
     retention_ms: 604800000   # 7 days; local POC policy, production Terraform-managed
 
   - name: mdm.sacco.golden
+    processing_mode: streaming
     partitions: 3
     replication: 1
     retention_ms: 604800000   # 7 days; local POC policy, production Terraform-managed
 
   - name: mdm.agent.golden
+    processing_mode: streaming
     partitions: 3
     replication: 1
     retention_ms: 604800000   # 7 days; local POC policy, production Terraform-managed
 
   - name: mdm.geography.golden
+    processing_mode: real-time
     partitions: 3
     replication: 1
     retention_ms: 604800000   # 7 days; local POC policy, production Terraform-managed
@@ -242,12 +275,14 @@ topics:
   # use so that kafka-init creates them, since auto-create is disabled.
 
   - name: payments.lifecycle.transitions.v1
+    processing_mode: real-time
     partitions: 6
     replication: 1
     retention_ms: 2592000000   # 30 days
     description: "Immutable lifecycle transition records (append-only)"
 
   - name: payments.lifecycle.state.v1
+    processing_mode: real-time
     partitions: 6
     replication: 1
     retention_ms: -1            # infinite
@@ -255,18 +290,21 @@ topics:
     description: "Compacted current lifecycle state per journey key"
 
   - name: payments.lifecycle.exceptions.v1
+    processing_mode: real-time
     partitions: 6
     replication: 1
     retention_ms: 2592000000   # 30 days
     description: "Operational lifecycle exceptions (SLA, gap, invalid)"
 
   - name: payments.lifecycle.dlq.v1
+    processing_mode: real-time
     partitions: 6
     replication: 1
     retention_ms: 7776000000   # 90 days
     description: "Streaming-route dead-letter queue for quarantined events"
 
   - name: payments.lifecycle.audit.v1
+    processing_mode: real-time
     partitions: 6
     replication: 1
     retention_ms: 31536000000  # 365 days

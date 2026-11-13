@@ -42,14 +42,14 @@ class KafkaArchitectureTests(unittest.TestCase):
 
     def test_deterministic_raw_path(self):
         stamp = datetime(2026, 9, 10, tzinfo=timezone.utc)
-        expected = ("raw/v2/category=pdmis/source_group=pdmis/source_system=pdmis/"
+        expected = ("raw/v1/category=pdmis/source_group=pdmis/source_system=pdmis/"
                     "year=2026/month=09/day=10/topic=pdmis.loans/partition=2/offset=81/record.avro")
-        with patch.dict(os.environ, {"RAW_ROOT": "raw", "RAW_VERSION": "v2", "RAW_PREFIX": "raw/v2"}):
+        with patch.dict(os.environ, {"RAW_ROOT": "raw", "RAW_VERSION": "v1", "RAW_PREFIX": "raw/v1"}):
             self.assertEqual(expected, consumer.deterministic_s3_key("pdmis.loans", 2, 81, stamp))
 
     def test_existing_raw_object_makes_replay_a_noop(self):
         client = Mock()
-        with patch.dict(os.environ, {"RAW_ROOT": "raw", "RAW_VERSION": "v2", "RAW_PREFIX": "raw/v2", "OBJECT_STORE_BUCKET": "dp-ai-payment"}), patch.object(consumer, "get_minio_client", return_value=client):
+        with patch.dict(os.environ, {"RAW_ROOT": "raw", "RAW_VERSION": "v1", "RAW_PREFIX": "raw/v1", "OBJECT_STORE_BUCKET": "dp-ai-payment"}), patch.object(consumer, "get_minio_client", return_value=client):
             result = consumer.store_event_to_s3(
                 {"event_id": "e"}, "pdmis.loans", 1, 2,
                 datetime(2026, 9, 10, tzinfo=timezone.utc))

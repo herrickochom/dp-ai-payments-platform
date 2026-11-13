@@ -144,11 +144,11 @@ Production periods marked TBD must be approved for purpose/record/jurisdiction b
 | Verification/evidence required | Internal topic cleanup/retention, schema versions and recovery coverage |
 | Current implementation status | Configured services; NOT VERIFIED |
 
-### A07: Raw `raw/v2`
+### A07: Raw `raw/v1`
 
 | Field | Asset record |
 |---|---|
-| Asset/layer | Raw `raw/v2` |
+| Asset/layer | Raw `raw/v1` |
 | Data owner (proposed; named assignment pending) | Source/domain owner with storage custodian |
 | Purpose | Source-fidelity Avro archive and reprocessing |
 | Sensitivity (provisional; approve per dataset) | Restricted; direct identifiers possible |

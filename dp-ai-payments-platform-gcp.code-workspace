@@ -1,0 +1,11 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "yaml.schemaStore.enable": false,
+    "yaml.schemas": {}
+  }
+}

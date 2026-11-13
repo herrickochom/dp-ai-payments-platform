@@ -10,4 +10,4 @@ Offline-first bridge for a **six-field source Avro record matching the isolated 
 - Failure stops processing; no silent skip, commit, or DLQ claim. No production recovery yet.
 - **Do not run live** until the actual source topic schema, IAM, and test-event mapping have been reviewed and approved.
 
-Offline verification: `python3 -m unittest discover -s tests/gcp -p 'test_kp001d_bridge_offline.py' -v`
+Offline verification: `python3 -m unittest discover -s tests/gcp -p 'test_kafka_pubsub_bridge_offline.py' -v`

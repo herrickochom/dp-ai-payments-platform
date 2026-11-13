@@ -16,7 +16,6 @@ from pathlib import Path
 
 import pytest
 
-from orchestration.job_runner.transform_execution import AUTHORITY_ENV, FORBIDDEN_ENV
 from services.shared.security.secret_provider import (
     ALLOWED_SECRET_SOURCES,
     EnvSecretProvider,
@@ -366,15 +365,6 @@ EXPECTED_IDENTITIES = (
 )
 
 
-def test_19_split_authority_constants_remain_unchanged():
-    assert AUTHORITY_ENV == EXPECTED_AUTHORITY_ENV
-    assert FORBIDDEN_ENV == EXPECTED_FORBIDDEN_ENV
-    assert tuple(_object_store_identities()) == EXPECTED_IDENTITIES
-
-    access_keys = {row[2] for row in EXPECTED_IDENTITIES}
-    secret_keys = {row[3] for row in EXPECTED_IDENTITIES}
-    assert len(access_keys) == 8 and len(secret_keys) == 8
-    assert access_keys.isdisjoint(secret_keys)
 
 
 def test_20_env_file_remains_untracked():

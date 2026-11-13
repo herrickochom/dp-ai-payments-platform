@@ -8,7 +8,7 @@ are added after snapshotting high watermarks.
 Run from repo root:
   python3 scripts/execute_guarded_pipeline.py --self-test
   python3 scripts/execute_guarded_pipeline.py --live \
-    --project $KP_GCP_PROJECT --subscription $KP_RAW_V2_SUBSCRIPTION \
+    --project $KP_GCP_PROJECT --subscription $KP_RAW_V1_SUBSCRIPTION \
     --max-events 200 --max-seconds 1200
 """
 from __future__ import annotations
@@ -19,11 +19,11 @@ from pathlib import Path
 ROOT = Path.cwd().resolve()
 PUBLISHER = ROOT / "services/payment-producer/source_publisher.py"
 BRIDGE = ROOT / "platform/gcp/kafka_pubsub_bridge/bridge.py"
-RAW_V2 = ROOT / "platform/gcp/pubsub_raw_ingestion/raw_v2.py"
-RAW_V2_CLOUD = ROOT / "platform/gcp/pubsub_raw_ingestion/raw_v2_cloud.py"
+RAW_V1 = ROOT / "platform/gcp/pubsub_raw_ingestion/raw_v1.py"
+RAW_V1_CLOUD = ROOT / "platform/gcp/pubsub_raw_ingestion/raw_v1_cloud.py"
 EXPECTED_TOPICS = 24
 EXPECTED_PARTITIONS = 136
-PUBSUB_TOPIC = "pdm-native-events-poc-v1"
+PUBSUB_TOPIC = "pdm-dev-payments-source-events-v1"
 
 def _load(name, path):
     spec = importlib.util.spec_from_file_location(name, path)
@@ -35,14 +35,14 @@ def _load(name, path):
 def _sec(t): print("\n=== " + t + " ===")
 
 def self_test():
-    for p in (PUBLISHER, BRIDGE, RAW_V2, RAW_V2_CLOUD):
+    for p in (PUBLISHER, BRIDGE, RAW_V1, RAW_V1_CLOUD):
         if not p.is_file(): raise SystemExit(f"STOP: missing {p}")
     sp = _load("gs_sp", PUBLISHER)
     assert len(sp.TOPIC_MANIFEST) == EXPECTED_TOPICS
     print(f"PASS: guarded pipeline self-tests; {EXPECTED_TOPICS} topics mapped")
 
 def run(args):
-    for p in (PUBLISHER, BRIDGE, RAW_V2, RAW_V2_CLOUD):
+    for p in (PUBLISHER, BRIDGE, RAW_V1, RAW_V1_CLOUD):
         if not p.is_file(): raise SystemExit(f"STOP: missing {p}")
 
     from confluent_kafka import Consumer, TopicPartition
@@ -52,8 +52,8 @@ def run(args):
 
     sp = _load("gs_sp", PUBLISHER)
     bridge_mod = _load("gs_bridge", BRIDGE)
-    rv2 = _load("gs_rv2", RAW_V2)
-    rv2_cloud = _load("gs_rv2_cloud", RAW_V2_CLOUD)
+    rv1 = _load("gs_rv1", RAW_V1)
+    rv1_cloud = _load("gs_rv1_cloud", RAW_V1_CLOUD)
 
     evidence = {
         "started_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -109,8 +109,49 @@ def run(args):
     if subprocess.run(cmd).returncode != 0:
         evidence["errors"].append("publisher non-zero"); evidence["status"] = "PUBLISHER_FAILED"; write(); return 1
     pub = json.loads(publish_ev.read_text())
-    evidence["publish_evidence"] = {"published": pub.get("published"), "topics": pub.get("topics"), "status": pub.get("status")}
-    print(f"PUBLISHED: {pub.get('published')} events")
+    published_count = pub.get("published")
+    delivered = pub.get("message_ids")
+
+    if type(published_count) is not int or published_count < 0:
+        raise RuntimeError("invalid publisher delivery count")
+    if not isinstance(delivered, list):
+        raise RuntimeError("publisher delivery identities missing")
+
+    expected = set()
+    for item in delivered:
+        if not isinstance(item, dict):
+            raise RuntimeError("invalid publisher delivery identity")
+        try:
+            identity = (
+                item["topic"],
+                int(item["partition"]),
+                int(item["offset"]),
+            )
+        except (KeyError, ValueError, TypeError) as exc:
+            raise RuntimeError("invalid Kafka delivery coordinates") from exc
+
+        if identity[0] not in names or identity[1] < 0 or identity[2] < 0:
+            raise RuntimeError("publisher identity outside approved inventory")
+
+        if identity[2] >= snapshot[(identity[0], identity[1])]:
+            expected.add(identity)
+
+    if len(expected) != published_count:
+        raise RuntimeError(
+            f"publisher reconciliation failed: "
+            f"new identities={len(expected)}, published={published_count}"
+        )
+
+    evidence["publish_evidence"] = {
+        "published": published_count,
+        "topics": pub.get("topics"),
+        "status": pub.get("status"),
+        "current_run_identities": [
+            {"topic": t, "partition": p, "offset": o}
+            for t, p, o in sorted(expected)
+        ],
+    }
+    print(f"PUBLISHED: {published_count} verified Kafka deliveries")
 
     _sec("STEP 4 — Kafka -> Pub/Sub bridge (only newly published offsets)")
     publisher = pubsub_v1.PublisherClient()
@@ -118,27 +159,59 @@ def run(args):
     publisher.get_topic(request={"topic": topic_path})  # fail-closed if missing
 
     bridged = 0; deadline = time.monotonic() + args.max_seconds
-    total_to_bridge = pub.get("published", 0)
-    to_assign = [TopicPartition(t, p, snapshot[(t, p)]) for (t, p) in snapshot]
-    snap_consumer.assign(to_assign)
+    total_to_bridge = len(expected)
+    pending = set(expected)
+
+    to_assign = [
+        TopicPartition(t, p, snapshot[(t, p)])
+        for (t, p) in snapshot
+        if any(k[0] == t and k[1] == p for k in expected)
+    ]
+
+    if to_assign:
+        snap_consumer.assign(to_assign)
+
     idle = 0
-    while bridged < total_to_bridge and time.monotonic() < deadline:
-        msg = snap_consumer.poll(1.0)
-        if msg is None:
-            idle += 1
-            if idle > 30: break
-            continue
-        idle = 0
-        if msg.error(): raise RuntimeError(str(msg.error()))
-        envelope = bridge_mod.encode_wire_envelope(msg)
-        publisher.publish(topic_path, envelope).result(timeout=30)
-        snap_consumer.commit(message=msg, asynchronous=False)
-        bridged += 1
-    snap_consumer.close()
-    evidence["bridge"] = {"bridged": bridged, "expected": total_to_bridge}
+    try:
+        while pending and time.monotonic() < deadline:
+            msg = snap_consumer.poll(1.0)
+            if msg is None:
+                idle += 1
+                if idle > 30:
+                    break
+                continue
+
+            idle = 0
+            if msg.error():
+                raise RuntimeError(str(msg.error()))
+
+            identity = (msg.topic(), msg.partition(), msg.offset())
+            if identity not in pending:
+                continue
+
+            envelope = bridge_mod.encode_wire_envelope(msg)
+            publisher.publish(topic_path, envelope).result(timeout=30)
+            pending.remove(identity)
+            bridged += 1
+    finally:
+        snap_consumer.close()
+
+    evidence["bridge"] = {
+        "bridged": bridged,
+        "expected": total_to_bridge,
+        "missing": [
+            {"topic": t, "partition": p, "offset": o}
+            for t, p, o in sorted(pending)
+        ],
+    }
     print(f"BRIDGED: {bridged}/{total_to_bridge}")
 
-    _sec("STEP 5 — Pub/Sub -> GCS Raw v2 worker")
+    if pending:
+        evidence["status"] = "BRIDGE_INCOMPLETE"
+        write()
+        return 2
+
+    _sec("STEP 5 — Pub/Sub -> GCS Raw v1 worker")
     reg = SchemaRegistryClient({"url": args.registry_url})
     sub = pubsub_v1.SubscriberClient()
     sub_path = sub.subscription_path(args.project, args.subscription)
@@ -146,11 +219,12 @@ def run(args):
     bucket = sc.lookup_bucket(args.bucket)
     if bucket is None:
         evidence["errors"].append(f"bucket not accessible {args.bucket}"); evidence["status"] = "BUCKET_FAILED"; write(); return 1
-    store = rv2_cloud.GCSConditionalStore(bucket)
-    acker = rv2_cloud.PubSubAcknowledger(sub, sub_path)
-    decoder = rv2_cloud.RegistryDecoder(reg)
+    store = rv1_cloud.GCSConditionalStore(bucket)
+    acker = rv1_cloud.PubSubAcknowledger(sub, sub_path)
+    decoder = rv1_cloud.RegistryDecoder(reg)
 
     processed = 0
+    processed_identities = set()
     while processed < bridged and time.monotonic() < deadline:
         # PULL-RETRY-ON-NOT-FOUND: retry pull on NotFound up to 60s (subscription propagation race)
         _pull_deadline = time.monotonic() + 60
@@ -169,11 +243,36 @@ def run(args):
         if not resp.received_messages: continue
         for recv in resp.received_messages:
             try:
-                name, state = rv2_cloud.process_message(recv.message.data, recv.ack_id, store, acker, decoder)
+                transport, _wire = rv1.transport(recv.message.data)
+                identity = (
+                    transport["kafka_topic"],
+                    transport["kafka_partition"],
+                    transport["kafka_offset"],
+                )
+
+                if identity not in expected:
+                    evidence["errors"].append(
+                        f"unrelated Pub/Sub message left unacknowledged: {identity}"
+                    )
+                    continue
+
+                if identity in processed_identities:
+                    evidence["errors"].append(
+                        f"duplicate Pub/Sub delivery left unacknowledged: {identity}"
+                    )
+                    continue
+
+                name, state = rv1_cloud.process_message(
+                    recv.message.data, recv.ack_id, store, acker, decoder
+                )
                 evidence["gcs_created"][name] = state
+                processed_identities.add(identity)
                 processed += 1
+
             except Exception as exc:
-                evidence["errors"].append(f"worker {type(exc).__name__}: {exc}")
+                evidence["errors"].append(
+                    f"worker {type(exc).__name__}: {exc}"
+                )
     sub.close()
     evidence["worker"] = {"processed": processed}
     print(f"WORKER: {processed} objects present in GCS")
@@ -198,7 +297,7 @@ def main():
     p.add_argument("--bootstrap", default=os.getenv("KP_KAFKA_BOOTSTRAP","localhost:9094"))
     p.add_argument("--registry-url", default=os.getenv("KP_SCHEMA_REGISTRY_URL","http://localhost:8081"))
     p.add_argument("--project", default=os.getenv("KP_GCP_PROJECT",""))
-    p.add_argument("--subscription", default=os.getenv("KP_RAW_V2_SUBSCRIPTION",""))
+    p.add_argument("--subscription", default=os.getenv("KP_RAW_V1_SUBSCRIPTION",""))
     p.add_argument("--bucket", default="dp-pdm-ai-platform-dev")
     p.add_argument("--sources-root", type=Path, default=Path("data"))
     p.add_argument("--schemas-dir", type=Path, default=Path("contracts/kafka"))
@@ -206,8 +305,8 @@ def main():
     p.add_argument("--no-idempotence", action="store_true")
     p.add_argument("--topics", default="", help="comma-separated topic allowlist")
     p.add_argument("--max-seconds", type=int, default=1200)
-    p.add_argument("--publish-evidence", default="evidence/source-publisher/last_run.json")
-    p.add_argument("--evidence", default="evidence/e2e-pipeline/last_run.json")
+    p.add_argument("--publish-evidence", default="runtime/source-publisher/last_run.json")
+    p.add_argument("--evidence", default="runtime/pipeline/last_run.json")
     a = p.parse_args()
     if a.self_test: self_test(); return
     if not a.live: print("SAFE: guarded pipeline installed; --live required."); return

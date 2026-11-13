@@ -9,15 +9,12 @@ requires-python = ">=3.10"
 # editor and interpreter need to resolve every module in the repo.
 dependencies = [
     "avro",
-    "boto3",
-    "botocore",
     "confluent-kafka",
     "fastapi",
     "httpx2==2.13.0",
     "fastavro",
     "openpyxl>=3.1.5",
     "pytz",
-    "pydantic",
     "PyYAML",
     "sqlglot",
     "trino",

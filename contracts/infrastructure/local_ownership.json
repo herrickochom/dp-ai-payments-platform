@@ -1,0 +1,64 @@
+{
+  "contract_version": 1,
+  "name": "pdm_local_infrastructure_ownership",
+
+  "environment": {
+    "target": "local",
+    "classification": "REFERENCE_INTEGRATION_ENVIRONMENT",
+    "production": false
+  },
+
+  "ownership": {
+    "terraform": {
+      "role": "DEPLOYMENT_GOVERNANCE_CONTROL_PLANE",
+      "owns_individual_docker_containers": false,
+      "owns_docker_networks": false,
+      "owns_docker_volumes": false,
+      "owns_compose_service_topology": false,
+      "may_validate_host_prerequisites": true,
+      "may_validate_compose_contract": true,
+      "may_govern_approved_compose_invocation": true
+    },
+
+    "docker_compose": {
+      "role": "LOCAL_APPLICATION_TOPOLOGY_AUTHORITY",
+      "authoritative_file": "docker-compose.yaml",
+      "owns_service_topology": true,
+      "owns_local_container_lifecycle": true,
+      "owns_local_network_topology": true,
+      "owns_local_volume_topology": true,
+      "profiles_supported": true
+    }
+  },
+
+  "dual_ownership_policy": {
+    "allowed": false,
+    "terraform_docker_provider_allowed": false,
+    "terraform_docker_container_resources_allowed": false,
+    "terraform_docker_network_resources_allowed": false,
+    "terraform_docker_volume_resources_allowed": false
+  },
+
+  "local_state_policy": {
+    "terraform_state_classification": "NON_PRODUCTION_DISPOSABLE",
+    "remote_backend_required": false,
+    "production_state_claim_allowed": false
+  },
+
+  "execution_policy": {
+    "terraform_may_directly_start_compose_during_plan": false,
+    "terraform_may_directly_stop_compose_during_plan": false,
+    "terraform_may_directly_mutate_compose_during_plan": false,
+    "terraform_apply_requires_explicit_operator_intent": true,
+    "destructive_cleanup_requires_separate_explicit_action": true
+  },
+
+  "protected_operations": {
+    "kafka_offset_reset_allowed": false,
+    "raw_object_deletion_allowed": false,
+    "token_link_rematerialisation_allowed": false,
+    "gate3_recovery_execution_allowed": false,
+    "cdc_implicit_activation_allowed": false,
+    "unbounded_dbt_execution_allowed": false
+  }
+}

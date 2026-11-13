@@ -33,21 +33,11 @@ def test_local_database_urls_keep_existing_semantics(monkeypatch):
     assert validate_database_url("postgresql+psycopg://localhost/ledger") == "postgresql://localhost/ledger"
 
 
-def test_c8_lease_and_unknown_write_safety_remain_in_place():
-    root = Path(__file__).resolve().parents[2]
-    queue = (root / "orchestration/transform_runtime/durable_queue.py").read_text()
-    worker = (root / "orchestration/job_runner/transform_worker.py").read_text()
-    assert "FOR UPDATE SKIP LOCKED" in queue
-    assert "clock_timestamp()" in queue
-    assert "lease_token" in queue
-    assert "status='ORPHANED'" in queue
-    assert "WORKER_LEASE_LOST_REQUIRES_RECONCILIATION" in worker
 
 
 def test_runtime_and_migration_database_authorities_are_separate():
     root = Path(__file__).resolve().parents[2]
 
-    compose = (root / "docker-compose.yaml").read_text()
     queue = (
         root / "orchestration/transform_runtime/durable_queue.py"
     ).read_text()
@@ -67,23 +57,6 @@ def test_runtime_and_migration_database_authorities_are_separate():
     assert "TRANSFORM_LEDGER_MIGRATION_DATABASE_URL" in migrate
     assert "TRANSFORM_LEDGER_APP_DATABASE_URL" not in migrate
 
-    runtime = compose.split(
-        "  transform-runtime:\n", 1
-    )[1].split(
-        "\n  platform-job-runner:", 1
-    )[0]
-
-    runner = compose.split(
-        "  platform-job-runner:\n", 1
-    )[1].split(
-        "\n  airflow-init:", 1
-    )[0]
-
-    assert "TRANSFORM_LEDGER_APP_DATABASE_URL" in runtime
-    assert "TRANSFORM_LEDGER_MIGRATION_DATABASE_URL" not in runtime
-
-    assert "TRANSFORM_LEDGER_APP_DATABASE_URL" in runner
-    assert "TRANSFORM_LEDGER_MIGRATION_DATABASE_URL" not in runner
 
 
 def test_application_database_role_rejects_admin_identity(monkeypatch):

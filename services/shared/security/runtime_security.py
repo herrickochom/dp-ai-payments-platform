@@ -36,29 +36,6 @@ def _require_https(url: str, *, service: str) -> None:
         )
 
 
-def validate_nessie_security(
-    endpoint: str,
-    *,
-    auth_mode: str | None = None,
-    token: str | None = None,
-) -> None:
-    """Validate the selected Nessie transport/authentication contract."""
-    if not is_production_security_mode():
-        return
-
-    _require_https(endpoint, service="Nessie")
-
-    if (auth_mode or "").strip().lower() != "bearer":
-        raise ValueError(
-            "Nessie must use bearer authentication when "
-            "DP_SECURITY_MODE=production"
-        )
-
-    if not (token or "").strip():
-        raise ValueError(
-            "Nessie bearer token is required when "
-            "DP_SECURITY_MODE=production"
-        )
 
 
 def validate_trino_security(*, scheme: str) -> None:

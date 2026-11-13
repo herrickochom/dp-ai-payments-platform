@@ -29,7 +29,6 @@ def test_required_clean_runner_dependencies_are_declared():
     text = REQUIREMENTS.read_text().lower()
 
     required = (
-        "boto3",
         "confluent-kafka",
         "pytz",
         "pytest==9.1.1",

@@ -11,7 +11,7 @@ resource "google_dataplex_lake" "payments" {
   location     = var.region
   name         = "payments-lake"
   display_name = "DP AI Payments Platform"
-  description  = "Kafka -> Raw v2 -> Bronze -> dbt -> Consumption"
+  description  = "Kafka -> Raw v1 -> Bronze -> dbt -> Consumption"
   labels = {
     platform = "dp-pdm-ai-platform"
     domain   = "payments"
@@ -53,15 +53,15 @@ resource "google_dataplex_zone" "curated" {
 }
 
 # NOTE: a Dataplex STORAGE_BUCKET asset registers the entire bucket.
-# Prefix-level scoping (e.g. only raw/v2/) is not supported at asset level;
+# Prefix-level scoping (e.g. only raw/v1/) is not supported at asset level;
 # use Dataplex data-quality/curation rules later if scoping is required.
-resource "google_dataplex_asset" "gcs_raw_v2" {
+resource "google_dataplex_asset" "gcs_raw_v1" {
   project       = var.project_id
   location      = var.region
   lake          = google_dataplex_lake.payments.name
   dataplex_zone = google_dataplex_zone.raw.name
-  name          = "gcs-raw-v2"
-  display_name  = "GCS bucket (whole bucket, not raw/v2-scoped)"
+  name          = "gcs-raw-v1"
+  display_name  = "GCS bucket (whole bucket, not raw/v1-scoped)"
 
   resource_spec {
     name = "projects/${var.project_id}/buckets/${var.bucket}"
@@ -101,7 +101,7 @@ resource "google_dataplex_datascan" "bronze_key_not_null" {
   display_name = "Bronze required-key not-null"
 
   data {
-    resource = "//bigquery.googleapis.com/projects/${var.project_id}/datasets/bronze/tables/payments_raw_v2"
+    resource = "//bigquery.googleapis.com/projects/${var.project_id}/datasets/bronze/tables/payments_raw_v1"
   }
 
   data_quality_spec {

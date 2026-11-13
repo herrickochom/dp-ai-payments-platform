@@ -5,8 +5,8 @@ Reads contracts/kafka/payment_event.avsc and technical_payment_event.avsc at
 runtime, constructs schema-conformant records, and emits Confluent Avro wire
 format so the unchanged downstream path applies:
 
-    Kafka -> bridge.encode_wire_envelope -> Pub/Sub -> raw_v2.name_for
-         -> GCSConditionalStore (raw/v2/.../record.avro) -> Dataflow
+    Kafka -> bridge.encode_wire_envelope -> Pub/Sub -> raw_v1.name_for
+         -> GCSConditionalStore (raw/v1/.../record.avro) -> Dataflow
 
 Invariants: explicit --live; bounded --max-messages; atomic evidence; optional
 --no-idempotence for stuck transaction coordinators.
@@ -339,6 +339,10 @@ def write_evidence(path: Path, ev):
         if os.path.exists(tmp): os.unlink(tmp)
 
 def run_live(args) -> int:
+    raise RuntimeError(
+        "STOP: Stage 2C live publishing is disabled pending "
+        "historical delivery reconciliation and approval"
+    )
     try:
         from confluent_kafka import Producer
         from confluent_kafka.schema_registry import SchemaRegistryClient
@@ -359,14 +363,21 @@ def run_live(args) -> int:
     if ev_path.exists():
         try:
             prior = json.loads(ev_path.read_text())
-            for m in prior.get("message_ids", []):
-                eid = m.get("event_id")
-                if eid: prior_ids.add(eid)
+            records = prior.get("message_ids", [])
+            if not isinstance(records, list):
+                raise ValueError("message_ids must be a list")
+            if any(not isinstance(m, dict) or not m.get("event_id") for m in records):
+                raise ValueError("invalid historical delivery record")
+            prior_records = list(records)
+            prior_ids = {m["event_id"] for m in prior_records}
             if prior_ids:
                 print(f"Resume: {len(prior_ids)} previously published event_ids will be skipped")
-        except (ValueError, KeyError):
-            pass
-    write_evidence(ev_path, ev)
+        except (ValueError, KeyError, OSError) as exc:
+            raise RuntimeError(
+                f"STOP: historical evidence cannot be safely loaded: {exc}"
+            ) from exc
+    ev.message_ids = list(prior_records)
+    # Preserve historical evidence until new deliveries are reconciled.
 
     reg = SchemaRegistryClient({"url": args.registry_url})
     ps = AvroSerializer(reg, pay_str)
@@ -430,7 +441,8 @@ def run_live(args) -> int:
         if published % 50 == 0: write_evidence(ev_path, ev)
 
     prod.flush(timeout=60)
-    ev.published = len(delivered); ev.message_ids = delivered  # KP-011: was [:1000]; truncated dedup ledger
+    ev.published = len(delivered)
+    ev.message_ids = list(delivered)
     # CANONICAL-MERGE-V3: append prior message_ids not seen this run
     if prior_records:
         new_ids = {m.get("event_id") for m in ev.message_ids if m.get("event_id")}
@@ -514,7 +526,7 @@ def main():
     p.add_argument("--max-seconds", type=int, default=900)
     p.add_argument("--topics", default="", help="comma-separated topic allowlist")
     p.add_argument("--no-idempotence", action="store_true")
-    p.add_argument("--evidence", default="evidence/source-publisher/last_run.json")
+    p.add_argument("--evidence", default="runtime/source-publisher/last_run.json")
     a = p.parse_args()
     if a.self_test: self_test(); return
     if not a.live:

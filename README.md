@@ -53,7 +53,7 @@ contexts are always the repository root, so every `COPY` in
 Source JSON/XML
   -> Kafka + Schema Registry
   -> services/kafka-consumer-events        (the governed Raw consumer)
-  -> s3://dp-ai-payment/raw/v2/**.avro     (immutable Avro archive)
+  -> s3://dp-ai-payment/raw/v1/**.avro     (immutable Avro archive)
   -> transform-runtime                     (durable transform control plane)
   -> PostgreSQL execution queue
   -> platform-job-runner                   (isolated dbt + DuckDB execution)

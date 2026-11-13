@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""KP-014D offline-only transaction admission simulator. NOT an Iceberg commit."""
+"""Offline-only Iceberg transaction admission simulator. NOT an Iceberg commit."""
 import argparse
 import hashlib
 import json
@@ -57,8 +57,8 @@ def admit(conn, digest, rows):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--root', default='evidence/iceberg-catalogue-and-commit-validation')
-    p.add_argument('--ledger', default='evidence/iceberg-catalogue-and-commit-validation/kp014d-offline-ledger.sqlite3')
+    p.add_argument('--root', default='runtime/iceberg-catalogue-validation')
+    p.add_argument('--ledger', default='runtime/iceberg-catalogue-validation/kp014d-offline-ledger.sqlite3')
     p.add_argument('--record', action='store_true', help='write local SQLite admission ledger; NEVER commits Iceberg')
     a = p.parse_args()
     root = Path(a.root)

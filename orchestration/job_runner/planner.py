@@ -24,10 +24,6 @@ class CommandPlan:
 
 
 SCHEDULED_COMMANDS = {
-    "platform_preflight": (
-        "platform-job",
-        "preflight",
-    ),
     "raw_readiness": (
         "platform-job",
         "raw-readiness",

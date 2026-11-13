@@ -1,0 +1,100 @@
+{
+  "contract_version": 1,
+  "name": "pdm_portable_platform_capabilities",
+
+  "capabilities": {
+    "compute": {
+      "required": true,
+      "portable": true
+    },
+
+    "networking": {
+      "required": true,
+      "portable": true
+    },
+
+    "service_identity": {
+      "required": true,
+      "portable": true
+    },
+
+    "object_storage": {
+      "required": true,
+      "portable": true,
+      "local_reference": "minio",
+      "cloud_native_substitution_allowed": true
+    },
+
+    "event_streaming": {
+      "required": true,
+      "portable": true,
+      "reference_semantics": "kafka",
+      "generated_event_path_required": true,
+      "cdc_event_path_required": true
+    },
+
+    "cdc": {
+      "required": true,
+      "portable": true,
+      "reference_adapter": "debezium",
+      "runtime_activation_default": "DENY"
+    },
+
+    "relational_database": {
+      "required": true,
+      "portable": true,
+      "reference_engine": "postgresql"
+    },
+
+    "lakehouse": {
+      "required": true,
+      "portable": true,
+      "table_format": "iceberg"
+    },
+
+    "catalogue": {
+      "required": true,
+      "portable": true,
+      "reference_implementation": "nessie"
+    },
+
+    "query_engine": {
+      "required": true,
+      "portable": true,
+      "reference_implementation": "trino"
+    },
+
+    "transformation": {
+      "required": true,
+      "portable": true,
+      "reference_implementation": "dbt"
+    },
+
+    "orchestration": {
+      "required": true,
+      "portable": true,
+      "reference_implementation": "airflow"
+    },
+
+    "business_intelligence": {
+      "required": true,
+      "portable": true,
+      "reference_implementation": "superset"
+    },
+
+    "secrets_and_key_management": {
+      "required_for_production": true,
+      "portable_control": true
+    },
+
+    "observability": {
+      "required_for_production": true,
+      "portable_control": true
+    },
+
+    "backup_and_disaster_recovery": {
+      "required_for_production": true,
+      "portable_control": true
+    }
+  }
+}

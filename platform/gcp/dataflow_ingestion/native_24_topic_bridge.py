@@ -11,7 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 BRIDGE = ROOT / 'platform/gcp/kafka_pubsub_bridge/bridge.py'
-EXPECTED_TOPIC = 'pdm-native-events-poc-v1'
+EXPECTED_TOPIC = 'pdm-dev-payments-source-events-v1'
 
 def load_bridge():
     spec = importlib.util.spec_from_file_location('kp010_existing_bridge', BRIDGE)

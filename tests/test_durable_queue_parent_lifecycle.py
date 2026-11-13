@@ -232,38 +232,3 @@ def test_finish_preserves_lease_fencing(worker, token, expired):
     assert database.child["status"] == "RUNNING"
     assert database.parent["status"] == "ADMITTED"
     assert database.events == []
-
-
-def test_record_nessie_branch_from_null():
-    database = LifecycleDatabase()
-    queue = QueueHarness(database)
-    branch = "transform_" + database.child["transform_run_id"]
-    assert queue.record_nessie_branch(database.child["batch_execution_id"], "worker-1", "lease-1", branch) == branch
-    assert database.child["nessie_branch"] == branch
-
-
-def test_record_nessie_branch_is_idempotent():
-    database = LifecycleDatabase()
-    queue = QueueHarness(database)
-    branch = "transform_" + database.child["transform_run_id"]
-    database.child["nessie_branch"] = branch
-    assert queue.record_nessie_branch(database.child["batch_execution_id"], "worker-1", "lease-1", branch) == branch
-    assert database.child["nessie_branch"] == branch
-
-
-def test_record_nessie_branch_conflict_fails_closed():
-    database = LifecycleDatabase()
-    queue = QueueHarness(database)
-    database.child["nessie_branch"] = "transform_tr_" + "c" * 32
-    with pytest.raises(DurableQueueError, match="conflicts with persisted branch"):
-        queue.record_nessie_branch(database.child["batch_execution_id"], "worker-1", "lease-1", "transform_" + database.child["transform_run_id"])
-    assert database.child["nessie_branch"] == "transform_tr_" + "c" * 32
-
-
-@pytest.mark.parametrize(("worker", "token"), [("wrong-worker", "lease-1"), ("worker-1", "wrong-token")])
-def test_record_nessie_branch_preserves_lease_fencing(worker, token):
-    database = LifecycleDatabase()
-    queue = QueueHarness(database)
-    with pytest.raises(LeaseLost, match="worker lease lost"):
-        queue.record_nessie_branch(database.child["batch_execution_id"], worker, token, "transform_" + database.child["transform_run_id"])
-    assert database.child["nessie_branch"] is None
