@@ -139,3 +139,5 @@ stage10-current-source-*.zip
 
 # Local generated runtime data; never commit
 /runtime/
+dp-ai-payments-platform-gcp.code-workspace
+[internal]/
