@@ -173,3 +173,4 @@ tfplan
 # ── Binaries ────────────────────────────────────────
 *.jar
 *.joblib
+*.code-workspace
