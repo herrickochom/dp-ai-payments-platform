@@ -175,3 +175,4 @@ transform/dbt/target/
 .terraform/
 __pycache__/
 transform/dbt/logs/
+certs/

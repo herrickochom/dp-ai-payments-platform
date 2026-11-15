@@ -260,6 +260,91 @@ services:
     restart: unless-stopped
     networks:
       - data-platform-network
+  # ==========================================================================
+  # MDM: Cloud SQL golden records (profile: mdm)
+  # ==========================================================================
+  cloud-sql-proxy:
+    image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.14.1
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform-gcp}-cloud-sql-proxy
+    profiles:
+      - mdm
+    command:
+      - "--address=0.0.0.0"
+      - "--port=5432"
+      - "--auto-iam-authn"
+      - "--tls-cert=/certs/mdm-server.crt"
+      - "--tls-key=/certs/mdm-server.key"
+      - "${CLOUD_SQL_CONNECTION_NAME:-project-e48f194e-f44f-458d-b4f:europe-west2:pdm-dev-mdm-postgres}"
+    volumes:
+      - ./certs:/certs:ro
+    restart: 'no'
+    networks:
+      - data-platform-network
+  mdm-loader:
+    profiles:
+      - mdm
+    build:
+      context: .
+      dockerfile: docker/mdm-loader/Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform-gcp}-mdm-loader
+    environment:
+      DATA_ROOT: /app/data
+      PDM_MDM_TARGET: cloudsql
+      PDM_MDM_FULL_REPLACE_APPROVED: I_APPROVE_FULL_MDM_REPLACEMENT
+      PDM_SOURCE_HOST: cloud-sql-proxy
+      PDM_SOURCE_DB_PORT: "5432"
+      PDM_SOURCE_DB: ${PDM_SOURCE_DB:-pdm_mdm}
+      PDM_SOURCE_USER: ${PDM_SOURCE_USER}
+      PDM_SOURCE_PASSWORD: ${PDM_SOURCE_PASSWORD}
+      PDM_SOURCE_SSLMODE: verify-full
+      PDM_SOURCE_SSLROOTCERT: /certs/mdm-ca.crt
+      PDM_SOURCE_CONNECT_TIMEOUT: "10"
+      PDM_SOURCE_STATEMENT_TIMEOUT_MS: "60000"
+    volumes:
+      - ./data:/app/data:ro
+      - ./certs:/certs:ro
+    depends_on:
+      cloud-sql-proxy:
+        condition: service_started
+    restart: 'no'
+    networks:
+      - data-platform-network
+  mdm-publisher:
+    profiles:
+      - mdm
+    build:
+      context: .
+      dockerfile: docker/mdm-publisher/Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform-gcp}-mdm-publisher
+    environment:
+      PDM_MDM_TARGET: cloudsql
+      PDM_SOURCE_HOST: cloud-sql-proxy
+      PDM_SOURCE_DB_PORT: "5432"
+      PDM_SOURCE_DB: ${PDM_SOURCE_DB:-pdm_mdm}
+      PDM_SOURCE_USER: ${PDM_SOURCE_USER}
+      PDM_SOURCE_PASSWORD: ${PDM_SOURCE_PASSWORD}
+      PDM_SOURCE_SSLMODE: verify-full
+      PDM_SOURCE_SSLROOTCERT: /certs/mdm-ca.crt
+      PDM_SOURCE_CONNECT_TIMEOUT: "10"
+      PDM_SOURCE_STATEMENT_TIMEOUT_MS: "60000"
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      KAFKA_SECURITY_PROTOCOL: ${KAFKA_SECURITY_PROTOCOL:-PLAINTEXT}
+      DP_SECRET_SOURCE: ${DP_SECRET_SOURCE:-}
+      DP_SECRET_DIR: ${DP_SECRET_DIR:-}
+    volumes:
+      - ./certs:/certs:ro
+    depends_on:
+      cloud-sql-proxy:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+    restart: 'no'
+    networks:
+      - data-platform-network
+
 networks:
   data-platform-network:
     external: true
