@@ -13,6 +13,7 @@
     "cdc-connect",
     "generate-data",
     "kafka-ui",
+    "mdm",
     "publish-data"
   ],
   "source": "docker-compose.yaml"
