@@ -176,3 +176,7 @@ tfplan
 *.code-workspace
 .pytest_cache/
 transform/dbt/target/
+*.tfstate
+*.tfstate.*
+.terraform/
+__pycache__/
