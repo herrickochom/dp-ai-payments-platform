@@ -5,7 +5,7 @@ from writer import FIELDS, convert, timestamp
 class WriterTests(unittest.TestCase):
     def sample(self):
         data = {name: None for name,_,_ in FIELDS if name != 'parsed_event_timestamp'}
-        data.update(event_id='e1', event_timestamp='2026-11-03T12:23:19Z', source_system='test', message_type='payment', _kafka_topic='test.topic', _kafka_partition=0, _kafka_offset=1, _kafka_timestamp='2026-11-03T12:23:19+00:00', _raw_object_path='gs://example/raw/v1/obj', _bronze_pipeline_version='v2', _bronze_loaded_at='2026-11-03T12:24:00Z')
+        data.update(event_id='e1', event_timestamp='2026-11-03T12:23:19Z', source_system='test', message_type='payment', _kafka_topic='test.topic', _kafka_partition=0, _kafka_offset=1, _kafka_timestamp='2026-11-03T12:23:19+00:00', _raw_object_path='gs://example/raw/v1/obj', _bronze_pipeline_version='v1', _bronze_loaded_at='2026-11-03T12:24:00Z')
         return data
     def test_25_fields(self):
         self.assertEqual(len(FIELDS),25)
