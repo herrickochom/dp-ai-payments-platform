@@ -191,6 +191,8 @@ CREATE TABLE IF NOT EXISTS mdm.beneficiary_identity_alerts_restricted (
     "source_system" text
 );
 
+-- Grants
+GRANT CONNECT ON DATABASE pdm_mdm TO pdm_mdm_writer;
 GRANT USAGE ON SCHEMA mdm TO pdm_mdm_writer;
 GRANT SELECT, INSERT, DELETE ON ALL TABLES IN SCHEMA mdm TO pdm_mdm_writer;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA mdm TO pdm_mdm_writer;

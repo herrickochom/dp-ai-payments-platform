@@ -272,8 +272,6 @@ services:
       - "--address=0.0.0.0"
       - "--port=5432"
       - "--auto-iam-authn"
-      - "--tls-cert=/certs/mdm-server.crt"
-      - "--tls-key=/certs/mdm-server.key"
       - "${CLOUD_SQL_CONNECTION_NAME:-project-e48f194e-f44f-458d-b4f:europe-west2:pdm-dev-mdm-postgres}"
     volumes:
       - ./certs:/certs:ro
@@ -296,8 +294,8 @@ services:
       PDM_SOURCE_DB: ${PDM_SOURCE_DB:-pdm_mdm}
       PDM_SOURCE_USER: ${PDM_SOURCE_USER}
       PDM_SOURCE_PASSWORD: ${PDM_SOURCE_PASSWORD}
-      PDM_SOURCE_SSLMODE: verify-full
-      PDM_SOURCE_SSLROOTCERT: /certs/mdm-ca.crt
+      PDM_SOURCE_SSLMODE: verify-ca
+      PDM_SOURCE_SSLROOTCERT: /certs/google-cloudsql-server-ca.crt
       PDM_SOURCE_CONNECT_TIMEOUT: "10"
       PDM_SOURCE_STATEMENT_TIMEOUT_MS: "60000"
     volumes:
@@ -323,8 +321,8 @@ services:
       PDM_SOURCE_DB: ${PDM_SOURCE_DB:-pdm_mdm}
       PDM_SOURCE_USER: ${PDM_SOURCE_USER}
       PDM_SOURCE_PASSWORD: ${PDM_SOURCE_PASSWORD}
-      PDM_SOURCE_SSLMODE: verify-full
-      PDM_SOURCE_SSLROOTCERT: /certs/mdm-ca.crt
+      PDM_SOURCE_SSLMODE: verify-ca
+      PDM_SOURCE_SSLROOTCERT: /certs/google-cloudsql-server-ca.crt
       PDM_SOURCE_CONNECT_TIMEOUT: "10"
       PDM_SOURCE_STATEMENT_TIMEOUT_MS: "60000"
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
