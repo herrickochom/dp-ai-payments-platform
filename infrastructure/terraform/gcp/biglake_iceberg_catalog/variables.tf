@@ -17,7 +17,7 @@ variable "approved_gcs_prefix" {
   default     = "gs://dp-pdm-ai-platform-dev/lakehouse/iceberg/payments/"
   validation {
     condition     = startswith(var.approved_gcs_prefix, "gs://dp-pdm-ai-platform-dev/lakehouse/iceberg/payments/")
-    error_message = "KP-014 must remain under the isolated pilot prefix."
+    error_message = "The Iceberg catalogue must remain under the isolated pilot prefix."
   }
 }
 variable "namespace_id" {

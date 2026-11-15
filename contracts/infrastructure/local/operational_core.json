@@ -2,31 +2,24 @@
   "contract_version": 1,
   "target": "local",
   "scope": "operational_core",
-
   "services": [
     "kafka",
-    "minio",
-    "nessie",
-    "payment-consumer-events",
-    "postgres",
-    "redis",
     "schema-registry"
   ],
-
   "excluded_from_operational_start": {
     "initialisation_helpers": [
       "kafka-init",
       "kafka-volume-init",
-      "minio-init-buckets",
-      "minio-init-databases",
-      "postgres-healthcheck",
       "schema-registry-init"
     ],
     "business_workloads": [
-      "payment-producer"
+      "payment-producer",
+      "payment-xml-generator"
+    ],
+    "optional_interfaces": [
+      "kafka-ui"
     ]
   },
-
   "command_policy": {
     "detached": true,
     "no_recreate": true,
@@ -36,7 +29,6 @@
     "build": false,
     "remove_orphans": false
   },
-
   "execution": {
     "enabled": false,
     "dry_run_allowed": true,

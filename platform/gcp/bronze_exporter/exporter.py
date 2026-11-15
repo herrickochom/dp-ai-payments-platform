@@ -73,8 +73,8 @@ def main(argv=None):
         p.error('output directory exists; overwrite prohibited')
     if str(dest).startswith(('gs://', 's3://')):
         p.error('remote output prohibited')
-    if os.environ.get('KP014B_ALLOW_BQ_READ') != 'YES':
-        p.error('live mode also requires KP014B_ALLOW_BQ_READ=YES')
+    if os.environ.get('BRONZE_EXPORT_ALLOW_BQ_READ') != 'YES':
+        p.error('live mode also requires BRONZE_EXPORT_ALLOW_BQ_READ=YES')
     from google.cloud import bigquery
     client = bigquery.Client(project=PROJECT)
     dry_config = bigquery.QueryJobConfig(dry_run=True, use_query_cache=False)

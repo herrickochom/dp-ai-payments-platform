@@ -1,4 +1,4 @@
-variable "enable_kp014_iceberg_pilot" {
+variable "enable_iceberg_pilot" {
   description = "Explicit opt-in; false creates no resources. Never enable without approved plan, cost ceiling and IAM."
   type        = bool
   default     = false
@@ -9,15 +9,15 @@ variable "project_id" {
 }
 variable "catalog_name" {
   type    = string
-  default = "pdm-kp014-iceberg-pilot"
+  default = "pdm-iceberg-pilot"
 }
 variable "approved_gcs_prefix" {
   description = "Proposed, NOT approved: must be reviewed before deployment."
   type        = string
-  default     = "gs://dp-pdm-ai-platform-dev/iceberg/kp014/"
+  default     = "gs://dp-pdm-ai-platform-dev/iceberg/pilot/"
   validation {
-    condition     = startswith(var.approved_gcs_prefix, "gs://dp-pdm-ai-platform-dev/iceberg/kp014/")
-    error_message = "KP-014 must remain under the isolated pilot prefix."
+    condition     = startswith(var.approved_gcs_prefix, "gs://dp-pdm-ai-platform-dev/iceberg/pilot/")
+    error_message = "The Iceberg pilot must remain under the isolated pilot prefix."
   }
 }
 variable "namespace_id" {

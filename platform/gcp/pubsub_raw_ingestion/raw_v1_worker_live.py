@@ -41,10 +41,10 @@ def run(args):
 def main():
     p=argparse.ArgumentParser()
     p.add_argument('--live',action='store_true')
-    p.add_argument('--project',default=os.getenv('KP_GCP_PROJECT',''))
-    p.add_argument('--subscription',default=os.getenv('KP_RAW_V1_SUBSCRIPTION',''))
+    p.add_argument('--project',default=os.getenv('PDM_GCP_PROJECT',''))
+    p.add_argument('--subscription',default=os.getenv('PDM_RAW_INGESTION_SUBSCRIPTION',''))
     p.add_argument('--bucket',default='dp-pdm-ai-platform-dev')
-    p.add_argument('--schema-registry-url',default=os.getenv('KP_SCHEMA_REGISTRY_URL',''))
+    p.add_argument('--schema-registry-url',default=os.getenv('PDM_SCHEMA_REGISTRY_URL',''))
     p.add_argument('--max-messages',type=int,default=1)
     args=p.parse_args()
     if not args.live:

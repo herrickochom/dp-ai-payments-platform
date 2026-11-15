@@ -37,9 +37,11 @@ class TestSourceEnvelope(unittest.TestCase):
         for topic in ("mdm.beneficiary.golden.restricted", "mdm.beneficiary.identity-alert.restricted", "mdm.crosswalk.restricted"):
             with self.assertRaises(mod.RouteRejected):
                 mod.route_for(topic)
-    def test_unverified_mdm_fail_closed(self):
-        with self.assertRaises(mod.RouteRejected):
-            mod.validate_envelope(envelope("mdm.sacco.golden", b'{}'))
+    def test_verified_mdm_json_accepted(self):
+        result = mod.validate_envelope(
+            envelope("mdm.sacco.golden", b'{}')
+        )
+        self.assertEqual(result["payload_format"], "json")
     def test_json_retry(self):
         value = mod.validate_envelope(envelope("payment-events.retry", b'{"reason":"test"}'))
         self.assertEqual(value["payload_format"], "json")

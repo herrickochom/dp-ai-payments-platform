@@ -15,15 +15,61 @@ class Tests(unittest.TestCase):
   with self.assertRaises(Exception):
    m.dispatch(b'{"payload_base64":"not-base64"}','id',object(),a,lambda *x:legacy.append(1),None,None)
   self.assertEqual(legacy,[]);self.assertEqual(a.ids,[])
+ def make_legacy_transport(self):
+  import base64
+  import hashlib
+
+  schema_id = 1
+  wire = bytes([0]) + schema_id.to_bytes(4, "big") + b"test-payload"
+
+  envelope = {
+   "kafka_topic": "icmn.vpm.pain001",
+   "kafka_partition": 0,
+   "kafka_offset": 1,
+   "kafka_timestamp_ms": 1770000000000,
+   "schema_registry_id": schema_id,
+   "payload_base64": base64.b64encode(wire).decode("ascii"),
+   "payload_sha256": hashlib.sha256(wire).hexdigest(),
+  }
+
+  return json.dumps(envelope).encode("utf-8")
+
  def test_legacy_dispatch(self):
-  a=Acker();calls=[]
-  result=m.dispatch(b'legacy','id',object(),a,lambda *x:calls.append(x) or ('k','CREATED'),'store','decoder')
-  self.assertEqual(result,('LEGACY',('k','CREATED')));self.assertEqual(len(calls),1)
+  a = Acker()
+  calls = []
+  data = self.make_legacy_transport()
+
+  result = m.dispatch(
+   data, "id", object(), a,
+   lambda *args: calls.append(args) or ("k", "CREATED"),
+   "store", "decoder"
+  )
+
+  self.assertEqual(result, ("LEGACY", ("k", "CREATED")))
+  self.assertEqual(len(calls), 1)
+  self.assertEqual(calls[0][0], data)
+  self.assertEqual(a.ids, [])
+
  def test_legacy_error_no_ack(self):
-  a=Acker()
-  with self.assertRaises(RuntimeError):
-   m.dispatch(b'legacy','id',object(),a,lambda *x:(_ for _ in ()).throw(RuntimeError('fail')),None,None)
-  self.assertEqual(a.ids,[])
+  a = Acker()
+  data = self.make_legacy_transport()
+  calls = []
+
+  def failing_processor(*args):
+   calls.append(args)
+   raise RuntimeError("simulated downstream failure")
+
+  with self.assertRaisesRegex(
+   RuntimeError, "simulated downstream failure"
+  ):
+   m.dispatch(
+    data, "id", object(), a,
+    failing_processor, None, None
+   )
+
+  self.assertEqual(len(calls), 1)
+  self.assertEqual(a.ids, [])
+
  def test_live_gate(self):
   from types import SimpleNamespace
   a=SimpleNamespace(live=False,max_messages=1,project='p',pubsub_topic='pdm-dev-payments-source-events-v1',subscription='s',bucket='dp-pdm-ai-platform-dev')

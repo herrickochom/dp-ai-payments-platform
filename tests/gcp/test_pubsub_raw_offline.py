@@ -6,7 +6,7 @@ import pathlib
 import unittest
 
 MODULE = pathlib.Path(__file__).resolve().parents[2] / 'platform/gcp/pubsub_raw_ingestion/worker.py'
-spec = importlib.util.spec_from_file_location('kp001w_worker', MODULE)
+spec = importlib.util.spec_from_file_location('pubsub_raw_worker', MODULE)
 worker = importlib.util.module_from_spec(spec)
 import sys
 sys.modules[spec.name] = worker

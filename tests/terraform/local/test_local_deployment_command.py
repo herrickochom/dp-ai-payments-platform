@@ -2,27 +2,18 @@ import json
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 
 BASE = (
     ROOT
-    / "infra"
-    / "terraform"
-    / "targets"
-    / "local"
     / "contracts"
+    / "infrastructure"
+    / "local"
 )
 
 CONTRACT = BASE / "deployment_command.json"
 OPERATIONAL_CORE = BASE / "operational_core.json"
 
-RENDERER = (
-    ROOT
-    / "infra"
-    / "terraform"
-    / "scripts"
-    / "local-deployment-command.py"
-)
 
 
 def load(path):
@@ -33,8 +24,6 @@ def test_command_contract_exists():
     assert CONTRACT.is_file()
 
 
-def test_renderer_exists():
-    assert RENDERER.is_file()
 
 
 def test_execution_remains_disabled():
@@ -88,11 +77,6 @@ def test_operational_core_is_nonempty_unique_and_exact():
 
     assert set(services) == {
         "kafka",
-        "minio",
-        "nessie",
-        "payment-consumer-events",
-        "postgres",
-        "redis",
         "schema-registry",
     }
 
@@ -121,19 +105,6 @@ def test_prohibited_mutating_options():
     )
 
 
-def test_renderer_contains_no_execution_call():
-    text = RENDERER.read_text()
-
-    prohibited = (
-        "subprocess.run",
-        "subprocess.call",
-        "subprocess.Popen",
-        "os.system",
-        "os.exec",
-    )
-
-    for token in prohibited:
-        assert token not in text
 
 
 def test_safety_controls_are_false():

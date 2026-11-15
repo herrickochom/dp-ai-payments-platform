@@ -1,0 +1,1960 @@
+{
+  "bucket": "dp-pdm-ai-platform-dev",
+  "generated_utc": "2026-11-14T21:33:26.992996+00:00",
+  "partition_count": 204,
+  "repository": "/home/hochom/projects/dp-ai-payments-platform-gcp",
+  "retained_offset_span": 5055,
+  "topic_count": 38,
+  "topics": {
+    "agent.locations": {
+      "decision": "LEGACY_CONTRACT",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 10,
+          "gcs_coordinates": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "partition": 0,
+          "retained_offset_span": 10,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 9,
+          "end_offset_exclusive": 9,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 9,
+          "end_offset_exclusive": 9,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 10,
+          "end_offset_exclusive": 10,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        }
+      ],
+      "processing_mode": "streaming",
+      "publisher": "legacy_bridge",
+      "status": "legacy_payment_event"
+    },
+    "agent.profiles": {
+      "decision": "LEGACY_CONTRACT",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 10,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 10,
+          "unmatched_offset_positions": 10
+        },
+        {
+          "beginning_offset": 9,
+          "end_offset_exclusive": 9,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 9,
+          "end_offset_exclusive": 9,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 10,
+          "end_offset_exclusive": 10,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        }
+      ],
+      "processing_mode": "batch",
+      "publisher": "legacy_bridge",
+      "status": "legacy_payment_event"
+    },
+    "agent.transactions": {
+      "decision": "LEGACY_CONTRACT",
+      "partitions": [
+        {
+          "beginning_offset": 20,
+          "end_offset_exclusive": 20,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 14,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 14,
+          "unmatched_offset_positions": 14
+        },
+        {
+          "beginning_offset": 22,
+          "end_offset_exclusive": 22,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 22,
+          "end_offset_exclusive": 22,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 20,
+          "end_offset_exclusive": 20,
+          "gcs_coordinates": [],
+          "partition": 4,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 18,
+          "gcs_coordinates": [],
+          "partition": 5,
+          "retained_offset_span": 18,
+          "unmatched_offset_positions": 18
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 18,
+          "gcs_coordinates": [],
+          "partition": 6,
+          "retained_offset_span": 18,
+          "unmatched_offset_positions": 18
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 17,
+          "gcs_coordinates": [],
+          "partition": 7,
+          "retained_offset_span": 17,
+          "unmatched_offset_positions": 17
+        }
+      ],
+      "processing_mode": "streaming",
+      "publisher": "legacy_bridge",
+      "status": "legacy_payment_event"
+    },
+    "cdc.pdm_mdm.mdm.sacco_master_sources": {
+      "decision": "REQUIRES_EXPLICIT_SOURCE_APPROVAL",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        }
+      ],
+      "processing_mode": "streaming",
+      "publisher": "governed_bridge",
+      "status": "contract_only"
+    },
+    "cpo.plm.pain002": {
+      "decision": "LEGACY_CONTRACT",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 42,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 42,
+          "unmatched_offset_positions": 42
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 44,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 44,
+          "unmatched_offset_positions": 44
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 37,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 37,
+          "unmatched_offset_positions": 37
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 38,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 38,
+          "unmatched_offset_positions": 38
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 41,
+          "gcs_coordinates": [],
+          "partition": 4,
+          "retained_offset_span": 41,
+          "unmatched_offset_positions": 41
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 36,
+          "gcs_coordinates": [],
+          "partition": 5,
+          "retained_offset_span": 36,
+          "unmatched_offset_positions": 36
+        }
+      ],
+      "processing_mode": "real-time",
+      "publisher": "legacy_bridge",
+      "status": "legacy_payment_event"
+    },
+    "cpo.psn.pain002": {
+      "decision": "LEGACY_CONTRACT",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 45,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 45,
+          "unmatched_offset_positions": 45
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 40,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 40,
+          "unmatched_offset_positions": 40
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 38,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 38,
+          "unmatched_offset_positions": 38
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 35,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 35,
+          "unmatched_offset_positions": 35
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 37,
+          "gcs_coordinates": [],
+          "partition": 4,
+          "retained_offset_span": 37,
+          "unmatched_offset_positions": 37
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 43,
+          "gcs_coordinates": [],
+          "partition": 5,
+          "retained_offset_span": 43,
+          "unmatched_offset_positions": 43
+        }
+      ],
+      "processing_mode": "real-time",
+      "publisher": "legacy_bridge",
+      "status": "legacy_payment_event"
+    },
+    "icmn.pmn.pain001": {
+      "decision": "LEGACY_CONTRACT",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 42,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 42,
+          "unmatched_offset_positions": 42
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 44,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 44,
+          "unmatched_offset_positions": 44
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 37,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 37,
+          "unmatched_offset_positions": 37
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 38,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 38,
+          "unmatched_offset_positions": 38
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 41,
+          "gcs_coordinates": [],
+          "partition": 4,
+          "retained_offset_span": 41,
+          "unmatched_offset_positions": 41
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 36,
+          "gcs_coordinates": [],
+          "partition": 5,
+          "retained_offset_span": 36,
+          "unmatched_offset_positions": 36
+        }
+      ],
+      "processing_mode": "real-time",
+      "publisher": "legacy_bridge",
+      "status": "legacy_payment_event"
+    },
+    "icmn.vpm.pain001": {
+      "decision": "LEGACY_CONTRACT",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 35,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 35,
+          "unmatched_offset_positions": 35
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 50,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 50,
+          "unmatched_offset_positions": 50
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 37,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 37,
+          "unmatched_offset_positions": 37
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 34,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 34,
+          "unmatched_offset_positions": 34
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 46,
+          "gcs_coordinates": [],
+          "partition": 4,
+          "retained_offset_span": 46,
+          "unmatched_offset_positions": 46
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 36,
+          "gcs_coordinates": [],
+          "partition": 5,
+          "retained_offset_span": 36,
+          "unmatched_offset_positions": 36
+        }
+      ],
+      "processing_mode": "real-time",
+      "publisher": "legacy_bridge",
+      "status": "legacy_payment_event"
+    },
+    "mdm.agent.golden": {
+      "decision": "REQUIRES_EXPLICIT_SOURCE_APPROVAL",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        }
+      ],
+      "processing_mode": "streaming",
+      "publisher": "governed_bridge",
+      "status": "contract_only"
+    },
+    "mdm.beneficiary.golden.restricted": {
+      "decision": "BLOCKED",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        }
+      ],
+      "processing_mode": "real-time",
+      "publisher": null,
+      "status": "blocked_restricted"
+    },
+    "mdm.beneficiary.identity-alert.restricted": {
+      "decision": "BLOCKED",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        }
+      ],
+      "processing_mode": "real-time",
+      "publisher": null,
+      "status": "blocked_restricted"
+    },
+    "mdm.crosswalk.restricted": {
+      "decision": "BLOCKED",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        }
+      ],
+      "processing_mode": "real-time",
+      "publisher": null,
+      "status": "blocked_restricted"
+    },
+    "mdm.geography.golden": {
+      "decision": "REQUIRES_EXPLICIT_SOURCE_APPROVAL",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        }
+      ],
+      "processing_mode": "real-time",
+      "publisher": "governed_bridge",
+      "status": "contract_only"
+    },
+    "mdm.sacco.golden": {
+      "decision": "REQUIRES_EXPLICIT_SOURCE_APPROVAL",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 1,
+          "gcs_coordinates": [
+            0
+          ],
+          "partition": 2,
+          "retained_offset_span": 1,
+          "unmatched_offset_positions": 0
+        }
+      ],
+      "processing_mode": "streaming",
+      "publisher": "governed_bridge",
+      "status": "contract_only"
+    },
+    "mobile.airtel.pacs002": {
+      "decision": "LEGACY_CONTRACT",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 6,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 6,
+          "unmatched_offset_positions": 6
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 5,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 5,
+          "unmatched_offset_positions": 5
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 2,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 2,
+          "unmatched_offset_positions": 2
+        },
+        {
+          "beginning_offset": 3,
+          "end_offset_exclusive": 3,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        }
+      ],
+      "processing_mode": "real-time",
+      "publisher": "legacy_bridge",
+      "status": "legacy_payment_event"
+    },
+    "mobile.airtel.pacs008": {
+      "decision": "LEGACY_CONTRACT",
+      "partitions": [
+        {
+          "beginning_offset": 2,
+          "end_offset_exclusive": 2,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 1,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 1,
+          "unmatched_offset_positions": 1
+        },
+        {
+          "beginning_offset": 5,
+          "end_offset_exclusive": 5,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 5,
+          "end_offset_exclusive": 5,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 1,
+          "end_offset_exclusive": 1,
+          "gcs_coordinates": [],
+          "partition": 4,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 2,
+          "end_offset_exclusive": 2,
+          "gcs_coordinates": [],
+          "partition": 5,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        }
+      ],
+      "processing_mode": "real-time",
+      "publisher": "legacy_bridge",
+      "status": "legacy_payment_event"
+    },
+    "mobile.mtn.pacs002": {
+      "decision": "LEGACY_CONTRACT",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 57,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 57,
+          "unmatched_offset_positions": 57
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 57,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 57,
+          "unmatched_offset_positions": 57
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 55,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 55,
+          "unmatched_offset_positions": 55
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 53,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 53,
+          "unmatched_offset_positions": 53
+        }
+      ],
+      "processing_mode": "real-time",
+      "publisher": "legacy_bridge",
+      "status": "legacy_payment_event"
+    },
+    "mobile.mtn.pacs008": {
+      "decision": "LEGACY_CONTRACT",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 39,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 39,
+          "unmatched_offset_positions": 39
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 39,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 39,
+          "unmatched_offset_positions": 39
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 43,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 43,
+          "unmatched_offset_positions": 43
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 33,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 33,
+          "unmatched_offset_positions": 33
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 30,
+          "gcs_coordinates": [],
+          "partition": 4,
+          "retained_offset_span": 30,
+          "unmatched_offset_positions": 30
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 38,
+          "gcs_coordinates": [],
+          "partition": 5,
+          "retained_offset_span": 38,
+          "unmatched_offset_positions": 38
+        }
+      ],
+      "processing_mode": "streaming",
+      "publisher": "legacy_bridge",
+      "status": "legacy_payment_event"
+    },
+    "payment-events.dlq": {
+      "decision": "REQUIRES_EXPLICIT_SOURCE_APPROVAL",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 4,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 5,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 6,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 7,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        }
+      ],
+      "processing_mode": "streaming",
+      "publisher": "governed_bridge",
+      "status": "contract_only"
+    },
+    "payment-events.retry": {
+      "decision": "REQUIRES_EXPLICIT_SOURCE_APPROVAL",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 4,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 5,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 6,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 7,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        }
+      ],
+      "processing_mode": "streaming",
+      "publisher": "governed_bridge",
+      "status": "contract_only"
+    },
+    "payments.lifecycle.audit.v1": {
+      "decision": "BLOCKED",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 4,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 5,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        }
+      ],
+      "processing_mode": "real-time",
+      "publisher": null,
+      "status": "blocked_unverified_format"
+    },
+    "payments.lifecycle.dlq.v1": {
+      "decision": "BLOCKED",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 4,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 5,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        }
+      ],
+      "processing_mode": "real-time",
+      "publisher": null,
+      "status": "blocked_unverified_format"
+    },
+    "payments.lifecycle.exceptions.v1": {
+      "decision": "BLOCKED",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 4,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 5,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        }
+      ],
+      "processing_mode": "real-time",
+      "publisher": null,
+      "status": "blocked_unverified_format"
+    },
+    "payments.lifecycle.state.v1": {
+      "decision": "REQUIRES_EXPLICIT_SOURCE_APPROVAL",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 4,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 5,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        }
+      ],
+      "processing_mode": "real-time",
+      "publisher": "governed_bridge",
+      "status": "contract_only"
+    },
+    "payments.lifecycle.transitions.v1": {
+      "decision": "REQUIRES_EXPLICIT_SOURCE_APPROVAL",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 4,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 5,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        }
+      ],
+      "processing_mode": "real-time",
+      "publisher": "governed_bridge",
+      "status": "contract_only"
+    },
+    "pdmis.beneficiaries": {
+      "decision": "LEGACY_CONTRACT",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 32,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 32,
+          "unmatched_offset_positions": 32
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 33,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 33,
+          "unmatched_offset_positions": 33
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 30,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 30,
+          "unmatched_offset_positions": 30
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 30,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 30,
+          "unmatched_offset_positions": 30
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 31,
+          "gcs_coordinates": [],
+          "partition": 4,
+          "retained_offset_span": 31,
+          "unmatched_offset_positions": 31
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 30,
+          "gcs_coordinates": [],
+          "partition": 5,
+          "retained_offset_span": 30,
+          "unmatched_offset_positions": 30
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 32,
+          "gcs_coordinates": [],
+          "partition": 6,
+          "retained_offset_span": 32,
+          "unmatched_offset_positions": 32
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 32,
+          "gcs_coordinates": [],
+          "partition": 7,
+          "retained_offset_span": 32,
+          "unmatched_offset_positions": 32
+        }
+      ],
+      "processing_mode": "batch",
+      "publisher": "legacy_bridge",
+      "status": "legacy_payment_event"
+    },
+    "pdmis.business_plans": {
+      "decision": "LEGACY_CONTRACT",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 63,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 63,
+          "unmatched_offset_positions": 63
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 63,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 63,
+          "unmatched_offset_positions": 63
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 62,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 62,
+          "unmatched_offset_positions": 62
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 62,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 62,
+          "unmatched_offset_positions": 62
+        }
+      ],
+      "processing_mode": "batch",
+      "publisher": "legacy_bridge",
+      "status": "legacy_payment_event"
+    },
+    "pdmis.households": {
+      "decision": "LEGACY_CONTRACT",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 63,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 63,
+          "unmatched_offset_positions": 63
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 63,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 63,
+          "unmatched_offset_positions": 63
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 62,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 62,
+          "unmatched_offset_positions": 62
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 62,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 62,
+          "unmatched_offset_positions": 62
+        }
+      ],
+      "processing_mode": "batch",
+      "publisher": "legacy_bridge",
+      "status": "legacy_payment_event"
+    },
+    "pdmis.loans": {
+      "decision": "LEGACY_CONTRACT",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 33,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 33,
+          "unmatched_offset_positions": 33
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 32,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 32,
+          "unmatched_offset_positions": 32
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 30,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 30,
+          "unmatched_offset_positions": 30
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 30,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 30,
+          "unmatched_offset_positions": 30
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 30,
+          "gcs_coordinates": [],
+          "partition": 4,
+          "retained_offset_span": 30,
+          "unmatched_offset_positions": 30
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 31,
+          "gcs_coordinates": [],
+          "partition": 5,
+          "retained_offset_span": 31,
+          "unmatched_offset_positions": 31
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 32,
+          "gcs_coordinates": [],
+          "partition": 6,
+          "retained_offset_span": 32,
+          "unmatched_offset_positions": 32
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 32,
+          "gcs_coordinates": [],
+          "partition": 7,
+          "retained_offset_span": 32,
+          "unmatched_offset_positions": 32
+        }
+      ],
+      "processing_mode": "batch",
+      "publisher": "legacy_bridge",
+      "status": "legacy_payment_event"
+    },
+    "pdmis.repayments": {
+      "decision": "LEGACY_CONTRACT",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 183,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 183,
+          "unmatched_offset_positions": 183
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 228,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 228,
+          "unmatched_offset_positions": 228
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 166,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 166,
+          "unmatched_offset_positions": 166
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 176,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 176,
+          "unmatched_offset_positions": 176
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 152,
+          "gcs_coordinates": [],
+          "partition": 4,
+          "retained_offset_span": 152,
+          "unmatched_offset_positions": 152
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 202,
+          "gcs_coordinates": [],
+          "partition": 5,
+          "retained_offset_span": 202,
+          "unmatched_offset_positions": 202
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 191,
+          "gcs_coordinates": [],
+          "partition": 6,
+          "retained_offset_span": 191,
+          "unmatched_offset_positions": 191
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 217,
+          "gcs_coordinates": [],
+          "partition": 7,
+          "retained_offset_span": 217,
+          "unmatched_offset_positions": 217
+        }
+      ],
+      "processing_mode": "streaming",
+      "publisher": "legacy_bridge",
+      "status": "legacy_payment_event"
+    },
+    "pdmis.saccos": {
+      "decision": "LEGACY_CONTRACT",
+      "partitions": [
+        {
+          "beginning_offset": 8,
+          "end_offset_exclusive": 8,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 5,
+          "end_offset_exclusive": 5,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 9,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 9,
+          "unmatched_offset_positions": 9
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 16,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 16,
+          "unmatched_offset_positions": 16
+        }
+      ],
+      "processing_mode": "batch",
+      "publisher": "legacy_bridge",
+      "status": "legacy_payment_event"
+    },
+    "pdmis.special_groups": {
+      "decision": "LEGACY_CONTRACT",
+      "partitions": [
+        {
+          "beginning_offset": 2,
+          "end_offset_exclusive": 2,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 2,
+          "end_offset_exclusive": 2,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 1,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 1,
+          "unmatched_offset_positions": 1
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 0,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        }
+      ],
+      "processing_mode": "batch",
+      "publisher": "legacy_bridge",
+      "status": "legacy_payment_event"
+    },
+    "wendi.camt052": {
+      "decision": "LEGACY_CONTRACT",
+      "partitions": [
+        {
+          "beginning_offset": 8,
+          "end_offset_exclusive": 8,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 5,
+          "end_offset_exclusive": 5,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 9,
+          "end_offset_exclusive": 9,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        },
+        {
+          "beginning_offset": 16,
+          "end_offset_exclusive": 16,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 0,
+          "unmatched_offset_positions": 0
+        }
+      ],
+      "processing_mode": "streaming",
+      "publisher": "legacy_bridge",
+      "status": "legacy_payment_event"
+    },
+    "wendi.camt053": {
+      "decision": "LEGACY_CONTRACT",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 36,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 36,
+          "unmatched_offset_positions": 36
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 40,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 40,
+          "unmatched_offset_positions": 40
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 36,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 36,
+          "unmatched_offset_positions": 36
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 39,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 39,
+          "unmatched_offset_positions": 39
+        }
+      ],
+      "processing_mode": "streaming",
+      "publisher": "legacy_bridge",
+      "status": "legacy_payment_event"
+    },
+    "wendi.camt054": {
+      "decision": "LEGACY_CONTRACT",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 20,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 20,
+          "unmatched_offset_positions": 20
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 21,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 21,
+          "unmatched_offset_positions": 21
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 17,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 17,
+          "unmatched_offset_positions": 17
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 19,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 19,
+          "unmatched_offset_positions": 19
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 16,
+          "gcs_coordinates": [],
+          "partition": 4,
+          "retained_offset_span": 16,
+          "unmatched_offset_positions": 16
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 19,
+          "gcs_coordinates": [],
+          "partition": 5,
+          "retained_offset_span": 19,
+          "unmatched_offset_positions": 19
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 19,
+          "gcs_coordinates": [],
+          "partition": 6,
+          "retained_offset_span": 19,
+          "unmatched_offset_positions": 19
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 20,
+          "gcs_coordinates": [],
+          "partition": 7,
+          "retained_offset_span": 20,
+          "unmatched_offset_positions": 20
+        }
+      ],
+      "processing_mode": "streaming",
+      "publisher": "legacy_bridge",
+      "status": "legacy_payment_event"
+    },
+    "wendi.pain001": {
+      "decision": "LEGACY_CONTRACT",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 37,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 37,
+          "unmatched_offset_positions": 37
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 38,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 38,
+          "unmatched_offset_positions": 38
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 48,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 48,
+          "unmatched_offset_positions": 48
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 36,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 36,
+          "unmatched_offset_positions": 36
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 33,
+          "gcs_coordinates": [],
+          "partition": 4,
+          "retained_offset_span": 33,
+          "unmatched_offset_positions": 33
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 46,
+          "gcs_coordinates": [],
+          "partition": 5,
+          "retained_offset_span": 46,
+          "unmatched_offset_positions": 46
+        }
+      ],
+      "processing_mode": "real-time",
+      "publisher": "legacy_bridge",
+      "status": "legacy_payment_event"
+    },
+    "wendi.pain002": {
+      "decision": "LEGACY_CONTRACT",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 43,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 43,
+          "unmatched_offset_positions": 43
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 37,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 37,
+          "unmatched_offset_positions": 37
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 38,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 38,
+          "unmatched_offset_positions": 38
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 40,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 40,
+          "unmatched_offset_positions": 40
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 37,
+          "gcs_coordinates": [],
+          "partition": 4,
+          "retained_offset_span": 37,
+          "unmatched_offset_positions": 37
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 43,
+          "gcs_coordinates": [],
+          "partition": 5,
+          "retained_offset_span": 43,
+          "unmatched_offset_positions": 43
+        }
+      ],
+      "processing_mode": "real-time",
+      "publisher": "legacy_bridge",
+      "status": "legacy_payment_event"
+    },
+    "wendi.transactions": {
+      "decision": "LEGACY_CONTRACT",
+      "partitions": [
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 32,
+          "gcs_coordinates": [],
+          "partition": 0,
+          "retained_offset_span": 32,
+          "unmatched_offset_positions": 32
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 30,
+          "gcs_coordinates": [],
+          "partition": 1,
+          "retained_offset_span": 30,
+          "unmatched_offset_positions": 30
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 29,
+          "gcs_coordinates": [],
+          "partition": 2,
+          "retained_offset_span": 29,
+          "unmatched_offset_positions": 29
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 29,
+          "gcs_coordinates": [],
+          "partition": 3,
+          "retained_offset_span": 29,
+          "unmatched_offset_positions": 29
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 28,
+          "gcs_coordinates": [],
+          "partition": 4,
+          "retained_offset_span": 28,
+          "unmatched_offset_positions": 28
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 29,
+          "gcs_coordinates": [],
+          "partition": 5,
+          "retained_offset_span": 29,
+          "unmatched_offset_positions": 29
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 31,
+          "gcs_coordinates": [],
+          "partition": 6,
+          "retained_offset_span": 31,
+          "unmatched_offset_positions": 31
+        },
+        {
+          "beginning_offset": 0,
+          "end_offset_exclusive": 30,
+          "gcs_coordinates": [],
+          "partition": 7,
+          "retained_offset_span": 30,
+          "unmatched_offset_positions": 30
+        }
+      ],
+      "processing_mode": "streaming",
+      "publisher": "legacy_bridge",
+      "status": "legacy_payment_event"
+    }
+  },
+  "unmatched_offset_positions": 5044
+}

@@ -2,15 +2,13 @@ import json
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 
 BASE = (
     ROOT
-    / "infra"
-    / "terraform"
-    / "targets"
-    / "local"
     / "contracts"
+    / "infrastructure"
+    / "local"
 )
 
 POLICY = BASE / "deployment_enablement.json"

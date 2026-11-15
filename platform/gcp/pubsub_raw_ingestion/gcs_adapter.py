@@ -1,4 +1,4 @@
-"""GCS immutable storage adapter for KP-001W. No live consumer or automatic ack."""
+"""GCS immutable storage adapter for pubsub-raw-ingestion. No live consumer or automatic ack."""
 from google.api_core.exceptions import PreconditionFailed
 
 

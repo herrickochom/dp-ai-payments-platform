@@ -6,7 +6,7 @@ from unittest.mock import Mock
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 MODULE = ROOT / 'platform/gcp/kafka_pubsub_bridge/bridge.py'
-spec = importlib.util.spec_from_file_location('kp001d_bridge', MODULE)
+spec = importlib.util.spec_from_file_location('kafka_pubsub_bridge', MODULE)
 bridge = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(bridge)
 

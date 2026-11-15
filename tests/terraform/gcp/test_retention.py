@@ -8,7 +8,7 @@ from pathlib import Path
 
 import yaml
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = Path(__file__).resolve().parents[3]
 VALIDATOR = (
     ROOT / "infrastructure/terraform/gcp/scripts/validate_retention.py"
 )

@@ -59,45 +59,47 @@ def dispatch(
     *,
     source_store=None,
 ):
-    """Reject malformed source messages before side effects."""
-
+    """Classify and validate source and legacy transport before side effects."""
     try:
         candidate = json.loads(data.decode("utf-8"))
-    except (UnicodeError, ValueError, AttributeError):
-        candidate = None
+    except (UnicodeError, ValueError, AttributeError) as exc:
+        raise OperationalError("invalid Pub/Sub transport JSON") from exc
 
-    source_fields = {
-        "message_type",
+    if not isinstance(candidate, dict):
+        raise OperationalError("Pub/Sub transport must be an object")
+
+    legacy_fields = {
         "kafka_topic",
         "kafka_partition",
         "kafka_offset",
         "kafka_timestamp_ms",
+        "schema_registry_id",
         "payload_base64",
         "payload_sha256",
-        "schema_registry_id",
     }
 
-    source_like = (
-        isinstance(candidate, dict)
-        and bool(source_fields.intersection(candidate))
-    )
-
-    if source_like:
+    if "message_type" in candidate:
         if not is_source_envelope(data):
-            raise OperationalError(
-                "invalid or missing source discriminator"
-            )
+            raise OperationalError("invalid source discriminator")
 
-        # Validate before storage, acknowledgement or legacy fallback.
         _stage12_contract.validate_envelope(candidate)
 
-        message = Received(
-            data,
-            lambda: acker.ack(ack_id),
-        )
-
+        message = Received(data, lambda: acker.ack(ack_id))
         store = ENTRY.store_one if source_store is None else source_store
         return "SOURCE", store(message, bucket)
+
+    if set(candidate) != legacy_fields:
+        raise OperationalError("invalid or ambiguous legacy envelope")
+
+    # Validate the existing legacy transport contract before side effects.
+    legacy_contract = load(
+        ROOT / "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "dp_legacy_transport_contract",
+    )
+    try:
+        legacy_contract.transport(data)
+    except legacy_contract.ContractError as exc:
+        raise OperationalError("invalid legacy transport") from exc
 
     return "LEGACY", legacy_process(
         data,
@@ -203,6 +205,23 @@ def run_bridge(args):
  check_live(args)
  if not all((args.kafka_bootstrap,args.kafka_topic,args.kafka_group)):
   raise OperationalError('Kafka connection, topic and dedicated group required')
+ # Reject unauthorised topics before opening network clients.
+ delivery = ENTRY.callbacks.delivery
+ route = delivery.adapter.contract.route_for(args.kafka_topic)
+
+ if args.kafka_topic in delivery.adapter.LEGACY_TOPICS:
+  raise OperationalError(
+   'legacy topic belongs to existing ingestion path'
+  )
+
+ if (
+  route['status'] != 'contract_only'
+  or args.kafka_topic not in delivery.APPROVED_SOURCE_TOPICS
+ ):
+  raise OperationalError(
+   'source publishing not explicitly authorised'
+  )
+
  from confluent_kafka import Consumer
  from google.cloud import pubsub_v1
  from confluent_kafka import TopicPartition
@@ -263,6 +282,63 @@ def _load_subscriber_routing():
         return module
 
 
+def process_legacy_with_lease(
+    message,
+    data,
+    ack_id,
+    store,
+    decoder,
+    legacy_process,
+    extend_lease,
+    *,
+    renewal_interval_seconds=5.0,
+    max_processing_seconds=None,
+):
+    """Run existing legacy durable processing; defer actual Pub/Sub ack."""
+    guard = get_source_lease_guard()
+
+    class DeferredAcknowledger:
+        def __init__(self):
+            self.requests = 0
+
+        def ack(self, supplied_ack_id):
+            if supplied_ack_id != ack_id:
+                raise OperationalError("legacy acknowledgement ID mismatch")
+            self.requests += 1
+            if self.requests != 1:
+                raise OperationalError("multiple legacy acknowledgement requests")
+
+    deferred = DeferredAcknowledger()
+
+    def durable_verify(received):
+        result = legacy_process(
+            data,
+            ack_id,
+            store,
+            deferred,
+            decoder,
+        )
+        return (
+            deferred.requests == 1
+            and isinstance(result, tuple)
+            and len(result) == 2
+            and isinstance(result[0], str)
+            and bool(result[0])
+            and result[1] in (
+                "CREATED",
+                "ALREADY_PRESENT_IDENTICAL",
+            )
+        )
+
+    return guard.process_with_renewal(
+        message,
+        durable_verify,
+        extend_lease,
+        renewal_interval_seconds=renewal_interval_seconds,
+        max_processing_seconds=max_processing_seconds,
+    )
+
+
 def route_pulled_message(
     *,
     received,
@@ -276,7 +352,7 @@ def route_pulled_message(
     renewal_interval_seconds=5.0,
     max_processing_seconds=60.0,
 ):
-    """Route one pulled message with source-only lease management."""
+    """Route pulled SOURCE and LEGACY messages with renewable leases."""
     if (
         isinstance(max_processing_seconds, bool)
         or not isinstance(max_processing_seconds, (int, float))
@@ -298,11 +374,8 @@ def route_pulled_message(
     )
 
     source_acker = acknowledger_module.SourceAcknowledger(
-        subscriber,
-        subscription,
-        rpc_timeout_seconds=5.0,
+        subscriber, subscription, rpc_timeout_seconds=5.0,
     )
-
     extender = extender_module.SourceLeaseExtender(
         subscriber,
         subscription,
@@ -311,23 +384,17 @@ def route_pulled_message(
         rpc_timeout_seconds=5.0,
     )
 
-    def unchanged_legacy_process(
-        data, ack_id, store, ignored_source_acker, decoder
-    ):
-        return legacy_process(
-            data, ack_id, store, legacy_acker, decoder
-        )
-
     return routing.route_received(
         data=received.message.data,
         ack_id=received.ack_id,
         bucket=bucket,
         acker=source_acker,
-        legacy_process=unchanged_legacy_process,
+        legacy_process=legacy_process,
         legacy_store=legacy_store,
         legacy_decoder=legacy_decoder,
         dispatch=dispatch,
         process_source_with_lease=process_source_with_lease,
+        process_legacy_with_lease=process_legacy_with_lease,
         extend_lease=extender.extend,
         renewal_interval_seconds=renewal_interval_seconds,
         max_processing_seconds=max_processing_seconds,
@@ -353,7 +420,7 @@ def run_subscriber(args):
    response=subscriber.pull(request={'subscription':path,'max_messages':1},timeout=20)
    if not response.received_messages:break
    received=response.received_messages[0]
-   route_pulled_message(
+   result = route_pulled_message(
        received=received,
        subscriber=subscriber,
        subscription=path,
@@ -363,6 +430,13 @@ def run_subscriber(args):
        legacy_store=legacy_store,
        legacy_decoder=decoder,
    )
+   if type(getattr(result, 'acknowledged', None)) is not bool:
+     raise OperationalError('invalid subscriber acknowledgement result')
+   if not result.acknowledged:
+     raise OperationalError(
+       f'subscriber delivery unacknowledged: '
+       f'route={result.route!r}, reason={result.reason!r}'
+     )
    done+=1
  finally:subscriber.close()
  return done

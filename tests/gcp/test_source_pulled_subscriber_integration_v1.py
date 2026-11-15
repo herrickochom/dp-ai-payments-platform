@@ -62,6 +62,21 @@ def source_data():
     }).encode()
 
 
+def legacy_data():
+    schema_id = 1
+    wire = bytes([0]) + schema_id.to_bytes(4, "big") + b"{}"
+
+    return json.dumps({
+        "kafka_topic": "pdmis.repayments",
+        "kafka_partition": 0,
+        "kafka_offset": 17,
+        "kafka_timestamp_ms": 1770000000000,
+        "schema_registry_id": schema_id,
+        "payload_base64": base64.b64encode(wire).decode(),
+        "payload_sha256": hashlib.sha256(wire).hexdigest(),
+    }).encode()
+
+
 class PulledSubscriberAcceptance(unittest.TestCase):
 
     def setUp(self):
@@ -69,16 +84,25 @@ class PulledSubscriberAcceptance(unittest.TestCase):
         self.legacy_acker = FakeLegacyAcker()
         self.legacy_calls = []
 
-    def invoke(self, data, processor, *, budget=60.0):
+    def invoke(
+        self, data, processor, *, budget=60.0,
+        legacy_processor=None,
+    ):
         received = SimpleNamespace(
             ack_id="ack-17",
             message=SimpleNamespace(data=data),
         )
 
-        def legacy_process(data, ack_id, store, acker, decoder):
+        def default_legacy_process(data, ack_id, store, acker, decoder):
             self.legacy_calls.append(data)
             acker.ack(ack_id)
             return ("legacy-key", "CREATED")
+
+        selected = (
+            default_legacy_process
+            if legacy_processor is None
+            else legacy_processor
+        )
 
         with patch.object(
             runtime,
@@ -91,7 +115,7 @@ class PulledSubscriberAcceptance(unittest.TestCase):
                 subscription="projects/test/subscriptions/test",
                 bucket=object(),
                 legacy_acker=self.legacy_acker,
-                legacy_process=legacy_process,
+                legacy_process=selected,
                 legacy_store=object(),
                 legacy_decoder=object(),
                 max_processing_seconds=budget,
@@ -180,16 +204,130 @@ class PulledSubscriberAcceptance(unittest.TestCase):
                 for event in self.subscriber.events)
         )
 
-    def test_legacy_uses_only_legacy_acker(self):
+    def test_legacy_acknowledged_only_after_guard(self):
         def forbidden(*args, **kwargs):
             self.fail("Source processor called for legacy message")
 
-        result = self.invoke(b"legacy-message", forbidden)
+        payload = legacy_data()
+        result = self.invoke(payload, forbidden)
 
         self.assertEqual(result.route, "LEGACY")
-        self.assertEqual(self.legacy_calls, [b"legacy-message"])
-        self.assertEqual(self.legacy_acker.ids, ["ack-17"])
+        self.assertTrue(result.acknowledged)
+        self.assertEqual(
+            result.reason,
+            "acknowledged_after_verification",
+        )
+        self.assertEqual(self.legacy_calls, [payload])
+        self.assertEqual(self.legacy_acker.ids, [])
+        self.assertEqual(
+            self.subscriber.events,
+            [("lease", "ack-17"), ("ack", "ack-17")],
+        )
+
+    def test_legacy_initial_lease_failure_prevents_processing(self):
+        def forbidden(*args, **kwargs):
+            self.fail("Source processor called for legacy message")
+
+        with patch.object(
+            self.subscriber,
+            "modify_ack_deadline",
+            side_effect=RuntimeError("lease unavailable"),
+        ):
+            result = self.invoke(legacy_data(), forbidden)
+
+        self.assertEqual(result.route, "LEGACY")
+        self.assertFalse(result.acknowledged)
+        self.assertEqual(result.reason, "initial_lease_failed")
+        self.assertEqual(self.legacy_calls, [])
+        self.assertEqual(self.legacy_acker.ids, [])
         self.assertEqual(self.subscriber.events, [])
+
+    def test_legacy_ack_rpc_failure_reports_unacknowledged(self):
+        def forbidden(*args, **kwargs):
+            self.fail("Source processor called for legacy message")
+
+        with patch.object(
+            self.subscriber,
+            "acknowledge",
+            side_effect=RuntimeError("ack unavailable"),
+        ):
+            result = self.invoke(legacy_data(), forbidden)
+
+        self.assertEqual(result.route, "LEGACY")
+        self.assertFalse(result.acknowledged)
+        self.assertEqual(
+            result.reason,
+            "ack_failed_redelivery_possible",
+        )
+        self.assertEqual(self.legacy_calls, [legacy_data()])
+        self.assertEqual(self.legacy_acker.ids, [])
+        self.assertEqual(
+            self.subscriber.events,
+            [("lease", "ack-17")],
+        )
+
+    def test_legacy_missing_ack_intent_prevents_ack(self):
+        def forbidden(*args, **kwargs):
+            self.fail("Source processor called for legacy message")
+
+        def processor(data, ack_id, store, acker, decoder):
+            self.legacy_calls.append(data)
+            return ("legacy-key", "CREATED")
+
+        result = self.invoke(
+            legacy_data(), forbidden, legacy_processor=processor
+        )
+
+        self.assertEqual(result.route, "LEGACY")
+        self.assertFalse(result.acknowledged)
+        self.assertEqual(result.reason, "not_durably_verified")
+        self.assertEqual(self.legacy_acker.ids, [])
+        self.assertEqual(
+            self.subscriber.events,
+            [("lease", "ack-17")],
+        )
+
+    def test_legacy_duplicate_ack_intent_prevents_ack(self):
+        def forbidden(*args, **kwargs):
+            self.fail("Source processor called for legacy message")
+
+        def processor(data, ack_id, store, acker, decoder):
+            acker.ack(ack_id)
+            acker.ack(ack_id)
+            return ("legacy-key", "CREATED")
+
+        result = self.invoke(
+            legacy_data(), forbidden, legacy_processor=processor
+        )
+
+        self.assertEqual(result.route, "LEGACY")
+        self.assertFalse(result.acknowledged)
+        self.assertEqual(result.reason, "durable_processing_failed")
+        self.assertEqual(self.legacy_acker.ids, [])
+        self.assertEqual(
+            self.subscriber.events,
+            [("lease", "ack-17")],
+        )
+
+    def test_legacy_processing_exception_prevents_ack(self):
+        def forbidden(*args, **kwargs):
+            self.fail("Source processor called for legacy message")
+
+        def processor(data, ack_id, store, acker, decoder):
+            raise RuntimeError("simulated storage failure")
+
+        result = self.invoke(
+            legacy_data(), forbidden, legacy_processor=processor
+        )
+
+        self.assertEqual(result.route, "LEGACY")
+        self.assertFalse(result.acknowledged)
+        self.assertEqual(result.reason, "durable_processing_failed")
+        self.assertEqual(self.legacy_acker.ids, [])
+        self.assertEqual(
+            self.subscriber.events,
+            [("lease", "ack-17")],
+        )
 
     def test_invalid_source_no_fallback_or_ack(self):
         invalid = json.dumps({

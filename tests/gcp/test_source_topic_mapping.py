@@ -5,7 +5,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 P = ROOT / 'platform/gcp/kafka_pubsub_bridge/source_mapping.py'
-spec = importlib.util.spec_from_file_location('kp001f_mapping', P)
+spec = importlib.util.spec_from_file_location('source_topic_mapping', P)
 mod = importlib.util.module_from_spec(spec)
 import sys
 sys.modules[spec.name] = mod

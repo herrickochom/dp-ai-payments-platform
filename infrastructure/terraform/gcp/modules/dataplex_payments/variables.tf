@@ -10,11 +10,6 @@ variable "bucket" {
   type        = string
   description = "GCS bucket registered as RAW asset. Asset covers the whole bucket."
 }
-variable "curated_datasets" {
-  type        = list(string)
-  description = "BigQuery datasets to register as CURATED assets (must already exist)."
-  default     = []
-}
 variable "enable_discovery" {
   type        = bool
   description = "Toggles Dataplex discovery on zones/assets. Billed; requires approval."

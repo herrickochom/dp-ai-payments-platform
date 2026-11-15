@@ -100,7 +100,7 @@ def process_with_renewal(
     try:
         thread = Thread(
             target=renew,
-            name='kp001w-lease-renewal',
+            name='raw-ingestion-lease-renewal',
             daemon=True,
         )
         thread.start()
@@ -159,7 +159,7 @@ def process_with_renewal(
             try:
                 reaper = Thread(
                     target=release_when_finished,
-                    name='kp001w-renewal-reaper',
+                    name='raw-ingestion-renewal-reaper',
                     daemon=True,
                 )
                 reaper.start()

@@ -1,4 +1,4 @@
-"""GCP-KP-001F: source contract evidence and fail-closed mapping eligibility.
+"""source-topic-mapping: source contract evidence and fail-closed mapping eligibility.
 
 This module deliberately does NOT fabricate payment_id, amount_minor or currency.
 It has no cloud, Kafka or external dependencies. Never used as a live publisher.
@@ -50,4 +50,4 @@ def assess(source_schema: str, record: Mapping[str, Any]) -> MappingAssessment:
 
 def require_approved_mapping(source_schema: str, record: Mapping[str, Any]) -> dict:
     assessment = assess(source_schema, record)
-    raise ValueError('GCP-KP-001F mapping blocked: ' + '; '.join(assessment.blockers))
+    raise ValueError('Source mapping blocked: ' + '; '.join(assessment.blockers))

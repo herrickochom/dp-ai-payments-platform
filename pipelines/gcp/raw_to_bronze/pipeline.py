@@ -1,4 +1,4 @@
-"""GCP-KP-011: Raw v1 -> BigQuery Bronze Dataflow pipeline.
+"""raw-to-bronze: Raw v1 -> BigQuery Bronze Dataflow pipeline.
 
 Reads Avro OCF objects from gs://<bucket>/raw/v1/**/record.avro,
 validates schema and lineage, deduplicates by (topic, partition, offset),
@@ -59,7 +59,7 @@ class Validate(beam.DoFn):
                 "reason": f"parse: {record['_parse_error']}",
                 "record_json": None,
                 "_quarantined_at": datetime.now(timezone.utc).isoformat(),
-                "_pipeline_version": "kp011-v1",
+                "_pipeline_version": "raw-to-bronze-v1",
             })
             return
 
@@ -84,7 +84,7 @@ class Validate(beam.DoFn):
                 "reason": "; ".join(errors),
                 "record_json": json.dumps(record, default=str)[:9000],
                 "_quarantined_at": datetime.now(timezone.utc).isoformat(),
-                "_pipeline_version": "kp011-v1",
+                "_pipeline_version": "raw-to-bronze-v1",
             })
             return
 
@@ -105,7 +105,7 @@ class Validate(beam.DoFn):
                 "reason": f"invalid_record: {exc}",
                 "record_json": json.dumps(record, default=str)[:9000],
                 "_quarantined_at": datetime.now(timezone.utc).isoformat(),
-                "_pipeline_version": "kp011-v1",
+                "_pipeline_version": "raw-to-bronze-v1",
             })
             return
         yield {
@@ -131,7 +131,7 @@ class Validate(beam.DoFn):
             "_kafka_source_group": km.get("source_group"),
             "_kafka_source_system": km.get("source_system"),
             "_raw_object_path": record["_raw_object_path"],
-            "_bronze_pipeline_version": "kp011-v1",
+            "_bronze_pipeline_version": "raw-to-bronze-v1",
             "_bronze_loaded_at": datetime.now(timezone.utc).isoformat(),
         }
 

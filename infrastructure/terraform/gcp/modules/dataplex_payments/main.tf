@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------
-# Dataplex lake + 2 zones + 6 assets (1 GCS + N BQ).
+# Dataplex lake + Raw zone + GCS asset (1 GCS + N BQ).
 # Discovery and quality scans are OFF by default (billed features). Flip the
 # corresponding variable after explicit approval — never silently enabled.
 # API endpoint: dataplex.googleapis.com (product renamed "Knowledge Catalog"
@@ -35,23 +35,6 @@ resource "google_dataplex_zone" "raw" {
   }
 }
 
-resource "google_dataplex_zone" "curated" {
-  project      = var.project_id
-  location     = var.region
-  lake         = google_dataplex_lake.payments.name
-  name         = "curated-zone"
-  display_name = "Curated zone"
-  type         = "CURATED"
-
-  resource_spec {
-    location_type = "SINGLE_REGION"
-  }
-
-  discovery_spec {
-    enabled = var.enable_discovery
-  }
-}
-
 # NOTE: a Dataplex STORAGE_BUCKET asset registers the entire bucket.
 # Prefix-level scoping (e.g. only raw/v1/) is not supported at asset level;
 # use Dataplex data-quality/curation rules later if scoping is required.
@@ -66,25 +49,6 @@ resource "google_dataplex_asset" "gcs_raw_v1" {
   resource_spec {
     name = "projects/${var.project_id}/buckets/${var.bucket}"
     type = "STORAGE_BUCKET"
-  }
-
-  discovery_spec {
-    enabled = var.enable_discovery
-  }
-}
-
-resource "google_dataplex_asset" "bq" {
-  for_each      = toset(var.curated_datasets)
-  project       = var.project_id
-  location      = var.region
-  lake          = google_dataplex_lake.payments.name
-  dataplex_zone = google_dataplex_zone.curated.name
-  name          = "bq-${each.key}"
-  display_name  = "BigQuery ${each.key}"
-
-  resource_spec {
-    name = "projects/${var.project_id}/datasets/${each.key}"
-    type = "BIGQUERY_DATASET"
   }
 
   discovery_spec {

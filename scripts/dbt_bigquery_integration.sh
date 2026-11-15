@@ -18,7 +18,7 @@ for arg in "$@"; do
 done
 
 echo "════════════════════════════════════════════════════════════════════════"
-echo "  GCP-KP-012 — dbt Integration Setup"
+echo "  GCP dbt and BigQuery Integration Setup"
 echo "  Mode:  $([ $LIVE -eq 0 ] && echo OFFLINE || echo LIVE)"
 echo "  Force: $([ $FORCE -eq 0 ] && echo 'no (refuse overwrite)' || echo yes)"
 echo "════════════════════════════════════════════════════════════════════════"
@@ -47,9 +47,9 @@ if git rev-parse --git-dir >/dev/null 2>&1; then
     fi
 fi
 
-# KP-011 status
+# raw-to-bronze status
 echo
-echo "  KP-011 status:"
+echo "  Raw-to-Bronze ingestion status:"
 JOB_STATE=$(gcloud dataflow jobs list --region="$REGION" --project="$PROJECT" --limit=1 --format='value(state)' 2>/dev/null)
 echo "    Dataflow job: ${JOB_STATE:-none}"
 BRONZE_ROWS=$(bq --project_id="$PROJECT" query --use_legacy_sql=false --format=csv \
@@ -65,7 +65,7 @@ else
     BRONZE_READY=0
     if [ "$LIVE" -eq 1 ]; then
         echo "  ✗ FATAL: --live refused because Bronze is empty"
-        echo "     Fix KP-011 first, then retry."
+        echo "     Fix Raw-to-Bronze ingestion first, then retry."
         exit 1
     fi
 fi
@@ -170,7 +170,7 @@ sources:
   - name: bronze
     database: 'project-e48f194e-f44f-458d-b4f'
     schema: bronze
-    description: KP-011 Bronze layer
+    description: Raw-to-Bronze ingestion layer
     tables:
       - name: payments_raw_v1
         description: 20403 records across 24 Kafka topics
@@ -500,7 +500,7 @@ echo "  VERIFIED LIVE    ✗  dbt run / dbt test against BigQuery"
 if [ "${BRONZE_READY:-0}" = "1" ]; then
     echo "  BLOCKED          ✗  none — ready for --live --approve-live"
 else
-    echo "  BLOCKED          ⚠  Bronze empty (${BRONZE_ROWS:-0} rows) — fix KP-011 first"
+    echo "  BLOCKED          ⚠  Bronze empty (${BRONZE_ROWS:-0} rows) — fix Raw-to-Bronze ingestion first"
 fi
 echo
 echo "  Evidence: runtime/dbt-validation/setup_report.json"
@@ -510,8 +510,8 @@ echo "  Next:"
 if [ "${BRONZE_READY:-0}" = "1" ]; then
     echo "    bash scripts/dbt_bigquery_integration.sh --live --approve-live"
 else
-    echo "    1. Fix KP-011 IAM (compute SA → bigquery.dataEditor on bronze dataset)"
-    echo "    2. Re-run Dataflow: bash /tmp/kp011_live.sh"
+    echo "    1. Fix Raw-to-Bronze ingestion IAM (compute SA → bigquery.dataEditor on bronze dataset)"
+    echo "    2. Re-run Dataflow using the approved ingestion deployment procedure."
     echo "    3. Verify: bq query 'SELECT COUNT(*) FROM bronze.payments_raw_v1'"
     echo "    4. Then re-run this script with --live --approve-live"
 fi

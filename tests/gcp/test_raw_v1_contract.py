@@ -8,7 +8,7 @@ from datetime import datetime,timezone
 
 ROOT=pathlib.Path(__file__).resolve().parents[2]
 MODULE=ROOT/'platform/gcp/pubsub_raw_ingestion/raw_v1.py'
-spec=importlib.util.spec_from_file_location('kp001_raw_v1',MODULE)
+spec=importlib.util.spec_from_file_location('raw_v1_contract',MODULE)
 raw=importlib.util.module_from_spec(spec); spec.loader.exec_module(raw)
 
 class Store:
@@ -38,7 +38,7 @@ class Tests(unittest.TestCase):
         self.assertTrue(name.endswith('/topic=icmn.pmn.pain001/partition=2/offset=7/record.avro'))
         self.assertEqual(state,'CREATED')
         self.assertEqual(store.read(name)[:4],bytes([79,98,106,1]))
-        self.assertEqual(raw.ocf_read(store.read(name))['payload']['amount'],12.5)
+        self.assertEqual(raw.ocf_read(store.read(name))['payload_wire'],bytes([0,0,0,0,2,1,2,3]))
         self.assertEqual(raw.process_raw_v1(data,'b',store,ack,self.decode)[1],'ALREADY_PRESENT_IDENTICAL')
         self.assertEqual(ack.calls,['a','b'])
     def test_collision_never_acks(self):
@@ -59,8 +59,15 @@ class Tests(unittest.TestCase):
     def test_same_coordinate_different_record_fails(self):
         store=Store(); ack=Ack(); data=self.envelope()
         raw.process_raw_v1(data,'a',store,ack,self.decode)
-        with self.assertRaises(raw.CollisionError):
-            raw.process_raw_v1(data,'b',store,ack,lambda w,t:{'event_id':'other'})
-        self.assertEqual(ack.calls,['a'])
+        # Identical original Kafka wire is an idempotent replay,
+        # regardless of a different decoded projection.
+        self.assertEqual(
+            raw.process_raw_v1(
+                data,'b',store,ack,
+                lambda w,t:{'event_id':'other'}
+            )[1],
+            'ALREADY_PRESENT_IDENTICAL'
+        )
+        self.assertEqual(ack.calls,['a','b'])
 
 if __name__=='__main__': unittest.main()

@@ -2,15 +2,14 @@ from pathlib import Path
 import json
 
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 
 REQUIREMENTS = ROOT / "requirements.txt"
 WORKFLOW = ROOT / ".github" / "workflows" / "ci.yml"
 CONTRACT = (
     ROOT
-    / "infra"
-    / "terraform"
     / "contracts"
+    / "infrastructure"
     / "github_actions_ci_contract.json"
 )
 

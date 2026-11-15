@@ -3,7 +3,7 @@ import importlib.util
 from pathlib import Path
 import unittest
 
-spec = importlib.util.spec_from_file_location('kp014b_exporter', Path(__file__).with_name('exporter.py'))
+spec = importlib.util.spec_from_file_location('bronze_exporter', Path(__file__).with_name('exporter.py'))
 m = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(m)
 

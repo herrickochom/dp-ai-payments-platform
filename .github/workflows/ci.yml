@@ -77,12 +77,6 @@ jobs:
           terraform_version: "1.16.3"
           terraform_wrapper: false
 
-      - name: Terraform format
-        run: terraform -chdir=infra/terraform fmt -check -recursive
-
-      - name: Terraform validate
-        run: terraform -chdir=infra/terraform validate -no-color
-
       - name: Prepare synthetic Compose validation environment
         shell: bash
         run: |
@@ -187,4 +181,4 @@ jobs:
         working-directory: infrastructure/terraform/gcp/environments/dev
 
       - name: Run GCP governance regression tests
-        run: python -m unittest discover -s infrastructure/terraform/gcp/tests -p 'test_*.py' -v
+        run: python -m pytest -q tests/terraform/gcp

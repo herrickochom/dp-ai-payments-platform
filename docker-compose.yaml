@@ -1,29 +1,26 @@
-# GCP source-side development stack only. Not a GCP production deployment.
-# Kafka and Schema Registry here are independent local development services.
-# No GCP API calls or cloud resources are created by this Compose file.
-# Data generation, publishing and Kafka UI are opt-in profiles.
-# No local PostgreSQL service; managed GCP database integration is configured separately.
-# IMPORTANT: payment-producer publishes real events to the local Kafka broker when invoked.
-name: dp-pdm-gcp-source-dev
+# GCP source-side development stack; not a GCP production deployment.
+# No cloud resources are created. CDC, publishing, generation and UI are opt-in.
+# WARNING: payment-producer publishes events when explicitly invoked.
+name: dp-ai-payments-platform-gcp
 services:
   kafka-volume-init:
     image: apache/kafka:4.3.1
     container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform-gcp}-kafka-volume-init
     user: 0:0
     entrypoint:
-    - bash
-    - -c
-    - chown -R 1000:1000 /var/lib/kafka/data /var/lib/kafka/metadata
+      - bash
+      - -c
+      - chown -R 1000:1000 /var/lib/kafka/data /var/lib/kafka/metadata
     volumes:
-    - kafka-data:/var/lib/kafka/data
-    - kafka-metadata:/var/lib/kafka/metadata
+      - kafka-data:/var/lib/kafka/data
+      - kafka-metadata:/var/lib/kafka/metadata
     restart: 'no'
     networks:
-    - data-platform-network
+      - data-platform-network
   kafka:
     build:
       context: .
-      dockerfile: platform/docker/dockerfiles/Dockerfile.kafka-broker
+      dockerfile: docker/kafka-broker/Dockerfile
     container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform-gcp}-kafka
     environment:
       CLUSTER_ID: XwjubDNrR0q4Q6FLK0M7Xg
@@ -42,29 +39,29 @@ services:
       KAFKA_HEAP_OPTS: -Xmx512M
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
     ports:
-    - 127.0.0.1:${KAFKA_EXTERNAL_PORT:-9094}:9094
+      - 127.0.0.1:${KAFKA_EXTERNAL_PORT:-9094}:9094
     volumes:
-    - kafka-data:/var/lib/kafka/data
-    - kafka-metadata:/var/lib/kafka/metadata
+      - kafka-data:/var/lib/kafka/data
+      - kafka-metadata:/var/lib/kafka/metadata
     depends_on:
       kafka-volume-init:
         condition: service_completed_successfully
     restart: unless-stopped
     networks:
-    - data-platform-network
+      - data-platform-network
     healthcheck:
       test:
-      - CMD
-      - bash
-      - -c
-      - echo > /dev/tcp/localhost/9092
+        - CMD
+        - bash
+        - -c
+        - echo > /dev/tcp/localhost/9092
       interval: 5s
       timeout: 5s
       retries: 30
   kafka-init:
     build:
       context: .
-      dockerfile: platform/docker/dockerfiles/Dockerfile.kafka-init
+      dockerfile: docker/kafka-init/Dockerfile
     container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform-gcp}-kafka-init
     environment:
       KAFKA_BOOTSTRAP_SERVER: kafka:9092
@@ -81,7 +78,7 @@ services:
         condition: service_healthy
     restart: 'no'
     networks:
-    - data-platform-network
+      - data-platform-network
   schema-registry:
     image: confluentinc/cp-schema-registry:7.5.0
     container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform-gcp}-schema-registry
@@ -101,17 +98,17 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_INIT_TIMEOUT_MS: 120000
       SCHEMA_REGISTRY_DEBUG: 'true'
     ports:
-    - 127.0.0.1:${SCHEMA_REGISTRY_PORT:-8081}:8081
+      - 127.0.0.1:${SCHEMA_REGISTRY_PORT:-8081}:8081
     depends_on:
       kafka:
         condition: service_healthy
     restart: unless-stopped
     networks:
-    - data-platform-network
+      - data-platform-network
     healthcheck:
       test:
-      - CMD-SHELL
-      - curl -f http://localhost:8081/subjects || exit 1
+        - CMD-SHELL
+        - curl -f http://localhost:8081/subjects || exit 1
       interval: 30s
       timeout: 10s
       retries: 5
@@ -126,41 +123,77 @@ services:
       SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: ${SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO:-}
       SCHEMA_COMPATIBILITY: BACKWARD_TRANSITIVE
     volumes:
-    - ${SCHEMA_REGISTRY_CERT_DIR:-/etc/schema-registry/certs}:/etc/schema-registry/certs:ro
-    - ./platform/kafka/configure-schema-registry.sh:/configure-schema-registry.sh:ro
-    - ./contracts/kafka:/contracts/kafka:ro
+      - ${SCHEMA_REGISTRY_CERT_DIR:-/etc/schema-registry/certs}:/etc/schema-registry/certs:ro
+      - ./platform/kafka/configure-schema-registry.sh:/configure-schema-registry.sh:ro
+      - ./contracts/kafka:/contracts/kafka:ro
     entrypoint:
-    - /bin/sh
-    - /configure-schema-registry.sh
+      - /bin/sh
+      - /configure-schema-registry.sh
     depends_on:
       schema-registry:
         condition: service_healthy
     restart: 'no'
     networks:
-    - data-platform-network
+      - data-platform-network
+  # Dedicated Debezium Kafka Connect worker. Explicitly opt-in; NO connector registration.
+  # Existing compacted Connect state topics must be provisioned and verified beforehand.
+  debezium:
+    profiles:
+      - cdc-connect
+    image: quay.io/debezium/connect@sha256:f943f65cb6f46087902541fd3c9a448707039e1ee21d6111b801df4c9fff8703
+    platform: linux/amd64
+    container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform-gcp}-debezium
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      GROUP_ID: pdm-cdc-connect-dev
+      CONFIG_STORAGE_TOPIC: _pdm_cdc_connect_configs
+      OFFSET_STORAGE_TOPIC: _pdm_cdc_connect_offsets
+      STATUS_STORAGE_TOPIC: _pdm_cdc_connect_status
+      CONFIG_STORAGE_REPLICATION_FACTOR: '1'
+      OFFSET_STORAGE_REPLICATION_FACTOR: '1'
+      STATUS_STORAGE_REPLICATION_FACTOR: '1'
+      ADVERTISED_HOST_NAME: debezium
+      REST_PORT: '8083'
+      CONNECT_CONFIG_PROVIDERS: file
+      CONNECT_CONFIG_PROVIDERS_FILE_CLASS: org.apache.kafka.common.config.provider.FileConfigProvider
+      KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      KEY_CONVERTER_SCHEMAS_ENABLE: 'false'
+      VALUE_CONVERTER_SCHEMAS_ENABLE: 'false'
+    ports:
+      - 127.0.0.1:${DEBEZIUM_REST_PORT:-8083}:8083
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - data-platform-network
+    restart: 'no'
+    # Intentionally no credentials mount or connector registration.
+    # Before activation, validate image startup env mapping and securely mount
+    # a FileConfigProvider-readable credentials file at the connector template path.
   payment-xml-generator:
     profiles:
-    - generate-data
+      - generate-data
     build:
       context: .
-      dockerfile: platform/docker/dockerfiles/Dockerfile.payment-xml-generator
+      dockerfile: docker/payment-xml-generator/Dockerfile
     container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform-gcp}-payment-xml-generator
     environment:
       DATA_ROOT: /app/data
       PYTHONUNBUFFERED: '1'
     volumes:
-    - ./data:/app/data
+      - ./data:/app/data
     depends_on: {}
     restart: 'no'
     networks:
-    - data-platform-network
+      - data-platform-network
     command:
-    - --count
-    - ${PDM_GENERATOR_COUNT:-250}
+      - --count
+      - ${PDM_GENERATOR_COUNT:-250}
   payment-producer:
     build:
       context: .
-      dockerfile: platform/docker/dockerfiles/Dockerfile.payment-producer
+      dockerfile: docker/payment-producer/Dockerfile
     container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform-gcp}-payment-producer
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
@@ -180,7 +213,7 @@ services:
       DP_SECRET_SOURCE: ${DP_SECRET_SOURCE:-}
       DP_SECRET_DIR: ${DP_SECRET_DIR:-}
     volumes:
-    - ./data:/app/data:ro
+      - ./data:/app/data:ro
     depends_on:
       kafka:
         condition: service_healthy
@@ -192,14 +225,14 @@ services:
         condition: service_completed_successfully
     restart: 'no'
     networks:
-    - data-platform-network
+      - data-platform-network
     profiles:
-    - publish-data
+      - publish-data
   kafka-ui:
     image: ghcr.io/kafbat/kafka-ui:v1.5.0
     container_name: ${COMPOSE_PROJECT_NAME:-dp-ai-payments-platform-gcp}-kafka-ui
     profiles:
-    - kafka-ui
+      - kafka-ui
     environment:
       AUTH_TYPE: LOGIN_FORM
       SPRING_SECURITY_USER_NAME: ${KAFKA_UI_USERNAME:-}
@@ -211,14 +244,14 @@ services:
       MCP_ENABLED: 'false'
       DYNAMIC_CONFIG_ENABLED: 'false'
     command:
-    - /bin/sh
-    - -ec
-    - >-
-      : "$${SPRING_SECURITY_USER_NAME:?KAFKA_UI_USERNAME is required}";
-      : "$${SPRING_SECURITY_USER_PASSWORD:?KAFKA_UI_PASSWORD is required}";
-      exec java --add-opens java.rmi/javax.rmi.ssl=ALL-UNNAMED -jar /api.jar
+      - /bin/sh
+      - -ec
+      - >-
+        : "$${SPRING_SECURITY_USER_NAME:?KAFKA_UI_USERNAME is required}";
+        : "$${SPRING_SECURITY_USER_PASSWORD:?KAFKA_UI_PASSWORD is required}";
+        exec java --add-opens java.rmi/javax.rmi.ssl=ALL-UNNAMED -jar /api.jar
     ports:
-    - 127.0.0.1:${KAFKA_UI_PORT:-8086}:8080
+      - 127.0.0.1:${KAFKA_UI_PORT:-8086}:8080
     depends_on:
       kafka:
         condition: service_healthy
@@ -226,11 +259,15 @@ services:
         condition: service_healthy
     restart: unless-stopped
     networks:
-    - data-platform-network
+      - data-platform-network
 networks:
   data-platform-network:
+    external: true
     name: ${DOCKER_NETWORK:-data-platform-network}
-    driver: bridge
 volumes:
-  kafka-data: null
-  kafka-metadata: null
+  kafka-data:
+    external: true
+    name: dp-pdm-gcp-source-dev_kafka-data
+  kafka-metadata:
+    external: true
+    name: dp-pdm-gcp-source-dev_kafka-metadata

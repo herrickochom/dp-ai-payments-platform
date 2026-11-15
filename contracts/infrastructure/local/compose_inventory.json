@@ -5,37 +5,14 @@
     "kafka",
     "kafka-init",
     "kafka-volume-init",
-    "minio",
-    "minio-init-buckets",
-    "minio-init-databases",
-    "minio-init-iam",
-    "nessie",
-    "payment-consumer-events",
-    "payment-producer",
-    "postgres",
-    "postgres-healthcheck",
-    "redis",
     "schema-registry",
     "schema-registry-init"
   ],
   "name": "pdm_local_compose_inventory",
   "profiles": [
-    "agents",
-    "ai",
-    "airflow",
-    "analytics",
-    "cdc",
-    "dashboard",
-    "dbt",
-    "duckdb",
     "generate-data",
     "kafka-ui",
-    "metabase",
-    "ml",
-    "pgadmin",
-    "streaming",
-    "superset",
-    "trino"
+    "publish-data"
   ],
   "source": "docker-compose.yaml"
 }

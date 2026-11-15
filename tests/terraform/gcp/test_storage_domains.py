@@ -8,7 +8,7 @@ import hcl2
 import yaml
 
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = Path(__file__).resolve().parents[3]
 ENV = ROOT / "infrastructure/terraform/gcp/environments/dev"
 POLICY = ROOT / "platform/config/governance/gcp_retention_schedule.yaml"
 

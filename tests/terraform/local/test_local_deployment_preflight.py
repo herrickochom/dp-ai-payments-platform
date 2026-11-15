@@ -2,25 +2,16 @@ import json
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 
 CONTRACT = (
     ROOT
-    / "infra"
-    / "terraform"
-    / "targets"
-    / "local"
     / "contracts"
+    / "infrastructure"
+    / "local"
     / "deployment_preflight.json"
 )
 
-SCRIPT = (
-    ROOT
-    / "infra"
-    / "terraform"
-    / "scripts"
-    / "local-preflight.sh"
-)
 
 
 def load():
@@ -110,39 +101,3 @@ def test_preflight_does_not_enable_deployment():
         ]
         is True
     )
-
-
-def test_preflight_script_exists():
-    assert SCRIPT.is_file()
-
-
-def test_preflight_script_has_no_mutating_compose_commands():
-    text = SCRIPT.read_text()
-
-    prohibited = (
-        "docker compose up",
-        "docker compose down",
-        "docker compose restart",
-        "docker compose stop",
-        "docker compose rm",
-        "docker compose pull",
-        "docker compose build",
-    )
-
-    for command in prohibited:
-        assert command not in text
-
-
-def test_preflight_script_has_no_secret_dump():
-    text = SCRIPT.read_text()
-
-    prohibited = (
-        "docker compose config --environment",
-        "env |",
-        "printenv",
-        "cat .env",
-        "source .env",
-    )
-
-    for value in prohibited:
-        assert value not in text

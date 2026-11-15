@@ -6,15 +6,13 @@ from services.shared.cdc.activation import (
 )
 
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 
 CONTRACT = (
     ROOT
-    / "infra"
-    / "terraform"
-    / "targets"
-    / "local"
     / "contracts"
+    / "infrastructure"
+    / "local"
     / "cdc_dormancy.json"
 )
 

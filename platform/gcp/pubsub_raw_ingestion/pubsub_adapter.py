@@ -1,4 +1,4 @@
-"""GCP-KP-001W callback adapter. Importing this module performs no cloud operation.
+"""pubsub-raw-ingestion callback adapter. Importing this module performs no cloud operation.
 
 Call `handle_message(message, store)` from a separately reviewed subscriber lifecycle.
 The Pub/Sub message is acknowledged only by the verified worker core, after

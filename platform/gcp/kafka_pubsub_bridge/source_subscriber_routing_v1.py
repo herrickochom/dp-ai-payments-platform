@@ -33,23 +33,21 @@ def route_received(
     dispatch,
     process_source_with_lease,
     extend_lease,
+    process_legacy_with_lease=None,
     renewal_interval_seconds=5.0,
     max_processing_seconds=None,
 ):
-    """Route a received Pub/Sub message without changing legacy dispatch."""
-
+    """Route validated SOURCE and LEGACY messages under lease control."""
     if not isinstance(data, bytes):
         raise RoutingError("message data must be bytes")
-
     if not isinstance(ack_id, str) or not ack_id:
         raise RoutingError("acknowledgement ID required")
-
     if not callable(dispatch):
         raise RoutingError("dispatch callback required")
-
     if not callable(process_source_with_lease):
         raise RoutingError("source lease processor required")
-
+    if not callable(process_legacy_with_lease):
+        raise RoutingError("legacy lease processor required")
     if not callable(extend_lease):
         raise RoutingError("lease extension callback required")
 
@@ -61,7 +59,8 @@ def route_received(
             acker.ack(ack_id)
 
     message = Received()
-    source_result = []
+    source_results = []
+    legacy_results = []
 
     def source_store(received, supplied_bucket):
         result = process_source_with_lease(
@@ -71,7 +70,7 @@ def route_received(
             renewal_interval_seconds=renewal_interval_seconds,
             max_processing_seconds=max_processing_seconds,
         )
-        source_result.append(result)
+        source_results.append(result)
         return result
 
     class SourceEntry:
@@ -79,46 +78,53 @@ def route_received(
         def store_one(received, supplied_bucket):
             return source_store(received, supplied_bucket)
 
-    # The supplied dispatch must support an injected source storage callback.
-    # Do not monkey-patch a shared module-level ENTRY object.
+    def guarded_legacy_process(
+        supplied_data, supplied_ack_id, store, ignored_acker, decoder
+    ):
+        if supplied_data != data or supplied_ack_id != ack_id:
+            raise RoutingError("legacy transport coordinates mismatch")
+
+        result = process_legacy_with_lease(
+            message,
+            supplied_data,
+            supplied_ack_id,
+            store,
+            decoder,
+            legacy_process,
+            extend_lease,
+            renewal_interval_seconds=renewal_interval_seconds,
+            max_processing_seconds=max_processing_seconds,
+        )
+        legacy_results.append(result)
+        return result
+
     route, result = dispatch(
         data,
         ack_id,
         bucket,
         acker,
-        legacy_process,
+        guarded_legacy_process,
         legacy_store,
         legacy_decoder,
         source_store=SourceEntry.store_one,
     )
 
     if route == "SOURCE":
-        if len(source_result) != 1:
+        if len(source_results) != 1 or legacy_results:
             raise RoutingError("source processing count mismatch")
+        lease_result = source_results[0]
+    elif route == "LEGACY":
+        if len(legacy_results) != 1 or source_results:
+            raise RoutingError("legacy processing count mismatch")
+        lease_result = legacy_results[0]
+    else:
+        raise RoutingError("unknown dispatch route")
 
-        lease_result = source_result[0]
+    if type(getattr(lease_result, "acknowledged", None)) is not bool:
+        raise RoutingError("invalid lease result")
 
-        if not isinstance(
-            getattr(lease_result, "acknowledged", None), bool
-        ):
-            raise RoutingError("invalid lease result")
+    reason = getattr(lease_result, "reason", None)
+    if not isinstance(reason, str) or not reason:
+        raise RoutingError("missing lease outcome reason")
 
-        reason = getattr(lease_result, "reason", None)
-
-        if not isinstance(reason, str) or not reason:
-            raise RoutingError("missing lease outcome reason")
-
-        return RoutingResult(
-            "SOURCE",
-            lease_result.acknowledged,
-            reason,
-        )
-
-    if route == "LEGACY":
-        return RoutingResult(
-            "LEGACY",
-            True,
-            "legacy_dispatch_completed",
-        )
-
-    raise RoutingError("unknown dispatch route")
+    return RoutingResult(route, lease_result.acknowledged, reason)

@@ -65,6 +65,7 @@ class RoutingAcceptance(unittest.TestCase):
             dispatch=runtime.dispatch,
             process_source_with_lease=processor,
             extend_lease=lambda _: events.append("extend"),
+            process_legacy_with_lease=runtime.process_legacy_with_lease,
         )
         return result, acker, events
 
@@ -162,18 +163,43 @@ class RoutingAcceptance(unittest.TestCase):
         self.assertEqual(legacy_calls, [])
 
     def test_legacy_unchanged(self):
+        import base64
+        import hashlib
+        import json
+
+        wire = bytes([0]) + (1).to_bytes(4, "big") + b"{}"
+        data = json.dumps({
+            "kafka_topic": "pdmis.repayments",
+            "kafka_partition": 0,
+            "kafka_offset": 17,
+            "kafka_timestamp_ms": 1770000000000,
+            "schema_registry_id": 1,
+            "payload_base64": base64.b64encode(wire).decode(),
+            "payload_sha256": hashlib.sha256(wire).hexdigest(),
+        }).encode()
+
+        legacy_events = []
+
+        def legacy(data, ack_id, store, acker, decoder):
+            legacy_events.append("legacy")
+            acker.ack(ack_id)
+            return ("key", "CREATED")
+
         result, acker, events = self.route(
-            b"legacy",
+            data,
             lambda *args, **kwargs: self.fail(
                 "source processor must not run"
             ),
+            legacy=legacy,
         )
 
         self.assertEqual(result.route, "LEGACY")
+        self.assertTrue(result.acknowledged)
         self.assertEqual(
-            result.reason, "legacy_dispatch_completed"
+            result.reason, "acknowledged_after_verification"
         )
-        self.assertEqual(events, ["legacy"])
+        self.assertEqual(acker.ids, ["ack-17"])
+        self.assertIn("legacy", legacy_events)
 
 
 if __name__ == "__main__":

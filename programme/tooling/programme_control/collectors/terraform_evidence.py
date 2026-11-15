@@ -22,8 +22,8 @@ from .base import (
     utc_now_iso,
 )
 
-TF_ROOT = "infra/terraform"
-CONTRACTS_DIR = f"{TF_ROOT}/contracts"
+TF_ROOT = "infrastructure/terraform/gcp"
+CONTRACTS_DIR = "contracts/infrastructure"
 
 
 def _scan_tf(root: Path) -> dict[str, Any]:
@@ -96,8 +96,8 @@ def collect_terraform(root: Path) -> CollectorResult:
                 "has_backend_block": scan["has_backend_block"],
                 "terraform_validation": validation_state,
                 "note": (
-                    "No resource or provider block exists: Terraform currently "
-                    "defines governance contracts only and provisions nothing."
+                    "Static Terraform configuration inventory only; "
+                    "no infrastructure operation was executed."
                 ),
             },
         )
@@ -122,7 +122,7 @@ def collect_terraform(root: Path) -> CollectorResult:
             evidence_id="EV-TF-VALIDATION",
             kind=KIND_TERRAFORM,
             title="terraform validate / fmt result",
-            location="infra/terraform",
+            location=TF_ROOT,
             status="NOT_RUN" if not binary else "AVAILABLE",
             source_path=TF_ROOT,
             observed_at=observed,
@@ -131,7 +131,7 @@ def collect_terraform(root: Path) -> CollectorResult:
                 "cli_available": bool(binary),
                 "note": (
                     "The updater does not run terraform. Run "
-                    "'terraform -chdir=infra/terraform validate' as a separate "
+                    "'terraform validate' in an initialised GCP configuration as a separate "
                     "explicit action to produce runtime evidence."
                 ),
             },

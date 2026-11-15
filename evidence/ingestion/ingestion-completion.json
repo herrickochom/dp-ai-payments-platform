@@ -1,0 +1,280 @@
+{
+  "already_in_raw": 12,
+  "bucket": "dp-pdm-ai-platform-dev",
+  "eligible_legacy_topics": 24,
+  "finished_utc": "2026-11-14T22:58:33.335760+00:00",
+  "governed_topics": 38,
+  "project": "project-e48f194e-f44f-458d-b4f",
+  "published": 1838,
+  "result": "IN_PROGRESS",
+  "started_utc": "2026-11-14T21:47:07.918737+00:00",
+  "topics": {
+    "agent.locations": {
+      "governance_status": "legacy_payment_event",
+      "processing_mode": "streaming",
+      "published": 0,
+      "status": "VERIFIED",
+      "verified": 0
+    },
+    "agent.profiles": {
+      "governance_status": "legacy_payment_event",
+      "processing_mode": "batch",
+      "published": 8,
+      "status": "VERIFIED",
+      "verified": 8
+    },
+    "agent.transactions": {
+      "governance_status": "legacy_payment_event",
+      "processing_mode": "streaming",
+      "published": 67,
+      "status": "VERIFIED",
+      "verified": 67
+    },
+    "cdc.pdm_mdm.mdm.sacco_master_sources": {
+      "governance_status": "contract_only",
+      "processing_mode": "streaming",
+      "published": 0,
+      "status": "EXCLUDED_BY_EXISTING_CONTRACT",
+      "verified": 0
+    },
+    "cpo.plm.pain002": {
+      "governance_status": "legacy_payment_event",
+      "processing_mode": "real-time",
+      "published": 238,
+      "status": "VERIFIED",
+      "verified": 238
+    },
+    "cpo.psn.pain002": {
+      "governance_status": "legacy_payment_event",
+      "processing_mode": "real-time",
+      "published": 238,
+      "status": "VERIFIED",
+      "verified": 238
+    },
+    "icmn.pmn.pain001": {
+      "governance_status": "legacy_payment_event",
+      "processing_mode": "real-time",
+      "published": 238,
+      "status": "VERIFIED",
+      "verified": 238
+    },
+    "icmn.vpm.pain001": {
+      "governance_status": "legacy_payment_event",
+      "processing_mode": "real-time",
+      "published": 238,
+      "status": "VERIFIED",
+      "verified": 238
+    },
+    "mdm.agent.golden": {
+      "governance_status": "contract_only",
+      "processing_mode": "streaming",
+      "published": 0,
+      "status": "EXCLUDED_BY_EXISTING_CONTRACT",
+      "verified": 0
+    },
+    "mdm.beneficiary.golden.restricted": {
+      "governance_status": "blocked_restricted",
+      "processing_mode": "real-time",
+      "published": 0,
+      "status": "EXCLUDED_BY_EXISTING_CONTRACT",
+      "verified": 0
+    },
+    "mdm.beneficiary.identity-alert.restricted": {
+      "governance_status": "blocked_restricted",
+      "processing_mode": "real-time",
+      "published": 0,
+      "status": "EXCLUDED_BY_EXISTING_CONTRACT",
+      "verified": 0
+    },
+    "mdm.crosswalk.restricted": {
+      "governance_status": "blocked_restricted",
+      "processing_mode": "real-time",
+      "published": 0,
+      "status": "EXCLUDED_BY_EXISTING_CONTRACT",
+      "verified": 0
+    },
+    "mdm.geography.golden": {
+      "governance_status": "contract_only",
+      "processing_mode": "real-time",
+      "published": 0,
+      "status": "EXCLUDED_BY_EXISTING_CONTRACT",
+      "verified": 0
+    },
+    "mdm.sacco.golden": {
+      "governance_status": "contract_only",
+      "processing_mode": "streaming",
+      "published": 0,
+      "status": "EXCLUDED_BY_EXISTING_CONTRACT",
+      "verified": 0
+    },
+    "mobile.airtel.pacs002": {
+      "governance_status": "legacy_payment_event",
+      "processing_mode": "real-time",
+      "published": 13,
+      "status": "VERIFIED",
+      "verified": 13
+    },
+    "mobile.airtel.pacs008": {
+      "governance_status": "legacy_payment_event",
+      "processing_mode": "real-time",
+      "published": 1,
+      "status": "VERIFIED",
+      "verified": 1
+    },
+    "mobile.mtn.pacs002": {
+      "governance_status": "legacy_payment_event",
+      "processing_mode": "real-time",
+      "published": 222,
+      "status": "VERIFIED",
+      "verified": 222
+    },
+    "mobile.mtn.pacs008": {
+      "governance_status": "legacy_payment_event",
+      "processing_mode": "streaming",
+      "published": 222,
+      "status": "VERIFIED",
+      "verified": 222
+    },
+    "payment-events.dlq": {
+      "governance_status": "contract_only",
+      "processing_mode": "streaming",
+      "published": 0,
+      "status": "EXCLUDED_BY_EXISTING_CONTRACT",
+      "verified": 0
+    },
+    "payment-events.retry": {
+      "governance_status": "contract_only",
+      "processing_mode": "streaming",
+      "published": 0,
+      "status": "EXCLUDED_BY_EXISTING_CONTRACT",
+      "verified": 0
+    },
+    "payments.lifecycle.audit.v1": {
+      "governance_status": "blocked_unverified_format",
+      "processing_mode": "real-time",
+      "published": 0,
+      "status": "EXCLUDED_BY_EXISTING_CONTRACT",
+      "verified": 0
+    },
+    "payments.lifecycle.dlq.v1": {
+      "governance_status": "blocked_unverified_format",
+      "processing_mode": "real-time",
+      "published": 0,
+      "status": "EXCLUDED_BY_EXISTING_CONTRACT",
+      "verified": 0
+    },
+    "payments.lifecycle.exceptions.v1": {
+      "governance_status": "blocked_unverified_format",
+      "processing_mode": "real-time",
+      "published": 0,
+      "status": "EXCLUDED_BY_EXISTING_CONTRACT",
+      "verified": 0
+    },
+    "payments.lifecycle.state.v1": {
+      "governance_status": "contract_only",
+      "processing_mode": "real-time",
+      "published": 0,
+      "status": "EXCLUDED_BY_EXISTING_CONTRACT",
+      "verified": 0
+    },
+    "payments.lifecycle.transitions.v1": {
+      "governance_status": "contract_only",
+      "processing_mode": "real-time",
+      "published": 0,
+      "status": "EXCLUDED_BY_EXISTING_CONTRACT",
+      "verified": 0
+    },
+    "pdmis.beneficiaries": {
+      "governance_status": "legacy_payment_event",
+      "processing_mode": "batch",
+      "published": 250,
+      "status": "VERIFIED",
+      "verified": 250
+    },
+    "pdmis.business_plans": {
+      "governance_status": "legacy_payment_event",
+      "processing_mode": "batch",
+      "published": 103,
+      "status": "PENDING",
+      "verified": 93
+    },
+    "pdmis.households": {
+      "governance_status": "legacy_payment_event",
+      "processing_mode": "batch",
+      "published": 0,
+      "status": "PENDING",
+      "verified": 0
+    },
+    "pdmis.loans": {
+      "governance_status": "legacy_payment_event",
+      "processing_mode": "batch",
+      "published": 0,
+      "status": "PENDING",
+      "verified": 0
+    },
+    "pdmis.repayments": {
+      "governance_status": "legacy_payment_event",
+      "processing_mode": "streaming",
+      "published": 0,
+      "status": "PENDING",
+      "verified": 0
+    },
+    "pdmis.saccos": {
+      "governance_status": "legacy_payment_event",
+      "processing_mode": "batch",
+      "published": 0,
+      "status": "PENDING",
+      "verified": 0
+    },
+    "pdmis.special_groups": {
+      "governance_status": "legacy_payment_event",
+      "processing_mode": "batch",
+      "published": 0,
+      "status": "PENDING",
+      "verified": 0
+    },
+    "wendi.camt052": {
+      "governance_status": "legacy_payment_event",
+      "processing_mode": "streaming",
+      "published": 0,
+      "status": "PENDING",
+      "verified": 0
+    },
+    "wendi.camt053": {
+      "governance_status": "legacy_payment_event",
+      "processing_mode": "streaming",
+      "published": 0,
+      "status": "PENDING",
+      "verified": 0
+    },
+    "wendi.camt054": {
+      "governance_status": "legacy_payment_event",
+      "processing_mode": "streaming",
+      "published": 0,
+      "status": "PENDING",
+      "verified": 0
+    },
+    "wendi.pain001": {
+      "governance_status": "legacy_payment_event",
+      "processing_mode": "real-time",
+      "published": 0,
+      "status": "PENDING",
+      "verified": 0
+    },
+    "wendi.pain002": {
+      "governance_status": "legacy_payment_event",
+      "processing_mode": "real-time",
+      "published": 0,
+      "status": "PENDING",
+      "verified": 0
+    },
+    "wendi.transactions": {
+      "governance_status": "legacy_payment_event",
+      "processing_mode": "streaming",
+      "published": 0,
+      "status": "PENDING",
+      "verified": 0
+    }
+  },
+  "verified": 1828
+}

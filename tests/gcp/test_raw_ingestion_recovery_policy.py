@@ -2,7 +2,7 @@ import importlib.util
 import pathlib
 import unittest
 P = pathlib.Path(__file__).resolve().parents[2] / 'platform/gcp/ingestion_recovery/recovery_policy.py'
-spec = importlib.util.spec_from_file_location('kp001x_recovery_policy', P)
+spec = importlib.util.spec_from_file_location('raw_ingestion_recovery_policy', P)
 m = importlib.util.module_from_spec(spec)
 import sys
 sys.modules[spec.name] = m

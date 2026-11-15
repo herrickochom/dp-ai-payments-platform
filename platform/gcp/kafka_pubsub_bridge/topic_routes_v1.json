@@ -66,34 +66,43 @@
       "status": "legacy_payment_event"
     },
     "mdm.agent.golden": {
-      "format": "unverified",
+      "format": "json",
       "processing_mode": "streaming",
-      "status": "blocked_unverified_format"
+      "status": "contract_only",
+      "category": "mdm",
+      "source_group": "mdm",
+      "source_system": "mdm"
     },
     "mdm.beneficiary.golden.restricted": {
-      "format": "unverified",
+      "format": "json",
       "processing_mode": "real-time",
       "status": "blocked_restricted"
     },
     "mdm.beneficiary.identity-alert.restricted": {
-      "format": "unverified",
+      "format": "json",
       "processing_mode": "real-time",
       "status": "blocked_restricted"
     },
     "mdm.crosswalk.restricted": {
-      "format": "unverified",
+      "format": "json",
       "processing_mode": "real-time",
       "status": "blocked_restricted"
     },
     "mdm.geography.golden": {
-      "format": "unverified",
+      "format": "json",
       "processing_mode": "real-time",
-      "status": "blocked_unverified_format"
+      "status": "contract_only",
+      "category": "mdm",
+      "source_group": "mdm",
+      "source_system": "mdm"
     },
     "mdm.sacco.golden": {
-      "format": "unverified",
+      "format": "json",
       "processing_mode": "streaming",
-      "status": "blocked_unverified_format"
+      "status": "contract_only",
+      "category": "mdm",
+      "source_group": "mdm",
+      "source_system": "mdm"
     },
     "mobile.airtel.pacs002": {
       "category": "mobile_networks",

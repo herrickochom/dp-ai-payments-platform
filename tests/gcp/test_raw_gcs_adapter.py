@@ -5,7 +5,7 @@ from google.api_core.exceptions import PreconditionFailed
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 PATH = ROOT / 'platform/gcp/pubsub_raw_ingestion/gcs_adapter.py'
-spec = importlib.util.spec_from_file_location('kp001w_gcs_adapter', PATH)
+spec = importlib.util.spec_from_file_location('raw_gcs_adapter', PATH)
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 

@@ -1,4 +1,4 @@
-"""KP-014E: offline-only proposed BigLake Iceberg catalogue contract and commit intent.
+"""iceberg-catalogue-commit: offline-only proposed BigLake Iceberg catalogue contract and commit intent.
 No REST client, cloud authentication, network calls, Iceberg writes, or ledger mutations.
 """
 import argparse
@@ -73,7 +73,7 @@ def build(root=DEFAULT_ROOT, ledger=None):
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--ledger',type=Path,default=Path('runtime/iceberg-catalogue-validation/kp014d-offline-ledger.sqlite3'))
+    p.add_argument('--ledger',type=Path,default=Path('runtime/iceberg-catalogue-validation/catalogue-commit-offline-ledger.sqlite3'))
     p.add_argument('--output',type=Path,help='new JSON file only; default prints to stdout')
     a=p.parse_args()
     result=build(ledger=a.ledger)

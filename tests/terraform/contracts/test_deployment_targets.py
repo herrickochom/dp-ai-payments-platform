@@ -2,30 +2,22 @@ import json
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 
 TARGETS = (
     ROOT
-    / "infra"
-    / "terraform"
     / "contracts"
+    / "infrastructure"
     / "deployment_targets.json"
 )
 
 CAPABILITIES = (
     ROOT
-    / "infra"
-    / "terraform"
     / "contracts"
+    / "infrastructure"
     / "platform_capabilities.json"
 )
 
-TARGET_ROOT = (
-    ROOT
-    / "infra"
-    / "terraform"
-    / "targets"
-)
 
 
 def load(path):
@@ -169,40 +161,49 @@ def test_reference_semantics_are_preserved():
     assert c["orchestration"]["reference_implementation"] == "airflow"
 
 
-def test_all_target_directories_exist():
-    for target in (
-        "local",
-        "aws",
-        "gcp",
-        "azure",
-    ):
-        assert (
-            TARGET_ROOT
-            / target
-            / "README.md"
-        ).is_file()
+def test_declared_targets_have_explicit_classification():
+    doc = load(TARGETS)
+    targets = doc["targets"]
+
+    assert set(targets) == {"local", "aws", "gcp", "azure"}
+
+    for name, target in targets.items():
+        assert target["enabled"] is True
+        assert target["terraform_target_required"] is True
+
+        if name == "local":
+            assert (
+                target["classification"]
+                == "REFERENCE_INTEGRATION_ENVIRONMENT"
+            )
+        else:
+            assert (
+                target["classification"]
+                == "CLOUD_DEPLOYMENT_TARGET"
+            )
 
 
 def test_cloud_substitution_is_not_implicit():
-    text = (
-        TARGET_ROOT
-        / "gcp"
-        / "README.md"
-    ).read_text()
+    doc = load(TARGETS)
+    policy = doc["architecture_policy"]
 
-    assert "does not by itself replace Kafka with Pub/Sub" in text
-    assert "Iceberg with" in text
-    assert "BigQuery" in text
+    assert policy["provider_neutral_core_required"] is True
+    assert policy["single_logical_platform_architecture"] is True
+    assert (
+        policy["provider_specific_architecture_forks_allowed"]
+        is False
+    )
+
+    assert policy["raw_first_ingestion_required"] is True
+    assert policy["direct_kafka_to_bronze_allowed"] is False
 
 
-def test_local_documentation_rejects_production_claim():
-    text = (
-        TARGET_ROOT
-        / "local"
-        / "README.md"
-    ).read_text().lower()
+def test_local_contract_rejects_production_claim():
+    doc = load(TARGETS)
+    local = doc["targets"]["local"]
 
-    assert "not a production environment" in text
-    assert "production high availability" in text
-    assert "production disaster recovery" in text
-    assert "cloud kms" in text
+    assert local["production_environment"] is False
+    assert local["high_availability_claim_allowed"] is False
+    assert local["production_dr_claim_allowed"] is False
+    assert local["cloud_credentials_required"] is False
+    assert local["remote_state_required"] is False

@@ -29,6 +29,22 @@ def persist_mdm(datasets: dict[str, list[dict[str, Any]]]) -> None:
     if not all(settings.values()):
         raise RuntimeError("PDM source PostgreSQL connection variables are required")
 
+    # Explicit migration-only gate. No automatic full-table replacement.
+    if os.environ.get("PDM_MDM_FULL_REPLACE_APPROVED") != "I_APPROVE_FULL_MDM_REPLACEMENT":
+        raise RuntimeError("Full MDM replacement DENIED; explicit migration approval required")
+    if os.environ.get("PDM_MDM_TARGET") != "cloudsql":
+        raise RuntimeError("Full MDM replacement DENIED; target must be cloudsql")
+    if os.environ.get("PDM_SOURCE_SSLMODE") != "verify-full":
+        raise RuntimeError("Cloud SQL MDM requires sslmode=verify-full")
+    if not os.environ.get("PDM_SOURCE_SSLROOTCERT", "").strip():
+        raise RuntimeError("Cloud SQL MDM requires an explicit CA certificate path")
+    if not os.environ.get("PDM_SOURCE_CONNECT_TIMEOUT", "").isdigit() or not 1 <= int(os.environ["PDM_SOURCE_CONNECT_TIMEOUT"]) <= 30:
+        raise RuntimeError("Cloud SQL MDM requires a 1..30 second connection timeout")
+    if not os.environ.get("PDM_SOURCE_STATEMENT_TIMEOUT_MS", "").isdigit() or not 1000 <= int(os.environ["PDM_SOURCE_STATEMENT_TIMEOUT_MS"]) <= 300000:
+        raise RuntimeError("Cloud SQL MDM requires a 1000..300000 ms statement timeout")
+    if settings["PDM_SOURCE_USER"].lower() in {"postgres", "root", "admin"}:
+        raise RuntimeError("Cloud SQL MDM requires a non-admin writer identity")
+
     import psycopg2
     from psycopg2.extras import execute_values
 
@@ -36,6 +52,10 @@ def persist_mdm(datasets: dict[str, list[dict[str, Any]]]) -> None:
         host=settings["PDM_SOURCE_HOST"], port=int(os.environ.get("PDM_SOURCE_DB_PORT", "5432")),
         dbname=settings["PDM_SOURCE_DB"], user=settings["PDM_SOURCE_USER"],
         password=settings["PDM_SOURCE_PASSWORD"],
+        sslmode=os.environ["PDM_SOURCE_SSLMODE"],
+        sslrootcert=os.environ["PDM_SOURCE_SSLROOTCERT"],
+        connect_timeout=int(os.environ["PDM_SOURCE_CONNECT_TIMEOUT"]),
+        options=f"-c statement_timeout={int(os.environ['PDM_SOURCE_STATEMENT_TIMEOUT_MS'])}",
     )
     try:
         with connection:

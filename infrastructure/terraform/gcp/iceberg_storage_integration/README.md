@@ -1,4 +1,4 @@
-# KP-014 isolated Iceberg Terraform module
+# iceberg-storage-integration isolated Iceberg Terraform module
 
 Offline-only generated module, NOT wired into environments/dev. Default enable flag is false. No `terraform apply` or GCP API enablement is performed.
 

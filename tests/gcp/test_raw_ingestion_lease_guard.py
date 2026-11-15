@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 PATH = Path(__file__).resolve().parents[2] / 'platform/gcp/pubsub_raw_ingestion/lease_guard.py'
-spec = importlib.util.spec_from_file_location('kp001w_lease_guard', PATH)
+spec = importlib.util.spec_from_file_location('raw_ingestion_lease_guard', PATH)
 mod = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = mod
 spec.loader.exec_module(mod)
@@ -176,7 +176,7 @@ class BoundedLeaseAcceptance(unittest.TestCase):
         self.assertEqual(message.acks, 1)
         self.assertFalse(
             any(
-                thread.name == "kp001w-lease-renewal"
+                thread.name == "raw-ingestion-lease-renewal"
                 and thread.is_alive()
                 for thread in threading.enumerate()
             )

@@ -118,7 +118,7 @@ class LeaseFaultInjectionAcceptance(unittest.TestCase):
 
         class ReaperFailureThread(original_thread):
             def start(self):
-                if self.name == "kp001w-renewal-reaper":
+                if self.name == "raw-ingestion-renewal-reaper":
                     raise RuntimeError("reaper unavailable")
                 return super().start()
 

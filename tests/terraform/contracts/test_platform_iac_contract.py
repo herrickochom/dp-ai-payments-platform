@@ -2,21 +2,19 @@ import json
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 
 IAC = (
     ROOT
-    / "infra"
-    / "terraform"
     / "contracts"
+    / "infrastructure"
     / "platform_iac_contract.json"
 )
 
 CICD = (
     ROOT
-    / "infra"
-    / "terraform"
     / "contracts"
+    / "infrastructure"
     / "cicd_quality_gates.json"
 )
 

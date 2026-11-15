@@ -8,7 +8,7 @@ are added after snapshotting high watermarks.
 Run from repo root:
   python3 scripts/execute_guarded_pipeline.py --self-test
   python3 scripts/execute_guarded_pipeline.py --live \
-    --project $KP_GCP_PROJECT --subscription $KP_RAW_V1_SUBSCRIPTION \
+    --project $PDM_GCP_PROJECT --subscription $PDM_RAW_INGESTION_SUBSCRIPTION \
     --max-events 200 --max-seconds 1200
 """
 from __future__ import annotations
@@ -294,10 +294,10 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--self-test", action="store_true")
     p.add_argument("--live", action="store_true")
-    p.add_argument("--bootstrap", default=os.getenv("KP_KAFKA_BOOTSTRAP","localhost:9094"))
-    p.add_argument("--registry-url", default=os.getenv("KP_SCHEMA_REGISTRY_URL","http://localhost:8081"))
-    p.add_argument("--project", default=os.getenv("KP_GCP_PROJECT",""))
-    p.add_argument("--subscription", default=os.getenv("KP_RAW_V1_SUBSCRIPTION",""))
+    p.add_argument("--bootstrap", default=os.getenv("PDM_KAFKA_BOOTSTRAP","localhost:9094"))
+    p.add_argument("--registry-url", default=os.getenv("PDM_SCHEMA_REGISTRY_URL","http://localhost:8081"))
+    p.add_argument("--project", default=os.getenv("PDM_GCP_PROJECT",""))
+    p.add_argument("--subscription", default=os.getenv("PDM_RAW_INGESTION_SUBSCRIPTION",""))
     p.add_argument("--bucket", default="dp-pdm-ai-platform-dev")
     p.add_argument("--sources-root", type=Path, default=Path("data"))
     p.add_argument("--schemas-dir", type=Path, default=Path("contracts/kafka"))

@@ -3,12 +3,13 @@ import re
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[2]
-TF = ROOT / "infra" / "terraform"
+ROOT = Path(__file__).resolve().parents[3]
+TF = ROOT / "infrastructure" / "terraform" / "gcp"
 
 CONTRACT = (
-    TF
+    ROOT
     / "contracts"
+    / "infrastructure"
     / "local_ownership.json"
 )
 
@@ -144,20 +145,23 @@ def test_protected_operations_remain_prohibited():
     assert p["unbounded_dbt_execution_allowed"] is False
 
 
-def test_local_readme_documents_ownership_boundary():
-    text = (
-        TF
-        / "targets"
-        / "local"
-        / "README.md"
-    ).read_text()
+def test_local_contract_defines_ownership_boundary():
+    contract = load()
+    ownership = contract["ownership"]
 
     assert (
-        "Docker Compose remains the authoritative "
-        "local application topology"
-    ) in text
+        ownership["docker_compose"]["role"]
+        == "LOCAL_APPLICATION_TOPOLOGY_AUTHORITY"
+    )
 
     assert (
-        "Terraform Docker provider resources "
-        "are intentionally prohibited"
-    ) in text
+        contract["dual_ownership_policy"]["allowed"]
+        is False
+    )
+
+    assert (
+        contract["dual_ownership_policy"][
+            "terraform_docker_provider_allowed"
+        ]
+        is False
+    )

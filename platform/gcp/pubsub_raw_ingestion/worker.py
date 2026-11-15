@@ -1,4 +1,4 @@
-"""KP-001W offline-tested durable-write-before-ack core; no cloud execution entrypoint."""
+"""pubsub-raw-ingestion offline-tested durable-write-before-ack core; no cloud execution entrypoint."""
 import base64
 import hashlib
 import json

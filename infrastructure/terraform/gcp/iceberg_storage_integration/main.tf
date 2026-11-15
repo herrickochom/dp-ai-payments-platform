@@ -1,4 +1,4 @@
-# KP-014: isolated module. Not referenced by environments/dev. Default creates zero resources.
+# iceberg-storage-integration: isolated module. Not referenced by environments/dev. Default creates zero resources.
 # NO API enablement, IAM changes, new buckets, external calls or writes in this module.
 locals {
   bronze_fields = [
@@ -30,7 +30,7 @@ locals {
   ]
 }
 resource "google_biglake_iceberg_catalog" "pilot" {
-  count            = var.enable_kp014_iceberg_pilot ? 1 : 0
+  count            = var.enable_iceberg_pilot ? 1 : 0
   project          = var.project_id
   name             = var.catalog_name
   catalog_type     = "CATALOG_TYPE_BIGLAKE"
@@ -40,7 +40,7 @@ resource "google_biglake_iceberg_catalog" "pilot" {
   lifecycle { prevent_destroy = true }
 }
 resource "google_biglake_iceberg_namespace" "pilot" {
-  count           = var.enable_kp014_iceberg_pilot ? 1 : 0
+  count           = var.enable_iceberg_pilot ? 1 : 0
   project         = var.project_id
   catalog         = google_biglake_iceberg_catalog.pilot[0].name
   namespace_id    = var.namespace_id
@@ -48,7 +48,7 @@ resource "google_biglake_iceberg_namespace" "pilot" {
   lifecycle { prevent_destroy = true }
 }
 resource "google_biglake_iceberg_table" "pilot" {
-  count           = var.enable_kp014_iceberg_pilot ? 1 : 0
+  count           = var.enable_iceberg_pilot ? 1 : 0
   project         = var.project_id
   catalog         = google_biglake_iceberg_catalog.pilot[0].name
   namespace       = google_biglake_iceberg_namespace.pilot[0].namespace_id

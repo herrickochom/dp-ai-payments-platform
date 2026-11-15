@@ -6,11 +6,11 @@ from unittest.mock import Mock
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 MODULE = ROOT / 'platform/gcp/kafka_pubsub_bridge/avro_integration.py'
-spec = importlib.util.spec_from_file_location('kp001g_avro', MODULE)
+spec = importlib.util.spec_from_file_location('source_avro_integration', MODULE)
 avro = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(avro)
 bridge_path = ROOT / 'platform/gcp/kafka_pubsub_bridge/bridge.py'
-bridge_spec = importlib.util.spec_from_file_location('kp001d_bridge_g', bridge_path)
+bridge_spec = importlib.util.spec_from_file_location('source_bridge_avro_test', bridge_path)
 bridge = importlib.util.module_from_spec(bridge_spec)
 bridge_spec.loader.exec_module(bridge)
 BUSINESS = json.loads((ROOT/'contracts/kafka/payment_event.avsc').read_text())

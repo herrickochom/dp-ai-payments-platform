@@ -16,7 +16,11 @@ spec.loader.exec_module(adapter)
 class DeliveryError(RuntimeError): pass
 
 
-APPROVED_SOURCE_TOPICS = frozenset()
+APPROVED_SOURCE_TOPICS = frozenset({
+    "mdm.sacco.golden",
+    "mdm.agent.golden",
+    "mdm.geography.golden",
+})
 
 def publish_then_commit(envelope, publish, commit):
     """Commit Kafka only after publisher confirms durable acceptance.

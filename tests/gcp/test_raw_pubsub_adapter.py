@@ -4,7 +4,7 @@ import json
 import unittest
 from pathlib import Path
 import sys
-# Import the existing kp001w namespace without shadowing Python stdlib platform.
+# Import the existing pubsub_raw_ingestion namespace without shadowing Python stdlib platform.
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "platform" / "gcp"))
 from pubsub_raw_ingestion.pubsub_adapter import handle_message
 from pubsub_raw_ingestion.worker import ConflictError, InvalidEnvelope

@@ -6,7 +6,7 @@ from pathlib import Path
 import hcl2
 
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = Path(__file__).resolve().parents[3]
 ENV = ROOT / "infrastructure/terraform/gcp/environments/dev"
 
 

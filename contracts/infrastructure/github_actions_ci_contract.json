@@ -45,12 +45,26 @@
     },
     "terraform_governance": {
       "commands": [
-        "terraform -chdir=infra/terraform fmt -check -recursive",
-        "terraform -chdir=infra/terraform validate -no-color",
-        ".venv/bin/python -m pytest -q tests/terraform"
+        "python -m pytest -q tests/terraform"
       ],
       "required": true,
-      "terraform_version": "1.16.3"
+      "terraform_version": "1.16.3",
+      "terraform_initialisation": {
+        "backend_disabled": true,
+        "input_disabled": true,
+        "lockfile_readonly": true,
+        "remote_backend_initialisation_permitted": false
+      }
+    },
+    "gcp_terraform_validation": {
+      "required": true,
+      "terraform_version": "1.16.3",
+      "commands": [
+        "terraform -chdir=infrastructure/terraform/gcp fmt -check -recursive",
+        "terraform -chdir=infrastructure/terraform/gcp/environments/dev init -backend=false -input=false -lockfile=readonly",
+        "terraform -chdir=infrastructure/terraform/gcp/environments/dev validate -no-color",
+        "python -m pytest -q tests/terraform/gcp"
+      ]
     }
   },
   "permissions": {

@@ -3,7 +3,7 @@ from pathlib import Path
 import importlib.util
 
 PATH = Path(__file__).resolve().parents[2] / 'platform/gcp/pubsub_raw_ingestion/bounded_subscriber.py'
-spec = importlib.util.spec_from_file_location('kp001w_bounded_subscriber', PATH)
+spec = importlib.util.spec_from_file_location('bounded_pubsub_subscriber', PATH)
 module = importlib.util.module_from_spec(spec)
 import sys
 sys.modules[spec.name] = module

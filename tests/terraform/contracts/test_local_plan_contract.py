@@ -3,14 +3,13 @@ import re
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[2]
-TF = ROOT / "infra" / "terraform"
+ROOT = Path(__file__).resolve().parents[3]
 
 CONTRACT = (
-    TF
-    / "targets"
-    / "local"
+    ROOT
     / "contracts"
+    / "infrastructure"
+    / "local"
     / "plan_contract.json"
 )
 
@@ -19,11 +18,6 @@ def load():
     return json.loads(CONTRACT.read_text())
 
 
-def terraform_text():
-    return "\n".join(
-        path.read_text()
-        for path in TF.rglob("*.tf")
-    )
 
 
 def test_plan_contract_exists():
@@ -72,41 +66,32 @@ def test_acceptance_requires_zero_resource_changes():
     )
 
 
-def test_terraform_source_has_zero_resources():
-    text = terraform_text()
-
-    assert not re.search(
-        r'resource\s+"',
-        text,
-    )
 
 
-def test_terraform_source_has_zero_providers():
-    text = terraform_text()
-
-    assert not re.search(
-        r'provider\s+"',
-        text,
-    )
 
 
-def test_terraform_source_has_zero_backends():
-    text = terraform_text()
-
-    assert not re.search(
-        r'backend\s+"',
-        text,
-    )
 
 
-def test_no_execution_provisioners_exist():
-    text = terraform_text()
 
-    prohibited = (
-        "local-exec",
-        "remote-exec",
-        "null_resource",
-    )
 
-    for value in prohibited:
-        assert value not in text
+def test_local_terraform_implementation_is_absent():
+    assert not (
+        ROOT / "infrastructure" / "terraform" / "local"
+    ).exists()
+
+
+def test_gcp_terraform_is_separately_owned():
+    assert (
+        ROOT / "infrastructure" / "terraform" / "gcp"
+    ).is_dir()
+
+
+def test_local_compose_does_not_claim_terraform_ownership():
+    path = ROOT / "contracts/infrastructure/local/deployment_interface.json"
+    interface = json.loads(path.read_text())
+
+    assert interface["compose"]["individual_resource_ownership_by_terraform"] is False
+    assert interface["terraform"]["local_exec_provisioner_allowed"] is False
+    assert interface["terraform"]["remote_exec_provisioner_allowed"] is False
+    assert interface["terraform"]["null_resource_compose_execution_allowed"] is False
+    assert interface["terraform"]["terraform_data_compose_execution_allowed"] is False

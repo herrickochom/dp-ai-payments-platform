@@ -1,15 +1,12 @@
 {
   "contract_version": 1,
   "name": "local_operational_core_convergence",
-
   "target": "local",
   "production": false,
-
   "desired_scope": {
     "contract": "operational_core.json",
-    "service_count": 7
+    "service_count": 2
   },
-
   "deployment_semantics": {
     "preflight_required": true,
     "cdc_dormancy_required": true,
@@ -19,13 +16,11 @@
     "already_converged_is_noop": true,
     "blind_compose_up_prohibited": true
   },
-
   "current_enablement": {
     "convergence_inspection_enabled": true,
     "converged_noop_enabled": true,
     "mutation_on_drift_enabled": false
   },
-
   "drift_policy": {
     "missing_service": "FAIL_CLOSED",
     "stopped_service": "FAIL_CLOSED",
@@ -35,7 +30,6 @@
     "automatic_init_helper_execution": "PROHIBITED",
     "automatic_business_workload_execution": "PROHIBITED"
   },
-
   "future_mutation_command_policy": {
     "compose_up": true,
     "detached": true,
@@ -47,7 +41,6 @@
     "build": false,
     "remove_orphans": false
   },
-
   "protected_operations": {
     "payment_producer_execution": false,
     "init_helper_execution": false,

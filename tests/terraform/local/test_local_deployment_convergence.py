@@ -2,15 +2,13 @@ import json
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 
 CONTRACT_ROOT = (
     ROOT
-    / "infra"
-    / "terraform"
-    / "targets"
-    / "local"
     / "contracts"
+    / "infrastructure"
+    / "local"
 )
 
 POLICY = (
@@ -23,21 +21,7 @@ CORE = (
     / "operational_core.json"
 )
 
-CHECKER = (
-    ROOT
-    / "infra"
-    / "terraform"
-    / "scripts"
-    / "local-convergence.py"
-)
 
-PLATFORM = (
-    ROOT
-    / "infra"
-    / "terraform"
-    / "scripts"
-    / "local-platform.sh"
-)
 
 
 def load(path):
@@ -48,14 +32,12 @@ def test_convergence_policy_exists():
     assert POLICY.is_file()
 
 
-def test_convergence_checker_exists():
-    assert CHECKER.is_file()
 
 
-def test_operational_core_has_seven_services():
+def test_operational_core_has_two_services():
     core = load(CORE)
 
-    assert len(core["services"]) == 7
+    assert set(core["services"]) == {"kafka", "schema-registry"}
 
 
 def test_converged_state_is_success_noop():
@@ -132,23 +114,3 @@ def test_protected_operations_disabled():
         policy["protected_operations"].values()
     ):
         assert value is False
-
-
-def test_checker_contains_no_compose_up():
-    text = CHECKER.read_text()
-
-    assert '"up"' not in text
-    assert "'up'" not in text
-    assert "compose up" not in text
-
-
-def test_platform_deploy_uses_convergence_control():
-    text = PLATFORM.read_text()
-
-    assert (
-        "DEPLOYMENT_INTERFACE=CONVERGENCE_CONTROL"
-        in text
-    )
-
-    assert "local-convergence.py" in text
-    assert "current_activation_summary" in text

@@ -1,4 +1,4 @@
-# KP-014: isolated module. Not referenced by environments/dev. Default creates zero resources.
+# iceberg-storage-integration: isolated module. Not referenced by environments/dev. Default creates zero resources.
 # NO API enablement, IAM changes, new buckets, external calls or writes in this module.
 locals {
   bronze_fields = [

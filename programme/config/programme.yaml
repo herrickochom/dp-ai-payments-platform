@@ -60,7 +60,7 @@ sources:
     - "transform"
     - "platform"
     - "orchestration"
-    - "infra"
+    - "infrastructure"
     - "contracts"
     - "scripts"
     - "ops"

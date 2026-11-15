@@ -49,7 +49,7 @@ def assess_wire(payload: bytes, schemas_by_id: Mapping[int, dict]):
     """Decode actual Avro; retain mapping block for unapproved source contracts."""
     from importlib.util import module_from_spec, spec_from_file_location
     module_path = Path(__file__).with_name('source_mapping.py')
-    spec = spec_from_file_location('kp001f_mapping_for_g', module_path)
+    spec = spec_from_file_location('source_mapping_for_avro', module_path)
     mod = module_from_spec(spec)
     # dataclass uses sys.modules lookup during class creation
     import sys

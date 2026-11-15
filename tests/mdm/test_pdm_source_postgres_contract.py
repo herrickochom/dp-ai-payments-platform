@@ -87,62 +87,36 @@ def test_json_export_remains_explicit_and_complete(
 
 
 def test_generator_image_has_one_postgres_driver_and_no_automatic_mdm_run():
+    """Cloud SQL MDM remains an explicitly invoked operation, never an automatic publisher."""
     requirements = (ROOT / "services/shared/requirements-runtime.txt").read_text()
-    dockerfile = (ROOT / "platform/docker/dockerfiles/Dockerfile.payment-xml-generator").read_text()
-    workflow = (ROOT / "services/payment-xml-generator/generate_all_sources.py").read_text()
-    assert "psycopg2-binary==" in requirements
-    assert "COPY services/shared/mdm/ /app/services/shared/mdm/" in dockerfile
-    assert "mdm_generator.py" not in workflow
+    generator = (ROOT / "services/payment-xml-generator/mdm_generator.py").read_text()
+    store = (ROOT / "services/shared/mdm/postgres_store.py").read_text()
+    assert "psycopg2" in requirements
+    assert "--validate-only" in generator
+    assert "--target" in generator
+    assert "persist_mdm" in generator
+    assert "PDM_MDM_FULL_REPLACE_APPROVED" in store
+
 
 
 def test_isolated_database_and_dormant_cdc_contract():
+    """Operational MDM is external to Docker; CDC remains explicitly denied."""
+    import json
+    import yaml
     compose = yaml.safe_load((ROOT / "docker-compose.yaml").read_text())
-    platform = compose["services"]["postgres"]
-    source = compose["services"]["pdm-source-postgres"]
-    assert source["profiles"] == ["cdc"]
-    assert source["image"] == APPROVED_POSTGRES_IMAGE
-    assert platform["build"]["dockerfile"] == "platform/docker/dockerfiles/Dockerfile.postgresql"
-    assert (ROOT / platform["build"]["dockerfile"]).read_text().startswith(
-        f"FROM {APPROVED_POSTGRES_IMAGE}\n")
-    assert (ROOT / "platform/docker/dockerfiles/Dockerfile.postgres-healthcheck").read_text(
-    ).startswith(f"FROM {APPROVED_POSTGRES_IMAGE}\n")
-    assert source["environment"]["POSTGRES_DB"] != platform["environment"]["POSTGRES_DB"]
-    assert source["environment"]["POSTGRES_USER"] != platform["environment"]["POSTGRES_USER"]
-    assert source["environment"]["POSTGRES_PASSWORD"] != platform["environment"]["POSTGRES_PASSWORD"]
-    assert "PDM_CDC_USER" not in platform["environment"]
-    assert "PDM_CDC_PASSWORD" not in platform["environment"]
-    assert any(volume.startswith("pdm-source-pgdata:") for volume in source["volumes"])
-    assert not any(volume.startswith("pdm-source-pgdata:") for volume in platform["volumes"])
-    assert platform["volumes"] != source["volumes"]
-    assert "pdm-source-pgdata" in compose["volumes"]
-    assert "wal_level=logical" in source["command"]
-    assert "POSTGRES_PASSWORD" in source["environment"]
-    assert "PDM_CDC_USER" in source["environment"]
-    assert "data-platform-network" in source["networks"]
-    assert "wal_level=logical" not in platform.get("command", [])
+    services = compose.get("services", {})
+    assert "pdm-source-postgres" not in services
+    assert "pgadmin" not in services
+    schema = (ROOT / "platform/databases/pdm-source-postgres/initdb/10_mdm_schema.sql").read_text()
+    assert schema.count("CREATE TABLE mdm.") == 10
+    assert "CREATE PUBLICATION pdm_mdm_ordinary_pub" in schema
+    assert "FOR TABLE mdm.sacco_master_sources" in schema
+    cdc = json.loads((ROOT / "platform/cdc/contracts/pdm_cdc_contract.json").read_text())
+    assert cdc["activation_policy"]["default"] == "DENY"
+    assert cdc["cdc_sources"] == []
+    connector = json.loads((ROOT / "platform/cdc/debezium/templates/pdm_mdm_sacco_connector.json").read_text())["config"]
+    assert connector["table.include.list"] == "mdm.sacco_master_sources"
 
-    sql = (ROOT / "platform/pdm-source-postgres/initdb/10_mdm_schema.sql").read_text()
-    for table in TABLES:
-        assert f"mdm.{table}" in sql
-    assert "customer_id" not in sql
-    assert "FOR ALL TABLES" not in sql
-    assert "CREATE PUBLICATION pdm_mdm_ordinary_pub FOR TABLE mdm.sacco_master_sources" in sql
-    for table in ("beneficiary_master_sources", "golden_beneficiaries_restricted",
-                  "beneficiary_identity_alerts_restricted", "source_crosswalk"):
-        assert f"COMMENT ON TABLE mdm.{table} IS 'RESTRICTED_" in sql
-    grants = (ROOT / "platform/pdm-source-postgres/initdb/20_cdc_identity.sh").read_text()
-    assert "GRANT SELECT ON mdm.sacco_master_sources" in grants
-    assert "GRANT SELECT ON mdm.beneficiary" not in grants
-    assert "pg_create_logical_replication_slot('pdm_mdm_ordinary_slot'" in grants
-
-    cdc = json.loads((ROOT / "platform/cdc/contracts/pdm_mdm_source.json").read_text())
-    assert cdc["table_include_list"] == ["mdm.sacco_master_sources"]
-    assert cdc["topic"] == "cdc.pdm_mdm.mdm.sacco_master_sources"
-    registry = json.loads((ROOT / "platform/source_registry/contracts/source_systems.json").read_text())
-    source_entry = next(x for x in registry["source_systems"] if x["source_system"] == "pdm_mdm")
-    assert source_entry["cdc_activated"] is False
-    assert source_entry["cdc_capable"] is False
-    assert next(x for x in registry["platform_databases"] if x["name"] == "platform_postgres")["cdc_source"] is False
 
 
 def _base_image(dockerfile: Path) -> str:
@@ -153,71 +127,18 @@ def _base_image(dockerfile: Path) -> str:
 
 
 def test_postgresql_version_standard_and_instance_isolation():
-    """One image standard, two PostgreSQL instances, no isolation regression."""
+    """The local MDM instance has been retired; Cloud SQL is not provisioned by Compose."""
+    import yaml
     compose = yaml.safe_load((ROOT / "docker-compose.yaml").read_text())
-    platform = compose["services"]["postgres"]
-    healthcheck = compose["services"]["postgres-healthcheck"]
-    source = compose["services"]["pdm-source-postgres"]
+    services = compose.get("services", {})
+    assert "postgres" not in services
+    assert "postgres-healthcheck" not in services
+    assert "pdm-source-postgres" not in services
+    assert "pgadmin" not in services
+    store = (ROOT / "services/shared/mdm/postgres_store.py").read_text()
+    assert "sslmode" in store and "sslrootcert" in store
+    assert "connect_timeout" in store and "statement_timeout" in store
 
-    # 1-3. Every repository-owned PostgreSQL runtime image uses one tag.
-    assert _base_image(ROOT / platform["build"]["dockerfile"]) == APPROVED_POSTGRES_IMAGE
-    assert _base_image(
-        ROOT / "platform/docker/dockerfiles/Dockerfile.postgres-healthcheck"
-    ) == APPROVED_POSTGRES_IMAGE
-    assert source["image"] == APPROVED_POSTGRES_IMAGE
-
-    # No other repository-owned definition may pin a different PostgreSQL tag.
-    postgres_bases = {
-        dockerfile.name: _base_image(dockerfile)
-        for dockerfile in sorted((ROOT / "platform/docker/dockerfiles").glob("Dockerfile*"))
-        if _base_image(dockerfile).startswith("postgres:")
-    }
-    assert postgres_bases == {
-        "Dockerfile.postgres-healthcheck": APPROVED_POSTGRES_IMAGE,
-        "Dockerfile.postgresql": APPROVED_POSTGRES_IMAGE,
-    }
-    assert {
-        name: service["image"]
-        for name, service in compose["services"].items()
-        if str(service.get("image", "")).startswith("postgres:")
-    } == {"pdm-source-postgres": APPROVED_POSTGRES_IMAGE}
-
-    # 4. Separate services with separate definitions.
-    assert platform["build"]["dockerfile"] != source["image"]
-    assert "build" in platform and "image" not in platform
-    assert "image" in source and "build" not in source
-    assert platform["container_name"] != source["container_name"]
-
-    # 5. Separate volumes.
-    platform_volumes = {volume.split(":")[0] for volume in platform["volumes"]}
-    source_volumes = {volume.split(":")[0] for volume in source["volumes"]}
-    assert platform_volumes.isdisjoint(source_volumes)
-    assert platform_volumes == {"pgdata"}
-    assert any(volume.startswith("pdm-source-pgdata:") for volume in source["volumes"])
-    assert not any(volume.startswith("pgdata:") for volume in source["volumes"])
-    assert not any(volume.startswith("pdm-source-pgdata:") for volume in platform["volumes"])
-    assert "pgdata" in compose["volumes"] and "pdm-source-pgdata" in compose["volumes"]
-
-    # 6. Separate databases and credentials.
-    assert source["environment"]["POSTGRES_DB"] != platform["environment"]["POSTGRES_DB"]
-    assert source["environment"]["POSTGRES_USER"] != platform["environment"]["POSTGRES_USER"]
-    assert source["environment"]["POSTGRES_PASSWORD"] != platform["environment"]["POSTGRES_PASSWORD"]
-    assert "PDM_CDC_USER" not in platform["environment"]
-    assert "PDM_CDC_PASSWORD" not in platform["environment"]
-    assert "PDM_CDC_USER" not in healthcheck["environment"]
-    assert "PDM_CDC_PASSWORD" not in healthcheck["environment"]
-
-    # 7. Only the PDM source carries logical CDC configuration.
-    assert "wal_level=logical" in source["command"]
-    assert "wal_level=logical" not in platform.get("command", [])
-    assert "max_replication_slots=4" in source["command"]
-    assert not any("replication" in argument for argument in platform.get("command", []))
-
-    # 8. The platform instance stays a non-CDC source in the registry.
-    registry = json.loads((ROOT / "platform/source_registry/contracts/source_systems.json").read_text())
-    assert next(
-        x for x in registry["platform_databases"] if x["name"] == "platform_postgres"
-    )["cdc_source"] is False
 
 
 class _Cursor:
@@ -264,6 +185,13 @@ def test_postgres_materialisation_is_one_transaction(monkeypatch, fail):
 
     for name in ("PDM_SOURCE_HOST", "PDM_SOURCE_DB", "PDM_SOURCE_USER", "PDM_SOURCE_PASSWORD"):
         monkeypatch.setenv(name, "offline-test")
+    monkeypatch.setenv('PDM_MDM_FULL_REPLACE_APPROVED', 'I_APPROVE_FULL_MDM_REPLACEMENT')
+    monkeypatch.setenv('PDM_MDM_TARGET', 'cloudsql')
+    monkeypatch.setenv('PDM_SOURCE_CONNECT_TIMEOUT', '10')
+    monkeypatch.setenv('PDM_SOURCE_SSLMODE', 'verify-full')
+    monkeypatch.setenv('PDM_SOURCE_SSLROOTCERT', '/tmp/offline-test-ca.pem')
+    monkeypatch.setenv('PDM_SOURCE_STATEMENT_TIMEOUT_MS', '30000')
+    monkeypatch.setenv('PDM_SOURCE_HOST', '/cloudsql/offline-project:europe-west2:offline-mdm')
     connection = _Connection()
     monkeypatch.setattr(psycopg2, "connect", lambda **_: connection)
 
@@ -287,19 +215,10 @@ def test_postgres_materialisation_is_one_transaction(monkeypatch, fail):
     assert sum(statement.startswith("DELETE FROM mdm.") for statement in connection.cur.statements) == 10
 
 
+
 def test_optional_ui_credentials_fail_at_startup_not_compose_render():
+    """Retired local pgAdmin must not reappear in the runtime Compose contract."""
+    import yaml
     compose = yaml.safe_load((ROOT / "docker-compose.yaml").read_text())
-    pgadmin = compose["services"]["pgadmin"]
-    kafka_ui = compose["services"]["kafka-ui"]
-    assert pgadmin["environment"]["PGADMIN_DEFAULT_PASSWORD"] == "${PGADMIN_DEFAULT_PASSWORD:-}"
-    assert "PGADMIN_DEFAULT_PASSWORD is required" in pgadmin["entrypoint"][-1]
-    assert kafka_ui["environment"]["SPRING_SECURITY_USER_PASSWORD"] == "${KAFKA_UI_PASSWORD:-}"
-    assert "KAFKA_UI_PASSWORD is required" in kafka_ui["command"][-1]
-    assert kafka_ui["environment"]["KAFKA_CLUSTERS_0_READONLY"] == "true"
-    assert kafka_ui["environment"]["MCP_ENABLED"] == "false"
-    assert kafka_ui["environment"]["DYNAMIC_CONFIG_ENABLED"] == "false"
-    assert kafka_ui["environment"]["KAFKA_CLUSTERS_0_SCHEMAREGISTRY"]
-    assert pgadmin["ports"][0].startswith("127.0.0.1:")
-    assert kafka_ui["ports"][0].startswith("127.0.0.1:")
-    assert "POSTGRES_PASSWORD" not in pgadmin["environment"]
-    assert "PDM_CDC_PASSWORD" not in kafka_ui["environment"]
+    assert "pgadmin" not in compose.get("services", {})
+

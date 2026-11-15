@@ -58,7 +58,7 @@ def admit(conn, digest, rows):
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--root', default='runtime/iceberg-catalogue-validation')
-    p.add_argument('--ledger', default='runtime/iceberg-catalogue-validation/kp014d-offline-ledger.sqlite3')
+    p.add_argument('--ledger', default='runtime/iceberg-catalogue-validation/catalogue-commit-offline-ledger.sqlite3')
     p.add_argument('--record', action='store_true', help='write local SQLite admission ledger; NEVER commits Iceberg')
     a = p.parse_args()
     root = Path(a.root)

@@ -1,4 +1,4 @@
-"""KP-010C: bounded native-wire Kafka -> existing Pub/Sub topic; no source replay.
+"""kafka-pubsub-native-bridge: bounded native-wire Kafka -> existing Pub/Sub topic; no source replay.
 
 This is an additive bridge only. Historical source publishing remains blocked until
 source identity and provenance are authoritatively reconciled.
@@ -14,7 +14,7 @@ BRIDGE = ROOT / 'platform/gcp/kafka_pubsub_bridge/bridge.py'
 EXPECTED_TOPIC = 'pdm-dev-payments-source-events-v1'
 
 def load_bridge():
-    spec = importlib.util.spec_from_file_location('kp010_existing_bridge', BRIDGE)
+    spec = importlib.util.spec_from_file_location('native_existing_bridge', BRIDGE)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
@@ -80,11 +80,11 @@ def main():
     p.add_argument('--approved-topics', required=True, help='Previously verified 24-topic JSON array')
     p.add_argument('--live', action='store_true')
     p.add_argument('--approve-pubsub-cost', action='store_true')
-    p.add_argument('--bootstrap', default=os.getenv('KP_KAFKA_BOOTSTRAP', ''))
-    p.add_argument('--registry', default=os.getenv('KP_SCHEMA_REGISTRY_URL', ''))
-    p.add_argument('--project', default=os.getenv('KP_GCP_PROJECT', ''))
+    p.add_argument('--bootstrap', default=os.getenv('PDM_KAFKA_BOOTSTRAP', ''))
+    p.add_argument('--registry', default=os.getenv('PDM_SCHEMA_REGISTRY_URL', ''))
+    p.add_argument('--project', default=os.getenv('PDM_GCP_PROJECT', ''))
     p.add_argument('--pubsub-topic', default=EXPECTED_TOPIC)
-    p.add_argument('--group', default='gcp-kp010c-native-bridge')
+    p.add_argument('--group', default='gcp-native-source-bridge')
     p.add_argument('--max-messages', type=int, default=10)
     run(p.parse_args())
 

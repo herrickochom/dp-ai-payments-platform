@@ -81,9 +81,14 @@ class AdapterTests(unittest.TestCase):
     def test_restricted(self):
         with self.assertRaises(a.contract.RouteRejected):
             a.make_envelope("mdm.crosswalk.restricted",0,0,1770000000000,b'{}')
-    def test_unverified(self):
-        with self.assertRaises(a.contract.RouteRejected):
-            a.make_envelope("mdm.sacco.golden",0,0,1770000000000,b'{}')
+    def test_verified_mdm_json(self):
+        record = a.make_envelope(
+            "mdm.sacco.golden", 0, 0, 1770000000000, b'{}'
+        )
+        key, body = a.prepare_object(record)
+        self.assertIn("topic=mdm.sacco.golden", key)
+        self.assertTrue(key.startswith("raw/v1/streaming/"))
+        self.assertTrue(body.startswith(b"Obj\x01"))
     def test_legacy_unchanged(self):
         e=a.make_envelope("icmn.vpm.pain001",0,1,1770000000000,b'\x00\x00\x00\x00\x01x',1)
         with self.assertRaises(a.AdapterError):

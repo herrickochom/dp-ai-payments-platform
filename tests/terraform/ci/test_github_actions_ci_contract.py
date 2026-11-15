@@ -2,13 +2,12 @@ import json
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 
 CONTRACT = (
     ROOT
-    / "infra"
-    / "terraform"
     / "contracts"
+    / "infrastructure"
     / "github_actions_ci_contract.json"
 )
 
@@ -57,6 +56,7 @@ def test_required_ci_jobs_exist():
     required = {
         "source_quality",
         "terraform_governance",
+        "gcp_terraform_validation",
         "cdc_mdm_regression",
         "compose_validation",
     }

@@ -1,4 +1,4 @@
-"""KP-014E: offline-only proposed BigLake Iceberg catalogue contract and commit intent.
+"""iceberg-catalogue-commit: offline-only proposed BigLake Iceberg catalogue contract and commit intent.
 No REST client, cloud authentication, network calls, Iceberg writes, or ledger mutations.
 """
 import argparse
@@ -10,10 +10,10 @@ from pathlib import Path
 EXPECTED_SHA = 'b78d55895754312a25392706b5bc2072be9f48ce74ba7905bd1807ddb8483654'
 DEFAULT_ROOT = Path('runtime/iceberg-catalogue-validation')
 CONTRACT = {
-    'catalogue_name': 'pdm-kp014-iceberg-pilot',
+    'catalogue_name': 'pdm-iceberg-pilot',
     'namespace': 'payments_pilot',
     'table': 'payments_events_iceberg_pilot',
-    'proposed_storage_prefix': 'gs://dp-pdm-ai-platform-dev/iceberg/kp014/',
+    'proposed_storage_prefix': 'gs://dp-pdm-ai-platform-dev/iceberg/pilot/',
     'region': 'europe-west2',
     'credential_mode_proposed': 'CREDENTIAL_MODE_END_USER',
     'catalogue_endpoint': 'UNVERIFIED_REQUIRES_OFFICIAL_PROVIDER_CONTRACT',
@@ -73,7 +73,7 @@ def build(root=DEFAULT_ROOT, ledger=None):
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--ledger',type=Path,default=Path('runtime/iceberg-catalogue-validation/kp014d-offline-ledger.sqlite3'))
+    p.add_argument('--ledger',type=Path,default=Path('runtime/iceberg-catalogue-validation/catalogue-commit-offline-ledger.sqlite3'))
     p.add_argument('--output',type=Path,help='new JSON file only; default prints to stdout')
     a=p.parse_args()
     result=build(ledger=a.ledger)

@@ -1,4 +1,4 @@
-"""KP-010: actual Pub/Sub -> Apache Beam/Dataflow -> GCS Raw v1.
+"""dataflow-raw-ingestion: actual Pub/Sub -> Apache Beam/Dataflow -> GCS Raw v1.
 Requires pre-existing Pub/Sub subscription, bucket, IAM and approved runtime.
 No resources are provisioned here. Never acknowledges failed GCS writes.
 """
@@ -29,7 +29,7 @@ def build_pipeline(argv):
             self.MessageField=MessageField
         def process(self,data):
             from google.api_core.exceptions import PreconditionFailed
-            from kp010 import raw_v1
+            from dataflow_ingestion import raw_v1
             obj,wire=raw_v1.transport(data)
             event=self.deserializer(wire,self.SerializationContext(obj['kafka_topic'],self.MessageField.VALUE))
             record=raw_v1.record_for(event,obj)
@@ -54,7 +54,7 @@ def build_pipeline(argv):
     p.add_argument('--project',required=True)
     p.add_argument('--region',required=True)
     p.add_argument('--runner',default='DirectRunner')
-    p.add_argument('--job-name',default='dp-kp010-raw-v1')
+    p.add_argument('--job-name',default='dp-payments-raw-v1')
     p.add_argument('--staging-location')
     p.add_argument('--temp-location')
     p.add_argument('--service-account-email')

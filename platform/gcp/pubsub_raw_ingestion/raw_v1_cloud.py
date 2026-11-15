@@ -30,12 +30,50 @@ class PubSubAcknowledger:
         self.subscriber.acknowledge(request={'subscription':self.subscription,'ack_ids':[ack_id]})
 
 class RegistryDecoder:
-    def __init__(self,registry):
+    """Schema Registry-backed decoder requiring one complete Avro datum."""
+
+    def __init__(self, registry):
         from confluent_kafka.schema_registry.avro import AvroDeserializer
-        self.deserializer=AvroDeserializer(registry)
-    def __call__(self,wire,topic):
-        from confluent_kafka.serialization import SerializationContext,MessageField
-        return self.deserializer(wire,SerializationContext(topic,MessageField.VALUE))
+        self.registry = registry
+        self.deserializer = AvroDeserializer(registry)
+        self._parsed_schemas = {}
+
+    def __call__(self, wire, topic):
+        import io
+        import json
+        from fastavro import parse_schema, schemaless_reader
+        from confluent_kafka.serialization import (
+            SerializationContext,
+            MessageField,
+        )
+
+        if type(wire) is not bytes or len(wire) <= 5 or wire[0] != 0:
+            raise ValueError("invalid Confluent Avro wire framing")
+
+        schema_id = int.from_bytes(wire[1:5], "big")
+        if schema_id < 1:
+            raise ValueError("invalid Schema Registry ID")
+
+        schema = self._parsed_schemas.get(schema_id)
+        if schema is None:
+            registered = self.registry.get_schema(schema_id)
+            schema_text = registered.schema_str
+            schema = parse_schema(json.loads(schema_text))
+            self._parsed_schemas[schema_id] = schema
+
+        # Independently verify that the writer schema consumes the
+        # complete Avro payload, including its final byte.
+        stream = io.BytesIO(wire[5:])
+        schemaless_reader(stream, schema)
+
+        if stream.read(1):
+            raise ValueError("unexpected trailing Avro bytes")
+
+        # Preserve the existing Confluent deserialization behaviour.
+        return self.deserializer(
+            wire,
+            SerializationContext(topic, MessageField.VALUE),
+        )
 
 def process_message(data,ack_id,store,acker,decoder):
     return raw.process_raw_v1(data,ack_id,store,acker,decoder)

@@ -31,7 +31,7 @@ CONTRACT_SOURCES = (
     ("platform/mdm/contracts", "*.json", "JSON"),
     ("platform/source_registry/contracts", "*.json", "JSON"),
     ("orchestration/transform_runtime/contracts", "*.json", "JSON"),
-    ("infra/terraform/contracts", "*.json", "JSON"),
+    ("contracts/infrastructure", "*.json", "JSON"),
 )
 
 # Files that hold key material: recorded as metadata, never opened.

@@ -1,4 +1,4 @@
-# GCP-KP-001D: Guarded Kafka-to-Pub/Sub POC
+# kafka-pubsub-bridge: Guarded Kafka-to-Pub/Sub POC
 
 Offline-first bridge for a **six-field source Avro record matching the isolated POC Pub/Sub schema exactly**. Existing technical Kafka events are NOT automatically mapped. This does not modify the payment producer, Kafka topics, Terraform, or cloud resources.
 
