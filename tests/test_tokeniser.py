@@ -90,11 +90,11 @@ def test_rotation_coexistence_and_active_selection(monkeypatch):
     monkeypatch.setenv("DP_TOKEN_KEY", TEST_KEY)
     v1 = build_token_links(["BEN-000001"], version=TEST_VERSION)
     monkeypatch.setenv("DP_TOKEN_KEY", OTHER_KEY)
-    v2 = build_token_links(["BEN-000001"], version=OTHER_VERSION)
-    assert v1[0].beneficiary_token != v2[0].beneficiary_token
+    v_other = build_token_links(["BEN-000001"], version=OTHER_VERSION)
+    assert v1[0].beneficiary_token != v_other[0].beneficiary_token
     assert v1[0].beneficiary_token.startswith(f"{TEST_VERSION}:")
-    assert v2[0].beneficiary_token.startswith(f"{OTHER_VERSION}:")
-    active = {r.token_version: r for r in v1 + v2}[OTHER_VERSION]
+    assert v_other[0].beneficiary_token.startswith(f"{OTHER_VERSION}:")
+    active = {r.token_version: r for r in v1 + v_other}[OTHER_VERSION]
     assert active.is_active and active.token_version == OTHER_VERSION
 
 

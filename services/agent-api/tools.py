@@ -567,7 +567,7 @@ class ToolRegistry:
             ) from exc
 
         #
-        # Pydantic v2 model_copy preserves all request fields that are not
+        # Pydantic model_copy preserves all request fields that are not
         # resource classification metadata, including identity, purpose,
         # action, approval, and any future governance context fields.
         #

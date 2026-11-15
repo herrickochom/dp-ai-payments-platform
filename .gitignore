@@ -174,3 +174,5 @@ tfplan
 *.jar
 *.joblib
 *.code-workspace
+.pytest_cache/
+transform/dbt/target/

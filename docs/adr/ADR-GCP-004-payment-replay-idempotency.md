@@ -137,7 +137,7 @@ sequenceDiagram
 ### 4.3 Automated run-state and publication lifecycle
 
 ```mermaid
-stateDiagram-v2
+stateDiagram
     [*] --> DISCOVERED: Source object or schedule ready
     DISCOVERED --> CLAIMED: Durable lease acquired
     CLAIMED --> VALIDATING: Launch bounded processing
@@ -170,7 +170,7 @@ A durable state machine, leases, retry budgets and manifest checks are **require
 | `currency` | STRING | Yes | Approved ISO 4217 code and currency semantics |
 | `event_timestamp` | TIMESTAMP | Yes | Valid instant, timezone explicit; UTC-normalised for canonicalisation |
 
-**Critical contract gap:** The current six-field source event does not contain `source_system`, `schema_version`, `producer_sequence`, `correlation_id`, or explicit source object lineage. Before production, transport metadata or a v2 envelope must supply a stable **source namespace** and version. Until then, global uniqueness of `event_id` must be contractually guaranteed and tested; never invent a namespace from mutable ingestion details.
+**Critical contract gap:** The current six-field source event does not contain `source_system`, `schema_version`, `producer_sequence`, `correlation_id`, or explicit source object lineage. Before production, transport metadata or a versioned envelope must supply a stable **source namespace** and version. Until then, global uniqueness of `event_id` must be contractually guaranteed and tested; never invent a namespace from mutable ingestion details.
 
 ### 5.2 Identity and fingerprint
 

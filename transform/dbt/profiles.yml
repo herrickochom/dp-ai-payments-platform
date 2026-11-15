@@ -2,7 +2,7 @@
 # Authentication: existing Google Application Default Credentials (ADC).
 # Set DBT_GCP_PROJECT to the approved GCP project ID before dbt execution.
 # Set DBT_GCP_LOCATION to the actual dataset location (default europe-west2).
-# IMPORTANT: Standard dbt-bigquery table materialization is NOT native BigLake Iceberg V2 publication.
+# IMPORTANT: Standard dbt-bigquery table materialization is NOT native BigLake Iceberg publication.
 # Do not run models until the guarded Iceberg publication implementation is validated.
 pdm_platform:
   target: gcp

@@ -34,7 +34,7 @@ class Tests(unittest.TestCase):
         o=InjectedGCSReader(Storage(),'dp-pdm-ai-platform-dev').read('raw/v1/2026-11-03/event.avro',1)
         self.assertEqual(o.content,b'Obj\x01')
     def test_noncanonical_rejected(self):
-        with self.assertRaises(AdapterContractError): InjectedGCSReader(Storage(),'dp-pdm-ai-platform-dev').read('raw/v2/a.avro',1)
+        with self.assertRaises(AdapterContractError): InjectedGCSReader(Storage(),'dp-pdm-ai-platform-dev').read('raw/unapproved/a.avro',1)
     def test_generation_bool_rejected(self):
         with self.assertRaises(AdapterContractError): InjectedGCSReader(Storage(),'dp-pdm-ai-platform-dev').read('raw/v1/a.avro',True)
     def test_stage_and_merge_order(self):

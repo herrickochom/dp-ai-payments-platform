@@ -255,7 +255,7 @@ def build_record(*, topic, source_path, record_index, payload, raw_bytes,
             "x_source_system": tech.get("x_source_system") or info["system"],
             "x_attributes": {
                 "source_path": source_path, "record_index": str(record_index),
-                "record_sha256": _sha(raw_bytes), "publisher": "source_publisher.v2",
+                "record_sha256": _sha(raw_bytes), "publisher": "source_publisher.v1",
             },
         }
         return _build_for_schema(technical_schema, candidates)
@@ -290,7 +290,7 @@ def build_record(*, topic, source_path, record_index, payload, raw_bytes,
         "payload": extracted if extracted else None,
         "x_attributes": {
             "source_path": source_path, "record_index": str(record_index),
-            "record_sha256": _sha(raw_bytes), "publisher": "source_publisher.v2",
+            "record_sha256": _sha(raw_bytes), "publisher": "source_publisher.v1",
         },
     }
     return _build_for_schema(business_schema, candidates)

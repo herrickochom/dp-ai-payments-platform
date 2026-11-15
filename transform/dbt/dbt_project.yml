@@ -47,7 +47,7 @@ clean-targets:
 #   gold
 #   consumption
 #
-# Native BigLake Iceberg V2 publication is NOT provided by the default
+# Native BigLake Iceberg publication is NOT provided by the default
 # dbt-bigquery table materialization. Do not execute until Stage B is validated.
 # ------------------------------------------------------------------------------
 
