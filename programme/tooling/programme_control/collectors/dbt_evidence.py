@@ -25,7 +25,6 @@ from .base import (
 TARGET_DIR = "transform/dbt/target"
 MANIFEST = f"{TARGET_DIR}/manifest.json"
 RUN_RESULTS = f"{TARGET_DIR}/run_results.json"
-CONTRACT = "orchestration/transform_runtime/contracts/lakehouse_transform.json"
 MODELS_DIR = "transform/dbt/models"
 
 
@@ -43,13 +42,10 @@ def collect_dbt(root: Path) -> CollectorResult:
 
     manifest_path = root / MANIFEST
     results_path = root / RUN_RESULTS
-    contract_path = root / CONTRACT
-
     manifest_status, manifest_bytes, manifest_hash = file_status(manifest_path)
     results_status, results_bytes, results_hash = file_status(results_path)
-    contract_status, _, contract_hash = file_status(contract_path)
 
-    contract = _read_json(contract_path) if contract_status == PRESENT else None
+    manifest = _read_json(manifest_path) if manifest_status == PRESENT else None
 
     model_sql = sorted((root / MODELS_DIR).rglob("*.sql")) if (root / MODELS_DIR).is_dir() else []
     layer_counts: dict[str, int] = {}
@@ -58,8 +54,13 @@ def collect_dbt(root: Path) -> CollectorResult:
         layer = relative.parts[0] if len(relative.parts) > 1 else "root"
         layer_counts[layer] = layer_counts.get(layer, 0) + 1
 
-    contract_model_count = int((contract or {}).get("manifest_model_count", 0) or 0)
-    contract_test_count = int((contract or {}).get("manifest_test_count", 0) or 0)
+    manifest_nodes = (manifest or {}).get("nodes", {}) or {}
+    manifest_model_count = sum(
+        1 for n in manifest_nodes.values() if n.get("resource_type") == "model"
+    )
+    manifest_test_count = sum(
+        1 for n in manifest_nodes.values() if n.get("resource_type") == "test"
+    )
 
     # A dbt result exists only when run_results.json carries real content.
     dbt_result = "NOT_RUN"
@@ -72,14 +73,13 @@ def collect_dbt(root: Path) -> CollectorResult:
         "manifest_status": manifest_status,
         "manifest_bytes": manifest_bytes,
         "run_results_status": results_status,
-        "contract_status": contract_status,
         "dbt_result": dbt_result,
-        "dbt_model_count": contract_model_count,
-        "dbt_test_count": contract_test_count,
+        "dbt_model_count": manifest_model_count,
+        "dbt_test_count": manifest_test_count,
         "source_model_file_count": len(model_sql),
         "layer_counts": layer_counts,
         "technical_status": (
-            "CONTRACT_ONLY" if contract_status == PRESENT else "UNKNOWN"
+            "MANIFEST_ONLY" if manifest_status == PRESENT else "UNKNOWN"
         ),
         "observed_at": observed,
     }
@@ -121,21 +121,20 @@ def collect_dbt(root: Path) -> CollectorResult:
     )
     result.add(
         EvidenceItem(
-            evidence_id="EV-DBT-CONTRACT",
+            evidence_id="EV-DBT-MANIFEST-COUNTS",
             kind=KIND_DBT,
-            title="Bounded lakehouse transform contract",
-            location=CONTRACT,
-            status=contract_status,
-            source_path=CONTRACT,
+            title="dbt manifest model and test counts",
+            location=MANIFEST,
+            status=manifest_status,
+            source_path=MANIFEST,
             observed_at=observed,
             detail={
-                "sha256": contract_hash,
-                "model_count": contract_model_count,
-                "test_count": contract_test_count,
-                "contract_version": (contract or {}).get("contract_version", ""),
+                "sha256": manifest_hash,
+                "model_count": manifest_model_count,
+                "test_count": manifest_test_count,
                 "note": (
-                    "Committed contract records the declared model and test "
-                    "inventory. It is a declared count, not an execution result."
+                    "Counts are read from manifest.json when present. "
+                    "A declared count, not an execution result."
                 ),
             },
         )

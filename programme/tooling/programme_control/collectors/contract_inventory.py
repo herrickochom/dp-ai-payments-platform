@@ -30,7 +30,6 @@ CONTRACT_SOURCES = (
     ("platform/cdc/contracts", "*.avsc", "AVRO"),
     ("platform/mdm/contracts", "*.json", "JSON"),
     ("platform/source_registry/contracts", "*.json", "JSON"),
-    ("orchestration/transform_runtime/contracts", "*.json", "JSON"),
     ("contracts/infrastructure", "*.json", "JSON"),
 )
 

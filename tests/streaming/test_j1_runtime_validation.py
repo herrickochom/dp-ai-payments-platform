@@ -1,3 +1,5 @@
+import pytest
+pytest.importorskip("pyflink")
 """Run-time schema-binding validation against the actual Flink container.
 
 Executed inside the pinned Flink image (apache-flink==1.18.1-py3) where PyFlink

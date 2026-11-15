@@ -1,3 +1,5 @@
+import pytest
+pytest.importorskip("pyflink")
 """Regression tests for the J1 DataStream-to-Table field mapping.
 
 These tests verify that the physical tuple produced by the extraction
