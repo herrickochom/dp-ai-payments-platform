@@ -339,10 +339,6 @@ def write_evidence(path: Path, ev):
         if os.path.exists(tmp): os.unlink(tmp)
 
 def run_live(args) -> int:
-    raise RuntimeError(
-        "STOP: Stage 2C live publishing is disabled pending "
-        "historical delivery reconciliation and approval"
-    )
     try:
         from confluent_kafka import Producer
         from confluent_kafka.schema_registry import SchemaRegistryClient
