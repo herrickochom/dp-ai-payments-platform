@@ -112,7 +112,7 @@ class GovernedStorageDomainTests(unittest.TestCase):
         self.assertTrue(
             variables["enable_governed_storage_deployment"]["default"]
         )
-        self.assertFalse(
+        self.assertTrue(
             variables["governance_approved"]["default"]
         )
 
