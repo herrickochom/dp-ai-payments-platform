@@ -180,3 +180,4 @@ transform/dbt/target/
 *.tfstate.*
 .terraform/
 __pycache__/
+transform/dbt/logs/
