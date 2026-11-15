@@ -99,14 +99,17 @@ class GovernedStorageDomainTests(unittest.TestCase):
 
         self.assertTrue(set(self.protected).isdisjoint(assigned))
 
-    def test_deployment_disabled_by_default(self):
+    def test_deployment_approval_state(self):
         variables = {
             normalise(name): details
             for item in self.variables["variable"]
             for name, details in item.items()
         }
 
-        self.assertFalse(
+        # Gate 4-α (commit 6301ff6) flipped this default to True as the
+        # deployment approval. Any future disable must revert both the
+        # variable and this assertion in one commit.
+        self.assertTrue(
             variables["enable_governed_storage_deployment"]["default"]
         )
         self.assertFalse(
