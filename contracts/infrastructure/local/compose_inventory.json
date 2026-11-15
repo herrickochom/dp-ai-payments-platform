@@ -10,6 +10,7 @@
   ],
   "name": "pdm_local_compose_inventory",
   "profiles": [
+    "cdc-connect",
     "generate-data",
     "kafka-ui",
     "publish-data"

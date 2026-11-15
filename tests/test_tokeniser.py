@@ -22,6 +22,19 @@ from tokeniser_job import (
     rows_from_bronze_records,
 )
 
+import os as _os
+import pathlib as _pl
+import pytest as _pytest
+_mounted_ok = (
+    _os.environ.get("DP_SECRET_SOURCE") == "mounted-files"
+    and _os.environ.get("DP_SECRET_DIR")
+    and (_pl.Path(_os.environ["DP_SECRET_DIR"]) / "DP_TOKEN_KEY_VERSION").is_file()
+)
+pytestmark = _pytest.mark.skipif(
+    not _mounted_ok,
+    reason="requires mounted secret files (DP_SECRET_SOURCE=mounted-files, DP_SECRET_DIR with DP_TOKEN_KEY_VERSION)",
+)
+
 TEST_KEY = "gate2-offline-test-key-only"
 TEST_VERSION = "vTest1"
 OTHER_KEY = "gate2-offline-rotation-key-only"
