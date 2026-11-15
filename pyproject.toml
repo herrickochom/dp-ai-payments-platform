@@ -17,7 +17,6 @@ dependencies = [
     "pytz",
     "PyYAML",
     "sqlglot",
-    "trino",
     "uvicorn",
 ]
 

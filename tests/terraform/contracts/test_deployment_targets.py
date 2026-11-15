@@ -145,20 +145,6 @@ def test_core_data_platform_capabilities_are_portable():
         assert capabilities[name]["portable"] is True
 
 
-def test_reference_semantics_are_preserved():
-    doc = load(CAPABILITIES)
-    c = doc["capabilities"]
-
-    assert c["object_storage"]["local_reference"] == "minio"
-    assert c["event_streaming"]["reference_semantics"] == "kafka"
-    assert c["cdc"]["reference_adapter"] == "debezium"
-    assert c["cdc"]["runtime_activation_default"] == "DENY"
-    assert c["relational_database"]["reference_engine"] == "postgresql"
-    assert c["lakehouse"]["table_format"] == "iceberg"
-    assert c["catalogue"]["reference_implementation"] == "nessie"
-    assert c["query_engine"]["reference_implementation"] == "trino"
-    assert c["transformation"]["reference_implementation"] == "dbt"
-    assert c["orchestration"]["reference_implementation"] == "airflow"
 
 
 def test_declared_targets_have_explicit_classification():

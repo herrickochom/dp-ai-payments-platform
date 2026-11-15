@@ -24,11 +24,7 @@ data/**
 warehouse/
 temp/
 tmp/
-minio-data/
 pgdata/
-*.duckdb
-!platform/docker/dockerfiles/Dockerfile.duckdb
-# ...but the DuckDB dbt image definition is code, not a local database file
 *.db
 *.sqlite
 
@@ -52,11 +48,9 @@ logs/
 *.logs
 **/logs/*.log
 
-# --- 5. Cloud & S3 Tools (MinIO/AWS) ---
 .aws/
 .s3cfg
 *.s3
-# MinIO Client (mc) config and session files
 .mc/
 mc.session
 s3-check-md5*

@@ -1,6 +1,6 @@
 import pytest
 
-from services.shared.security.runtime_security import is_production_security_mode, validate_kafka_security, validate_schema_registry_security, validate_trino_security
+from services.shared.security.runtime_security import is_production_security_mode, validate_kafka_security, validate_schema_registry_security
 
 
 @pytest.fixture(autouse=True)
@@ -23,8 +23,6 @@ def test_production_security_mode_is_case_insensitive(monkeypatch, value):
 
 
 
-def test_development_allows_trino_http():
-    validate_trino_security(scheme="http")
 
 
 def test_development_allows_kafka_plaintext():
@@ -45,17 +43,8 @@ def test_development_allows_schema_registry_http():
 
 
 
-def test_production_allows_trino_https(monkeypatch):
-    monkeypatch.setenv("DP_SECURITY_MODE", "production")
-
-    validate_trino_security(scheme="https")
 
 
-def test_production_rejects_trino_http(monkeypatch):
-    monkeypatch.setenv("DP_SECURITY_MODE", "production")
-
-    with pytest.raises(ValueError, match="HTTPS"):
-        validate_trino_security(scheme="http")
 
 
 def test_production_allows_kafka_ssl(monkeypatch):

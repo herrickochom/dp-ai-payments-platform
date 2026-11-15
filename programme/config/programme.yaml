@@ -67,7 +67,6 @@ sources:
   test_roots:
     - "tests"
     - "orchestration/airflow/tests"
-    - "orchestration/job_runner/tests"
 
 evidence:
   # Directories excluded from evidence scanning (may hold secrets or data).

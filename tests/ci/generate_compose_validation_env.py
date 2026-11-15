@@ -25,7 +25,6 @@ SPECIAL_VALUES = {
     "OBJECT_STORE_REGION": "europe-west2",
     "TRINO_BASE_IMAGE": "trinodb/trino:477",
     "TRINO_SQLALCHEMY_URI": (
-        "trino://ci_user:ci_placeholder@trino:8443/iceberg"
     ),
     "TRANSFORM_LEDGER_APP_DATABASE_URL": (
         "postgresql://ci_user:ci_placeholder@postgres:5432/ci"

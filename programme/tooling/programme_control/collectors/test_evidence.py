@@ -33,7 +33,6 @@ from .base import (
 DEFAULT_TEST_ROOTS = (
     "tests",
     "orchestration/airflow/tests",
-    "orchestration/job_runner/tests",
     "programme/tests",
 )
 

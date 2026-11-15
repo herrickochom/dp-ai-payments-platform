@@ -93,7 +93,6 @@ models:
 #
 #   * The transform runtime provisions exactly the namespaces
 #     {bronze, silver, silver_vault, gold, consumption} on the run branch.
-#   * The profile's default schema is `staging`, which is a DuckDB-local
 #     view namespace and is deliberately not provisioned on the run branch.
 #   * The geographic reference seeds are read by consumption-layer models
 #     that already depend on `silver`-level dimensions.

@@ -13,7 +13,6 @@ RUN pip install --no-cache-dir --upgrade \
 
 RUN pip install --no-cache-dir \
     dbt-core==1.9.4 \
-    dbt-trino==1.9.3
 
 WORKDIR /usr/app/dbt
 

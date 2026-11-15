@@ -115,7 +115,6 @@ jobs:
             "fastapi==0.115.12" \
             "pydantic==2.5.0" \
             "httpx==0.24.1" \
-            "trino==0.329.0"
 
       - name: Orchestration regression tests
         run: python -m pytest -q orchestration/airflow/tests

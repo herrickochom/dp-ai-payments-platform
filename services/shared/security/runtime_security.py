@@ -38,16 +38,6 @@ def _require_https(url: str, *, service: str) -> None:
 
 
 
-def validate_trino_security(*, scheme: str) -> None:
-    """Validate the transport selected by a Trino client."""
-    if not is_production_security_mode():
-        return
-
-    if (scheme or "").strip().lower() != "https":
-        raise ValueError(
-            "Trino clients must use HTTPS when "
-            "DP_SECURITY_MODE=production"
-        )
 
 
 def validate_kafka_security(
