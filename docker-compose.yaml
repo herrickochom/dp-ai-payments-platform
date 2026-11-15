@@ -284,7 +284,7 @@ services:
       PDM_SOURCE_DB: ${PDM_SOURCE_DB:-pdm_mdm}
       PDM_SOURCE_USER: ${PDM_SOURCE_USER}
       PDM_SOURCE_PASSWORD: ${PDM_SOURCE_PASSWORD}
-      PDM_SOURCE_SSLMODE: verify-ca
+      PDM_SOURCE_SSLMODE: disable
       PDM_SOURCE_SSLROOTCERT: /certs/google-cloudsql-server-ca.crt
       PDM_SOURCE_CONNECT_TIMEOUT: '10'
       PDM_SOURCE_STATEMENT_TIMEOUT_MS: '60000'
@@ -311,7 +311,7 @@ services:
       PDM_SOURCE_DB: ${PDM_SOURCE_DB:-pdm_mdm}
       PDM_SOURCE_USER: ${PDM_SOURCE_USER}
       PDM_SOURCE_PASSWORD: ${PDM_SOURCE_PASSWORD}
-      PDM_SOURCE_SSLMODE: verify-ca
+      PDM_SOURCE_SSLMODE: disable
       PDM_SOURCE_SSLROOTCERT: /certs/google-cloudsql-server-ca.crt
       PDM_SOURCE_CONNECT_TIMEOUT: '10'
       PDM_SOURCE_STATEMENT_TIMEOUT_MS: '60000'
@@ -320,8 +320,10 @@ services:
       KAFKA_SECURITY_PROTOCOL: ${KAFKA_SECURITY_PROTOCOL:-PLAINTEXT}
       DP_SECRET_SOURCE: ${DP_SECRET_SOURCE:-}
       DP_SECRET_DIR: ${DP_SECRET_DIR:-}
+      MDM_KAFKA_PUBLISH_ENABLED: 'true'
     volumes:
     - ./certs:/certs:ro
+    - ./data:/app/data:ro
     depends_on:
       cloud-sql-proxy:
         condition: service_started

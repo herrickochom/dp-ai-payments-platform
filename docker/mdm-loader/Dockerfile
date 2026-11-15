@@ -5,7 +5,7 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 # Both the generator entrypoint and the postgres_store library are needed.
 COPY services/payment-xml-generator/ /app/generator/
 COPY services/shared/ /app/services/shared/
-COPY services/shared/__init__.py /app/services/__init__.py 2>/dev/null || touch /app/services/__init__.py
+RUN mkdir -p /app/services && touch /app/services/__init__.py
 ENV PYTHONUNBUFFERED=1
 ENV DATA_ROOT=/app/data
 ENV PYTHONPATH=/app:/app/generator

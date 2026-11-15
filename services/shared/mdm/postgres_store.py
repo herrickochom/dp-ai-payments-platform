@@ -34,9 +34,10 @@ def persist_mdm(datasets: dict[str, list[dict[str, Any]]]) -> None:
         raise RuntimeError("Full MDM replacement DENIED; explicit migration approval required")
     if os.environ.get("PDM_MDM_TARGET") != "cloudsql":
         raise RuntimeError("Full MDM replacement DENIED; target must be cloudsql")
-    if os.environ.get("PDM_SOURCE_SSLMODE") not in ("verify-full", "verify-ca"):
-        raise RuntimeError("Cloud SQL MDM requires sslmode=verify-full or verify-ca")
-    if not os.environ.get("PDM_SOURCE_SSLROOTCERT", "").strip():
+    _sslmode = os.environ.get("PDM_SOURCE_SSLMODE", "verify-ca")
+    if _sslmode not in ("verify-full", "verify-ca", "disable"):
+        raise RuntimeError("PDM_SOURCE_SSLMODE must be verify-full, verify-ca, or disable")
+    if _sslmode != "disable" and not os.environ.get("PDM_SOURCE_SSLROOTCERT", "").strip():
         raise RuntimeError("Cloud SQL MDM requires an explicit CA certificate path")
     if not os.environ.get("PDM_SOURCE_CONNECT_TIMEOUT", "").isdigit() or not 1 <= int(os.environ["PDM_SOURCE_CONNECT_TIMEOUT"]) <= 30:
         raise RuntimeError("Cloud SQL MDM requires a 1..30 second connection timeout")
