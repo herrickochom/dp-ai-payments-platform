@@ -33,6 +33,26 @@ from generator_common import (
     write_xml,
 )
 
+from pdm_governed_synthetic_ledger_v1 import build_ledger
+from pdm_synthetic_camt_v1 import build as build_synthetic_camt
+from lxml import etree
+from pathlib import Path
+
+_SYNTHETIC_LEDGER = None
+_XSD_DIR = Path(__file__).resolve().parents[2] / 'contracts/iso20022/xsd'
+
+def _synthetic_camt(context, *, kind):
+    if _SYNTHETIC_LEDGER is None:
+        raise RuntimeError('synthetic ledger preflight required before CAMT generation')
+    namespace = CAMT053_NS if kind == '053' else CAMT054_NS
+    xml = build_synthetic_camt(context, _SYNTHETIC_LEDGER, kind=kind,
+        namespace=namespace, wallet_account=payment_account, event_timestamp=event_timestamp)
+    xsd = _XSD_DIR / ('camt.053.001.08.xsd' if kind == '053' else 'camt.054.001.08.xsd')
+    schema = etree.XMLSchema(etree.parse(str(xsd)))
+    schema.assertValid(etree.fromstring(xml))
+    validate_xml_no_empty_text(xml, f'Wendi synthetic CAMT.{kind}')
+    return xml
+
 def wallet_status(status: str) -> str:
     return {STATUS_ACSC: "SUCCESSFUL", "PDNG": "PENDING", "RJCT": "FAILED"}[status]
 
@@ -129,15 +149,15 @@ def generate_pain002(context: dict) -> bytes:
 
     pmt = child(report, "OrgnlPmtInfAndSts")
     child(pmt, "OrgnlPmtInfId", f"WENDI-PMT-{loan_id}")
-    child(pmt, "TxSts", status)
+    tx = child(pmt, "TxInfAndSts")
+    child(tx, "OrgnlInstrId", f"WENDI-INSTR-{loan_id}")
+    child(tx, "OrgnlEndToEndId", loan_id)
+    child(tx, "OrgnlUETR", stable_uetr("uetr-wendi", loan_id))
+    child(tx, "TxSts", status)
     reason_code, reason_detail = status_reason(context["scenario"])
-    reason = child(pmt, "StsRsnInf")
+    reason = child(tx, "StsRsnInf")
     child(child(reason, "Rsn"), "Cd", reason_code)
     child(reason, "AddtlInf", reason_detail)
-    child(pmt, "OrgnlInstrId", f"WENDI-INSTR-{loan_id}")
-    child(pmt, "OrgnlEndToEndId", loan_id)
-    child(pmt, "OrgnlTxId", lifecycle["wendi_tx_id"])
-    child(pmt, "OrgnlUETR", stable_uetr("uetr-wendi", loan_id))
 
     xml = ET.tostring(root, encoding="utf-8", xml_declaration=True)
     validate_xml_no_empty_text(xml, f"Wendi PAIN002 {loan_id}")
@@ -145,119 +165,13 @@ def generate_pain002(context: dict) -> bytes:
 
 
 def generate_camt053(context: dict) -> bytes:
-    loan = context["loan"]
-    beneficiary = context["beneficiary"]
-    sacco = context["sacco"]
-    lifecycle = context["lifecycle"]
-    amount = context["amount"]
-    loan_id = loan["loan_id"]
+    return _synthetic_camt(context, kind='053')
 
-    root = ET.Element("Document", xmlns=CAMT053_NS)
-    stmt = child(root, "BkToCstmrStmt")
-    header = child(stmt, "GrpHdr")
-    child(header, "MsgId", lifecycle["wendi_statement_message_id"])
-    child(header, "CreDtTm", event_timestamp(loan, "cashout"))
-
-    statement = child(stmt, "Stmt")
-    child(statement, "Id", f"STMT-{loan_id}-{event_date(loan, 'cashout')}")
-    child(statement, "CreDtTm", event_timestamp(loan, "cashout"))
-    child(statement, "ElctrncSeqNb", str(int(loan_id.split("-")[-1]) % 999 + 1))
-    period = child(statement, "FrToDt")
-    child(period, "FrDtTm", event_timestamp(loan, "disbursement"))
-    child(period, "ToDtTm", event_timestamp(loan, "cashout"))
-
-    account = child(statement, "Acct")
-    other = child(child(account, "Id"), "Othr")
-    child(other, "Id", sacco["wendi_account"])
-    child(other, "Issr", "WENDI")
-
-    opening = child(statement, "Bal")
-    child(child(opening, "Tp"), "CdOrPrtry", "OPBD")
-    child(opening, "Amt", "0.00", Ccy="UGX")
-    child(opening, "CdtDbtInd", "CRDT")
-    child(opening, "Dt", event_date(loan, "disbursement"))
-
-    closing = child(statement, "Bal")
-    child(child(closing, "Tp"), "CdOrPrtry", "CLBD")
-    child(closing, "Amt", amount, Ccy="UGX")
-    child(closing, "CdtDbtInd", "CRDT")
-    child(closing, "Dt", event_date(loan, "cashout"))
-
-    entry = child(statement, "Ntry")
-    child(entry, "NtryRef", f"NTRY-{loan_id}")
-    child(entry, "Amt", amount, Ccy="UGX")
-    child(entry, "CdtDbtInd", "CRDT")
-    child(entry, "Sts", "BOOK")
-    child(child(entry, "BookgDt"), "Dt", event_date(loan, "cashout"))
-    child(child(entry, "ValDt"), "Dt", event_date(loan, "cashout"))
-    child(entry, "BkTxCd", "PMNT-RCVD-EMIS")
-    child(entry, "AcctSvcrRef", f"ASR-WENDI-{loan_id}")
-    details = child(entry, "NtryDtls")
-    tx_details = child(details, "TxDtls")
-    refs = child(tx_details, "Refs")
-    child(refs, "InstrId", f"WENDI-INSTR-{loan_id}")
-    child(refs, "EndToEndId", loan_id)
-    child(refs, "TxId", lifecycle["wendi_tx_id"])
-    child(refs, "UETR", stable_uetr("uetr-wendi", loan_id))
-    tx_amount = child(tx_details, "Amt")
-    child(tx_amount, "Amt", amount, Ccy="UGX")
-    child(tx_amount, "CdtDbtInd", "CRDT")
-    child(child(tx_details, "Dbtr"), "Nm", sacco["name"])
-    child(child(tx_details, "Cdtr"), "Nm", beneficiary["name"])
-    debtor_agent_fi = child(child(tx_details, "DbtrAgt"), "FinInstnId")
-    child(debtor_agent_fi, "BICFI", "WENDI")
-    child(debtor_agent_fi, "Nm", "WENDI Wallet Platform")
-    creditor_agent_fi = child(child(tx_details, "CdtrAgt"), "FinInstnId")
-    child(creditor_agent_fi, "BICFI", "WENDI")
-    child(creditor_agent_fi, "Nm", "WENDI Wallet Platform")
-    remit = child(tx_details, "RmtInf")
-    child(remit, "Ustrd", f"PDM Loan {loan_id} - {loan['project_type']}")
-
-    xml = ET.tostring(root, encoding="utf-8", xml_declaration=True)
-    validate_xml_no_empty_text(xml, f"Wendi CAMT053 {loan_id}")
-    return xml
 
 
 def generate_camt054(context: dict) -> bytes:
-    loan = context["loan"]
-    beneficiary = context["beneficiary"]
-    lifecycle = context["lifecycle"]
-    amount = context["amount"]
-    loan_id = loan["loan_id"]
+    return _synthetic_camt(context, kind='054')
 
-    root = ET.Element("Document", xmlns=CAMT054_NS)
-    notif = child(root, "BkToCstmrDbtCdtNtfctn")
-    header = child(notif, "GrpHdr")
-    child(header, "MsgId", lifecycle["wendi_notification_message_id"])
-    child(header, "CreDtTm", event_timestamp(loan, "cashout"))
-
-    notification = child(notif, "Ntfctn")
-    child(notification, "Id", f"NTF-{loan_id}")
-    child(notification, "CreDtTm", event_timestamp(loan, "cashout"))
-
-    account = child(notification, "Acct")
-    other = child(child(account, "Id"), "Othr")
-    child(other, "Id", payment_account(loan, beneficiary))
-    child(other, "Issr", "WENDI")
-
-    entry = child(notification, "Ntry")
-    child(entry, "Amt", amount, Ccy="UGX")
-    child(entry, "CdtDbtInd", "CRDT")
-    child(entry, "Sts", "BOOK")
-    child(child(entry, "BookgDt"), "Dt", event_date(loan, "cashout"))
-    tx_details = child(child(entry, "NtryDtls"), "TxDtls")
-    refs = child(tx_details, "Refs")
-    child(refs, "EndToEndId", loan_id)
-    child(refs, "TxId", lifecycle["vpm_transaction_id"])
-    tx_amount = child(tx_details, "Amt")
-    child(tx_amount, "Amt", amount, Ccy="UGX")
-    child(tx_amount, "CdtDbtInd", "CRDT")
-    remit = child(tx_details, "RmtInf")
-    child(remit, "Ustrd", f"PDM Loan {loan_id} disbursement to {beneficiary['name']}")
-
-    xml = ET.tostring(root, encoding="utf-8", xml_declaration=True)
-    validate_xml_no_empty_text(xml, f"Wendi CAMT054 {loan_id}")
-    return xml
 
 
 def generate_camt052(sacco: dict, total: int, as_of_date: str) -> bytes:
@@ -340,46 +254,48 @@ def main() -> None:
     }
 
     if args.clean:
-        for directory in dirs.values():
-            clean_directory(directory)
+        raise RuntimeError('--clean is disabled for guarded Stage 9E generation')
 
     contexts = payment_contexts(args.count)
     all_loans = load_json(PDMIS_ROOT / "loans.json")
     as_of_date = authoritative_as_of_date(all_loans)
     saccos = load_json(PDMIS_ROOT / "saccos.json")
     sacco_index = {row["sacco_id"]: idx + 1 for idx, row in enumerate(saccos)}
+    global _SYNTHETIC_LEDGER
+    _SYNTHETIC_LEDGER = build_ledger(contexts, wallet_account=payment_account,
+        event_timestamp=event_timestamp, settled_status=STATUS_ACSC)
+    pending = {}
     totals = defaultdict(int)
     transactions = []
     success_count = 0
-
     for seq, context in enumerate(contexts, 1):
-        write_xml(dirs["pain001"] / f"pain001_{seq:04d}.xml", generate_pain001(context))
-        write_xml(dirs["pain002"] / f"pain002_{seq:04d}.xml", generate_pain002(context))
-
+        pending[dirs["pain001"] / f"pain001_{seq:04d}.xml"] = generate_pain001(context)
+        pending[dirs["pain002"] / f"pain002_{seq:04d}.xml"] = generate_pain002(context)
         agent_id = f"AGENT-{sacco_index[context['sacco']['sacco_id']]:04d}"
         transactions.append(transaction_record(context, agent_id))
-
         if context["status"] == STATUS_ACSC:
             success_count += 1
             totals[context["sacco"]["sacco_id"]] += context["amount"]
-            write_xml(dirs["camt053"] / f"camt053_{seq:04d}.xml", generate_camt053(context))
-            write_xml(dirs["camt054"] / f"camt054_{seq:04d}.xml", generate_camt054(context))
-
+            pending[dirs["camt053"] / f"camt053_{seq:04d}.xml"] = generate_camt053(context)
+            pending[dirs["camt054"] / f"camt054_{seq:04d}.xml"] = generate_camt054(context)
     for report_number, sacco in enumerate(saccos, 1):
-        write_xml(
-            dirs["camt052"] / f"camt052_report_{report_number:03d}.xml",
-            generate_camt052(sacco, totals[sacco["sacco_id"]], as_of_date),
-        )
-
-    validate_no_nulls(transactions, "wendi_transactions")
-    write_json(DATA_ROOT / "wendi" / "wendi_transactions.json", transactions)
-
-    print(
-        "Wendi generation PASS: "
-        f"{len(contexts)} PAIN001, {len(contexts)} PAIN002, "
-        f"{success_count} CAMT053, {success_count} CAMT054, "
-        f"{len(saccos)} CAMT052, {len(transactions)} transaction records"
-    )
+        pending[dirs["camt052"] / f"camt052_report_{report_number:03d}.xml"] = generate_camt052(
+            sacco, totals[sacco["sacco_id"]], as_of_date)
+    validate_no_nulls(transactions, 'wendi_transactions')
+    # Fail closed: never overwrite or merge with existing generated source datasets.
+    pending[DATA_ROOT / 'wendi' / 'wendi_transactions.json'] = transactions
+    if any(path.exists() for path in pending):
+        raise RuntimeError('destination already exists; refusing overwrite')
+    # This is a staged implementation; do not write to data/ without a separately
+    # verified atomic multi-file promotion mechanism.
+    for path, payload in pending.items():
+        if path.exists():
+            raise RuntimeError('staging destination already exists: ' + str(path))
+        if isinstance(payload, bytes):
+            write_xml(path, payload)
+        else:
+            write_json(path, payload)
+    print('PASS: Wendi staged dataset generated')
 
 
 if __name__ == "__main__":
