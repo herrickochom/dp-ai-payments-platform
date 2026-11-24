@@ -1,0 +1,686 @@
+[
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0001",
+    "credit_ugx": 0,
+    "debit_ugx": 86000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0001",
+    "journal_id": "JRN-CREDIT-SYN-0001-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0001",
+    "credit_ugx": 86000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0001",
+    "journal_id": "JRN-CREDIT-SYN-0001-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0002",
+    "credit_ugx": 0,
+    "debit_ugx": 87000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0002",
+    "journal_id": "JRN-CREDIT-SYN-0002-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0002",
+    "credit_ugx": 87000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0002",
+    "journal_id": "JRN-CREDIT-SYN-0002-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0003",
+    "credit_ugx": 0,
+    "debit_ugx": 88000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0003",
+    "journal_id": "JRN-CREDIT-SYN-0003-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0003",
+    "credit_ugx": 88000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0003",
+    "journal_id": "JRN-CREDIT-SYN-0003-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0004",
+    "credit_ugx": 0,
+    "debit_ugx": 89000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0004",
+    "journal_id": "JRN-CREDIT-SYN-0004-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0004",
+    "credit_ugx": 89000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0004",
+    "journal_id": "JRN-CREDIT-SYN-0004-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0005",
+    "credit_ugx": 0,
+    "debit_ugx": 90000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0005",
+    "journal_id": "JRN-CREDIT-SYN-0005-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0005",
+    "credit_ugx": 90000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0005",
+    "journal_id": "JRN-CREDIT-SYN-0005-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0006",
+    "credit_ugx": 0,
+    "debit_ugx": 91000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0006",
+    "journal_id": "JRN-CREDIT-SYN-0006-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0006",
+    "credit_ugx": 91000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0006",
+    "journal_id": "JRN-CREDIT-SYN-0006-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0007",
+    "credit_ugx": 0,
+    "debit_ugx": 92000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0007",
+    "journal_id": "JRN-CREDIT-SYN-0007-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0007",
+    "credit_ugx": 92000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0007",
+    "journal_id": "JRN-CREDIT-SYN-0007-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0008",
+    "credit_ugx": 0,
+    "debit_ugx": 93000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0008",
+    "journal_id": "JRN-CREDIT-SYN-0008-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0008",
+    "credit_ugx": 93000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0008",
+    "journal_id": "JRN-CREDIT-SYN-0008-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0009",
+    "credit_ugx": 0,
+    "debit_ugx": 94000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0009",
+    "journal_id": "JRN-CREDIT-SYN-0009-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0009",
+    "credit_ugx": 94000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0009",
+    "journal_id": "JRN-CREDIT-SYN-0009-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0010",
+    "credit_ugx": 0,
+    "debit_ugx": 95000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0010",
+    "journal_id": "JRN-CREDIT-SYN-0010-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0010",
+    "credit_ugx": 95000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0010",
+    "journal_id": "JRN-CREDIT-SYN-0010-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0011",
+    "credit_ugx": 0,
+    "debit_ugx": 96000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0011",
+    "journal_id": "JRN-CREDIT-SYN-0011-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0011",
+    "credit_ugx": 96000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0011",
+    "journal_id": "JRN-CREDIT-SYN-0011-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0012",
+    "credit_ugx": 0,
+    "debit_ugx": 97000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0012",
+    "journal_id": "JRN-CREDIT-SYN-0012-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0012",
+    "credit_ugx": 97000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0012",
+    "journal_id": "JRN-CREDIT-SYN-0012-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0013",
+    "credit_ugx": 0,
+    "debit_ugx": 98000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0013",
+    "journal_id": "JRN-CREDIT-SYN-0013-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0013",
+    "credit_ugx": 98000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0013",
+    "journal_id": "JRN-CREDIT-SYN-0013-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0014",
+    "credit_ugx": 0,
+    "debit_ugx": 99000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0014",
+    "journal_id": "JRN-CREDIT-SYN-0014-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0014",
+    "credit_ugx": 99000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0014",
+    "journal_id": "JRN-CREDIT-SYN-0014-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0015",
+    "credit_ugx": 0,
+    "debit_ugx": 100000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0015",
+    "journal_id": "JRN-CREDIT-SYN-0015-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0015",
+    "credit_ugx": 100000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0015",
+    "journal_id": "JRN-CREDIT-SYN-0015-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0016",
+    "credit_ugx": 0,
+    "debit_ugx": 101000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0016",
+    "journal_id": "JRN-CREDIT-SYN-0016-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0016",
+    "credit_ugx": 101000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0016",
+    "journal_id": "JRN-CREDIT-SYN-0016-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0017",
+    "credit_ugx": 0,
+    "debit_ugx": 102000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0017",
+    "journal_id": "JRN-CREDIT-SYN-0017-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0017",
+    "credit_ugx": 102000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0017",
+    "journal_id": "JRN-CREDIT-SYN-0017-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0018",
+    "credit_ugx": 0,
+    "debit_ugx": 103000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0018",
+    "journal_id": "JRN-CREDIT-SYN-0018-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0018",
+    "credit_ugx": 103000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0018",
+    "journal_id": "JRN-CREDIT-SYN-0018-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0019",
+    "credit_ugx": 0,
+    "debit_ugx": 104000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0019",
+    "journal_id": "JRN-CREDIT-SYN-0019-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0019",
+    "credit_ugx": 104000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0019",
+    "journal_id": "JRN-CREDIT-SYN-0019-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0020",
+    "credit_ugx": 0,
+    "debit_ugx": 105000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0020",
+    "journal_id": "JRN-CREDIT-SYN-0020-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0020",
+    "credit_ugx": 105000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0020",
+    "journal_id": "JRN-CREDIT-SYN-0020-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0021",
+    "credit_ugx": 0,
+    "debit_ugx": 106000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0021",
+    "journal_id": "JRN-CREDIT-SYN-0021-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0021",
+    "credit_ugx": 106000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0021",
+    "journal_id": "JRN-CREDIT-SYN-0021-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0022",
+    "credit_ugx": 0,
+    "debit_ugx": 107000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0022",
+    "journal_id": "JRN-CREDIT-SYN-0022-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0022",
+    "credit_ugx": 107000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0022",
+    "journal_id": "JRN-CREDIT-SYN-0022-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0023",
+    "credit_ugx": 0,
+    "debit_ugx": 108000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0023",
+    "journal_id": "JRN-CREDIT-SYN-0023-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0023",
+    "credit_ugx": 108000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0023",
+    "journal_id": "JRN-CREDIT-SYN-0023-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0024",
+    "credit_ugx": 0,
+    "debit_ugx": 109000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0024",
+    "journal_id": "JRN-CREDIT-SYN-0024-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0024",
+    "credit_ugx": 109000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0024",
+    "journal_id": "JRN-CREDIT-SYN-0024-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0025",
+    "credit_ugx": 0,
+    "debit_ugx": 110000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0025",
+    "journal_id": "JRN-CREDIT-SYN-0025-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0025",
+    "credit_ugx": 110000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0025",
+    "journal_id": "JRN-CREDIT-SYN-0025-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0026",
+    "credit_ugx": 0,
+    "debit_ugx": 111000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0026",
+    "journal_id": "JRN-CREDIT-SYN-0026-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0026",
+    "credit_ugx": 111000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0026",
+    "journal_id": "JRN-CREDIT-SYN-0026-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0027",
+    "credit_ugx": 0,
+    "debit_ugx": 112000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0027",
+    "journal_id": "JRN-CREDIT-SYN-0027-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0027",
+    "credit_ugx": 112000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0027",
+    "journal_id": "JRN-CREDIT-SYN-0027-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0028",
+    "credit_ugx": 0,
+    "debit_ugx": 113000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0028",
+    "journal_id": "JRN-CREDIT-SYN-0028-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0028",
+    "credit_ugx": 113000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0028",
+    "journal_id": "JRN-CREDIT-SYN-0028-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0029",
+    "credit_ugx": 0,
+    "debit_ugx": 114000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0029",
+    "journal_id": "JRN-CREDIT-SYN-0029-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0029",
+    "credit_ugx": 114000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0029",
+    "journal_id": "JRN-CREDIT-SYN-0029-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0030",
+    "credit_ugx": 0,
+    "debit_ugx": 115000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0030",
+    "journal_id": "JRN-CREDIT-SYN-0030-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0030",
+    "credit_ugx": 115000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0030",
+    "journal_id": "JRN-CREDIT-SYN-0030-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0031",
+    "credit_ugx": 0,
+    "debit_ugx": 116000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0031",
+    "journal_id": "JRN-CREDIT-SYN-0031-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0031",
+    "credit_ugx": 116000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0031",
+    "journal_id": "JRN-CREDIT-SYN-0031-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0032",
+    "credit_ugx": 0,
+    "debit_ugx": 117000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0032",
+    "journal_id": "JRN-CREDIT-SYN-0032-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0032",
+    "credit_ugx": 117000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0032",
+    "journal_id": "JRN-CREDIT-SYN-0032-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0033",
+    "credit_ugx": 0,
+    "debit_ugx": 118000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0033",
+    "journal_id": "JRN-CREDIT-SYN-0033-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0033",
+    "credit_ugx": 118000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0033",
+    "journal_id": "JRN-CREDIT-SYN-0033-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0034",
+    "credit_ugx": 0,
+    "debit_ugx": 119000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0034",
+    "journal_id": "JRN-CREDIT-SYN-0034-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0034",
+    "credit_ugx": 119000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0034",
+    "journal_id": "JRN-CREDIT-SYN-0034-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0035",
+    "credit_ugx": 0,
+    "debit_ugx": 120000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0035",
+    "journal_id": "JRN-CREDIT-SYN-0035-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0035",
+    "credit_ugx": 120000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0035",
+    "journal_id": "JRN-CREDIT-SYN-0035-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0036",
+    "credit_ugx": 0,
+    "debit_ugx": 121000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0036",
+    "journal_id": "JRN-CREDIT-SYN-0036-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0036",
+    "credit_ugx": 121000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0036",
+    "journal_id": "JRN-CREDIT-SYN-0036-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0037",
+    "credit_ugx": 0,
+    "debit_ugx": 122000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0037",
+    "journal_id": "JRN-CREDIT-SYN-0037-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0037",
+    "credit_ugx": 122000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0037",
+    "journal_id": "JRN-CREDIT-SYN-0037-CR"
+  },
+  {
+    "account": "SACCO_BANK_CASH",
+    "credit_id": "CREDIT-SYN-0038",
+    "credit_ugx": 0,
+    "debit_ugx": 123000,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0038",
+    "journal_id": "JRN-CREDIT-SYN-0038-DR"
+  },
+  {
+    "account": "GOVERNMENT_FUNDING_CLEARING",
+    "credit_id": "CREDIT-SYN-0038",
+    "credit_ugx": 123000,
+    "debit_ugx": 0,
+    "evidence_type": "SYNTHETIC_ACCOUNTING_ENTRY",
+    "instruction_id": "INST-SYN-0038",
+    "journal_id": "JRN-CREDIT-SYN-0038-CR"
+  }
+]

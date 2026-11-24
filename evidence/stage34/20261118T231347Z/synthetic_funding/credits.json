@@ -1,0 +1,306 @@
+[
+  {
+    "amount_ugx": 86000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0001",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0001",
+    "sacco_id": "SACCO-ADJ-001"
+  },
+  {
+    "amount_ugx": 87000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0002",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0002",
+    "sacco_id": "SACCO-AGA-001"
+  },
+  {
+    "amount_ugx": 88000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0003",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0003",
+    "sacco_id": "SACCO-ARP-001"
+  },
+  {
+    "amount_ugx": 89000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0004",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0004",
+    "sacco_id": "SACCO-BGR-001"
+  },
+  {
+    "amount_ugx": 90000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0005",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0005",
+    "sacco_id": "SACCO-BUK-001"
+  },
+  {
+    "amount_ugx": 91000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0006",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0006",
+    "sacco_id": "SACCO-BUS-001"
+  },
+  {
+    "amount_ugx": 92000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0007",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0007",
+    "sacco_id": "SACCO-FPO-001"
+  },
+  {
+    "amount_ugx": 93000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0008",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0008",
+    "sacco_id": "SACCO-GBU-001"
+  },
+  {
+    "amount_ugx": 94000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0009",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0009",
+    "sacco_id": "SACCO-HOM-001"
+  },
+  {
+    "amount_ugx": 95000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0010",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0010",
+    "sacco_id": "SACCO-IGG-001"
+  },
+  {
+    "amount_ugx": 96000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0011",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0011",
+    "sacco_id": "SACCO-JIN-001"
+  },
+  {
+    "amount_ugx": 97000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0012",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0012",
+    "sacco_id": "SACCO-KAM-001"
+  },
+  {
+    "amount_ugx": 98000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0013",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0013",
+    "sacco_id": "SACCO-KBG-001"
+  },
+  {
+    "amount_ugx": 99000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0014",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0014",
+    "sacco_id": "SACCO-KIT-001"
+  },
+  {
+    "amount_ugx": 100000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0015",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0015",
+    "sacco_id": "SACCO-KLA-001"
+  },
+  {
+    "amount_ugx": 101000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0016",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0016",
+    "sacco_id": "SACCO-KSE-001"
+  },
+  {
+    "amount_ugx": 102000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0017",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0017",
+    "sacco_id": "SACCO-KTD-001"
+  },
+  {
+    "amount_ugx": 103000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0018",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0018",
+    "sacco_id": "SACCO-KUM-001"
+  },
+  {
+    "amount_ugx": 104000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0019",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0019",
+    "sacco_id": "SACCO-LRA-001"
+  },
+  {
+    "amount_ugx": 105000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0020",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0020",
+    "sacco_id": "SACCO-MBA-001"
+  },
+  {
+    "amount_ugx": 106000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0021",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0021",
+    "sacco_id": "SACCO-MBR-001"
+  },
+  {
+    "amount_ugx": 107000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0022",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0022",
+    "sacco_id": "SACCO-MKN-001"
+  },
+  {
+    "amount_ugx": 108000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0023",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0023",
+    "sacco_id": "SACCO-MPG-001"
+  },
+  {
+    "amount_ugx": 109000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0024",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0024",
+    "sacco_id": "SACCO-MRT-001"
+  },
+  {
+    "amount_ugx": 110000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0025",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0025",
+    "sacco_id": "SACCO-MSD-001"
+  },
+  {
+    "amount_ugx": 111000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0026",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0026",
+    "sacco_id": "SACCO-MSK-001"
+  },
+  {
+    "amount_ugx": 112000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0027",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0027",
+    "sacco_id": "SACCO-MYG-001"
+  },
+  {
+    "amount_ugx": 113000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0028",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0028",
+    "sacco_id": "SACCO-NAP-001"
+  },
+  {
+    "amount_ugx": 114000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0029",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0029",
+    "sacco_id": "SACCO-NEB-001"
+  },
+  {
+    "amount_ugx": 115000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0030",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0030",
+    "sacco_id": "SACCO-NPK-001"
+  },
+  {
+    "amount_ugx": 116000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0031",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0031",
+    "sacco_id": "SACCO-NTG-001"
+  },
+  {
+    "amount_ugx": 117000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0032",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0032",
+    "sacco_id": "SACCO-RAK-001"
+  },
+  {
+    "amount_ugx": 118000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0033",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0033",
+    "sacco_id": "SACCO-RUK-001"
+  },
+  {
+    "amount_ugx": 119000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0034",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0034",
+    "sacco_id": "SACCO-SRG-001"
+  },
+  {
+    "amount_ugx": 120000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0035",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0035",
+    "sacco_id": "SACCO-SRT-001"
+  },
+  {
+    "amount_ugx": 121000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0036",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0036",
+    "sacco_id": "SACCO-TOR-001"
+  },
+  {
+    "amount_ugx": 122000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0037",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0037",
+    "sacco_id": "SACCO-WAK-001"
+  },
+  {
+    "amount_ugx": 123000,
+    "credit_date": "2026-11-04",
+    "credit_id": "CREDIT-SYN-0038",
+    "evidence_type": "SYNTHETIC_SIMULATED_BANK_CREDIT",
+    "instruction_id": "INST-SYN-0038",
+    "sacco_id": "SACCO-YBE-001"
+  }
+]

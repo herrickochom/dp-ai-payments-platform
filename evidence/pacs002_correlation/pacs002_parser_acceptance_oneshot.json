@@ -1,0 +1,40 @@
+{
+  "timestamp_utc": "2026-11-20T21:14:00.635783+00:00",
+  "status": "PASS_PACS002_LOCAL_CORRELATION_PARSER",
+  "checks": {
+    "Patched sources and sidecar exist": {
+      "status": "PASS",
+      "detail": ""
+    },
+    "238 unique mapping identities": {
+      "status": "PASS",
+      "detail": ""
+    },
+    "Original XML fingerprints preserved": {
+      "status": "PASS",
+      "detail": ""
+    },
+    "Exact PACS.002 parser and resolver located": {
+      "status": "PASS",
+      "detail": "['parse_pacs002_xml']"
+    },
+    "Generator no longer emits unsupported field": {
+      "status": "PASS",
+      "detail": ""
+    },
+    "Patched producer parser recovers 238/238 IDs from temporary XML without StsReqId": {
+      "status": "PASS",
+      "detail": ""
+    },
+    "Incorrect transaction keys rejected for all 238": {
+      "status": "PASS",
+      "detail": ""
+    }
+  },
+  "xml_modifications": 0,
+  "kafka_publications": 0,
+  "cloud_operations": 0,
+  "promotion": 0,
+  "documents_tested": 238,
+  "limitation": "Temporary XML only removes StsReqId; it is not a full corrected candidate, XSD regression, producer publication, or full 514-document acceptance."
+}

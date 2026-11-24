@@ -1,0 +1,323 @@
+{
+  "acceptance": {
+    "funding_to_disbursement_reconciliation": "NOT VERIFIED",
+    "identifier_correlation_discovery": "PASS",
+    "independent_financial_reconciliation": "NOT VERIFIED",
+    "iso_xml_parsing": "PASS",
+    "journal_balance_reconciliation": "NOT VERIFIED",
+    "json_source_structure": "PASS",
+    "repayment_to_ledger_reconciliation": "NOT VERIFIED",
+    "settlement_to_payment_reconciliation": "NOT VERIFIED",
+    "source_preservation": "PASS"
+  },
+  "gcp_operations": 0,
+  "json_correlations": [
+    {
+      "left": "pdmis_loans",
+      "left_field": "loan_id",
+      "left_unique": 250,
+      "matched_unique": 144,
+      "right": "pdmis_repayments",
+      "right_field": "loan_id",
+      "right_unique": 144,
+      "sample_matches": [
+        "LOAN-000001",
+        "LOAN-000002",
+        "LOAN-000003",
+        "LOAN-000004",
+        "LOAN-000006",
+        "LOAN-000008",
+        "LOAN-000009",
+        "LOAN-000011",
+        "LOAN-000013",
+        "LOAN-000016"
+      ],
+      "status": "PASS"
+    },
+    {
+      "left": "pdmis_loans",
+      "left_field": "loan_id",
+      "left_unique": 250,
+      "matched_unique": 238,
+      "right": "wendi_transactions",
+      "right_field": "loan_id",
+      "right_unique": 238,
+      "sample_matches": [
+        "LOAN-000001",
+        "LOAN-000002",
+        "LOAN-000003",
+        "LOAN-000004",
+        "LOAN-000005",
+        "LOAN-000006",
+        "LOAN-000007",
+        "LOAN-000008",
+        "LOAN-000009",
+        "LOAN-000010"
+      ],
+      "status": "PASS"
+    },
+    {
+      "left": "pdmis_repayments",
+      "left_field": "loan_id",
+      "left_unique": 144,
+      "matched_unique": 144,
+      "right": "wendi_transactions",
+      "right_field": "loan_id",
+      "right_unique": 238,
+      "sample_matches": [
+        "LOAN-000001",
+        "LOAN-000002",
+        "LOAN-000003",
+        "LOAN-000004",
+        "LOAN-000006",
+        "LOAN-000008",
+        "LOAN-000009",
+        "LOAN-000011",
+        "LOAN-000013",
+        "LOAN-000016"
+      ],
+      "status": "PASS"
+    }
+  ],
+  "kafka_operations": 0,
+  "overall": "NOT VERIFIED",
+  "previous_evidence": "evidence/stage9_financial_reconciliation_investigation/financial_evidence_inventory.json",
+  "previous_evidence_sha256": "f0b70e888780550780f46e75447d9843c7a5eba0cc2ca90ce13e29207c5e86ac",
+  "repository": "/home/hochom/projects/dp-ai-payments-platform-gcp",
+  "schema_registry_operations": 0,
+  "source_modifications": 0,
+  "sources": {
+    "pdmis_loans": {
+      "amounts": {},
+      "currencies": {},
+      "dictionary_records": 250,
+      "fields": {
+        "amount_approved": 250,
+        "amount_disbursed": 250,
+        "amount_repaid": 250,
+        "amount_requested": 250,
+        "application_date": 250,
+        "approval_date": 250,
+        "as_of_date": 250,
+        "beneficiary_id": 250,
+        "business_plan_id": 250,
+        "cashout_date": 250,
+        "contractual_repayment_progress": 250,
+        "created_at": 250,
+        "days_past_due": 250,
+        "delinquency_bucket": 250,
+        "disbursement_date": 250,
+        "due_repayment_rate": 250,
+        "first_repayment_date": 250,
+        "interest_charged": 250,
+        "interest_outstanding_balance": 250,
+        "interest_paid": 250,
+        "interest_rate": 250,
+        "last_payment_date": 151,
+        "last_repayment_date": 250,
+        "loan_id": 250,
+        "loan_status": 250,
+        "loan_term_months": 250,
+        "outstanding_balance": 250,
+        "principal_outstanding_balance": 250,
+        "principal_repaid": 250,
+        "principal_repayment_rate": 250,
+        "project_location": 250,
+        "project_type": 250,
+        "repayment_frequency": 250,
+        "repayment_rate": 250,
+        "repayment_status": 250,
+        "sacco_id": 250,
+        "scheduled_instalment": 250,
+        "updated_at": 250,
+        "verification_date": 250
+      },
+      "identifiers": {
+        "loan_id": {
+          "count": 250,
+          "sample": [
+            "LOAN-000001",
+            "LOAN-000002",
+            "LOAN-000003",
+            "LOAN-000004",
+            "LOAN-000005"
+          ]
+        }
+      },
+      "name": "pdmis_loans",
+      "path": "data/pdmis/loans.json",
+      "records": 250,
+      "sha256": "86dbfbcd195faf25a9035591b5ed84736ce5cce6afd9eb892fbe36eb427d4fff",
+      "shape": "root_list"
+    },
+    "pdmis_repayments": {
+      "amounts": {
+        "amount": {
+          "count": 1515,
+          "maximum": "94500.0",
+          "minimum": "0.0",
+          "sum": "102892500.0"
+        }
+      },
+      "currencies": {
+        "currency": {
+          "UGX": 1515
+        }
+      },
+      "dictionary_records": 1515,
+      "fields": {
+        "amount": 1515,
+        "as_of_date": 1515,
+        "beneficiary_id": 1515,
+        "channel": 1515,
+        "contractual_repayment_progress": 1515,
+        "cumulative_amount_paid": 1515,
+        "currency": 1515,
+        "days_late": 1515,
+        "days_past_due": 1515,
+        "delinquency_bucket": 1515,
+        "due_repayment_rate": 1515,
+        "event_date": 1515,
+        "event_sequence": 1515,
+        "event_type": 1515,
+        "instalment_number": 1515,
+        "interest_outstanding_balance": 1515,
+        "interest_paid": 1515,
+        "loan_id": 1515,
+        "outstanding_balance": 1515,
+        "payment_date": 1515,
+        "payment_status": 1515,
+        "principal_outstanding_balance": 1515,
+        "principal_paid": 1515,
+        "principal_repayment_rate": 1515,
+        "repayment_due_date": 1515,
+        "repayment_event_id": 1515,
+        "repayment_rate": 1515,
+        "sacco_id": 1515,
+        "scheduled_amount": 1515,
+        "scheduled_interest_amount": 1515,
+        "scheduled_principal_amount": 1515
+      },
+      "identifiers": {
+        "loan_id": {
+          "count": 144,
+          "sample": [
+            "LOAN-000001",
+            "LOAN-000002",
+            "LOAN-000003",
+            "LOAN-000004",
+            "LOAN-000006"
+          ]
+        }
+      },
+      "name": "pdmis_repayments",
+      "path": "data/pdmis/repayments.json",
+      "records": 1515,
+      "sha256": "ad08debd4fa09bbaa9b9eb5aa8c530ab94a361b434a57e357a153caaa0f6441a",
+      "shape": "root_list"
+    },
+    "wendi_transactions": {
+      "amounts": {
+        "amount": {
+          "count": 238,
+          "maximum": "1000000",
+          "minimum": "1000000",
+          "sum": "238000000"
+        }
+      },
+      "currencies": {
+        "currency": {
+          "UGX": 238
+        }
+      },
+      "dictionary_records": 238,
+      "fields": {
+        "agent_id": 238,
+        "amount": 238,
+        "beneficiary_id": 238,
+        "beneficiary_name": 238,
+        "created_at": 238,
+        "currency": 238,
+        "destination_account": 238,
+        "destination_account_type": 238,
+        "device_id": 238,
+        "event_id": 238,
+        "event_timestamp": 238,
+        "event_type": 238,
+        "ip_address": 238,
+        "loan_id": 238,
+        "metadata.is_assisted": 238,
+        "metadata.processing_time_ms": 238,
+        "metadata.source_system": 238,
+        "metadata.transaction_type": 238,
+        "sacco_id": 238,
+        "source_account": 238,
+        "source_account_type": 238,
+        "transaction_status": 238,
+        "updated_at": 238,
+        "user_agent": 238,
+        "wendi_transaction_id": 238
+      },
+      "identifiers": {
+        "loan_id": {
+          "count": 238,
+          "sample": [
+            "LOAN-000001",
+            "LOAN-000002",
+            "LOAN-000003",
+            "LOAN-000004",
+            "LOAN-000005"
+          ]
+        }
+      },
+      "name": "wendi_transactions",
+      "path": "data/wendi/wendi_transactions.json",
+      "records": 238,
+      "sha256": "4b9ba84f00bd3be3c957836a72d0d471f269a0cd44ad61dfce27cfbfa23b1e17",
+      "shape": "root_list"
+    }
+  },
+  "timestamp_utc": "2026-11-20T22:22:29.736851+00:00",
+  "xml": {
+    "amount_fields": {
+      "pacs.008.001.08:InstdAmt": 238,
+      "pacs.008.001.08:IntrBkSttlmAmt": 238,
+      "pain.001.001.09:InstdAmt": 476
+    },
+    "documents": 2395,
+    "errors": [],
+    "identifier_fields": {
+      "camt.052.001.08:MsgId": 38,
+      "camt.053.001.08:EndToEndId": 152,
+      "camt.053.001.08:MsgId": 151,
+      "camt.053.001.08:TxId": 189,
+      "camt.054.001.08:EndToEndId": 151,
+      "camt.054.001.08:MsgId": 151,
+      "camt.054.001.08:TxId": 151,
+      "pacs.002.001.10:MsgId": 238,
+      "pacs.002.001.10:OrgnlEndToEndId": 238,
+      "pacs.002.001.10:OrgnlMsgId": 238,
+      "pacs.002.001.10:OrgnlTxId": 238,
+      "pacs.008.001.08:EndToEndId": 238,
+      "pacs.008.001.08:InstrId": 238,
+      "pacs.008.001.08:MsgId": 238,
+      "pacs.008.001.08:TxId": 238,
+      "pain.001.001.09:EndToEndId": 238,
+      "pain.001.001.09:InstrId": 476,
+      "pain.001.001.09:MsgId": 476,
+      "pain.002.001.12:MsgId": 476,
+      "pain.002.001.12:OrgnlEndToEndId": 238,
+      "pain.002.001.12:OrgnlMsgId": 476
+    },
+    "iso_families": {
+      "camt.052.001.08": 38,
+      "camt.053.001.08": 151,
+      "camt.054.001.08": 151,
+      "pacs.002.001.10": 238,
+      "pacs.008.001.08": 238,
+      "pain.001.001.09": 476,
+      "pain.002.001.12": 476
+    }
+  },
+  "xml_correlations": []
+}

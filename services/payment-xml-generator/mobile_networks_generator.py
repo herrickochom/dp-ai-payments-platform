@@ -29,11 +29,11 @@ CREDITOR_AGENT_NAME = {
     "AIRTEL": "Airtel Money",
 }
 UGANDA_POSTAL = {
-    "AdrLine": "Plot 37 Kampala Road",
+    "PstCd": "00256",
     "TwnNm": "Kampala",
     "CtrySubDvsn": "Central",
     "Ctry": "UG",
-    "PstCd": "00256",
+    "AdrLine": "Plot 37 Kampala Road",
 }
 
 
@@ -85,8 +85,8 @@ def generate_pacs008(context: dict, network: str) -> bytes:
     debtor_acct = child(tx, "DbtrAcct")
     debtor_id = child(child(debtor_acct, "Id"), "Othr")
     child(debtor_id, "Id", sacco["wendi_account"])
+    child(child(debtor_id, "SchmeNm"), "Prtry", "WENDI")
     child(debtor_id, "Issr", "WENDI")
-    child(debtor_id, "SchmeNm", "WENDI")
     debtor_agent = child(tx, "DbtrAgt")
     debtor_fi = child(debtor_agent, "FinInstnId")
     child(debtor_fi, "BICFI", intermediary["bic"])
@@ -101,8 +101,8 @@ def generate_pacs008(context: dict, network: str) -> bytes:
     creditor_acct = child(tx, "CdtrAcct")
     creditor_id = child(child(creditor_acct, "Id"), "Othr")
     child(creditor_id, "Id", payment_account(loan, beneficiary))
+    child(child(creditor_id, "SchmeNm"), "Prtry", "MSISDN")
     child(creditor_id, "Issr", network)
-    child(creditor_id, "SchmeNm", "MSISDN")
     creditor_agent = child(tx, "CdtrAgt")
     creditor_fi = child(creditor_agent, "FinInstnId")
     child(creditor_fi, "BICFI", CREDITOR_AGENT_BIC[network])
@@ -112,6 +112,16 @@ def generate_pacs008(context: dict, network: str) -> bytes:
     remit = child(tx, "RmtInf")
     child(remit, "Ustrd", f"PDM Loan {loan_id}")
     child(remit, "Ustrd", f"Business plan {loan['business_plan_id']}")
+
+    # PACS008_SCHEMA_SEQUENCE_V1: XSD-driven transaction child ordering.
+    # Reorder existing direct children only; preserve each subtree and its values.
+    _order = ('PmtId', 'PmtTpInf', 'IntrBkSttlmAmt', 'IntrBkSttlmDt', 'SttlmPrty', 'SttlmTmIndctn', 'SttlmTmReq', 'AccptncDtTm', 'PoolgAdjstmntDt', 'InstdAmt', 'XchgRate', 'ChrgBr', 'ChrgsInf', 'PrvsInstgAgt1', 'PrvsInstgAgt1Acct', 'PrvsInstgAgt2', 'PrvsInstgAgt2Acct', 'PrvsInstgAgt3', 'PrvsInstgAgt3Acct', 'InstgAgt', 'InstdAgt', 'IntrmyAgt1', 'IntrmyAgt1Acct', 'IntrmyAgt2', 'IntrmyAgt2Acct', 'IntrmyAgt3', 'IntrmyAgt3Acct', 'UltmtDbtr', 'InitgPty', 'Dbtr', 'DbtrAcct', 'DbtrAgt', 'DbtrAgtAcct', 'CdtrAgt', 'CdtrAgtAcct', 'Cdtr', 'CdtrAcct', 'UltmtCdtr', 'InstrForCdtrAgt', 'InstrForNxtAgt', 'Purp', 'RgltryRptg', 'Tax', 'RltdRmtInf', 'RmtInf', 'SplmtryData')
+    _positions = {name: idx for idx, name in enumerate(_order)}
+    _children = list(tx)
+    _names = [elem.tag.rsplit("}", 1)[-1] for elem in _children]
+    if any(name not in _positions for name in _names):
+        raise ValueError("PACS.008 unexpected transaction child; fail closed")
+    tx[:] = sorted(_children, key=lambda elem: _positions[elem.tag.rsplit("}", 1)[-1]])
 
     xml = ET.tostring(root, encoding="utf-8", xml_declaration=True)
     validate_xml_no_empty_text(xml, f"{network} PACS008 {loan_id}")
@@ -143,17 +153,16 @@ def generate_pacs002(context: dict, network: str) -> bytes:
     child(status, "OrgnlEndToEndId", loan_id)
     child(status, "OrgnlTxId", lifecycle[f"{network_key}_transaction_id"])
     child(status, "TxSts", status_code)
-    child(status, "StsReqId", f"STATUS-{network}-{loan_id}")
     reason_info = child(status, "StsRsnInf")
     child(child(reason_info, "Rsn"), "Cd", reason_code)
     child(reason_info, "AddtlInf", reason_detail)
+    child(status, "AccptncDtTm", event_timestamp(loan, "disbursement", 12))
+    child(status, "AcctSvcrRef", f"ASR-{network}-{loan_id}")
+    child(status, "ClrSysRef", f"CLR-{network}-{loan_id}")
     instructing_agent = child(status, "InstgAgt")
     instructing_fi = child(instructing_agent, "FinInstnId")
     child(instructing_fi, "BICFI", CREDITOR_AGENT_BIC[network])
     child(instructing_fi, "Nm", CREDITOR_AGENT_NAME[network])
-    child(status, "AccptncDtTm", event_timestamp(loan, "disbursement", 12))
-    child(status, "AcctSvcrRef", f"ASR-{network}-{loan_id}")
-    child(status, "ClrSysRef", f"CLR-{network}-{loan_id}")
 
     xml = ET.tostring(root, encoding="utf-8", xml_declaration=True)
     validate_xml_no_empty_text(xml, f"{network} PACS002 {loan_id}")

@@ -322,15 +322,15 @@ def parse_pain002_xml(file_path: str) -> Dict[str, Any]:
             "header": {
                 "message_id": text('.//ns:GrpHdr/ns:MsgId'),
                 "creation_date": text('.//ns:GrpHdr/ns:CreDtTm'),
-                "initiating_party": text('.//ns:GrpHdr/ns:InitgPty'),
+                "initiating_party": text('.//ns:GrpHdr/ns:InitgPty/ns:Nm'),
                 "original_message_id": text('.//ns:OrgnlGrpInfAndSts/ns:OrgnlMsgId'),
                 "original_message_type": text('.//ns:OrgnlGrpInfAndSts/ns:OrgnlMsgNmId'),
                 "group_status": text('.//ns:OrgnlGrpInfAndSts/ns:GrpSts'),
             },
             "payload": {
-                "transaction_status": text('.//ns:OrgnlPmtInfAndSts/ns:TxSts'),
-                "reason_code": text('.//ns:OrgnlPmtInfAndSts/ns:StsRsnInf/ns:Rsn'),
-                "additional_info": text('.//ns:OrgnlPmtInfAndSts/ns:StsRsnInf/ns:AddtlInf'),
+                "transaction_status": text('.//ns:OrgnlPmtInfAndSts/ns:TxInfAndSts/ns:TxSts'),
+                "reason_code": text('.//ns:OrgnlPmtInfAndSts/ns:TxInfAndSts/ns:StsRsnInf/ns:Rsn/ns:Cd'),
+                "additional_info": text('.//ns:OrgnlPmtInfAndSts/ns:TxInfAndSts/ns:StsRsnInf/ns:AddtlInf'),
                 "settlement_status": text('.//ns:OrgnlPmtInfAndSts/ns:SettlementStatus'),
                 "business_date": text('.//ns:OrgnlPmtInfAndSts/ns:BusinessDate'),
             },
@@ -339,6 +339,117 @@ def parse_pain002_xml(file_path: str) -> Dict[str, Any]:
     except Exception as e:
         logger.error(f"Error parsing XML {file_path}: {e}")
         return {}
+
+
+def parse_pacs002_xml(file_path: str) -> Dict[str, Any]:
+    """Project PACS.002 identifiers while retaining the full XML."""
+    try:
+        root = ET.parse(file_path).getroot()
+        ns = {"ns": "urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10"}
+
+        if root.tag != "{" + ns["ns"] + "}Document":
+            raise ValueError("Unexpected PACS.002 namespace/root")
+
+        def required(path: str) -> str:
+            element = root.find(path, ns)
+            value = (
+                element.text.strip()
+                if element is not None and element.text
+                else ""
+            )
+            if not value:
+                raise ValueError(f"Missing PACS.002 field: {path}")
+            return value
+
+        message_id = required(
+            "./ns:FIToFIPmtStsRpt/ns:GrpHdr/ns:MsgId"
+        )
+        original_message_id = required(
+            "./ns:FIToFIPmtStsRpt/ns:OrgnlGrpInfAndSts/ns:OrgnlMsgId"
+        )
+        original_message_type = required(
+            "./ns:FIToFIPmtStsRpt/ns:OrgnlGrpInfAndSts/ns:OrgnlMsgNmId"
+        )
+
+        txbase = (
+            "./ns:FIToFIPmtStsRpt/ns:TxInfAndSts/"
+        )
+
+        original_transaction_id = required(
+            txbase + "ns:OrgnlTxId"
+        )
+        original_end_to_end_id = required(
+            txbase + "ns:OrgnlEndToEndId"
+        )
+        transaction_status = required(
+            txbase + "ns:TxSts"
+        )
+
+        def optional(path: str) -> str:
+            element = root.find(path, ns)
+            return (
+                element.text.strip()
+                if element is not None and element.text
+                else ""
+            )
+
+        return {
+            "message_id": message_id,
+            "transaction_id": original_transaction_id,
+            "header": {
+                "message_id": message_id,
+                "original_message_id": original_message_id,
+                "original_message_type": original_message_type,
+            },
+            "payload": {
+                "original_transaction_id": original_transaction_id,
+                "original_instruction_id": optional(
+                    txbase + "ns:OrgnlInstrId"
+                ),
+                "original_end_to_end_id": original_end_to_end_id,
+                "transaction_status": transaction_status,
+                "status_request_id": _pdm_pacs002_status_request_id(
+                    message_id, original_message_id, original_transaction_id,
+                    original_end_to_end_id, optional(txbase + "ns:StsReqId")
+                ),
+            },
+            "xml": {
+                root.tag.rsplit("}", 1)[-1]: xml_to_dict(root)
+            },
+        }
+    except (ET.ParseError, OSError, ValueError) as exc:
+        logger.error(
+            "Unable to parse PACS.002 %s: %s",
+            file_path, exc
+        )
+        return {}
+
+
+
+def _pdm_pacs002_status_request_id(message_id, original_message_id, transaction_id, end_to_end_id, xml_value):
+    """Preserve historical status request identity outside the ISO PACS.002 XML."""
+    if xml_value:
+        return xml_value
+    import json as _json
+    import os as _os
+    from pathlib import Path as _Path
+    path = _Path(_os.environ.get(
+        "PDM_PACS002_CORRELATION_MAP",
+        str(_Path(__file__).resolve().parents[2] / "platform/contracts/pacs002_status_request_map_v1.json")
+    ))
+    if not path.is_file():
+        return ""
+    mapping = _json.loads(path.read_text(encoding="utf-8"))
+    if mapping.get("contract_version") != 1:
+        raise ValueError("Unsupported PACS.002 correlation mapping version")
+    matches = [r for r in mapping["records"] if
+        r["message_id"] == message_id and
+        r["original_message_id"] == original_message_id and
+        r["transaction_id"] == transaction_id and
+        r["end_to_end_id"] == end_to_end_id]
+    if len(matches) > 1:
+        raise ValueError("Ambiguous PACS.002 correlation mapping")
+    return matches[0]["status_request_id"] if matches else ""
 
 def parse_generic_xml(file_path: str) -> Dict[str, Any]:
     """Preserve an arbitrary XML document as the canonical nested JSON shape."""
@@ -552,6 +663,8 @@ def parse_event(file_path: str) -> Optional[Dict[str, Any]]:
         payload = parse_pain001_xml(file_path)
     elif "pain002" in msg_type.lower():
         payload = parse_pain002_xml(file_path)
+    elif "pacs002" in msg_type.lower():
+        payload = parse_pacs002_xml(file_path)
     else:
         # PACS/CAMT are preserved losslessly here. Message-family-specific
         # projections can be added without changing the raw contract.

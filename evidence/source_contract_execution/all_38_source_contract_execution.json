@@ -1,0 +1,1894 @@
+{
+  "timestamp_utc": "2026-11-20T20:42:37.180424+00:00",
+  "repository": "/home/hochom/projects/dp-ai-payments-platform-gcp",
+  "mode": "READ_ONLY_SOURCE_AND_SCHEMA_VERIFICATION",
+  "status": "SOURCE CONTRACT INVESTIGATION COMPLETED",
+  "topics": {
+    "agent.locations": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "streaming",
+      "route_contract": "PASS",
+      "source_file_candidates": 155,
+      "source_file_types": {
+        ".json": 4,
+        ".xml": 151
+      },
+      "source_examples": [
+        "data/agent_network/agent_locations.json",
+        "data/agent_network/agent_profiles.json",
+        "data/agent_network/agent_transactions/agent_tx_0001.xml",
+        "data/agent_network/agent_transactions/agent_tx_0002.xml",
+        "data/agent_network/agent_transactions/agent_tx_0003.xml"
+      ],
+      "xml_xsd_results": {
+        "NOT VERIFIED": 151
+      },
+      "producer_candidates": [
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES FOUND \u2014 PRODUCER MAPPING NOT VERIFIED"
+    },
+    "agent.profiles": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "batch",
+      "route_contract": "PASS",
+      "source_file_candidates": 155,
+      "source_file_types": {
+        ".json": 4,
+        ".xml": 151
+      },
+      "source_examples": [
+        "data/agent_network/agent_locations.json",
+        "data/agent_network/agent_profiles.json",
+        "data/agent_network/agent_transactions/agent_tx_0001.xml",
+        "data/agent_network/agent_transactions/agent_tx_0002.xml",
+        "data/agent_network/agent_transactions/agent_tx_0003.xml"
+      ],
+      "xml_xsd_results": {
+        "NOT VERIFIED": 151
+      },
+      "producer_candidates": [
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES FOUND \u2014 PRODUCER MAPPING NOT VERIFIED"
+    },
+    "agent.transactions": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "streaming",
+      "route_contract": "PASS",
+      "source_file_candidates": 156,
+      "source_file_types": {
+        ".json": 5,
+        ".xml": 151
+      },
+      "source_examples": [
+        "data/agent_network/agent_locations.json",
+        "data/agent_network/agent_profiles.json",
+        "data/agent_network/agent_transactions/agent_tx_0001.xml",
+        "data/agent_network/agent_transactions/agent_tx_0002.xml",
+        "data/agent_network/agent_transactions/agent_tx_0003.xml"
+      ],
+      "xml_xsd_results": {
+        "NOT VERIFIED": 151
+      },
+      "producer_candidates": [
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES FOUND \u2014 PRODUCER MAPPING NOT VERIFIED"
+    },
+    "cdc.pdm_mdm.mdm.sacco_master_sources": {
+      "classification": "CDC",
+      "processing_mode": "streaming",
+      "route_contract": "PASS",
+      "source_file_candidates": 1,
+      "source_file_types": {
+        ".json": 1
+      },
+      "source_examples": [
+        "data/mdm/sacco_master_sources.json"
+      ],
+      "xml_xsd_results": {},
+      "producer_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "CONTROLLED WORKFLOW \u2014 NOT EXECUTED"
+    },
+    "cpo.plm.pain002": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route_contract": "PASS",
+      "source_file_candidates": 714,
+      "source_file_types": {
+        ".xml": 714
+      },
+      "source_examples": [
+        "data/cpo/plm/pain002/plm_0001.xml",
+        "data/cpo/plm/pain002/plm_0002.xml",
+        "data/cpo/plm/pain002/plm_0003.xml",
+        "data/cpo/plm/pain002/plm_0004.xml",
+        "data/cpo/plm/pain002/plm_0005.xml"
+      ],
+      "xml_xsd_results": {
+        "NOT VERIFIED": 714
+      },
+      "producer_candidates": [
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES FOUND \u2014 PRODUCER MAPPING NOT VERIFIED"
+    },
+    "cpo.psn.pain002": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route_contract": "PASS",
+      "source_file_candidates": 714,
+      "source_file_types": {
+        ".xml": 714
+      },
+      "source_examples": [
+        "data/cpo/plm/pain002/plm_0001.xml",
+        "data/cpo/plm/pain002/plm_0002.xml",
+        "data/cpo/plm/pain002/plm_0003.xml",
+        "data/cpo/plm/pain002/plm_0004.xml",
+        "data/cpo/plm/pain002/plm_0005.xml"
+      ],
+      "xml_xsd_results": {
+        "NOT VERIFIED": 714
+      },
+      "producer_candidates": [
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES FOUND \u2014 PRODUCER MAPPING NOT VERIFIED"
+    },
+    "icmn.pmn.pain001": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route_contract": "PASS",
+      "source_file_candidates": 714,
+      "source_file_types": {
+        ".xml": 714
+      },
+      "source_examples": [
+        "data/icmn/pmn/pain001/pmn_0001.xml",
+        "data/icmn/pmn/pain001/pmn_0002.xml",
+        "data/icmn/pmn/pain001/pmn_0003.xml",
+        "data/icmn/pmn/pain001/pmn_0004.xml",
+        "data/icmn/pmn/pain001/pmn_0005.xml"
+      ],
+      "xml_xsd_results": {
+        "NOT VERIFIED": 714
+      },
+      "producer_candidates": [
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES FOUND \u2014 PRODUCER MAPPING NOT VERIFIED"
+    },
+    "icmn.vpm.pain001": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route_contract": "PASS",
+      "source_file_candidates": 714,
+      "source_file_types": {
+        ".xml": 714
+      },
+      "source_examples": [
+        "data/icmn/pmn/pain001/pmn_0001.xml",
+        "data/icmn/pmn/pain001/pmn_0002.xml",
+        "data/icmn/pmn/pain001/pmn_0003.xml",
+        "data/icmn/pmn/pain001/pmn_0004.xml",
+        "data/icmn/pmn/pain001/pmn_0005.xml"
+      ],
+      "xml_xsd_results": {
+        "NOT VERIFIED": 714
+      },
+      "producer_candidates": [
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES FOUND \u2014 PRODUCER MAPPING NOT VERIFIED"
+    },
+    "mdm.agent.golden": {
+      "classification": "ORDINARY_MDM_ACCEPTED",
+      "processing_mode": "streaming",
+      "route_contract": "PASS",
+      "source_file_candidates": 158,
+      "source_file_types": {
+        ".json": 7,
+        ".xml": 151
+      },
+      "source_examples": [
+        "data/agent_network/agent_locations.json",
+        "data/agent_network/agent_profiles.json",
+        "data/agent_network/agent_transactions/agent_tx_0001.xml",
+        "data/agent_network/agent_transactions/agent_tx_0002.xml",
+        "data/agent_network/agent_transactions/agent_tx_0003.xml"
+      ],
+      "xml_xsd_results": {
+        "NOT VERIFIED": 151
+      },
+      "producer_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "PREVIOUS LIVE ACCEPTANCE \u2014 PRESERVED"
+    },
+    "mdm.beneficiary.golden.restricted": {
+      "classification": "RESTRICTED_MDM",
+      "processing_mode": "real-time",
+      "route_contract": "PASS",
+      "source_file_candidates": 6,
+      "source_file_types": {
+        ".json": 6
+      },
+      "source_examples": [
+        "data/mdm/beneficiary_identity_alerts_restricted.json",
+        "data/mdm/beneficiary_master_sources.json",
+        "data/mdm/golden_agents.json",
+        "data/mdm/golden_beneficiaries_restricted.json",
+        "data/mdm/golden_geography.json"
+      ],
+      "xml_xsd_results": {},
+      "producer_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "CONTROLLED WORKFLOW \u2014 NOT EXECUTED"
+    },
+    "mdm.beneficiary.identity-alert.restricted": {
+      "classification": "RESTRICTED_MDM",
+      "processing_mode": "real-time",
+      "route_contract": "PASS",
+      "source_file_candidates": 3,
+      "source_file_types": {
+        ".json": 3
+      },
+      "source_examples": [
+        "data/mdm/beneficiary_identity_alerts_restricted.json",
+        "data/mdm/beneficiary_master_sources.json",
+        "data/mdm/golden_beneficiaries_restricted.json"
+      ],
+      "xml_xsd_results": {},
+      "producer_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "CONTROLLED WORKFLOW \u2014 NOT EXECUTED"
+    },
+    "mdm.crosswalk.restricted": {
+      "classification": "RESTRICTED_MDM",
+      "processing_mode": "real-time",
+      "route_contract": "PASS",
+      "source_file_candidates": 3,
+      "source_file_types": {
+        ".json": 3
+      },
+      "source_examples": [
+        "data/mdm/beneficiary_identity_alerts_restricted.json",
+        "data/mdm/golden_beneficiaries_restricted.json",
+        "data/mdm/source_crosswalk.json"
+      ],
+      "xml_xsd_results": {},
+      "producer_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "CONTROLLED WORKFLOW \u2014 NOT EXECUTED"
+    },
+    "mdm.geography.golden": {
+      "classification": "ORDINARY_MDM_ACCEPTED",
+      "processing_mode": "real-time",
+      "route_contract": "PASS",
+      "source_file_candidates": 5,
+      "source_file_types": {
+        ".json": 5
+      },
+      "source_examples": [
+        "data/mdm/geography_master_sources.json",
+        "data/mdm/golden_agents.json",
+        "data/mdm/golden_beneficiaries_restricted.json",
+        "data/mdm/golden_geography.json",
+        "data/mdm/golden_saccos.json"
+      ],
+      "xml_xsd_results": {},
+      "producer_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "PREVIOUS LIVE ACCEPTANCE \u2014 PRESERVED"
+    },
+    "mdm.sacco.golden": {
+      "classification": "ORDINARY_MDM_ACCEPTED",
+      "processing_mode": "streaming",
+      "route_contract": "PASS",
+      "source_file_candidates": 6,
+      "source_file_types": {
+        ".json": 6
+      },
+      "source_examples": [
+        "data/mdm/golden_agents.json",
+        "data/mdm/golden_beneficiaries_restricted.json",
+        "data/mdm/golden_geography.json",
+        "data/mdm/golden_saccos.json",
+        "data/mdm/sacco_master_sources.json"
+      ],
+      "xml_xsd_results": {},
+      "producer_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "PREVIOUS LIVE ACCEPTANCE \u2014 PRESERVED"
+    },
+    "mobile.airtel.pacs002": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route_contract": "PASS",
+      "source_file_candidates": 476,
+      "source_file_types": {
+        ".xml": 476
+      },
+      "source_examples": [
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0012.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0023.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0035.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0046.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0069.xml"
+      ],
+      "xml_xsd_results": {
+        "NOT VERIFIED": 476
+      },
+      "producer_candidates": [
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES FOUND \u2014 PRODUCER MAPPING NOT VERIFIED"
+    },
+    "mobile.airtel.pacs008": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route_contract": "PASS",
+      "source_file_candidates": 476,
+      "source_file_types": {
+        ".xml": 476
+      },
+      "source_examples": [
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0012.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0023.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0035.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0046.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0069.xml"
+      ],
+      "xml_xsd_results": {
+        "NOT VERIFIED": 476
+      },
+      "producer_candidates": [
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES FOUND \u2014 PRODUCER MAPPING NOT VERIFIED"
+    },
+    "mobile.mtn.pacs002": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route_contract": "PASS",
+      "source_file_candidates": 476,
+      "source_file_types": {
+        ".xml": 476
+      },
+      "source_examples": [
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0012.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0023.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0035.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0046.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0069.xml"
+      ],
+      "xml_xsd_results": {
+        "NOT VERIFIED": 476
+      },
+      "producer_candidates": [
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES FOUND \u2014 PRODUCER MAPPING NOT VERIFIED"
+    },
+    "mobile.mtn.pacs008": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "streaming",
+      "route_contract": "PASS",
+      "source_file_candidates": 476,
+      "source_file_types": {
+        ".xml": 476
+      },
+      "source_examples": [
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0012.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0023.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0035.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0046.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0069.xml"
+      ],
+      "xml_xsd_results": {
+        "NOT VERIFIED": 476
+      },
+      "producer_candidates": [
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES FOUND \u2014 PRODUCER MAPPING NOT VERIFIED"
+    },
+    "payment-events.dlq": {
+      "classification": "OPERATIONAL_DERIVED",
+      "processing_mode": "streaming",
+      "route_contract": "PASS",
+      "source_file_candidates": 0,
+      "source_file_types": {},
+      "source_examples": [],
+      "xml_xsd_results": {},
+      "producer_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "CONTROLLED WORKFLOW \u2014 NOT EXECUTED"
+    },
+    "payment-events.retry": {
+      "classification": "OPERATIONAL_DERIVED",
+      "processing_mode": "streaming",
+      "route_contract": "PASS",
+      "source_file_candidates": 0,
+      "source_file_types": {},
+      "source_examples": [],
+      "xml_xsd_results": {},
+      "producer_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "CONTROLLED WORKFLOW \u2014 NOT EXECUTED"
+    },
+    "payments.lifecycle.audit.v1": {
+      "classification": "OPERATIONAL_DERIVED",
+      "processing_mode": "real-time",
+      "route_contract": "PASS",
+      "source_file_candidates": 1,
+      "source_file_types": {
+        ".json": 1
+      },
+      "source_examples": [
+        "data/pdmis/repayments.json"
+      ],
+      "xml_xsd_results": {},
+      "producer_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "CONTROLLED WORKFLOW \u2014 NOT EXECUTED"
+    },
+    "payments.lifecycle.dlq.v1": {
+      "classification": "OPERATIONAL_DERIVED",
+      "processing_mode": "real-time",
+      "route_contract": "PASS",
+      "source_file_candidates": 1,
+      "source_file_types": {
+        ".json": 1
+      },
+      "source_examples": [
+        "data/pdmis/repayments.json"
+      ],
+      "xml_xsd_results": {},
+      "producer_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "CONTROLLED WORKFLOW \u2014 NOT EXECUTED"
+    },
+    "payments.lifecycle.exceptions.v1": {
+      "classification": "OPERATIONAL_DERIVED",
+      "processing_mode": "real-time",
+      "route_contract": "PASS",
+      "source_file_candidates": 1,
+      "source_file_types": {
+        ".json": 1
+      },
+      "source_examples": [
+        "data/pdmis/repayments.json"
+      ],
+      "xml_xsd_results": {},
+      "producer_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "CONTROLLED WORKFLOW \u2014 NOT EXECUTED"
+    },
+    "payments.lifecycle.state.v1": {
+      "classification": "OPERATIONAL_DERIVED",
+      "processing_mode": "real-time",
+      "route_contract": "PASS",
+      "source_file_candidates": 1,
+      "source_file_types": {
+        ".json": 1
+      },
+      "source_examples": [
+        "data/pdmis/repayments.json"
+      ],
+      "xml_xsd_results": {},
+      "producer_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "CONTROLLED WORKFLOW \u2014 NOT EXECUTED"
+    },
+    "payments.lifecycle.transitions.v1": {
+      "classification": "OPERATIONAL_DERIVED",
+      "processing_mode": "real-time",
+      "route_contract": "PASS",
+      "source_file_candidates": 1,
+      "source_file_types": {
+        ".json": 1
+      },
+      "source_examples": [
+        "data/pdmis/repayments.json"
+      ],
+      "xml_xsd_results": {},
+      "producer_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "CONTROLLED WORKFLOW \u2014 NOT EXECUTED"
+    },
+    "pdmis.beneficiaries": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "batch",
+      "route_contract": "PASS",
+      "source_file_candidates": 8,
+      "source_file_types": {
+        ".json": 8
+      },
+      "source_examples": [
+        "data/mdm/golden_beneficiaries_restricted.json",
+        "data/pdmis/beneficiaries.json",
+        "data/pdmis/business_plans.json",
+        "data/pdmis/households.json",
+        "data/pdmis/loans.json"
+      ],
+      "xml_xsd_results": {},
+      "producer_candidates": [
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES FOUND \u2014 PRODUCER MAPPING NOT VERIFIED"
+    },
+    "pdmis.business_plans": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "batch",
+      "route_contract": "PASS",
+      "source_file_candidates": 7,
+      "source_file_types": {
+        ".json": 7
+      },
+      "source_examples": [
+        "data/pdmis/beneficiaries.json",
+        "data/pdmis/business_plans.json",
+        "data/pdmis/households.json",
+        "data/pdmis/loans.json",
+        "data/pdmis/repayments.json"
+      ],
+      "xml_xsd_results": {},
+      "producer_candidates": [
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES FOUND \u2014 PRODUCER MAPPING NOT VERIFIED"
+    },
+    "pdmis.households": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "batch",
+      "route_contract": "PASS",
+      "source_file_candidates": 7,
+      "source_file_types": {
+        ".json": 7
+      },
+      "source_examples": [
+        "data/pdmis/beneficiaries.json",
+        "data/pdmis/business_plans.json",
+        "data/pdmis/households.json",
+        "data/pdmis/loans.json",
+        "data/pdmis/repayments.json"
+      ],
+      "xml_xsd_results": {},
+      "producer_candidates": [
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES FOUND \u2014 PRODUCER MAPPING NOT VERIFIED"
+    },
+    "pdmis.loans": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "batch",
+      "route_contract": "PASS",
+      "source_file_candidates": 7,
+      "source_file_types": {
+        ".json": 7
+      },
+      "source_examples": [
+        "data/pdmis/beneficiaries.json",
+        "data/pdmis/business_plans.json",
+        "data/pdmis/households.json",
+        "data/pdmis/loans.json",
+        "data/pdmis/repayments.json"
+      ],
+      "xml_xsd_results": {},
+      "producer_candidates": [
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES FOUND \u2014 PRODUCER MAPPING NOT VERIFIED"
+    },
+    "pdmis.repayments": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "streaming",
+      "route_contract": "PASS",
+      "source_file_candidates": 7,
+      "source_file_types": {
+        ".json": 7
+      },
+      "source_examples": [
+        "data/pdmis/beneficiaries.json",
+        "data/pdmis/business_plans.json",
+        "data/pdmis/households.json",
+        "data/pdmis/loans.json",
+        "data/pdmis/repayments.json"
+      ],
+      "xml_xsd_results": {},
+      "producer_candidates": [
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES FOUND \u2014 PRODUCER MAPPING NOT VERIFIED"
+    },
+    "pdmis.saccos": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "batch",
+      "route_contract": "PASS",
+      "source_file_candidates": 8,
+      "source_file_types": {
+        ".json": 8
+      },
+      "source_examples": [
+        "data/mdm/golden_saccos.json",
+        "data/pdmis/beneficiaries.json",
+        "data/pdmis/business_plans.json",
+        "data/pdmis/households.json",
+        "data/pdmis/loans.json"
+      ],
+      "xml_xsd_results": {},
+      "producer_candidates": [
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES FOUND \u2014 PRODUCER MAPPING NOT VERIFIED"
+    },
+    "pdmis.special_groups": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "batch",
+      "route_contract": "PASS",
+      "source_file_candidates": 7,
+      "source_file_types": {
+        ".json": 7
+      },
+      "source_examples": [
+        "data/pdmis/beneficiaries.json",
+        "data/pdmis/business_plans.json",
+        "data/pdmis/households.json",
+        "data/pdmis/loans.json",
+        "data/pdmis/repayments.json"
+      ],
+      "xml_xsd_results": {},
+      "producer_candidates": [
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES FOUND \u2014 PRODUCER MAPPING NOT VERIFIED"
+    },
+    "wendi.camt052": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "streaming",
+      "route_contract": "PASS",
+      "source_file_candidates": 817,
+      "source_file_types": {
+        ".xml": 816,
+        ".json": 1
+      },
+      "source_examples": [
+        "data/wendi/camt052/camt052_report_001.xml",
+        "data/wendi/camt052/camt052_report_002.xml",
+        "data/wendi/camt052/camt052_report_003.xml",
+        "data/wendi/camt052/camt052_report_004.xml",
+        "data/wendi/camt052/camt052_report_005.xml"
+      ],
+      "xml_xsd_results": {
+        "NOT VERIFIED": 816
+      },
+      "producer_candidates": [
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES FOUND \u2014 PRODUCER MAPPING NOT VERIFIED"
+    },
+    "wendi.camt053": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "streaming",
+      "route_contract": "PASS",
+      "source_file_candidates": 817,
+      "source_file_types": {
+        ".xml": 816,
+        ".json": 1
+      },
+      "source_examples": [
+        "data/wendi/camt052/camt052_report_001.xml",
+        "data/wendi/camt052/camt052_report_002.xml",
+        "data/wendi/camt052/camt052_report_003.xml",
+        "data/wendi/camt052/camt052_report_004.xml",
+        "data/wendi/camt052/camt052_report_005.xml"
+      ],
+      "xml_xsd_results": {
+        "NOT VERIFIED": 816
+      },
+      "producer_candidates": [
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES FOUND \u2014 PRODUCER MAPPING NOT VERIFIED"
+    },
+    "wendi.camt054": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "streaming",
+      "route_contract": "PASS",
+      "source_file_candidates": 817,
+      "source_file_types": {
+        ".xml": 816,
+        ".json": 1
+      },
+      "source_examples": [
+        "data/wendi/camt052/camt052_report_001.xml",
+        "data/wendi/camt052/camt052_report_002.xml",
+        "data/wendi/camt052/camt052_report_003.xml",
+        "data/wendi/camt052/camt052_report_004.xml",
+        "data/wendi/camt052/camt052_report_005.xml"
+      ],
+      "xml_xsd_results": {
+        "NOT VERIFIED": 816
+      },
+      "producer_candidates": [
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES FOUND \u2014 PRODUCER MAPPING NOT VERIFIED"
+    },
+    "wendi.pain001": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route_contract": "PASS",
+      "source_file_candidates": 1293,
+      "source_file_types": {
+        ".xml": 1292,
+        ".json": 1
+      },
+      "source_examples": [
+        "data/icmn/pmn/pain001/pmn_0001.xml",
+        "data/icmn/pmn/pain001/pmn_0002.xml",
+        "data/icmn/pmn/pain001/pmn_0003.xml",
+        "data/icmn/pmn/pain001/pmn_0004.xml",
+        "data/icmn/pmn/pain001/pmn_0005.xml"
+      ],
+      "xml_xsd_results": {
+        "NOT VERIFIED": 1292
+      },
+      "producer_candidates": [
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES FOUND \u2014 PRODUCER MAPPING NOT VERIFIED"
+    },
+    "wendi.pain002": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route_contract": "PASS",
+      "source_file_candidates": 1293,
+      "source_file_types": {
+        ".xml": 1292,
+        ".json": 1
+      },
+      "source_examples": [
+        "data/cpo/plm/pain002/plm_0001.xml",
+        "data/cpo/plm/pain002/plm_0002.xml",
+        "data/cpo/plm/pain002/plm_0003.xml",
+        "data/cpo/plm/pain002/plm_0004.xml",
+        "data/cpo/plm/pain002/plm_0005.xml"
+      ],
+      "xml_xsd_results": {
+        "NOT VERIFIED": 1292
+      },
+      "producer_candidates": [
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES FOUND \u2014 PRODUCER MAPPING NOT VERIFIED"
+    },
+    "wendi.transactions": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "streaming",
+      "route_contract": "PASS",
+      "source_file_candidates": 968,
+      "source_file_types": {
+        ".xml": 967,
+        ".json": 1
+      },
+      "source_examples": [
+        "data/agent_network/agent_transactions/agent_tx_0001.xml",
+        "data/agent_network/agent_transactions/agent_tx_0002.xml",
+        "data/agent_network/agent_transactions/agent_tx_0003.xml",
+        "data/agent_network/agent_transactions/agent_tx_0004.xml",
+        "data/agent_network/agent_transactions/agent_tx_0005.xml"
+      ],
+      "xml_xsd_results": {
+        "NOT VERIFIED": 967
+      },
+      "producer_candidates": [
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "source_ownership": "NOT VERIFIED",
+      "kafka_publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES FOUND \u2014 PRODUCER MAPPING NOT VERIFIED"
+    }
+  },
+  "producer_implementations": [
+    {
+      "path": "services/mdm-publisher/mdm_publisher.py",
+      "calls": [
+        {
+          "line": 288,
+          "function": "producer.produce",
+          "arguments": [
+            "item['topic']"
+          ],
+          "keywords": [
+            {
+              "name": "key",
+              "value": "item['key'].encode('utf-8')"
+            },
+            {
+              "name": "value",
+              "value": "json.dumps(item['record'], separators=(',', ':')).encode('utf-8')"
+            }
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "line": 23,
+          "expression": "TOPIC_CONTRACT_PATH = ROOT / 'platform' / 'mdm' / 'contracts' / 'mdm_kafka_topics.json'"
+        },
+        {
+          "line": 45,
+          "expression": "contract = load_topic_contract()"
+        },
+        {
+          "line": 98,
+          "expression": "policies = topic_policy()"
+        },
+        {
+          "line": 147,
+          "expression": "policies = topic_policy()"
+        },
+        {
+          "line": 251,
+          "expression": "bootstrap = os.getenv('KAFKA_BOOTSTRAP_SERVERS')"
+        },
+        {
+          "line": 267,
+          "expression": "producer_config = {'bootstrap.servers': bootstrap, 'enable.idempotence': True, 'acks': 'all'}"
+        },
+        {
+          "line": 273,
+          "expression": "producer = Producer(producer_config)"
+        },
+        {
+          "line": 108,
+          "expression": "topic = spec['topic']"
+        },
+        {
+          "line": 138,
+          "expression": "counts[topic] = len(rows)"
+        },
+        {
+          "line": 152,
+          "expression": "topic = spec['topic']"
+        },
+        {
+          "line": 153,
+          "expression": "policy = policies[topic]"
+        },
+        {
+          "line": 370,
+          "expression": "topic_counts: dict[str, int] = {}"
+        },
+        {
+          "line": 373,
+          "expression": "topic_counts[item['topic']] = topic_counts.get(item['topic'], 0) + 1"
+        }
+      ]
+    },
+    {
+      "path": "services/payment-producer/delivery_coordinator.py",
+      "calls": [
+        {
+          "line": 95,
+          "function": "self.producer.produce",
+          "arguments": [],
+          "keywords": [
+            {
+              "name": "topic",
+              "value": "topic"
+            },
+            {
+              "name": "key",
+              "value": "key"
+            },
+            {
+              "name": "value",
+              "value": "wire"
+            }
+          ]
+        },
+        {
+          "line": 103,
+          "function": "self.producer.poll",
+          "arguments": [
+            "0"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 107,
+          "function": "self.producer.flush",
+          "arguments": [],
+          "keywords": []
+        }
+      ],
+      "assignments": [
+        {
+          "line": 13,
+          "expression": "self.producer = producer"
+        },
+        {
+          "line": 107,
+          "expression": "remaining = self.producer.flush(timeout=timeout)"
+        },
+        {
+          "line": 64,
+          "expression": "actual_topic = message.topic()"
+        }
+      ]
+    },
+    {
+      "path": "services/payment-producer/guarded_delivery_adapter.py",
+      "calls": [
+        {
+          "line": 90,
+          "function": "self.coordinator.publish",
+          "arguments": [
+            "topic",
+            "event_id",
+            "content"
+          ],
+          "keywords": []
+        }
+      ],
+      "assignments": [
+        {
+          "line": 52,
+          "expression": "self.coordinator = DeliveryCoordinator(journal, producer)"
+        },
+        {
+          "line": 64,
+          "expression": "decision = classify_event(event_id, topic, self.boundary)"
+        }
+      ]
+    },
+    {
+      "path": "services/payment-producer/kafka_producer.py",
+      "calls": [
+        {
+          "line": 1000,
+          "function": "producer.produce",
+          "arguments": [],
+          "keywords": [
+            {
+              "name": "topic",
+              "value": "topic"
+            },
+            {
+              "name": "key",
+              "value": "key"
+            },
+            {
+              "name": "value",
+              "value": "event"
+            }
+          ]
+        },
+        {
+          "line": 1019,
+          "function": "producer.produce",
+          "arguments": [],
+          "keywords": [
+            {
+              "name": "topic",
+              "value": "topic"
+            },
+            {
+              "name": "key",
+              "value": "key"
+            },
+            {
+              "name": "value",
+              "value": "event"
+            }
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "line": 82,
+          "expression": "TOPIC_MAPPINGS = {'icmn.vpm.pain001': {'category': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'description': 'VPM Payment Initiation', 'has_technical_attrs': False}, 'icmn.pmn.pain001': {'category': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'description': 'PMN Technical Payment Event', 'event_family': 'TECHNICAL_PAYMENT_EVENT'}, 'cpo.psn.pain002': {'category': 'cpo', 'sy"
+        },
+        {
+          "line": 49,
+          "expression": "KAFKA_BOOTSTRAP_SERVERS = os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'kafka:9092')"
+        },
+        {
+          "line": 50,
+          "expression": "SCHEMA_REGISTRY_URL = os.getenv('SCHEMA_REGISTRY_URL', 'http://schema-registry:8081')"
+        },
+        {
+          "line": 52,
+          "expression": "SCHEMA_PATH = os.getenv('SCHEMA_PATH', '/app/schemas/payment_event.avsc')"
+        },
+        {
+          "line": 55,
+          "expression": "PRODUCER_IDEMPOTENCE = os.getenv('PRODUCER_IDEMPOTENCE', 'true').lower() == 'true'"
+        },
+        {
+          "line": 56,
+          "expression": "PRODUCER_ACKS = os.getenv('PRODUCER_ACKS', 'all')"
+        },
+        {
+          "line": 57,
+          "expression": "PRODUCER_RETRIES = int(os.getenv('PRODUCER_RETRIES', '5'))"
+        },
+        {
+          "line": 58,
+          "expression": "PRODUCER_DELIVERY_TIMEOUT_MS = int(os.getenv('PRODUCER_DELIVERY_TIMEOUT_MS', '120000'))"
+        },
+        {
+          "line": 59,
+          "expression": "PRODUCER_REQUEST_TIMEOUT_MS = int(os.getenv('PRODUCER_REQUEST_TIMEOUT_MS', '30000'))"
+        },
+        {
+          "line": 60,
+          "expression": "PRODUCER_LINGER_MS = int(os.getenv('PRODUCER_LINGER_MS', '10'))"
+        },
+        {
+          "line": 61,
+          "expression": "PRODUCER_BATCH_SIZE = int(os.getenv('PRODUCER_BATCH_SIZE', '65536'))"
+        },
+        {
+          "line": 62,
+          "expression": "PRODUCER_COMPRESSION_TYPE = os.getenv('PRODUCER_COMPRESSION_TYPE', 'snappy')"
+        },
+        {
+          "line": 70,
+          "expression": "SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO = resolve_secret('SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO')"
+        },
+        {
+          "line": 71,
+          "expression": "SCHEMA_REGISTRY_AUTH_REQUIRED = os.getenv('SCHEMA_REGISTRY_AUTH_REQUIRED', 'false').strip().lower() == 'true'"
+        },
+        {
+          "line": 620,
+          "expression": "system, msg_type, topic = detect_system_from_path(file_path)"
+        },
+        {
+          "line": 716,
+          "expression": "entity_field, observation_field = PDMIS_SNAPSHOT_KEYS[topic]"
+        },
+        {
+          "line": 748,
+          "expression": "identity_input = json.dumps([topic, entity_id.strip(), observation_date if observation_date is not None else fingerprint], separators=(',', ':'))"
+        },
+        {
+          "line": 766,
+          "expression": "system, msg_type, topic = detect_system_from_path(file_path)"
+        },
+        {
+          "line": 895,
+          "expression": "avro_schema = load_avro_schema()"
+        },
+        {
+          "line": 912,
+          "expression": "sr_config = {'url': Config.SCHEMA_REGISTRY_URL}"
+        },
+        {
+          "line": 915,
+          "expression": "sr_client = SchemaRegistryClient(sr_config)"
+        },
+        {
+          "line": 918,
+          "expression": "avro_serializer = AvroSerializer(schema_registry_client=sr_client, schema_str=str(avro_schema), to_dict=lambda data, ctx: data)"
+        },
+        {
+          "line": 925,
+          "expression": "producer_config = {'bootstrap.servers': Config.KAFKA_BOOTSTRAP_SERVERS, 'key.serializer': StringSerializer('utf_8'), 'value.serializer': avro_serializer, 'acks': Config.PRODUCER_ACKS, 'retries': Config.PRODUCER_RETRIES, 'delivery.timeout.ms': Config.PRODUCER_DELIVERY_TIMEOUT_MS, 'request.timeout.ms': Config.PRODUCER_REQUEST_TIMEOUT_MS, 'linger.ms': Config.PRODUCER_LINGER_MS, 'batch.size': Config.P"
+        },
+        {
+          "line": 946,
+          "expression": "producer = SerializingProducer(producer_config)"
+        },
+        {
+          "line": 959,
+          "expression": "files_by_topic = {}"
+        },
+        {
+          "line": 967,
+          "expression": "json_events_by_topic = {}"
+        },
+        {
+          "line": 1033,
+          "expression": "outstanding = producer.flush()"
+        },
+        {
+          "line": 914,
+          "expression": "sr_config['basic.auth.user.info'] = Config.SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO"
+        },
+        {
+          "line": 961,
+          "expression": "system, msg_type, topic = detect_system_from_path(file_path)"
+        },
+        {
+          "line": 187,
+          "expression": "details = {'service': 'payment-producer', 'event': 'kafka_delivery', 'topic': message.topic() if message else None, 'partition': message.partition() if message and (not error) else None, 'event_id': event_id, 'business_key': business_key, 'result': 'failed' if error else 'delivered', 'error_type': type(error).__name__ if error else None, 'error': str(error) if error else None}"
+        },
+        {
+          "line": 207,
+          "expression": "schema_str = f.read()"
+        },
+        {
+          "line": 978,
+          "expression": "topic = event.pop('_topic')"
+        },
+        {
+          "line": 817,
+          "expression": "snapshot_event_id, fingerprint = pdmis_snapshot_identity(topic, record)"
+        },
+        {
+          "line": 964,
+          "expression": "files_by_topic[topic] = []"
+        },
+        {
+          "line": 999,
+          "expression": "key = select_business_key(topic, event)"
+        },
+        {
+          "line": 1018,
+          "expression": "key = select_business_key(topic, event)"
+        }
+      ]
+    },
+    {
+      "path": "services/payment-producer/source_publisher.py",
+      "calls": [
+        {
+          "line": 422,
+          "function": "prod.produce",
+          "arguments": [],
+          "keywords": [
+            {
+              "name": "topic",
+              "value": "topic"
+            },
+            {
+              "name": "key",
+              "value": "key.encode()"
+            },
+            {
+              "name": "value",
+              "value": "wire"
+            }
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "line": 25,
+          "expression": "TOPIC_MANIFEST: dict[str, dict[str, str]] = {'icmn.vpm.pain001': {'system': 'icmn', 'msg_type': 'pain001', 'family': 'PAYMENT_BUSINESS_EVENT'}, 'icmn.pmn.pain001': {'system': 'pmn', 'msg_type': 'technical_payment_event', 'family': 'TECHNICAL_PAYMENT_EVENT'}, 'cpo.psn.pain002': {'system': 'cpo', 'msg_type': 'pain002', 'family': 'PAYMENT_BUSINESS_EVENT'}, 'cpo.plm.pain002': {'system': 'plm', 'msg_ty"
+        },
+        {
+          "line": 114,
+          "expression": "TECH_XML_MAP = {'EventId': 'event_id', 'MessageId': 'message_id', 'EventFamily': 'event_family', 'EventType': 'event_type', 'CorrelationId': 'correlation_id', 'PaymentInstructionId': 'instruction_id', 'InstructionId': 'instruction_id', 'EndToEndId': 'end_to_end_id', 'TransactionId': 'transaction_id', 'UETR': 'uetr', 'BusinessReference': 'business_reference', 'XTrace': 'x_trace', 'XChannel': 'x_cha"
+        },
+        {
+          "line": 149,
+          "expression": "key = str(schemas_dir.resolve())"
+        },
+        {
+          "line": 151,
+          "expression": "pay = schemas_dir / 'payment_event.avsc'"
+        },
+        {
+          "line": 152,
+          "expression": "tech = schemas_dir / 'technical_payment_event.avsc'"
+        },
+        {
+          "line": 233,
+          "expression": "info = TOPIC_MANIFEST[topic]"
+        },
+        {
+          "line": 234,
+          "expression": "ev_id = _event_id(topic, source_path, record_index)"
+        },
+        {
+          "line": 271,
+          "expression": "bk = _business_key(topic, extracted)"
+        },
+        {
+          "line": 319,
+          "expression": "schemas_dir: str = ''"
+        },
+        {
+          "line": 319,
+          "expression": "bootstrap: str = ''"
+        },
+        {
+          "line": 322,
+          "expression": "topics: dict = field(default_factory=dict)"
+        },
+        {
+          "line": 350,
+          "expression": "business_schema, technical_schema, pay_str, tech_str = _load_schemas(Path(args.schemas_dir).resolve())"
+        },
+        {
+          "line": 351,
+          "expression": "topic_filter = {t.strip() for t in args.topics.split(',') if t.strip()}"
+        },
+        {
+          "line": 353,
+          "expression": "ev = Evidence(source_root=str(args.sources_root), schemas_dir=str(args.schemas_dir), bootstrap=args.bootstrap, registry_url=args.registry_url, max_messages=args.max_messages)"
+        },
+        {
+          "line": 378,
+          "expression": "reg = SchemaRegistryClient({'url': args.registry_url})"
+        },
+        {
+          "line": 381,
+          "expression": "prod_cfg = {'bootstrap.servers': args.bootstrap, 'compression.type': 'zstd', 'linger.ms': 20}"
+        },
+        {
+          "line": 387,
+          "expression": "prod = Producer(prod_cfg)"
+        },
+        {
+          "line": 475,
+          "expression": "business_schema, technical_schema, _, _ = _load_schemas(CONTRACTS_DIR)"
+        },
+        {
+          "line": 476,
+          "expression": "parsed_b = fastavro.parse_schema(business_schema)"
+        },
+        {
+          "line": 477,
+          "expression": "parsed_t = fastavro.parse_schema(technical_schema)"
+        },
+        {
+          "line": 480,
+          "expression": "rec_b = build_record(topic='agent.locations', source_path='fake/agent.locations', record_index=0, payload={'agent_id': 'AGENT-0001'}, raw_bytes=b'{}', is_technical=False, business_schema=business_schema, technical_schema=technical_schema)"
+        },
+        {
+          "line": 503,
+          "expression": "rec_t = build_record(topic='icmn.pmn.pain001', source_path='fake/icmn.pmn.pain001', record_index=0, payload={}, raw_bytes=xml, is_technical=True, business_schema=business_schema, technical_schema=technical_schema)"
+        },
+        {
+          "line": 229,
+          "expression": "b, t, _, _ = _load_schemas(CONTRACTS_DIR)"
+        },
+        {
+          "line": 230,
+          "expression": "business_schema = business_schema or b"
+        },
+        {
+          "line": 231,
+          "expression": "technical_schema = technical_schema or t"
+        },
+        {
+          "line": 241,
+          "expression": "bk = tech.get('business_reference') or tech.get('end_to_end_id') or tech.get('message_id') or _business_key(topic, payload)"
+        },
+        {
+          "line": 245,
+          "expression": "msg_id = tech.get('message_id') or f'{topic}/{record_index}'"
+        },
+        {
+          "line": 246,
+          "expression": "candidates = {**tech, 'event_id': tech.get('event_id') or ev_id, 'message_id': msg_id, 'event_family': 'TECHNICAL_PAYMENT_EVENT', 'event_type': info['msg_type'], 'schema_version': tech.get('schema_version') or '1', 'business_reference': tech.get('business_reference') or bk or ev_id, 'end_to_end_id': tech.get('end_to_end_id') or bk or ev_id, 'x_source_system': tech.get('x_source_system') or info['s"
+        },
+        {
+          "line": 303,
+          "expression": "topic = route(rel)"
+        },
+        {
+          "line": 407,
+          "expression": "info = TOPIC_MANIFEST[topic]"
+        },
+        {
+          "line": 450,
+          "expression": "b = ev.topics.setdefault(d['topic'], {'attempted': 0, 'delivered': 0})"
+        },
+        {
+          "line": 409,
+          "expression": "rec = build_record(topic=topic, source_path=sp, record_index=idx, payload=payload, raw_bytes=raw, is_technical=is_tech, business_schema=business_schema, technical_schema=technical_schema)"
+        },
+        {
+          "line": 415,
+          "expression": "key = rec.get('source_key') or rec.get('business_reference') or rec.get('message_id') or _business_key(topic, payload) or rec.get('event_id', '')"
+        },
+        {
+          "line": 421,
+          "expression": "wire = ser(rec, SerializationContext(topic, MessageField.VALUE))"
+        }
+      ]
+    },
+    {
+      "path": "platform/gcp/dataflow_ingestion/native_24_topic_bridge.py",
+      "calls": [
+        {
+          "line": 84,
+          "function": "pubsub_v1.PublisherClient",
+          "arguments": [],
+          "keywords": []
+        },
+        {
+          "line": 109,
+          "function": "bridge.publish_wire_then_commit",
+          "arguments": [
+            "consumer",
+            "publisher",
+            "topic_path"
+          ],
+          "keywords": []
+        }
+      ],
+      "assignments": [
+        {
+          "line": 14,
+          "expression": "EXPECTED_TOPIC = 'pdm-dev-payments-source-events-v1'"
+        },
+        {
+          "line": 42,
+          "expression": "_path = os.path.normpath(os.path.join(_here, '..', '..', '..', 'platform', 'kafka', 'topics.yaml'))"
+        },
+        {
+          "line": 72,
+          "expression": "topics = validate_topics(args.approved_topics)"
+        },
+        {
+          "line": 83,
+          "expression": "registry = SchemaRegistryClient({'url': args.registry})"
+        },
+        {
+          "line": 85,
+          "expression": "topic_path = publisher.topic_path(args.project, args.pubsub_topic)"
+        },
+        {
+          "line": 86,
+          "expression": "consumer = Consumer({'bootstrap.servers': args.bootstrap, 'group.id': args.group, 'enable.auto.commit': False, 'auto.offset.reset': 'earliest'})"
+        },
+        {
+          "line": 49,
+          "expression": "_topics = _doc.get('topics') or _doc.get('kafka_topics') or []"
+        },
+        {
+          "line": 51,
+          "expression": "_topics = _doc"
+        },
+        {
+          "line": 105,
+          "expression": "identity = (msg.topic(), msg.partition(), msg.offset())"
+        },
+        {
+          "line": 109,
+          "expression": "pubsub_id = bridge.publish_wire_then_commit(consumer, publisher, topic_path, msg)"
+        },
+        {
+          "line": 59,
+          "expression": "_n = _t.get('name') or _t.get('topic') or _t.get('id')"
+        }
+      ]
+    },
+    {
+      "path": "platform/gcp/kafka_pubsub_bridge/bridge.py",
+      "calls": [
+        {
+          "line": 53,
+          "function": "publisher.publish",
+          "arguments": [
+            "topic_path",
+            "payload"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 83,
+          "function": "pubsub_v1.PublisherClient",
+          "arguments": [],
+          "keywords": []
+        },
+        {
+          "line": 150,
+          "function": "publisher.publish(topic_path, data).result",
+          "arguments": [],
+          "keywords": []
+        },
+        {
+          "line": 150,
+          "function": "publisher.publish",
+          "arguments": [
+            "topic_path",
+            "data"
+          ],
+          "keywords": []
+        }
+      ],
+      "assignments": [
+        {
+          "line": 53,
+          "expression": "future = publisher.publish(topic_path, payload, **attrs)"
+        },
+        {
+          "line": 75,
+          "expression": "registry = SchemaRegistryClient({'url': args.schema_registry_url})"
+        },
+        {
+          "line": 77,
+          "expression": "consumer = Consumer({'bootstrap.servers': args.kafka_bootstrap, 'group.id': args.group, 'enable.auto.commit': False, 'auto.offset.reset': 'earliest'})"
+        },
+        {
+          "line": 84,
+          "expression": "topic_path = publisher.topic_path(args.project, args.topic)"
+        },
+        {
+          "line": 138,
+          "expression": "schema_id = int.from_bytes(wire[1:5], 'big')"
+        },
+        {
+          "line": 141,
+          "expression": "obj = {'kafka_topic': message.topic(), 'kafka_partition': message.partition(), 'kafka_offset': message.offset(), 'kafka_timestamp_ms': stamp[1], 'schema_registry_id': schema_id, 'payload_base64': base64.b64encode(wire).decode('ascii'), 'payload_sha256': hashlib.sha256(wire).hexdigest()}"
+        },
+        {
+          "line": 150,
+          "expression": "message_id = publisher.publish(topic_path, data).result(timeout=30)"
+        },
+        {
+          "line": 95,
+          "expression": "event = deserializer(message.value(), SerializationContext(message.topic(), MessageField.VALUE))"
+        }
+      ]
+    },
+    {
+      "path": "platform/gcp/kafka_pubsub_bridge/raw_v1_bridge_live.py",
+      "calls": [
+        {
+          "line": 125,
+          "function": "pubsub_v1.PublisherClient",
+          "arguments": [],
+          "keywords": []
+        },
+        {
+          "line": 52,
+          "function": "publisher.publish(topic_path, body).result",
+          "arguments": [],
+          "keywords": []
+        },
+        {
+          "line": 348,
+          "function": "pubsub_v1.PublisherClient",
+          "arguments": [],
+          "keywords": []
+        },
+        {
+          "line": 155,
+          "function": "bridge.publish_wire_then_commit",
+          "arguments": [
+            "consumer",
+            "publisher",
+            "topic_path"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 398,
+          "function": "bridge.publish_wire_then_commit",
+          "arguments": [
+            "consumer",
+            "publisher",
+            "topic_path"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 52,
+          "function": "publisher.publish",
+          "arguments": [
+            "topic_path",
+            "body"
+          ],
+          "keywords": []
+        }
+      ],
+      "assignments": [
+        {
+          "line": 94,
+          "expression": "topics = None"
+        },
+        {
+          "line": 104,
+          "expression": "approved_legacy_topics = lambda: frozenset(topics)"
+        },
+        {
+          "line": 108,
+          "expression": "registry = SchemaRegistryClient({'url': args.schema_registry_url})"
+        },
+        {
+          "line": 123,
+          "expression": "consumer = Consumer({'bootstrap.servers': args.kafka_bootstrap, 'group.id': args.group, 'enable.auto.commit': False, 'auto.offset.reset': 'earliest'})"
+        },
+        {
+          "line": 126,
+          "expression": "topic_path = publisher.topic_path(args.project, args.topic)"
+        },
+        {
+          "line": 192,
+          "expression": "expected = {'topic', 'partition', 'start_offset', 'end_offset', 'consumer_group'}"
+        },
+        {
+          "line": 200,
+          "expression": "topic = plan['topic']"
+        },
+        {
+          "line": 257,
+          "expression": "topic_map = None"
+        },
+        {
+          "line": 278,
+          "expression": "topic, partition, start, end, group = validate_recovery_plan(plan, frozenset(topic_map))"
+        },
+        {
+          "line": 287,
+          "expression": "consumer = Consumer({'bootstrap.servers': args.kafka_bootstrap, 'group.id': group, 'enable.auto.commit': False, 'enable.auto.offset.store': False, 'auto.offset.reset': 'error'})"
+        },
+        {
+          "line": 30,
+          "expression": "schema_id = int.from_bytes(wire[1:5], 'big')"
+        },
+        {
+          "line": 42,
+          "expression": "body = json.dumps({'kafka_topic': msg.topic(), 'kafka_partition': msg.partition(), 'kafka_offset': msg.offset(), 'kafka_timestamp_ms': stamp[1], 'schema_registry_id': schema_id, 'payload_base64': base64.b64encode(wire).decode('ascii'), 'payload_sha256': hashlib.sha256(wire).hexdigest()}, sort_keys=True, separators=(',', ':')).encode('utf-8')"
+        },
+        {
+          "line": 52,
+          "expression": "message_id = publisher.publish(topic_path, body).result(timeout=30)"
+        },
+        {
+          "line": 60,
+          "expression": "result = consumer.commit(offsets=[TopicPartition(msg.topic(), msg.partition(), next_offset)], asynchronous=False)"
+        },
+        {
+          "line": 296,
+          "expression": "metadata = consumer.list_topics(topic=topic, timeout=15)"
+        },
+        {
+          "line": 297,
+          "expression": "topic_metadata = metadata.topics.get(topic)"
+        },
+        {
+          "line": 305,
+          "expression": "tp = TopicPartition(topic, partition)"
+        },
+        {
+          "line": 330,
+          "expression": "registry = SchemaRegistryClient({'url': args.schema_registry_url})"
+        },
+        {
+          "line": 349,
+          "expression": "topic_path = publisher.topic_path(args.project, args.topic)"
+        },
+        {
+          "line": 139,
+          "expression": "schema_id = int.from_bytes(wire[1:5], 'big')"
+        },
+        {
+          "line": 144,
+          "expression": "event = decoder(wire, msg.topic())"
+        },
+        {
+          "line": 155,
+          "expression": "message_id = bridge.publish_wire_then_commit(consumer, publisher, topic_path, msg)"
+        },
+        {
+          "line": 382,
+          "expression": "schema_id = int.from_bytes(wire[1:5], 'big')"
+        },
+        {
+          "line": 389,
+          "expression": "event = decoder(wire, topic)"
+        },
+        {
+          "line": 398,
+          "expression": "message_id = bridge.publish_wire_then_commit(consumer, publisher, topic_path, msg)"
+        },
+        {
+          "line": 101,
+          "expression": "topics = ast.literal_eval(node.value)"
+        },
+        {
+          "line": 266,
+          "expression": "topic_map = ast.literal_eval(node.value)"
+        }
+      ]
+    },
+    {
+      "path": "platform/gcp/kafka_pubsub_bridge/source_bounded_entrypoint_v1.py",
+      "calls": [
+        {
+          "line": 59,
+          "function": "callbacks.publish_kafka_record",
+          "arguments": [
+            "record",
+            "publisher",
+            "topic_path"
+          ],
+          "keywords": []
+        }
+      ],
+      "assignments": [
+        {
+          "line": 26,
+          "expression": "topic = message.topic()"
+        },
+        {
+          "line": 34,
+          "expression": "schema_id = int.from_bytes(value[1:5], 'big') if value is not None and len(value) >= 5 and (value[0] == 0) else None"
+        },
+        {
+          "line": 53,
+          "expression": "expected = (record['topic'], record['partition'], record['offset'] + 1)"
+        },
+        {
+          "line": 54,
+          "expression": "actual = (getattr(tp, 'topic', None), getattr(tp, 'partition', None), getattr(tp, 'offset', None))"
+        }
+      ]
+    },
+    {
+      "path": "platform/gcp/kafka_pubsub_bridge/source_live_callbacks_v1.py",
+      "calls": [
+        {
+          "line": 36,
+          "function": "delivery.publish_then_commit",
+          "arguments": [
+            "envelope",
+            "publish",
+            "commit"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 34,
+          "function": "publisher.publish",
+          "arguments": [
+            "pubsub_topic_path",
+            "payload"
+          ],
+          "keywords": []
+        }
+      ],
+      "assignments": [
+        {
+          "line": 30,
+          "expression": "envelope = a.make_envelope(record['topic'], record['partition'], record['offset'], record['timestamp_ms'], record['value'], record.get('schema_registry_id'))"
+        },
+        {
+          "line": 34,
+          "expression": "future = publisher.publish(pubsub_topic_path, payload)"
+        }
+      ]
+    },
+    {
+      "path": "platform/gcp/kafka_pubsub_bridge/source_operational_runtime_v1.py",
+      "calls": [
+        {
+          "line": 228,
+          "function": "pubsub_v1.PublisherClient",
+          "arguments": [],
+          "keywords": []
+        },
+        {
+          "line": 242,
+          "function": "ENTRY.publish_one",
+          "arguments": [
+            "msg",
+            "consumer",
+            "publisher"
+          ],
+          "keywords": []
+        }
+      ],
+      "assignments": [
+        {
+          "line": 71,
+          "expression": "legacy_fields = {'kafka_topic', 'kafka_partition', 'kafka_offset', 'kafka_timestamp_ms', 'schema_registry_id', 'payload_base64', 'payload_sha256'}"
+        },
+        {
+          "line": 210,
+          "expression": "route = delivery.adapter.contract.route_for(args.kafka_topic)"
+        },
+        {
+          "line": 229,
+          "expression": "topic_path = publisher.topic_path(args.project, args.pubsub_topic)"
+        },
+        {
+          "line": 231,
+          "expression": "consumer = Consumer({'bootstrap.servers': args.kafka_bootstrap, 'group.id': args.kafka_group, 'enable.auto.commit': False, 'enable.auto.offset.store': False, 'auto.offset.reset': 'latest'})"
+        },
+        {
+          "line": 416,
+          "expression": "decoder = cloud.RegistryDecoder(SchemaRegistryClient({'url': args.schema_registry_url}))"
+        }
+      ]
+    }
+  ],
+  "schema_inventory": [],
+  "summary": {
+    "governed_topics": 38,
+    "source_files": 2415,
+    "xml_files": 2395,
+    "xml_well_formed": 2395,
+    "xml_xsd_pass": 0,
+    "xml_xsd_fail": 0,
+    "xml_xsd_not_verified": 2395,
+    "producer_implementation_files": 11,
+    "schema_files": 0,
+    "topics_with_source_candidates": 36,
+    "verified_producer_mappings": 0,
+    "new_live_publications": 0
+  },
+  "limitations": [
+    "Path-based source matching is only candidate discovery",
+    "No generators or Kafka producers are executed",
+    "No Kafka messages are published or consumed",
+    "No cloud operations are performed",
+    "Restricted data payloads are not printed",
+    "Schema validation requires a unique matching XSD namespace",
+    "Previous MDM acceptance is preserved, not re-executed"
+  ]
+}

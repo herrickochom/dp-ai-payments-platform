@@ -1,0 +1,1512 @@
+{
+  "checks": {
+    "cross_message_correlation": {
+      "detail": "Correlation inventory produced; domain-specific message relationships must be checked against authoritative contracts",
+      "relationships": {
+        "pacs.002.001.10->pacs.008.001.08": {
+          "matched_end_to_end_ids": 238,
+          "matched_transaction_ids": 238,
+          "original_end_to_end_ids": 238,
+          "original_transaction_ids": 238,
+          "source_documents": 238,
+          "target_documents": 238,
+          "unmatched_end_to_end_ids": [],
+          "unmatched_transaction_ids": []
+        },
+        "pain.002.001.12->pain.001.001.09": {
+          "matched_end_to_end_ids": 238,
+          "matched_transaction_ids": 0,
+          "original_end_to_end_ids": 238,
+          "original_transaction_ids": 0,
+          "source_documents": 476,
+          "target_documents": 476,
+          "unmatched_end_to_end_ids": [],
+          "unmatched_transaction_ids": []
+        }
+      },
+      "status": "NOT VERIFIED"
+    },
+    "financial_reconciliation": {
+      "amount_profiles": {
+        "pacs.008.001.08.InstdAmt": {
+          "count": 238,
+          "maximum": "1000000",
+          "minimum": "1000000",
+          "sum": "238000000"
+        },
+        "pacs.008.001.08.IntrBkSttlmAmt": {
+          "count": 238,
+          "maximum": "1000000",
+          "minimum": "1000000",
+          "sum": "238000000"
+        },
+        "pain.001.001.09.CtrlSum": {
+          "count": 952,
+          "maximum": "1000000",
+          "minimum": "1000000",
+          "sum": "952000000"
+        },
+        "pain.001.001.09.InstdAmt": {
+          "count": 476,
+          "maximum": "1000000",
+          "minimum": "1000000",
+          "sum": "476000000"
+        }
+      },
+      "detail": "Financial profiles and source structures collected. No unsupported ledger or settlement equality has been assumed.",
+      "source_inventory": {
+        "csv_files": [],
+        "json_files": [
+          "data/agent_network/agent_locations.json",
+          "data/agent_network/agent_profiles.json",
+          "data/mdm/agent_master_sources.json",
+          "data/mdm/beneficiary_identity_alerts_restricted.json",
+          "data/mdm/beneficiary_master_sources.json",
+          "data/mdm/geography_master_sources.json",
+          "data/mdm/golden_agents.json",
+          "data/mdm/golden_beneficiaries_restricted.json",
+          "data/mdm/golden_geography.json",
+          "data/mdm/golden_saccos.json",
+          "data/mdm/sacco_master_sources.json",
+          "data/mdm/source_crosswalk.json",
+          "data/pdmis/beneficiaries.json",
+          "data/pdmis/business_plans.json",
+          "data/pdmis/households.json",
+          "data/pdmis/loans.json",
+          "data/pdmis/repayments.json",
+          "data/pdmis/saccos.json",
+          "data/pdmis/special_groups.json",
+          "data/wendi/wendi_transactions.json"
+        ]
+      },
+      "source_structures": {
+        "data/agent_network/agent_locations.json": {
+          "count": 38,
+          "sample_keys": [
+            "address",
+            "agent_id",
+            "is_active",
+            "latitude",
+            "location_type",
+            "longitude"
+          ],
+          "type": "list"
+        },
+        "data/agent_network/agent_profiles.json": {
+          "count": 38,
+          "sample_keys": [
+            "agent_code",
+            "agent_id",
+            "commission_rate",
+            "country",
+            "county",
+            "created_at",
+            "district",
+            "is_active",
+            "location",
+            "name",
+            "network_provider",
+            "parish",
+            "phone",
+            "region",
+            "registration_date",
+            "registration_number",
+            "sub_county",
+            "updated_at",
+            "verified",
+            "village"
+          ],
+          "type": "list"
+        },
+        "data/mdm/agent_master_sources.json": {
+          "count": 38,
+          "sample_keys": [
+            "agent_code",
+            "agent_id",
+            "county",
+            "district",
+            "is_active",
+            "master_domain",
+            "name",
+            "network_provider",
+            "parish",
+            "phone",
+            "region",
+            "registration_number",
+            "source_created_at",
+            "source_entity",
+            "source_record_id",
+            "source_system",
+            "source_updated_at",
+            "sub_county",
+            "verified",
+            "village"
+          ],
+          "type": "list"
+        },
+        "data/mdm/beneficiary_identity_alerts_restricted.json": {
+          "count": 6,
+          "sample_keys": [
+            "alert_type",
+            "golden_record_id",
+            "master_domain",
+            "severity",
+            "source_entity",
+            "source_record_id",
+            "source_system"
+          ],
+          "type": "list"
+        },
+        "data/mdm/beneficiary_master_sources.json": {
+          "count": 250,
+          "sample_keys": [
+            "alternative_phone",
+            "beneficiary_id",
+            "county",
+            "date_of_birth",
+            "district",
+            "email",
+            "household_id",
+            "is_active",
+            "master_domain",
+            "name",
+            "nin",
+            "nin_verified",
+            "parish",
+            "phone",
+            "region",
+            "source_created_at",
+            "source_entity",
+            "source_record_id",
+            "source_system",
+            "source_updated_at",
+            "sub_county",
+            "village"
+          ],
+          "type": "list"
+        },
+        "data/mdm/geography_master_sources.json": {
+          "count": 38,
+          "sample_keys": [
+            "county",
+            "district",
+            "location_key",
+            "master_domain",
+            "parish",
+            "region",
+            "source_entity",
+            "source_record_id",
+            "source_system",
+            "sub_county",
+            "village"
+          ],
+          "type": "list"
+        },
+        "data/mdm/golden_agents.json": {
+          "count": 38,
+          "sample_keys": [
+            "agent_code",
+            "agent_id",
+            "county",
+            "district",
+            "is_active",
+            "master_domain",
+            "mdm_agent_id",
+            "name",
+            "network_provider",
+            "parish",
+            "phone",
+            "region",
+            "registration_number",
+            "source_created_at",
+            "source_entity",
+            "source_record_id",
+            "source_system",
+            "source_updated_at",
+            "sub_county",
+            "verified",
+            "village"
+          ],
+          "type": "list"
+        },
+        "data/mdm/golden_beneficiaries_restricted.json": {
+          "count": 244,
+          "sample_keys": [
+            "alternative_phone",
+            "county",
+            "date_of_birth",
+            "district",
+            "email",
+            "household_id",
+            "is_active",
+            "mdm_beneficiary_id",
+            "name",
+            "nin",
+            "nin_verified",
+            "parish",
+            "phone",
+            "record_classification",
+            "region",
+            "source_created_at",
+            "source_record_id",
+            "source_system",
+            "source_updated_at",
+            "sub_county",
+            "village"
+          ],
+          "type": "list"
+        },
+        "data/mdm/golden_geography.json": {
+          "count": 38,
+          "sample_keys": [
+            "county",
+            "district",
+            "location_key",
+            "master_domain",
+            "mdm_location_id",
+            "parish",
+            "region",
+            "source_entity",
+            "source_record_id",
+            "source_system",
+            "sub_county",
+            "village"
+          ],
+          "type": "list"
+        },
+        "data/mdm/golden_saccos.json": {
+          "count": 38,
+          "sample_keys": [
+            "county",
+            "district",
+            "is_active",
+            "master_domain",
+            "mdm_sacco_id",
+            "name",
+            "parish",
+            "region",
+            "registration_number",
+            "sacco_id",
+            "source_created_at",
+            "source_entity",
+            "source_record_id",
+            "source_system",
+            "source_updated_at",
+            "sub_county",
+            "village",
+            "wendi_account"
+          ],
+          "type": "list"
+        },
+        "data/mdm/sacco_master_sources.json": {
+          "count": 38,
+          "sample_keys": [
+            "county",
+            "district",
+            "is_active",
+            "master_domain",
+            "name",
+            "parish",
+            "region",
+            "registration_number",
+            "sacco_id",
+            "source_created_at",
+            "source_entity",
+            "source_record_id",
+            "source_system",
+            "source_updated_at",
+            "sub_county",
+            "village",
+            "wendi_account"
+          ],
+          "type": "list"
+        },
+        "data/mdm/source_crosswalk.json": {
+          "count": 364,
+          "sample_keys": [
+            "golden_record_id",
+            "is_current",
+            "master_domain",
+            "match_rule",
+            "match_status",
+            "source_entity",
+            "source_record_id",
+            "source_system",
+            "valid_from",
+            "valid_to"
+          ],
+          "type": "list"
+        },
+        "data/pdmis/beneficiaries.json": {
+          "count": 250,
+          "sample_keys": [
+            "alternative_phone",
+            "beneficiary_id",
+            "beneficiary_token",
+            "county",
+            "created_at",
+            "date_of_birth",
+            "district",
+            "email",
+            "gender",
+            "household_id",
+            "is_active",
+            "name",
+            "nin",
+            "nin_hashed",
+            "nin_verified",
+            "parish",
+            "phone",
+            "phone_verified",
+            "region",
+            "registration_date",
+            "special_group",
+            "special_group_code",
+            "sub_county",
+            "updated_at",
+            "village"
+          ],
+          "type": "list"
+        },
+        "data/pdmis/business_plans.json": {
+          "count": 250,
+          "sample_keys": [
+            "approval_status",
+            "beneficiary_id",
+            "business_plan_id",
+            "description",
+            "expected_revenue",
+            "loan_id",
+            "location",
+            "project_type",
+            "submission_date"
+          ],
+          "type": "list"
+        },
+        "data/pdmis/households.json": {
+          "count": 250,
+          "sample_keys": [
+            "adults_count",
+            "children_count",
+            "county",
+            "created_at",
+            "district",
+            "economic_status",
+            "food_security_status",
+            "head_of_household",
+            "head_phone",
+            "household_id",
+            "housing_type",
+            "land_ownership",
+            "member_count",
+            "parish",
+            "region",
+            "registration_date",
+            "sub_county",
+            "updated_at",
+            "village"
+          ],
+          "type": "list"
+        },
+        "data/pdmis/loans.json": {
+          "count": 250,
+          "sample_keys": [
+            "amount_approved",
+            "amount_disbursed",
+            "amount_repaid",
+            "amount_requested",
+            "application_date",
+            "approval_date",
+            "as_of_date",
+            "beneficiary_id",
+            "business_plan_id",
+            "cashout_date",
+            "contractual_repayment_progress",
+            "created_at",
+            "days_past_due",
+            "delinquency_bucket",
+            "disbursement_date",
+            "due_repayment_rate",
+            "first_repayment_date",
+            "interest_charged",
+            "interest_outstanding_balance",
+            "interest_paid",
+            "interest_rate",
+            "last_payment_date",
+            "last_repayment_date",
+            "loan_id",
+            "loan_status",
+            "loan_term_months",
+            "outstanding_balance",
+            "principal_outstanding_balance",
+            "principal_repaid",
+            "principal_repayment_rate",
+            "project_location",
+            "project_type",
+            "repayment_frequency",
+            "repayment_rate",
+            "repayment_status",
+            "sacco_id",
+            "scheduled_instalment",
+            "updated_at",
+            "verification_date"
+          ],
+          "type": "list"
+        },
+        "data/pdmis/repayments.json": {
+          "count": 1515,
+          "sample_keys": [
+            "amount",
+            "as_of_date",
+            "beneficiary_id",
+            "channel",
+            "contractual_repayment_progress",
+            "cumulative_amount_paid",
+            "currency",
+            "days_late",
+            "days_past_due",
+            "delinquency_bucket",
+            "due_repayment_rate",
+            "event_date",
+            "event_sequence",
+            "event_type",
+            "instalment_number",
+            "interest_outstanding_balance",
+            "interest_paid",
+            "loan_id",
+            "outstanding_balance",
+            "payment_date",
+            "payment_status",
+            "principal_outstanding_balance",
+            "principal_paid",
+            "principal_repayment_rate",
+            "repayment_due_date",
+            "repayment_event_id",
+            "repayment_rate",
+            "sacco_id",
+            "scheduled_amount",
+            "scheduled_interest_amount",
+            "scheduled_principal_amount"
+          ],
+          "type": "list"
+        },
+        "data/pdmis/saccos.json": {
+          "count": 38,
+          "sample_keys": [
+            "chairperson",
+            "county",
+            "created_at",
+            "district",
+            "is_active",
+            "name",
+            "number_of_beneficiaries",
+            "office_address",
+            "office_exists",
+            "parish",
+            "postbank_account",
+            "region",
+            "registration_date",
+            "registration_number",
+            "sacco_id",
+            "secretary",
+            "sub_county",
+            "total_funds_disbursed",
+            "total_funds_received",
+            "total_repayments",
+            "treasurer",
+            "updated_at",
+            "village",
+            "wendi_account"
+          ],
+          "type": "list"
+        },
+        "data/pdmis/special_groups.json": {
+          "count": 5,
+          "sample_keys": [
+            "description",
+            "group_code",
+            "group_name",
+            "quota_percentage"
+          ],
+          "type": "list"
+        },
+        "data/wendi/wendi_transactions.json": {
+          "count": 238,
+          "sample_keys": [
+            "agent_id",
+            "amount",
+            "beneficiary_id",
+            "beneficiary_name",
+            "created_at",
+            "currency",
+            "destination_account",
+            "destination_account_type",
+            "device_id",
+            "event_id",
+            "event_timestamp",
+            "event_type",
+            "ip_address",
+            "loan_id",
+            "metadata",
+            "sacco_id",
+            "source_account",
+            "source_account_type",
+            "transaction_status",
+            "updated_at",
+            "user_agent",
+            "wendi_transaction_id"
+          ],
+          "type": "list"
+        }
+      },
+      "status": "NOT VERIFIED"
+    },
+    "kafka_catalogue": {
+      "detail": "38 governed Kafka topics identified",
+      "processing_modes": {
+        "batch": 7,
+        "real-time": 18,
+        "streaming": 13
+      },
+      "status": "PASS",
+      "topic_count": 38
+    },
+    "kafka_route_alignment": {
+      "detail": "Static topic-to-route coverage",
+      "missing_topics": [],
+      "route_count": 38,
+      "status": "PASS",
+      "structure": {
+        "container": "routes",
+        "top_level_keys": [
+          "contract_version",
+          "routes"
+        ]
+      },
+      "unknown_topics": []
+    },
+    "message_identity": {
+      "detail": "No duplicate message identifiers found within a family",
+      "status": "PASS",
+      "unique_message_keys": 1768
+    },
+    "payment_status_semantics": {
+      "detail": "Statuses enumerated; source-to-response state transition rules require authoritative business contracts",
+      "status": "NOT VERIFIED",
+      "statuses": [
+        {
+          "count": 151,
+          "family": "pacs.002.001.10",
+          "status": "ACSC"
+        },
+        {
+          "count": 37,
+          "family": "pacs.002.001.10",
+          "status": "PDNG"
+        },
+        {
+          "count": 50,
+          "family": "pacs.002.001.10",
+          "status": "RJCT"
+        },
+        {
+          "count": 302,
+          "family": "pain.002.001.12",
+          "status": "ACSC"
+        },
+        {
+          "count": 74,
+          "family": "pain.002.001.12",
+          "status": "PDNG"
+        },
+        {
+          "count": 100,
+          "family": "pain.002.001.12",
+          "status": "RJCT"
+        }
+      ]
+    },
+    "producer_static_contract": {
+      "candidate_modules": [
+        {
+          "calls": [
+            "flush",
+            "produce"
+          ],
+          "file": "services/mdm-publisher/mdm_publisher.py",
+          "topic_like_literals": [
+            "bootstrap.servers",
+            "enable.idempotence",
+            "mdm_kafka_topics.json",
+            "mdm_publish_registry.json",
+            "sasl.mechanism",
+            "sasl.password",
+            "sasl.username",
+            "security.protocol",
+            "ssl.ca.location",
+            "ssl.certificate.location",
+            "ssl.key.location"
+          ]
+        },
+        {
+          "calls": [
+            "flush",
+            "poll",
+            "produce"
+          ],
+          "file": "services/payment-producer/delivery_coordinator.py",
+          "topic_like_literals": []
+        },
+        {
+          "calls": [
+            "publish"
+          ],
+          "file": "services/payment-producer/guarded_delivery_adapter.py",
+          "topic_like_literals": []
+        },
+        {
+          "calls": [
+            "flush",
+            "poll",
+            "produce"
+          ],
+          "file": "services/payment-producer/kafka_producer.py",
+          "topic_like_literals": [
+            "1.0.0",
+            "agent.locations",
+            "agent.profiles",
+            "agent.transactions",
+            "agent_locations.json",
+            "agent_profiles.json",
+            "agent_transactions.json",
+            "basic.auth.user.info",
+            "batch.size",
+            "beneficiaries.json",
+            "bootstrap.servers",
+            "business_plans.json",
+            "compression.type",
+            "cpo.plm.pain002",
+            "cpo.psn.pain002",
+            "delivery.timeout.ms",
+            "enable.idempotence",
+            "households.json",
+            "icmn.pmn.pain001",
+            "icmn.vpm.pain001",
+            "key.serializer",
+            "linger.ms",
+            "loans.json",
+            "max.in.flight.requests.per.connection",
+            "mobile.airtel.pacs002",
+            "mobile.airtel.pacs008",
+            "mobile.mtn.pacs002",
+            "mobile.mtn.pacs008",
+            "pdmis.",
+            "pdmis.beneficiaries",
+            "pdmis.business_plans",
+            "pdmis.households",
+            "pdmis.loans",
+            "pdmis.repayments",
+            "pdmis.saccos",
+            "pdmis.special_groups",
+            "repayments.json",
+            "request.timeout.ms",
+            "saccos.json",
+            "sasl.mechanism",
+            "sasl.password",
+            "sasl.username",
+            "security.protocol",
+            "special_groups.json",
+            "ssl.ca.location",
+            "ssl.certificate.location",
+            "ssl.key.location",
+            "transactions.json",
+            "value.serializer",
+            "wendi.camt052",
+            "wendi.camt053",
+            "wendi.camt054",
+            "wendi.pain001",
+            "wendi.pain002",
+            "wendi.transactions",
+            "wendi_transactions.json"
+          ]
+        },
+        {
+          "calls": [
+            "flush",
+            "poll",
+            "produce"
+          ],
+          "file": "services/payment-producer/source_publisher.py",
+          "topic_like_literals": [
+            ".json",
+            ".pub-",
+            ".xml",
+            "agent.locations",
+            "agent.profiles",
+            "agent.transactions",
+            "agent_locations.json",
+            "agent_profiles.json",
+            "agent_transactions.json",
+            "beneficiaries.json",
+            "bootstrap.servers",
+            "business_plans.json",
+            "compression.type",
+            "cpo.plm.pain002",
+            "cpo.psn.pain002",
+            "enable.idempotence",
+            "households.json",
+            "icmn.pmn.pain001",
+            "icmn.vpm.pain001",
+            "linger.ms",
+            "loans.json",
+            "message.timeout.ms",
+            "mobile.airtel.pacs002",
+            "mobile.airtel.pacs008",
+            "mobile.mtn.pacs002",
+            "mobile.mtn.pacs008",
+            "payment_event.avsc",
+            "pdmis.",
+            "pdmis.beneficiaries",
+            "pdmis.business_plans",
+            "pdmis.households",
+            "pdmis.loans",
+            "pdmis.repayments",
+            "pdmis.saccos",
+            "pdmis.special_groups",
+            "repayments.json",
+            "saccos.json",
+            "source_publisher.v1",
+            "special_groups.json",
+            "technical_payment_event.avsc",
+            "transactions.json",
+            "wendi.camt052",
+            "wendi.camt053",
+            "wendi.camt054",
+            "wendi.pain001",
+            "wendi.pain002",
+            "wendi.transactions",
+            "wendi_transactions.json"
+          ]
+        }
+      ],
+      "detail": "Python producer source inspected without execution",
+      "status": "PASS",
+      "syntax_errors": []
+    },
+    "schema_registry_delivery": {
+      "detail": "Integration source and contracts inspected statically; runtime compatibility and delivery are not asserted",
+      "integration_modules": [
+        {
+          "file": "platform/gcp/dataflow_ingestion/__init__.py",
+          "functions": [],
+          "schema_related_literals": []
+        },
+        {
+          "file": "platform/gcp/dataflow_ingestion/dataflow_raw_v1.py",
+          "functions": [
+            "build_pipeline",
+            "__init__",
+            "setup",
+            "process"
+          ],
+          "schema_related_literals": [
+            "--schema-registry-url",
+            "application/avro",
+            "kafka_topic",
+            "topic"
+          ]
+        },
+        {
+          "file": "platform/gcp/dataflow_ingestion/native_24_topic_bridge.py",
+          "functions": [
+            "load_bridge",
+            "validate_topics",
+            "_load_canonical_catalog",
+            "run",
+            "main"
+          ],
+          "schema_related_literals": [
+            "--approve-pubsub-cost",
+            "--approved-topics",
+            "--pubsub-topic",
+            "--registry",
+            "PDM_SCHEMA_REGISTRY_URL",
+            "Previously verified 24-topic JSON array",
+            "SAFE: validated 24-topic inventory; no Kafka or cloud calls",
+            "STOP: explicit live cost approval, Kafka, registry and project required",
+            "approved inventory contains topics not in canonical catalog: ",
+            "approved inventory must not contain duplicate topics",
+            "canonical topic catalog not found at ",
+            "kafka-pubsub-native-bridge: bounded native-wire Kafka -> existing Pub/Sub topic; no source replay.\n\nThis is an additive bridge only. Historical source publishing remains blocked until\nsource identity and provenance are authoritatively reconciled.\n",
+            "kafka_topics",
+            "not a Confluent Avro wire message",
+            "platform/gcp/kafka_pubsub_bridge/bridge.py",
+            "pubsub_message_id",
+            "topic",
+            "topics",
+            "topics.yaml",
+            "topics_configured",
+            "unapproved source topic"
+          ]
+        },
+        {
+          "file": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "functions": [
+            "transport",
+            "name_for",
+            "record_for",
+            "ocf_encode",
+            "ocf_read",
+            "process_raw_v1"
+          ],
+          "schema_related_literals": [
+            "/record.avro",
+            "/topic=",
+            "Avro OCF magic mismatch",
+            "Raw v1 offline core; cloud adapter and Schema Registry decoder are injected.",
+            "decoder(wire,topic) must be Schema Registry-backed; store.create_if_absent must be atomic.",
+            "kafka_topic",
+            "not exactly one Avro datum",
+            "raw/v1/",
+            "schema id",
+            "schema_registry_id",
+            "topic",
+            "{\"type\": \"record\", \"name\": \"PaymentEvent\", \"namespace\": \"com.dp.ai.payment\", \"fields\": [{\"name\": \"event_id\", \"type\": \"string\"}, {\"name\": \"message_id\", \"type\": [\"null\", \"string\"], \"default\": null}, {\"name\": \"timestamp\", \"type\": \"string\"}, {\"name\": \"source_system\", \"type\": \"string\"}, {\"name\": \"message_type\", \"type\": \"string\"}, {\"name\": \"event_family\", \"type\": \"string\", \"default\": \"PAYMENT_BUSINESS_EVENT\"}, {\"name\": \"payload\", \"type\": {\"type\": \"record\", \"name\": \"Payload\", \"fields\": [{\"name\": \"amount\", \"type\": [\"double\", \"null\"]}, {\"name\": \"currency\", \"type\": [\"string\", \"null\"]}, {\"name\": \"debtor\", \"type\": [\"string\", \"null\"]}, {\"name\": \"creditor\", \"type\": [\"string\", \"null\"]}, {\"name\": \"status\", \"type\": [\"string\", \"null\"]}, {\"name\": \"x_attributes\", \"type\": {\"type\": \"map\", \"values\": \"string\"}, \"default\": {}}]}}, {\"name\": \"event_data\", \"type\": [\"null\", \"string\"], \"default\": null}, {\"name\": \"parsed_event_data\", \"type\": [\"null\", \"string\"], \"default\": null}, {\"name\": \"_kafka_metadata\", \"type\": {\"type\": \"record\", \"name\": \"KafkaMetadata\", \"fields\": [{\"name\": \"topic\", \"type\": \"string\"}, {\"name\": \"partition\", \"type\": \"int\"}, {\"name\": \"offset\", \"type\": \"long\"}, {\"name\": \"timestamp\", \"type\": \"string\"}, {\"name\": \"category\", \"type\": [\"string\", \"null\"]}, {\"name\": \"source_group\", \"type\": [\"string\", \"null\"]}, {\"name\": \"source_system\", \"type\": [\"string\", \"null\"]}]}}]}"
+          ]
+        },
+        {
+          "file": "platform/gcp/dataflow_ingestion/setup.py",
+          "functions": [],
+          "schema_related_literals": [
+            "avro==1.12.0",
+            "confluent-kafka[avro]"
+          ]
+        },
+        {
+          "file": "platform/gcp/kafka_pubsub_bridge/__init__.py",
+          "functions": [],
+          "schema_related_literals": []
+        },
+        {
+          "file": "platform/gcp/kafka_pubsub_bridge/avro_integration.py",
+          "functions": [
+            "full_name",
+            "encode_wire",
+            "decode_wire",
+            "assess_wire"
+          ],
+          "schema_related_literals": [
+            "Decode actual Avro; retain mapping block for unapproved source contracts.",
+            "Offline Confluent-wire-format Avro decoding and fail-closed contract routing.\n\nNo Kafka consumer, Pub/Sub client, cloud network calls or offset commits.\nAn in-memory registry of explicit schema IDs is used ONLY for local tests.\n",
+            "invalid Avro payload",
+            "invalid Confluent Avro wire header",
+            "invalid schema id",
+            "source_mapping_for_avro",
+            "unapproved or unknown schema id",
+            "unexpected trailing Avro bytes"
+          ]
+        },
+        {
+          "file": "platform/gcp/kafka_pubsub_bridge/bridge.py",
+          "functions": [
+            "validate_event",
+            "encode_event",
+            "provenance",
+            "publish_then_commit",
+            "run_live",
+            "main",
+            "encode_wire_envelope",
+            "publish_wire_then_commit"
+          ],
+          "schema_related_literals": [
+            "--schema-registry-url",
+            "--source-topic",
+            "--topic",
+            "Confluent Avro wire bytes required",
+            "FAIL: Kafka bootstrap, topic and Schema Registry URL required",
+            "FAIL: POC restricted to isolated Pub/Sub topic",
+            "FAIL: Pub/Sub project and topic required",
+            "KP_SCHEMA_REGISTRY_URL",
+            "KP_SOURCE_TOPIC",
+            "Kafka -> Pub/Sub proof-of-concept, strict six-field contract.\n\nRun explicitly with --live after authorisation and source-topic mapping review.\nNo consumer offsets are committed before a successful Pub/Sub publish future.\n",
+            "kafka_topic",
+            "schema_registry_id"
+          ]
+        },
+        {
+          "file": "platform/gcp/kafka_pubsub_bridge/raw_governed_encoder_v1.py",
+          "functions": [
+            "load_module",
+            "prepare"
+          ],
+          "schema_related_literals": [
+            "Lossless, fail-closed governed Raw v1 Avro OCF encoder.",
+            "canonical Avro record count mismatch",
+            "canonical topic mismatch",
+            "kafka_topic",
+            "legacy writer owns this topic or route is not eligible",
+            "raw_topic_governance_v1.py",
+            "topic"
+          ]
+        },
+        {
+          "file": "platform/gcp/kafka_pubsub_bridge/raw_governed_subscriber_v1.py",
+          "functions": [
+            "load_encoder",
+            "process"
+          ],
+          "schema_related_literals": [
+            "explicit topic approval set required",
+            "invalid stored Avro OCF",
+            "kafka_topic",
+            "missing Kafka topic",
+            "topic"
+          ]
+        },
+        {
+          "file": "platform/gcp/kafka_pubsub_bridge/raw_topic_governance_v1.py",
+          "functions": [
+            "load_governance",
+            "route_for",
+            "require_live_authorisation"
+          ],
+          "schema_related_literals": [
+            "Authoritative fail-closed Raw v1 topic governance.",
+            "confluent_avro",
+            "invalid 38-topic registry",
+            "platform/kafka/topics.yaml",
+            "topic blocked from ordinary ingestion",
+            "topic registry/route mismatch",
+            "topic_routes_v1.json",
+            "topics",
+            "unknown Kafka topic"
+          ]
+        },
+        {
+          "file": "platform/gcp/kafka_pubsub_bridge/raw_v1_bridge_live.py",
+          "functions": [
+            "load_bridge",
+            "run",
+            "main",
+            "validate_recovery_plan",
+            "run_recovery",
+            "publish_wire_then_commit"
+          ],
+          "schema_related_literals": [
+            " pubsub_message_id=",
+            "--schema-registry-url",
+            "--source-topic",
+            "--topic",
+            "Kafka topic not approved for legacy ingestion",
+            "Kafka topic unavailable",
+            "PDM_SCHEMA_REGISTRY_URL",
+            "PDM_SOURCE_TOPIC",
+            "PUBSUB_CONFIRMED=",
+            "RECOVERY_PUBLISHED topic=",
+            "STOP: unapproved Pub/Sub topic",
+            "TOPIC_MAP",
+            "invalid Confluent Avro wire",
+            "invalid Schema Registry ID",
+            "invalid legacy topic contract",
+            "invalid source schema ID; offset uncommitted",
+            "kafka_topic",
+            "pubsub_raw_ingestion",
+            "pubsub_raw_ingestion/raw_v1.py",
+            "pubsub_raw_ingestion/raw_v1_cloud.py",
+            "schema_registry_id",
+            "topic",
+            "unapproved legacy topic"
+          ]
+        },
+        {
+          "file": "platform/gcp/kafka_pubsub_bridge/source_bounded_entrypoint_v1.py",
+          "functions": [
+            "_record_from_kafka",
+            "publish_one",
+            "store_one",
+            "store_one_deferred",
+            "bounded_publish",
+            "commit"
+          ],
+          "schema_related_literals": [
+            "Bounded, opt-in orchestration for Stage 4 client callbacks.\n\nThis module does NOT replace existing bridge/subscriber entrypoints, create\nclients, manage leases, or start live ingestion. An operator must provide\nactual Kafka, Pub/Sub and GCS clients and explicitly bounded records/messages.\nLegacy payment topics are intentionally delegated to their existing writer.\n",
+            "topic"
+          ]
+        },
+        {
+          "file": "platform/gcp/kafka_pubsub_bridge/source_delivery_v1.py",
+          "functions": [
+            "publish_then_commit",
+            "store_then_ack"
+          ],
+          "schema_related_literals": [
+            "Offline-tested callback-based delivery primitives for non-legacy ordinary topics.\n\nNot connected to a live bridge or subscriber. Caller supplies publisher/storage\ncallbacks and owns consumer lifecycle, retries, leases and credentials.\n",
+            "kafka_topic",
+            "legacy bridge owns topic"
+          ]
+        },
+        {
+          "file": "platform/gcp/kafka_pubsub_bridge/source_envelope_v1.py",
+          "functions": [
+            "route_for",
+            "validate_envelope"
+          ],
+          "schema_related_literals": [
+            "Offline 38-topic source routing and lossless envelope validation.\n\nThis module does not publish, acknowledge, or access cloud resources.\n",
+            "confluent_avro",
+            "invalid Confluent Avro framing",
+            "kafka_topic",
+            "schema registry ID mismatch",
+            "schema_registry_id",
+            "topic",
+            "topic blocked from ordinary ingestion",
+            "topic_routes_v1.json",
+            "unknown topic"
+          ]
+        },
+        {
+          "file": "platform/gcp/kafka_pubsub_bridge/source_live_callbacks_v1.py",
+          "functions": [
+            "publish_kafka_record",
+            "store_pubsub_message",
+            "publish",
+            "create",
+            "readback"
+          ],
+          "schema_related_literals": [
+            "application/avro",
+            "explicit Pub/Sub topic path required",
+            "record: mapping with topic/partition/offset/timestamp_ms/value.\n\n    Publisher.publish(topic_path, data) must return a Future whose result()\n    confirms the Pub/Sub message ID. Kafka commit is a supplied callback and\n    MUST commit only this acknowledged record, synchronously.\n    ",
+            "schema_registry_id",
+            "topic"
+          ]
+        },
+        {
+          "file": "platform/gcp/kafka_pubsub_bridge/source_mapping.py",
+          "functions": [
+            "assess",
+            "require_approved_mapping"
+          ],
+          "schema_related_literals": [
+            "decoded Avro record must be a mapping",
+            "source-topic-mapping: source contract evidence and fail-closed mapping eligibility.\n\nThis module deliberately does NOT fabricate payment_id, amount_minor or currency.\nIt has no cloud, Kafka or external dependencies. Never used as a live publisher.\n",
+            "unapproved Schema Registry subject or Avro record type"
+          ]
+        },
+        {
+          "file": "platform/gcp/kafka_pubsub_bridge/source_operational_runtime_v1.py",
+          "functions": [
+            "load",
+            "is_source_envelope",
+            "dispatch",
+            "get_source_lease_guard",
+            "process_source_with_lease",
+            "check_live",
+            "run_bridge",
+            "_load_subscriber_routing",
+            "process_legacy_with_lease",
+            "route_pulled_message",
+            "run_subscriber",
+            "main",
+            "__init__",
+            "ack",
+            "durable_verify",
+            "durable_verify",
+            "__init__",
+            "ack"
+          ],
+          "schema_related_literals": [
+            "--kafka-topic",
+            "--pubsub-topic",
+            "--schema-registry-url",
+            "Kafka connection, topic and dedicated group required",
+            "explicit cloud project/topic/subscription/bucket required",
+            "kafka_topic",
+            "legacy schema registry URL required",
+            "legacy topic belongs to existing ingestion path",
+            "platform/gcp/kafka_pubsub_bridge/source_subscriber_routing_v1.py",
+            "platform/gcp/pubsub_raw_ingestion/lease_guard.py",
+            "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+            "platform/gcp/pubsub_raw_ingestion/raw_v1_cloud.py",
+            "platform/gcp/pubsub_raw_ingestion/source_acknowledger_v1.py",
+            "platform/gcp/pubsub_raw_ingestion/source_lease_extension_v1.py",
+            "schema_registry_id",
+            "topic",
+            "unexpected Kafka topic",
+            "unexpected Pub/Sub topic"
+          ]
+        },
+        {
+          "file": "platform/gcp/kafka_pubsub_bridge/source_runtime_adapter_v1.py",
+          "functions": [
+            "make_envelope",
+            "_canonical_record",
+            "immutable_key",
+            "prepare_object"
+          ],
+          "schema_related_literals": [
+            "/record.avro",
+            "/topic=",
+            "Produce deterministic Avro OCF for immutable GCS storage.",
+            "invalid Avro OCF",
+            "invalid topic path",
+            "kafka_topic",
+            "legacy writer owns this topic",
+            "raw/v1/",
+            "schema_registry_id",
+            "topic"
+          ]
+        },
+        {
+          "file": "platform/gcp/kafka_pubsub_bridge/source_subscriber_routing_v1.py",
+          "functions": [
+            "route_received",
+            "source_store",
+            "guarded_legacy_process",
+            "__init__",
+            "ack",
+            "store_one"
+          ],
+          "schema_related_literals": []
+        },
+        {
+          "file": "platform/gcp/pubsub_raw_ingestion/bounded_subscriber.py",
+          "functions": [
+            "process_one",
+            "ack"
+          ],
+          "schema_related_literals": []
+        },
+        {
+          "file": "platform/gcp/pubsub_raw_ingestion/gcs_adapter.py",
+          "functions": [
+            "__init__",
+            "create_if_absent",
+            "read"
+          ],
+          "schema_related_literals": [
+            "GCS immutable storage adapter for pubsub-raw-ingestion. No live consumer or automatic ack."
+          ]
+        },
+        {
+          "file": "platform/gcp/pubsub_raw_ingestion/lease_guard.py",
+          "functions": [
+            "process_with_renewal",
+            "ack",
+            "renew",
+            "stop_and_wait",
+            "release_when_finished"
+          ],
+          "schema_related_literals": []
+        },
+        {
+          "file": "platform/gcp/pubsub_raw_ingestion/pubsub_adapter.py",
+          "functions": [
+            "handle_message",
+            "__init__",
+            "ack"
+          ],
+          "schema_related_literals": [
+            "pubsub-raw-ingestion callback adapter. Importing this module performs no cloud operation.\n\nCall `handle_message(message, store)` from a separately reviewed subscriber lifecycle.\nThe Pub/Sub message is acknowledged only by the verified worker core, after\nimmutable GCS creation or identical-object readback. Exceptions propagate; no ack.\n"
+          ]
+        },
+        {
+          "file": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "functions": [
+            "transport",
+            "name_for",
+            "record_for",
+            "ocf_encode",
+            "ocf_read",
+            "process_raw_v1"
+          ],
+          "schema_related_literals": [
+            "/record.avro",
+            "/topic=",
+            "Avro OCF magic mismatch",
+            "Raw v1 offline core; cloud adapter and Schema Registry decoder are injected.",
+            "kafka_topic",
+            "not exactly one Avro datum",
+            "raw/v1/",
+            "schema id",
+            "schema_registry_id",
+            "topic",
+            "{\"type\":\"record\",\"name\":\"RawSourceEvent\",\"namespace\":\"com.dp.ai.raw\",\"fields\":[{\"name\":\"kafka_topic\",\"type\":\"string\"},{\"name\":\"kafka_partition\",\"type\":\"int\"},{\"name\":\"kafka_offset\",\"type\":\"long\"},{\"name\":\"kafka_timestamp_ms\",\"type\":\"long\"},{\"name\":\"schema_registry_id\",\"type\":\"int\"},{\"name\":\"payload_sha256\",\"type\":\"string\"},{\"name\":\"payload_wire\",\"type\":\"bytes\"}]}"
+          ]
+        },
+        {
+          "file": "platform/gcp/pubsub_raw_ingestion/raw_v1_cloud.py",
+          "functions": [
+            "process_message",
+            "__init__",
+            "create_if_absent",
+            "read",
+            "__init__",
+            "ack",
+            "__init__",
+            "__call__"
+          ],
+          "schema_related_literals": [
+            "Schema Registry-backed decoder requiring one complete Avro datum.",
+            "application/avro",
+            "invalid Confluent Avro wire framing",
+            "invalid Schema Registry ID",
+            "unexpected trailing Avro bytes"
+          ]
+        },
+        {
+          "file": "platform/gcp/pubsub_raw_ingestion/raw_v1_worker_live.py",
+          "functions": [
+            "load_cloud",
+            "run",
+            "main"
+          ],
+          "schema_related_literals": [
+            "--schema-registry-url",
+            "PDM_SCHEMA_REGISTRY_URL",
+            "STOP: explicit project, subscription, registry URL and 1..10 messages required"
+          ]
+        },
+        {
+          "file": "platform/gcp/pubsub_raw_ingestion/source_acknowledger_v1.py",
+          "functions": [
+            "__init__",
+            "ack"
+          ],
+          "schema_related_literals": []
+        },
+        {
+          "file": "platform/gcp/pubsub_raw_ingestion/source_lease_extension_v1.py",
+          "functions": [
+            "__init__",
+            "extend"
+          ],
+          "schema_related_literals": []
+        },
+        {
+          "file": "platform/gcp/pubsub_raw_ingestion/worker.py",
+          "functions": [
+            "validate",
+            "process",
+            "create_if_absent",
+            "read",
+            "ack"
+          ],
+          "schema_related_literals": [
+            "Confluent wire schema mismatch",
+            "avro_payload_base64",
+            "exactly one Avro payload field required",
+            "invalid schema ID",
+            "invalid topic",
+            "kafka_topic",
+            "pubsub-raw-ingestion offline-tested durable-write-before-ack core; no cloud execution entrypoint.",
+            "schema_registry_id"
+          ]
+        },
+        {
+          "file": "services/payment-producer/delivery_coordinator.py",
+          "functions": [
+            "__init__",
+            "_check_failures",
+            "publish",
+            "finish",
+            "callback"
+          ],
+          "schema_related_literals": [
+            "Topic mismatch: ",
+            "event identity and topic required",
+            "topic"
+          ]
+        },
+        {
+          "file": "services/payment-producer/delivery_journal.py",
+          "functions": [
+            "__init__",
+            "close",
+            "__enter__",
+            "__exit__",
+            "fingerprint",
+            "state",
+            "begin",
+            "confirm",
+            "mark_uncertain",
+            "assert_recovery_safe",
+            "counts"
+          ],
+          "schema_related_literals": [
+            "\n                CREATE TABLE IF NOT EXISTS deliveries (\n                    event_id TEXT PRIMARY KEY,\n                    topic TEXT NOT NULL,\n                    state TEXT NOT NULL CHECK (\n                        state IN (\n                            'PENDING',\n                            'CONFIRMED',\n                            'UNCERTAIN'\n                        )\n                    ),\n                    partition_id INTEGER,\n                    offset_id INTEGER,\n                    CHECK (\n                        state != 'CONFIRMED'\n                        OR (\n                            partition_id IS NOT NULL\n                            AND offset_id IS NOT NULL\n                        )\n                    )\n                )\n            ",
+            "\n                INSERT INTO deliveries(\n                    event_id,\n                    topic,\n                    state,\n                    content_sha256\n                )\n                VALUES (?, ?, 'PENDING', ?)\n                ",
+            "\n                SELECT topic, state\n                FROM deliveries\n                WHERE event_id=?\n                ",
+            "\n                SELECT topic, state, content_sha256\n                FROM deliveries\n                WHERE event_id=?\n                ",
+            "Event ID topic conflict: ",
+            "event_id and topic required"
+          ]
+        },
+        {
+          "file": "services/payment-producer/event_admission_policy.py",
+          "functions": [
+            "classify_event",
+            "assert_live_activation_allowed",
+            "__post_init__"
+          ],
+          "schema_related_literals": [
+            "Missing topic"
+          ]
+        },
+        {
+          "file": "services/payment-producer/guarded_delivery_adapter.py",
+          "functions": [
+            "__init__",
+            "publish",
+            "finish"
+          ],
+          "schema_related_literals": []
+        },
+        {
+          "file": "services/payment-producer/kafka_producer.py",
+          "functions": [
+            "select_business_key",
+            "kafka_security_config",
+            "load_avro_schema",
+            "xml_to_dict",
+            "parse_pain001_xml",
+            "parse_pain002_xml",
+            "parse_pacs002_xml",
+            "_pdm_pacs002_status_request_id",
+            "parse_generic_xml",
+            "parse_technical_payment_event",
+            "detect_system_from_path",
+            "parse_event",
+            "pdmis_snapshot_identity",
+            "parse_json_events",
+            "main",
+            "__init__",
+            "callback",
+            "delivered",
+            "text",
+            "required",
+            "optional",
+            "first",
+            "text_of"
+          ],
+          "schema_related_literals": [
+            "\nPayment Event Producer - Reads source XML/JSON files and produces to PDM platform Kafka topics.\n\nSource domains supported:\n- ICMN, CPO, Wendi, Mobile Networks, Agent Network and PDMIS\n- Reconciliation topics are intentionally excluded because they are downstream-derived events.\n",
+            " JSON records to topic: ",
+            "/app/schemas/payment_event.avsc",
+            "Detect (system, msg_type, topic) from the source path or filename.",
+            "Load Avro schema from file",
+            "Missing authoritative event ID for topic=",
+            "No stable business key available for topic ",
+            "Parse XML file and create event with proper topic mapping",
+            "SCHEMA_PATH",
+            "SCHEMA_REGISTRY_AUTH_REQUIRED",
+            "SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO",
+            "SCHEMA_REGISTRY_URL",
+            "Schema file not found: ",
+            "Unknown JSON system/topic for ",
+            "Unknown system/topic for ",
+            "_topic",
+            "http://schema-registry:8081",
+            "topic",
+            "\u2705 Avro schema loaded",
+            "\ud83d\udccb Source records grouped by topic:",
+            "\ud83d\udce1 Schema Registry: ",
+            "\ud83d\udce4 Producing to topic: "
+          ]
+        },
+        {
+          "file": "services/payment-producer/source_publisher.py",
+          "functions": [
+            "route",
+            "_sha",
+            "_canon",
+            "_event_id",
+            "_business_key",
+            "_extract_iso",
+            "_extract_technical",
+            "_load_schemas",
+            "_default_for",
+            "_normalize",
+            "_build_for_schema",
+            "build_record",
+            "iter_records",
+            "write_evidence",
+            "run_live",
+            "self_test",
+            "main",
+            "t",
+            "as_json",
+            "make_cb",
+            "cb"
+          ],
+          "schema_related_literals": [
+            " topics mapped",
+            " topics; skipped ",
+            "--registry-url",
+            "--schemas-dir",
+            "--topics",
+            "PDM_SCHEMA_REGISTRY_URL",
+            "Schema-driven source-to-Kafka publisher for all 24 approved PDM datasets.\n\nReads contracts/kafka/payment_event.avsc and technical_payment_event.avsc at\nruntime, constructs schema-conformant records, and emits Confluent Avro wire\nformat so the unchanged downstream path applies:\n\n    Kafka -> bridge.encode_wire_envelope -> Pub/Sub -> raw_v1.name_for\n         -> GCSConditionalStore (raw/v1/.../record.avro) -> Dataflow\n\nInvariants: explicit --live; bounded --max-messages; atomic evidence; optional\n--no-idempotence for stuck transaction coordinators.\n",
+            "SchemaVersion",
+            "comma-separated topic allowlist",
+            "registry_url",
+            "schema_version",
+            "schemas_dir",
+            "topic",
+            "topics"
+          ]
+        },
+        {
+          "file": "services/payment-producer/source_quarantine.py",
+          "functions": [
+            "source_identity",
+            "failure_metadata",
+            "validate_failure_metadata",
+            "__init__",
+            "persist",
+            "_is_precondition_failed",
+            "_read_body",
+            "_is_missing",
+            "persist"
+          ],
+          "schema_related_literals": [
+            "UNKNOWN_TOPIC"
+          ]
+        }
+      ],
+      "status": "NOT VERIFIED"
+    },
+    "source_preservation": {
+      "changed_files": [],
+      "detail": "Before-and-after source XML SHA-256 verification",
+      "files_after": 2395,
+      "files_before": 2395,
+      "status": "PASS"
+    },
+    "xml_index": {
+      "count": 2395,
+      "detail": "All expected XML documents indexed",
+      "families": {
+        "NON_ISO:AgentTransaction": 151,
+        "NON_ISO:TechnicalPaymentEvent": 476,
+        "camt.052.001.08": 38,
+        "camt.053.001.08": 151,
+        "camt.054.001.08": 151,
+        "pacs.002.001.10": 238,
+        "pacs.008.001.08": 238,
+        "pain.001.001.09": 476,
+        "pain.002.001.12": 476
+      },
+      "status": "PASS"
+    }
+  },
+  "evidence": {},
+  "finding_counts": {},
+  "findings": [],
+  "gcp_operations": 0,
+  "kafka_operations": 0,
+  "repository": "/home/hochom/projects/dp-ai-payments-platform-gcp",
+  "source_modifications": 0,
+  "status": "NOT VERIFIED",
+  "timestamp_utc": "2026-11-20T21:58:56.536541+00:00"
+}

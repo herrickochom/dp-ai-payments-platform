@@ -1,0 +1,493 @@
+{
+  "checks": {
+    "cross_message_identity": {
+      "detail": "Identifier comparisons completed; relationship semantics require approved mappings",
+      "relationships": {
+        "pacs.002.001.10->pacs.008.001.08": {
+          "end_to_end_id": {
+            "examples": [],
+            "matched": 238,
+            "source_distinct": 238,
+            "target_distinct": 238,
+            "unmatched": 0
+          },
+          "message_id": {
+            "examples": [],
+            "matched": 238,
+            "source_distinct": 238,
+            "unmatched": 0
+          },
+          "transaction_id": {
+            "examples": [],
+            "matched": 238,
+            "source_distinct": 238,
+            "target_distinct": 238,
+            "unmatched": 0
+          }
+        },
+        "pain.002.001.12->pain.001.001.09": {
+          "end_to_end_id": {
+            "examples": [],
+            "matched": 238,
+            "source_distinct": 238,
+            "target_distinct": 238,
+            "unmatched": 0
+          },
+          "message_id": {
+            "examples": [],
+            "matched": 476,
+            "source_distinct": 476,
+            "unmatched": 0
+          },
+          "transaction_id": {
+            "examples": [],
+            "matched": 0,
+            "source_distinct": 0,
+            "target_distinct": 0,
+            "unmatched": 0
+          }
+        }
+      },
+      "status": "NOT VERIFIED"
+    },
+    "independent_financial_provenance": {
+      "candidate_files": [
+        "platform/gcp/pubsub_raw_ingestion/source_acknowledger_v1.py",
+        "services/payment-producer/delivery_journal.py",
+        "services/payment-xml-generator/pdm_account_posting_contract.py",
+        "services/payment-xml-generator/pdm_account_posting_evidence_v1.py",
+        "services/payment-xml-generator/pdm_funding_contract.py",
+        "services/payment-xml-generator/pdm_funding_iso20022.py",
+        "services/payment-xml-generator/pdm_funding_settlement_contract.py",
+        "services/payment-xml-generator/pdm_governed_synthetic_ledger_v1.py",
+        "services/payment-xml-generator/pdm_wendi_disbursement_iso20022.py",
+        "services/shared/replay_ledger.py",
+        "services/shared/replay_ledger_demo.py",
+        "tests/gcp/test_delivery_journal.py",
+        "tests/gcp/test_delivery_journal_hardening.py",
+        "tests/gcp/test_delivery_ledger_watchdog.py",
+        "tests/gcp/test_live_pipeline_reconciliation.py",
+        "tests/gcp/test_remote_job_reconciliation.py",
+        "tests/gcp/test_source_acknowledger_v1.py",
+        "tests/test_pdm_account_posting_contract.py",
+        "tests/test_pdm_account_posting_evidence_v1.py",
+        "tests/test_pdm_funding_contract.py",
+        "tests/test_pdm_funding_iso20022.py",
+        "tests/test_pdm_funding_settlement_contract.py",
+        "tests/test_pdm_wendi_disbursement_iso20022.py"
+      ],
+      "detail": "Candidate contracts identified; independent source-to-journal reconciliation is not established",
+      "status": "NOT VERIFIED"
+    },
+    "message_uniqueness": {
+      "detail": "Message ID uniqueness within family",
+      "duplicates": 0,
+      "examples": {},
+      "status": "PASS"
+    },
+    "pacs002_sidecar": {
+      "detail": "Preserved identifier mapping file exists and parses",
+      "path": "platform/contracts/pacs002_status_request_map_v1.json",
+      "root_type": "dict",
+      "sha256": "0d5592bb0788762892d5656c389969e841352342a967b4b51c5283d3e98ae6ce",
+      "status": "PASS"
+    },
+    "pain001_document_controls": {
+      "counts": {
+        "pass_count": 476,
+        "pass_sum": 476,
+        "requires_family_rule": 238
+      },
+      "detail": "Scoped PAIN.001 group-header count and sum checks",
+      "examples": [
+        {
+          "actual": "1000000",
+          "expected": "1000000",
+          "file": "data/icmn/vpm/pain001/vpm_0001.xml"
+        },
+        {
+          "actual": "1000000",
+          "expected": "1000000",
+          "file": "data/icmn/vpm/pain001/vpm_0002.xml"
+        },
+        {
+          "actual": "1000000",
+          "expected": "1000000",
+          "file": "data/icmn/vpm/pain001/vpm_0003.xml"
+        },
+        {
+          "actual": "1000000",
+          "expected": "1000000",
+          "file": "data/icmn/vpm/pain001/vpm_0004.xml"
+        },
+        {
+          "actual": "1000000",
+          "expected": "1000000",
+          "file": "data/icmn/vpm/pain001/vpm_0005.xml"
+        },
+        {
+          "actual": "1000000",
+          "expected": "1000000",
+          "file": "data/icmn/vpm/pain001/vpm_0006.xml"
+        },
+        {
+          "actual": "1000000",
+          "expected": "1000000",
+          "file": "data/icmn/vpm/pain001/vpm_0007.xml"
+        },
+        {
+          "actual": "1000000",
+          "expected": "1000000",
+          "file": "data/icmn/vpm/pain001/vpm_0008.xml"
+        },
+        {
+          "actual": "1000000",
+          "expected": "1000000",
+          "file": "data/icmn/vpm/pain001/vpm_0009.xml"
+        },
+        {
+          "actual": "1000000",
+          "expected": "1000000",
+          "file": "data/icmn/vpm/pain001/vpm_0010.xml"
+        }
+      ],
+      "failures": [],
+      "status": "PASS"
+    },
+    "producer_python_syntax": {
+      "detail": "Producer and ingestion Python syntax",
+      "errors": [],
+      "modules_with_relevant_calls": 15,
+      "status": "PASS"
+    },
+    "producer_topic_binding": {
+      "detail": "Literal topic references identified; dynamically constructed mappings require runtime-aware inspection",
+      "referenced_governed_topics": 28,
+      "source_evidence": [
+        {
+          "calls": [
+            "flush",
+            "poll",
+            "produce"
+          ],
+          "file": "services/payment-producer/delivery_coordinator.py",
+          "literal_governed_topics": []
+        },
+        {
+          "calls": [
+            "publish"
+          ],
+          "file": "services/payment-producer/guarded_delivery_adapter.py",
+          "literal_governed_topics": []
+        },
+        {
+          "calls": [
+            "flush",
+            "poll",
+            "produce"
+          ],
+          "file": "services/payment-producer/kafka_producer.py",
+          "literal_governed_topics": [
+            "agent.locations",
+            "agent.profiles",
+            "agent.transactions",
+            "cpo.plm.pain002",
+            "cpo.psn.pain002",
+            "icmn.pmn.pain001",
+            "icmn.vpm.pain001",
+            "mobile.airtel.pacs002",
+            "mobile.airtel.pacs008",
+            "mobile.mtn.pacs002",
+            "mobile.mtn.pacs008",
+            "pdmis.beneficiaries",
+            "pdmis.business_plans",
+            "pdmis.households",
+            "pdmis.loans",
+            "pdmis.repayments",
+            "pdmis.saccos",
+            "pdmis.special_groups",
+            "wendi.camt052",
+            "wendi.camt053",
+            "wendi.camt054",
+            "wendi.pain001",
+            "wendi.pain002",
+            "wendi.transactions"
+          ]
+        },
+        {
+          "calls": [
+            "flush",
+            "poll",
+            "produce"
+          ],
+          "file": "services/payment-producer/source_publisher.py",
+          "literal_governed_topics": [
+            "agent.locations",
+            "agent.profiles",
+            "agent.transactions",
+            "cpo.plm.pain002",
+            "cpo.psn.pain002",
+            "icmn.pmn.pain001",
+            "icmn.vpm.pain001",
+            "mobile.airtel.pacs002",
+            "mobile.airtel.pacs008",
+            "mobile.mtn.pacs002",
+            "mobile.mtn.pacs008",
+            "pdmis.beneficiaries",
+            "pdmis.business_plans",
+            "pdmis.households",
+            "pdmis.loans",
+            "pdmis.repayments",
+            "pdmis.saccos",
+            "pdmis.special_groups",
+            "wendi.camt052",
+            "wendi.camt053",
+            "wendi.camt054",
+            "wendi.pain001",
+            "wendi.pain002",
+            "wendi.transactions"
+          ]
+        },
+        {
+          "calls": [
+            "commit",
+            "poll",
+            "publish"
+          ],
+          "file": "platform/gcp/kafka_pubsub_bridge/bridge.py",
+          "literal_governed_topics": []
+        },
+        {
+          "calls": [
+            "commit",
+            "get_schema",
+            "poll",
+            "publish"
+          ],
+          "file": "platform/gcp/kafka_pubsub_bridge/raw_v1_bridge_live.py",
+          "literal_governed_topics": []
+        },
+        {
+          "calls": [
+            "commit"
+          ],
+          "file": "platform/gcp/kafka_pubsub_bridge/source_bounded_entrypoint_v1.py",
+          "literal_governed_topics": []
+        },
+        {
+          "calls": [
+            "commit",
+            "publish"
+          ],
+          "file": "platform/gcp/kafka_pubsub_bridge/source_delivery_v1.py",
+          "literal_governed_topics": [
+            "mdm.agent.golden",
+            "mdm.geography.golden",
+            "mdm.sacco.golden"
+          ]
+        },
+        {
+          "calls": [],
+          "file": "platform/gcp/kafka_pubsub_bridge/source_envelope_v1.py",
+          "literal_governed_topics": [
+            "cdc.pdm_mdm.mdm.sacco_master_sources"
+          ]
+        },
+        {
+          "calls": [
+            "publish"
+          ],
+          "file": "platform/gcp/kafka_pubsub_bridge/source_live_callbacks_v1.py",
+          "literal_governed_topics": []
+        },
+        {
+          "calls": [
+            "poll"
+          ],
+          "file": "platform/gcp/kafka_pubsub_bridge/source_operational_runtime_v1.py",
+          "literal_governed_topics": []
+        },
+        {
+          "calls": [],
+          "file": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "literal_governed_topics": [
+            "agent.locations",
+            "agent.profiles",
+            "agent.transactions",
+            "cpo.plm.pain002",
+            "cpo.psn.pain002",
+            "icmn.pmn.pain001",
+            "icmn.vpm.pain001",
+            "mobile.airtel.pacs002",
+            "mobile.airtel.pacs008",
+            "mobile.mtn.pacs002",
+            "mobile.mtn.pacs008",
+            "pdmis.beneficiaries",
+            "pdmis.business_plans",
+            "pdmis.households",
+            "pdmis.loans",
+            "pdmis.repayments",
+            "pdmis.saccos",
+            "pdmis.special_groups",
+            "wendi.camt052",
+            "wendi.camt053",
+            "wendi.camt054",
+            "wendi.pain001",
+            "wendi.pain002",
+            "wendi.transactions"
+          ]
+        },
+        {
+          "calls": [
+            "get_schema"
+          ],
+          "file": "platform/gcp/pubsub_raw_ingestion/raw_v1_cloud.py",
+          "literal_governed_topics": []
+        },
+        {
+          "calls": [
+            "get_schema",
+            "poll"
+          ],
+          "file": "platform/gcp/dataflow_ingestion/native_24_topic_bridge.py",
+          "literal_governed_topics": []
+        },
+        {
+          "calls": [
+            "flush"
+          ],
+          "file": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "literal_governed_topics": [
+            "agent.locations",
+            "agent.profiles",
+            "agent.transactions",
+            "cpo.plm.pain002",
+            "cpo.psn.pain002",
+            "icmn.pmn.pain001",
+            "icmn.vpm.pain001",
+            "mobile.airtel.pacs002",
+            "mobile.airtel.pacs008",
+            "mobile.mtn.pacs002",
+            "mobile.mtn.pacs008",
+            "pdmis.beneficiaries",
+            "pdmis.business_plans",
+            "pdmis.households",
+            "pdmis.loans",
+            "pdmis.repayments",
+            "pdmis.saccos",
+            "pdmis.special_groups",
+            "wendi.camt052",
+            "wendi.camt053",
+            "wendi.camt054",
+            "wendi.pain001",
+            "wendi.pain002",
+            "wendi.transactions"
+          ]
+        }
+      ],
+      "status": "NOT VERIFIED"
+    },
+    "schema_registry_runtime": {
+      "detail": "No Schema Registry connection, registration or live compatibility test executed",
+      "status": "NOT VERIFIED"
+    },
+    "source_inventory": {
+      "actual": 2395,
+      "detail": "Expected XML inventory",
+      "expected": 2395,
+      "status": "PASS"
+    },
+    "source_preservation": {
+      "after": 2395,
+      "before": 2395,
+      "changed": [],
+      "detail": "Source XML SHA-256 preservation",
+      "status": "PASS"
+    },
+    "status_semantics": {
+      "detail": "Status distributions available; transition rules and settlement evidence remain separate",
+      "distributions": [
+        {
+          "count": 151,
+          "family": "pacs.002.001.10",
+          "status": "ACSC"
+        },
+        {
+          "count": 37,
+          "family": "pacs.002.001.10",
+          "status": "PDNG"
+        },
+        {
+          "count": 50,
+          "family": "pacs.002.001.10",
+          "status": "RJCT"
+        },
+        {
+          "count": 302,
+          "family": "pain.002.001.12",
+          "status": "ACSC"
+        },
+        {
+          "count": 74,
+          "family": "pain.002.001.12",
+          "status": "PDNG"
+        },
+        {
+          "count": 100,
+          "family": "pain.002.001.12",
+          "status": "RJCT"
+        }
+      ],
+      "status": "NOT VERIFIED"
+    },
+    "topic_catalogue": {
+      "detail": "Governed Kafka inventory",
+      "duplicate_topics": [],
+      "invalid_modes": [],
+      "modes": {
+        "batch": 7,
+        "real-time": 18,
+        "streaming": 13
+      },
+      "status": "PASS",
+      "topics": 38
+    },
+    "topic_route_alignment": {
+      "detail": "Static Kafka-to-GCP topic coverage",
+      "missing": [],
+      "routes": 38,
+      "status": "PASS",
+      "unknown": []
+    },
+    "xml_parse": {
+      "detail": "XML parsing",
+      "errors": [],
+      "parsed": 2395,
+      "status": "PASS"
+    }
+  },
+  "cloud_operations": 0,
+  "evidence": {},
+  "family_counts": {
+    "NON_ISO:AgentTransaction": 151,
+    "NON_ISO:TechnicalPaymentEvent": 476,
+    "camt.052.001.08": 38,
+    "camt.053.001.08": 151,
+    "camt.054.001.08": 151,
+    "pacs.002.001.10": 238,
+    "pacs.008.001.08": 238,
+    "pain.001.001.09": 476,
+    "pain.002.001.12": 476
+  },
+  "findings": [],
+  "kafka_operations": 0,
+  "overall": "NOT VERIFIED",
+  "repository": "/home/hochom/projects/dp-ai-payments-platform-gcp",
+  "runtime_executed": false,
+  "source_modifications": 0,
+  "status_counts": {
+    "NOT VERIFIED": 5,
+    "PASS": 9
+  },
+  "timestamp": "2026-11-20T22:00:51.514373+00:00"
+}

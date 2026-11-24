@@ -1,0 +1,4697 @@
+{
+  "timestamp_utc": "2026-11-20T20:34:38.016161+00:00",
+  "repository": "/home/hochom/projects/dp-ai-payments-platform-gcp",
+  "scope": "24 business-source topics",
+  "execution_mode": "READ_ONLY",
+  "status": "IMPLEMENTATION EVIDENCE COLLECTED",
+  "producer_implementations": {
+    "platform/gcp/dataflow_ingestion/native_24_topic_bridge.py": {
+      "parse": "PASS",
+      "functions": [
+        {
+          "name": "load_bridge",
+          "line": 16
+        },
+        {
+          "name": "validate_topics",
+          "line": 22
+        },
+        {
+          "name": "_load_canonical_catalog",
+          "line": 38
+        },
+        {
+          "name": "run",
+          "line": 71
+        },
+        {
+          "name": "main",
+          "line": 121
+        }
+      ],
+      "imports": [
+        "argparse",
+        "confluent_kafka",
+        "confluent_kafka.schema_registry",
+        "google.cloud",
+        "importlib.util",
+        "json",
+        "os",
+        "pathlib",
+        "yaml"
+      ],
+      "producer_calls": [
+        {
+          "call": "pubsub_v1.PublisherClient",
+          "line": 84,
+          "expression": "pubsub_v1.PublisherClient()"
+        },
+        {
+          "call": "bridge.publish_wire_then_commit",
+          "line": 109,
+          "expression": "bridge.publish_wire_then_commit(consumer, publisher, topic_path, msg)"
+        }
+      ],
+      "topic_literals": [
+        {
+          "value": "platform/gcp/kafka_pubsub_bridge/bridge.py",
+          "line": 13
+        },
+        {
+          "value": "..",
+          "line": 43
+        },
+        {
+          "value": "..",
+          "line": 43
+        },
+        {
+          "value": "..",
+          "line": 43
+        },
+        {
+          "value": "topics.yaml",
+          "line": 43
+        },
+        {
+          "value": "bootstrap.servers",
+          "line": 86
+        },
+        {
+          "value": "group.id",
+          "line": 86
+        },
+        {
+          "value": "enable.auto.commit",
+          "line": 87
+        },
+        {
+          "value": "auto.offset.reset",
+          "line": 87
+        }
+      ]
+    },
+    "platform/gcp/kafka_pubsub_bridge/bridge.py": {
+      "parse": "PASS",
+      "functions": [
+        {
+          "name": "validate_event",
+          "line": 18
+        },
+        {
+          "name": "encode_event",
+          "line": 33
+        },
+        {
+          "name": "provenance",
+          "line": 37
+        },
+        {
+          "name": "publish_then_commit",
+          "line": 48
+        },
+        {
+          "name": "run_live",
+          "line": 59
+        },
+        {
+          "name": "main",
+          "line": 105
+        },
+        {
+          "name": "encode_wire_envelope",
+          "line": 128
+        },
+        {
+          "name": "publish_wire_then_commit",
+          "line": 147
+        }
+      ],
+      "imports": [
+        "argparse",
+        "base64",
+        "confluent_kafka",
+        "confluent_kafka.schema_registry",
+        "confluent_kafka.schema_registry.avro",
+        "confluent_kafka.serialization",
+        "dataclasses",
+        "google.cloud",
+        "hashlib",
+        "json",
+        "os",
+        "typing"
+      ],
+      "producer_calls": [
+        {
+          "call": "publisher.publish",
+          "line": 53,
+          "expression": "publisher.publish(topic_path, payload, **attrs)"
+        },
+        {
+          "call": "pubsub_v1.PublisherClient",
+          "line": 83,
+          "expression": "pubsub_v1.PublisherClient()"
+        },
+        {
+          "call": "publisher.publish(topic_path, data).result",
+          "line": 150,
+          "expression": "publisher.publish(topic_path, data).result(timeout=30)"
+        },
+        {
+          "call": "publisher.publish",
+          "line": 150,
+          "expression": "publisher.publish(topic_path, data)"
+        }
+      ],
+      "topic_literals": [
+        {
+          "value": "No inferred values; reject extra fields and incompatible source records.",
+          "line": 19
+        },
+        {
+          "value": "Acknowledge Pub/Sub publish before synchronously committing Kafka offset.",
+          "line": 50
+        },
+        {
+          "value": "Raw v1 transport preserves original Confluent wire bytes and Kafka provenance.",
+          "line": 129
+        },
+        {
+          "value": "Commit Kafka only after successful Pub/Sub publish future.",
+          "line": 148
+        },
+        {
+          "value": "bootstrap.servers",
+          "line": 78
+        },
+        {
+          "value": "group.id",
+          "line": 79
+        },
+        {
+          "value": "enable.auto.commit",
+          "line": 80
+        },
+        {
+          "value": "auto.offset.reset",
+          "line": 81
+        },
+        {
+          "value": "SAFE: bridge installed; no Kafka consumption or cloud publishing. Use offline tests first.",
+          "line": 118
+        },
+        {
+          "value": "FAIL: bounded POC requires 1..10 messages",
+          "line": 121
+        }
+      ]
+    },
+    "platform/gcp/kafka_pubsub_bridge/raw_v1_bridge_live.py": {
+      "parse": "PASS",
+      "functions": [
+        {
+          "name": "load_bridge",
+          "line": 7
+        },
+        {
+          "name": "run",
+          "line": 84
+        },
+        {
+          "name": "main",
+          "line": 162
+        },
+        {
+          "name": "validate_recovery_plan",
+          "line": 187
+        },
+        {
+          "name": "run_recovery",
+          "line": 229
+        },
+        {
+          "name": "publish_wire_then_commit",
+          "line": 14
+        }
+      ],
+      "imports": [
+        "argparse",
+        "ast",
+        "base64",
+        "confluent_kafka",
+        "confluent_kafka.schema_registry",
+        "google.cloud",
+        "hashlib",
+        "importlib.util",
+        "json",
+        "os",
+        "pathlib",
+        "types"
+      ],
+      "producer_calls": [
+        {
+          "call": "pubsub_v1.PublisherClient",
+          "line": 125,
+          "expression": "pubsub_v1.PublisherClient()"
+        },
+        {
+          "call": "publisher.publish(topic_path, body).result",
+          "line": 52,
+          "expression": "publisher.publish(topic_path, body).result(timeout=30)"
+        },
+        {
+          "call": "pubsub_v1.PublisherClient",
+          "line": 348,
+          "expression": "pubsub_v1.PublisherClient()"
+        },
+        {
+          "call": "bridge.publish_wire_then_commit",
+          "line": 155,
+          "expression": "bridge.publish_wire_then_commit(consumer, publisher, topic_path, msg)"
+        },
+        {
+          "call": "bridge.publish_wire_then_commit",
+          "line": 398,
+          "expression": "bridge.publish_wire_then_commit(consumer, publisher, topic_path, msg)"
+        },
+        {
+          "call": "publisher.publish",
+          "line": 52,
+          "expression": "publisher.publish(topic_path, body)"
+        }
+      ],
+      "topic_literals": [
+        {
+          "value": "Bounded opt-in Kafka -> Pub/Sub Raw v1 bridge. Never runs on import.",
+          "line": 1
+        },
+        {
+          "value": "Use the canonical seven-field Raw v1 transport.",
+          "line": 8
+        },
+        {
+          "value": "Validate an explicit, bounded legacy recovery request.",
+          "line": 188
+        },
+        {
+          "value": "Bounded explicit legacy Kafka recovery into existing Pub/Sub transport.",
+          "line": 230
+        },
+        {
+          "value": "raw_v1.py",
+          "line": 91
+        },
+        {
+          "value": "raw_v1_cloud.py",
+          "line": 114
+        },
+        {
+          "value": "pubsub_raw_ingestion/raw_v1.py",
+          "line": 253
+        },
+        {
+          "value": "bootstrap.servers",
+          "line": 123
+        },
+        {
+          "value": "group.id",
+          "line": 123
+        },
+        {
+          "value": "enable.auto.commit",
+          "line": 124
+        },
+        {
+          "value": "auto.offset.reset",
+          "line": 124
+        },
+        {
+          "value": "SAFE: Raw v1 bridge installed; no Kafka/cloud access. --live required.",
+          "line": 178
+        },
+        {
+          "value": "recovery range must contain 1..10 offsets",
+          "line": 216
+        },
+        {
+          "value": "bootstrap.servers",
+          "line": 288
+        },
+        {
+          "value": "group.id",
+          "line": 289
+        },
+        {
+          "value": "enable.auto.commit",
+          "line": 290
+        },
+        {
+          "value": "enable.auto.offset.store",
+          "line": 291
+        },
+        {
+          "value": "auto.offset.reset",
+          "line": 292
+        },
+        {
+          "value": "pubsub_raw_ingestion/raw_v1_cloud.py",
+          "line": 336
+        },
+        {
+          "value": "._-",
+          "line": 222
+        }
+      ]
+    },
+    "platform/gcp/kafka_pubsub_bridge/source_bounded_entrypoint_v1.py": {
+      "parse": "PASS",
+      "functions": [
+        {
+          "name": "_record_from_kafka",
+          "line": 19
+        },
+        {
+          "name": "publish_one",
+          "line": 38
+        },
+        {
+          "name": "store_one",
+          "line": 61
+        },
+        {
+          "name": "store_one_deferred",
+          "line": 65
+        },
+        {
+          "name": "bounded_publish",
+          "line": 78
+        },
+        {
+          "name": "commit",
+          "line": 45
+        }
+      ],
+      "imports": [
+        "__future__",
+        "importlib.util",
+        "pathlib"
+      ],
+      "producer_calls": [
+        {
+          "call": "callbacks.publish_kafka_record",
+          "line": 59,
+          "expression": "callbacks.publish_kafka_record(record, publisher, topic_path, commit)"
+        }
+      ],
+      "topic_literals": [
+        {
+          "value": "source_live_callbacks_v1.py",
+          "line": 12
+        },
+        {
+          "value": "Adapt confluent_kafka.Message without logging payload or credentials.",
+          "line": 20
+        },
+        {
+          "value": "Store and read back before Pub/Sub ack. Errors propagate unacked.",
+          "line": 62
+        }
+      ]
+    },
+    "platform/gcp/kafka_pubsub_bridge/source_live_callbacks_v1.py": {
+      "parse": "PASS",
+      "functions": [
+        {
+          "name": "publish_kafka_record",
+          "line": 20
+        },
+        {
+          "name": "store_pubsub_message",
+          "line": 39
+        },
+        {
+          "name": "publish",
+          "line": 32
+        },
+        {
+          "name": "create",
+          "line": 54
+        },
+        {
+          "name": "readback",
+          "line": 61
+        }
+      ],
+      "imports": [
+        "__future__",
+        "google.api_core.exceptions",
+        "importlib.util",
+        "json",
+        "pathlib"
+      ],
+      "producer_calls": [
+        {
+          "call": "delivery.publish_then_commit",
+          "line": 36,
+          "expression": "delivery.publish_then_commit(envelope, publish, commit)"
+        },
+        {
+          "call": "publisher.publish",
+          "line": 34,
+          "expression": "publisher.publish(pubsub_topic_path, payload)"
+        }
+      ],
+      "topic_literals": [
+        {
+          "value": "source_delivery_v1.py",
+          "line": 12
+        }
+      ]
+    },
+    "platform/gcp/kafka_pubsub_bridge/source_operational_runtime_v1.py": {
+      "parse": "PASS",
+      "functions": [
+        {
+          "name": "load",
+          "line": 12
+        },
+        {
+          "name": "is_source_envelope",
+          "line": 34
+        },
+        {
+          "name": "dispatch",
+          "line": 51
+        },
+        {
+          "name": "get_source_lease_guard",
+          "line": 115
+        },
+        {
+          "name": "process_source_with_lease",
+          "line": 157
+        },
+        {
+          "name": "check_live",
+          "line": 192
+        },
+        {
+          "name": "run_bridge",
+          "line": 204
+        },
+        {
+          "name": "_load_subscriber_routing",
+          "line": 250
+        },
+        {
+          "name": "process_legacy_with_lease",
+          "line": 285
+        },
+        {
+          "name": "route_pulled_message",
+          "line": 342
+        },
+        {
+          "name": "run_subscriber",
+          "line": 404
+        },
+        {
+          "name": "main",
+          "line": 444
+        },
+        {
+          "name": "__init__",
+          "line": 48
+        },
+        {
+          "name": "ack",
+          "line": 49
+        },
+        {
+          "name": "durable_verify",
+          "line": 172
+        },
+        {
+          "name": "durable_verify",
+          "line": 313
+        },
+        {
+          "name": "__init__",
+          "line": 301
+        },
+        {
+          "name": "ack",
+          "line": 304
+        }
+      ],
+      "imports": [
+        "__future__",
+        "argparse",
+        "confluent_kafka",
+        "confluent_kafka.schema_registry",
+        "google.cloud",
+        "importlib.util",
+        "json",
+        "os",
+        "pathlib",
+        "sys",
+        "threading"
+      ],
+      "producer_calls": [
+        {
+          "call": "pubsub_v1.PublisherClient",
+          "line": 228,
+          "expression": "pubsub_v1.PublisherClient()"
+        },
+        {
+          "call": "ENTRY.publish_one",
+          "line": 242,
+          "expression": "ENTRY.publish_one(msg, consumer, publisher, topic_path)"
+        }
+      ],
+      "topic_literals": [
+        {
+          "value": "source_envelope_v1.py",
+          "line": 23
+        },
+        {
+          "value": "Recognise explicitly versioned source envelopes.",
+          "line": 35
+        },
+        {
+          "value": "Classify and validate source and legacy transport before side effects.",
+          "line": 62
+        },
+        {
+          "value": "Return one fully initialised lease guard per runtime process.",
+          "line": 116
+        },
+        {
+          "value": "Load the routing contract with dataclass-safe registration.",
+          "line": 251
+        },
+        {
+          "value": "Run existing legacy durable processing; defer actual Pub/Sub ack.",
+          "line": 297
+        },
+        {
+          "value": "Route pulled SOURCE and LEGACY messages with renewable leases.",
+          "line": 355
+        },
+        {
+          "value": "source_bounded_entrypoint_v1.py",
+          "line": 19
+        },
+        {
+          "value": "platform/gcp/pubsub_raw_ingestion/lease_guard.py",
+          "line": 118
+        },
+        {
+          "value": "platform/gcp/kafka_pubsub_bridge/source_subscriber_routing_v1.py",
+          "line": 254
+        },
+        {
+          "value": "payments.source-event.v1",
+          "line": 44
+        },
+        {
+          "value": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "line": 96
+        },
+        {
+          "value": "max-messages must be 1..10",
+          "line": 197
+        },
+        {
+          "value": "bootstrap.servers",
+          "line": 231
+        },
+        {
+          "value": "group.id",
+          "line": 231
+        },
+        {
+          "value": "enable.auto.commit",
+          "line": 232
+        },
+        {
+          "value": "enable.auto.offset.store",
+          "line": 232
+        },
+        {
+          "value": "auto.offset.reset",
+          "line": 233
+        },
+        {
+          "value": "platform/gcp/pubsub_raw_ingestion/source_acknowledger_v1.py",
+          "line": 366
+        },
+        {
+          "value": "platform/gcp/pubsub_raw_ingestion/source_lease_extension_v1.py",
+          "line": 371
+        },
+        {
+          "value": "platform/gcp/pubsub_raw_ingestion/raw_v1_cloud.py",
+          "line": 409
+        }
+      ]
+    },
+    "services/mdm-publisher/mdm_publisher.py": {
+      "parse": "PASS",
+      "functions": [
+        {
+          "name": "load_json",
+          "line": 32
+        },
+        {
+          "name": "load_registry",
+          "line": 36
+        },
+        {
+          "name": "load_topic_contract",
+          "line": 40
+        },
+        {
+          "name": "topic_policy",
+          "line": 44
+        },
+        {
+          "name": "stable_key",
+          "line": 53
+        },
+        {
+          "name": "validate_authority",
+          "line": 77
+        },
+        {
+          "name": "validate_registry",
+          "line": 96
+        },
+        {
+          "name": "build_publish_plan",
+          "line": 143
+        },
+        {
+          "name": "kafka_security_config",
+          "line": 184
+        },
+        {
+          "name": "execute_publish",
+          "line": 231
+        },
+        {
+          "name": "main",
+          "line": 309
+        },
+        {
+          "name": "callback",
+          "line": 279
+        }
+      ],
+      "imports": [
+        "__future__",
+        "argparse",
+        "confluent_kafka",
+        "json",
+        "os",
+        "pathlib",
+        "services.shared.security.runtime_security",
+        "services.shared.security.secret_provider",
+        "typing"
+      ],
+      "producer_calls": [
+        {
+          "call": "producer.produce",
+          "line": 288,
+          "expression": "producer.produce(item['topic'], key=item['key'].encode('utf-8'), value=json.dumps(item['record'], separators=(',', ':')).encode('utf-8'), on_delivery=callback)"
+        }
+      ],
+      "topic_literals": [
+        {
+          "value": "mdm_publish_registry.json",
+          "line": 20
+        },
+        {
+          "value": "mdm_kafka_topics.json",
+          "line": 28
+        },
+        {
+          "value": "Build and validate Kafka security for explicit MDM publication.",
+          "line": 185
+        },
+        {
+          "value": "\n    Explicit execution path.\n\n    Importing this module, validation and plan generation never\n    connect to Kafka.\n    ",
+          "line": 234
+        },
+        {
+          "value": "security.protocol",
+          "line": 204
+        },
+        {
+          "value": "ssl.ca.location",
+          "line": 208
+        },
+        {
+          "value": "ssl.certificate.location",
+          "line": 209
+        },
+        {
+          "value": "ssl.key.location",
+          "line": 212
+        },
+        {
+          "value": "sasl.mechanism",
+          "line": 215
+        },
+        {
+          "value": "sasl.username",
+          "line": 216
+        },
+        {
+          "value": "sasl.password",
+          "line": 217
+        },
+        {
+          "value": "bootstrap.servers",
+          "line": 268
+        },
+        {
+          "value": "enable.idempotence",
+          "line": 269
+        }
+      ]
+    },
+    "services/payment-producer/delivery_coordinator.py": {
+      "parse": "PASS",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 11
+        },
+        {
+          "name": "_check_failures",
+          "line": 22
+        },
+        {
+          "name": "publish",
+          "line": 29
+        },
+        {
+          "name": "finish",
+          "line": 106
+        },
+        {
+          "name": "callback",
+          "line": 48
+        }
+      ],
+      "imports": [
+        "delivery_journal"
+      ],
+      "producer_calls": [
+        {
+          "call": "self.producer.produce",
+          "line": 95,
+          "expression": "self.producer.produce(topic=topic, key=key, value=wire, on_delivery=callback)"
+        },
+        {
+          "call": "self.producer.poll",
+          "line": 103,
+          "expression": "self.producer.poll(0)"
+        },
+        {
+          "call": "self.producer.flush",
+          "line": 107,
+          "expression": "self.producer.flush(timeout=timeout)"
+        }
+      ],
+      "topic_literals": [
+        {
+          "value": "Durable Kafka delivery coordination; offline integration component.",
+          "line": 1
+        }
+      ]
+    },
+    "services/payment-producer/guarded_delivery_adapter.py": {
+      "parse": "PASS",
+      "functions": [
+        {
+          "name": "__init__",
+          "line": 25
+        },
+        {
+          "name": "publish",
+          "line": 56
+        },
+        {
+          "name": "finish",
+          "line": 98
+        }
+      ],
+      "imports": [
+        "delivery_coordinator",
+        "event_admission_policy",
+        "hashlib"
+      ],
+      "producer_calls": [
+        {
+          "call": "self.coordinator.publish",
+          "line": 90,
+          "expression": "self.coordinator.publish(topic, event_id, content, key, wire)"
+        }
+      ],
+      "topic_literals": []
+    },
+    "services/payment-producer/kafka_producer.py": {
+      "parse": "PASS",
+      "functions": [
+        {
+          "name": "select_business_key",
+          "line": 137
+        },
+        {
+          "name": "kafka_security_config",
+          "line": 159
+        },
+        {
+          "name": "load_avro_schema",
+          "line": 203
+        },
+        {
+          "name": "xml_to_dict",
+          "line": 240
+        },
+        {
+          "name": "parse_pain001_xml",
+          "line": 267
+        },
+        {
+          "name": "parse_pain002_xml",
+          "line": 309
+        },
+        {
+          "name": "parse_pacs002_xml",
+          "line": 344
+        },
+        {
+          "name": "parse_generic_xml",
+          "line": 427
+        },
+        {
+          "name": "parse_technical_payment_event",
+          "line": 472
+        },
+        {
+          "name": "detect_system_from_path",
+          "line": 559
+        },
+        {
+          "name": "parse_event",
+          "line": 618
+        },
+        {
+          "name": "pdmis_snapshot_identity",
+          "line": 714
+        },
+        {
+          "name": "parse_json_events",
+          "line": 764
+        },
+        {
+          "name": "main",
+          "line": 884
+        },
+        {
+          "name": "__init__",
+          "line": 175
+        },
+        {
+          "name": "callback",
+          "line": 180
+        },
+        {
+          "name": "delivered",
+          "line": 181
+        },
+        {
+          "name": "text",
+          "line": 317
+        },
+        {
+          "name": "required",
+          "line": 353
+        },
+        {
+          "name": "optional",
+          "line": 388
+        },
+        {
+          "name": "first",
+          "line": 431
+        },
+        {
+          "name": "text_of",
+          "line": 438
+        }
+      ],
+      "imports": [
+        "avro.schema",
+        "confluent_kafka",
+        "confluent_kafka.schema_registry",
+        "confluent_kafka.schema_registry.avro",
+        "confluent_kafka.serialization",
+        "datetime",
+        "glob",
+        "hashlib",
+        "json",
+        "logging",
+        "os",
+        "pathlib",
+        "services.shared.security.runtime_security",
+        "services.shared.security.secret_provider",
+        "sys",
+        "threading",
+        "time",
+        "typing",
+        "uuid",
+        "xml.etree.ElementTree"
+      ],
+      "producer_calls": [
+        {
+          "call": "producer.produce",
+          "line": 1000,
+          "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+        },
+        {
+          "call": "producer.produce",
+          "line": 1019,
+          "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+        }
+      ],
+      "topic_literals": [
+        {
+          "value": "icmn.vpm.pain001",
+          "line": 84
+        },
+        {
+          "value": "icmn.pmn.pain001",
+          "line": 85
+        },
+        {
+          "value": "cpo.psn.pain002",
+          "line": 88
+        },
+        {
+          "value": "cpo.plm.pain002",
+          "line": 89
+        },
+        {
+          "value": "wendi.pain001",
+          "line": 92
+        },
+        {
+          "value": "wendi.pain002",
+          "line": 93
+        },
+        {
+          "value": "wendi.camt052",
+          "line": 94
+        },
+        {
+          "value": "wendi.camt053",
+          "line": 95
+        },
+        {
+          "value": "wendi.camt054",
+          "line": 96
+        },
+        {
+          "value": "wendi.transactions",
+          "line": 97
+        },
+        {
+          "value": "mobile.mtn.pacs008",
+          "line": 100
+        },
+        {
+          "value": "mobile.mtn.pacs002",
+          "line": 101
+        },
+        {
+          "value": "mobile.airtel.pacs008",
+          "line": 102
+        },
+        {
+          "value": "mobile.airtel.pacs002",
+          "line": 103
+        },
+        {
+          "value": "agent.profiles",
+          "line": 106
+        },
+        {
+          "value": "agent.locations",
+          "line": 107
+        },
+        {
+          "value": "agent.transactions",
+          "line": 108
+        },
+        {
+          "value": "pdmis.beneficiaries",
+          "line": 111
+        },
+        {
+          "value": "pdmis.business_plans",
+          "line": 112
+        },
+        {
+          "value": "pdmis.households",
+          "line": 113
+        },
+        {
+          "value": "pdmis.loans",
+          "line": 114
+        },
+        {
+          "value": "pdmis.repayments",
+          "line": 115
+        },
+        {
+          "value": "pdmis.saccos",
+          "line": 116
+        },
+        {
+          "value": "pdmis.special_groups",
+          "line": 117
+        },
+        {
+          "value": "icmn.pmn.pain001",
+          "line": 121
+        },
+        {
+          "value": "cpo.plm.pain002",
+          "line": 122
+        },
+        {
+          "value": "pdmis.loans",
+          "line": 123
+        },
+        {
+          "value": "pdmis.repayments",
+          "line": 124
+        },
+        {
+          "value": "pdmis.beneficiaries",
+          "line": 125
+        },
+        {
+          "value": "pdmis.saccos",
+          "line": 126
+        },
+        {
+          "value": "pdmis.households",
+          "line": 127
+        },
+        {
+          "value": "pdmis.business_plans",
+          "line": 128
+        },
+        {
+          "value": "pdmis.special_groups",
+          "line": 129
+        },
+        {
+          "value": "agent.transactions",
+          "line": 130
+        },
+        {
+          "value": "agent.profiles",
+          "line": 131
+        },
+        {
+          "value": "agent.locations",
+          "line": 132
+        },
+        {
+          "value": "wendi.transactions",
+          "line": 133
+        },
+        {
+          "value": "Return a stable partition key; event_id is intentionally never used.",
+          "line": 138
+        },
+        {
+          "value": "Count broker acknowledgements rather than local queue acceptance.",
+          "line": 174
+        },
+        {
+          "value": "Project every XML element and attribute to JSON-friendly values.",
+          "line": 241
+        },
+        {
+          "value": "Parse PAIN.001 XML file and extract payment data",
+          "line": 268
+        },
+        {
+          "value": "Parse PAIN.002 XML into its business header and payload.",
+          "line": 310
+        },
+        {
+          "value": "Project PACS.002 identifiers while retaining the full XML.",
+          "line": 345
+        },
+        {
+          "value": "Preserve an arbitrary XML document as the canonical nested JSON shape.",
+          "line": 428
+        },
+        {
+          "value": "Parse the standalone technical contract without ISO namespace assumptions.",
+          "line": 473
+        },
+        {
+          "value": "Detect (system, msg_type, topic) from the source path or filename.",
+          "line": 560
+        },
+        {
+          "value": "pdmis.loans",
+          "line": 705
+        },
+        {
+          "value": "pdmis.beneficiaries",
+          "line": 706
+        },
+        {
+          "value": "pdmis.households",
+          "line": 707
+        },
+        {
+          "value": "pdmis.saccos",
+          "line": 708
+        },
+        {
+          "value": "pdmis.business_plans",
+          "line": 709
+        },
+        {
+          "value": "pdmis.special_groups",
+          "line": 710
+        },
+        {
+          "value": "Return a replay-stable observation ID and canonical content fingerprint.",
+          "line": 715
+        },
+        {
+          "value": "A source file cannot be safely converted into Kafka events.",
+          "line": 761
+        },
+        {
+          "value": "Create one Kafka event per JSON object for Agent, Wendi or PDMIS feeds.",
+          "line": 765
+        },
+        {
+          "value": "/app/schemas/payment_event.avsc",
+          "line": 52
+        },
+        {
+          "value": "security.protocol",
+          "line": 160
+        },
+        {
+          "value": "sasl.mechanism",
+          "line": 162
+        },
+        {
+          "value": "sasl.username",
+          "line": 163
+        },
+        {
+          "value": "sasl.password",
+          "line": 164
+        },
+        {
+          "value": "ssl.ca.location",
+          "line": 165
+        },
+        {
+          "value": "ssl.certificate.location",
+          "line": 166
+        },
+        {
+          "value": "ssl.key.location",
+          "line": 167
+        },
+        {
+          "value": "./ns:FIToFIPmtStsRpt/ns:TxInfAndSts/",
+          "line": 375
+        },
+        {
+          "value": "agent_profiles.json",
+          "line": 567
+        },
+        {
+          "value": "agent_locations.json",
+          "line": 568
+        },
+        {
+          "value": "agent_transactions.json",
+          "line": 569
+        },
+        {
+          "value": "beneficiaries.json",
+          "line": 570
+        },
+        {
+          "value": "business_plans.json",
+          "line": 571
+        },
+        {
+          "value": "households.json",
+          "line": 572
+        },
+        {
+          "value": "loans.json",
+          "line": 573
+        },
+        {
+          "value": "repayments.json",
+          "line": 574
+        },
+        {
+          "value": "saccos.json",
+          "line": 575
+        },
+        {
+          "value": "special_groups.json",
+          "line": 576
+        },
+        {
+          "value": "transactions.json",
+          "line": 577
+        },
+        {
+          "value": "wendi_transactions.json",
+          "line": 578
+        },
+        {
+          "value": "1.0.0",
+          "line": 694
+        },
+        {
+          "value": "bootstrap.servers",
+          "line": 926
+        },
+        {
+          "value": "key.serializer",
+          "line": 927
+        },
+        {
+          "value": "value.serializer",
+          "line": 928
+        },
+        {
+          "value": "delivery.timeout.ms",
+          "line": 931
+        },
+        {
+          "value": "request.timeout.ms",
+          "line": 932
+        },
+        {
+          "value": "linger.ms",
+          "line": 933
+        },
+        {
+          "value": "batch.size",
+          "line": 934
+        },
+        {
+          "value": "compression.type",
+          "line": 935
+        },
+        {
+          "value": "\u23f3 Flushing producer...",
+          "line": 1032
+        },
+        {
+          "value": "urn:iso:std:iso:20022:tech:xsd:pain.001.001.09",
+          "line": 274
+        },
+        {
+          "value": "urn:iso:std:iso:20022:tech:xsd:pain.002.001.12",
+          "line": 315
+        },
+        {
+          "value": "urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10",
+          "line": 348
+        },
+        {
+          "value": "./ns:FIToFIPmtStsRpt/ns:GrpHdr/ns:MsgId",
+          "line": 365
+        },
+        {
+          "value": "./ns:FIToFIPmtStsRpt/ns:OrgnlGrpInfAndSts/ns:OrgnlMsgId",
+          "line": 368
+        },
+        {
+          "value": "./ns:FIToFIPmtStsRpt/ns:OrgnlGrpInfAndSts/ns:OrgnlMsgNmId",
+          "line": 371
+        },
+        {
+          "value": "agent.profiles",
+          "line": 567
+        },
+        {
+          "value": "agent.locations",
+          "line": 568
+        },
+        {
+          "value": "agent.transactions",
+          "line": 569
+        },
+        {
+          "value": "pdmis.beneficiaries",
+          "line": 570
+        },
+        {
+          "value": "pdmis.business_plans",
+          "line": 571
+        },
+        {
+          "value": "pdmis.households",
+          "line": 572
+        },
+        {
+          "value": "pdmis.loans",
+          "line": 573
+        },
+        {
+          "value": "pdmis.repayments",
+          "line": 574
+        }
+      ]
+    },
+    "services/payment-producer/source_publisher.py": {
+      "parse": "PASS",
+      "functions": [
+        {
+          "name": "route",
+          "line": 73
+        },
+        {
+          "name": "_sha",
+          "line": 86
+        },
+        {
+          "name": "_canon",
+          "line": 87
+        },
+        {
+          "name": "_event_id",
+          "line": 88
+        },
+        {
+          "name": "_business_key",
+          "line": 90
+        },
+        {
+          "name": "_extract_iso",
+          "line": 99
+        },
+        {
+          "name": "_extract_technical",
+          "line": 136
+        },
+        {
+          "name": "_load_schemas",
+          "line": 148
+        },
+        {
+          "name": "_default_for",
+          "line": 160
+        },
+        {
+          "name": "_normalize",
+          "line": 176
+        },
+        {
+          "name": "_build_for_schema",
+          "line": 221
+        },
+        {
+          "name": "build_record",
+          "line": 226
+        },
+        {
+          "name": "iter_records",
+          "line": 298
+        },
+        {
+          "name": "write_evidence",
+          "line": 330
+        },
+        {
+          "name": "run_live",
+          "line": 341
+        },
+        {
+          "name": "self_test",
+          "line": 466
+        },
+        {
+          "name": "main",
+          "line": 513
+        },
+        {
+          "name": "t",
+          "line": 102
+        },
+        {
+          "name": "as_json",
+          "line": 324
+        },
+        {
+          "name": "make_cb",
+          "line": 390
+        },
+        {
+          "name": "cb",
+          "line": 391
+        }
+      ],
+      "imports": [
+        "__future__",
+        "argparse",
+        "confluent_kafka",
+        "confluent_kafka.schema_registry",
+        "confluent_kafka.schema_registry.avro",
+        "confluent_kafka.serialization",
+        "dataclasses",
+        "datetime",
+        "fastavro",
+        "hashlib",
+        "io",
+        "json",
+        "os",
+        "pathlib",
+        "sys",
+        "tempfile",
+        "time",
+        "xml.etree"
+      ],
+      "producer_calls": [
+        {
+          "call": "prod.produce",
+          "line": 422,
+          "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+        }
+      ],
+      "topic_literals": [
+        {
+          "value": "icmn.vpm.pain001",
+          "line": 26
+        },
+        {
+          "value": "icmn.pmn.pain001",
+          "line": 27
+        },
+        {
+          "value": "cpo.psn.pain002",
+          "line": 28
+        },
+        {
+          "value": "cpo.plm.pain002",
+          "line": 29
+        },
+        {
+          "value": "wendi.camt052",
+          "line": 30
+        },
+        {
+          "value": "wendi.camt053",
+          "line": 31
+        },
+        {
+          "value": "wendi.camt054",
+          "line": 32
+        },
+        {
+          "value": "wendi.transactions",
+          "line": 33
+        },
+        {
+          "value": "wendi.pain001",
+          "line": 34
+        },
+        {
+          "value": "wendi.pain002",
+          "line": 35
+        },
+        {
+          "value": "mobile.mtn.pacs008",
+          "line": 36
+        },
+        {
+          "value": "mobile.mtn.pacs002",
+          "line": 37
+        },
+        {
+          "value": "mobile.airtel.pacs008",
+          "line": 38
+        },
+        {
+          "value": "mobile.airtel.pacs002",
+          "line": 39
+        },
+        {
+          "value": "agent.transactions",
+          "line": 40
+        },
+        {
+          "value": "agent.profiles",
+          "line": 41
+        },
+        {
+          "value": "agent.locations",
+          "line": 42
+        },
+        {
+          "value": "pdmis.beneficiaries",
+          "line": 43
+        },
+        {
+          "value": "pdmis.business_plans",
+          "line": 44
+        },
+        {
+          "value": "pdmis.households",
+          "line": 45
+        },
+        {
+          "value": "pdmis.loans",
+          "line": 46
+        },
+        {
+          "value": "pdmis.repayments",
+          "line": 47
+        },
+        {
+          "value": "pdmis.saccos",
+          "line": 48
+        },
+        {
+          "value": "pdmis.special_groups",
+          "line": 49
+        },
+        {
+          "value": "agent_profiles.json",
+          "line": 53
+        },
+        {
+          "value": "agent_locations.json",
+          "line": 53
+        },
+        {
+          "value": "agent_transactions.json",
+          "line": 54
+        },
+        {
+          "value": "beneficiaries.json",
+          "line": 54
+        },
+        {
+          "value": "business_plans.json",
+          "line": 55
+        },
+        {
+          "value": "households.json",
+          "line": 55
+        },
+        {
+          "value": "loans.json",
+          "line": 56
+        },
+        {
+          "value": "repayments.json",
+          "line": 56
+        },
+        {
+          "value": "saccos.json",
+          "line": 57
+        },
+        {
+          "value": "special_groups.json",
+          "line": 57
+        },
+        {
+          "value": "wendi_transactions.json",
+          "line": 58
+        },
+        {
+          "value": "transactions.json",
+          "line": 58
+        },
+        {
+          "value": "agent.profiles",
+          "line": 53
+        },
+        {
+          "value": "agent.locations",
+          "line": 53
+        },
+        {
+          "value": "agent.transactions",
+          "line": 54
+        },
+        {
+          "value": "pdmis.beneficiaries",
+          "line": 54
+        },
+        {
+          "value": "pdmis.business_plans",
+          "line": 55
+        },
+        {
+          "value": "pdmis.households",
+          "line": 55
+        },
+        {
+          "value": "pdmis.loans",
+          "line": 56
+        },
+        {
+          "value": "pdmis.repayments",
+          "line": 56
+        },
+        {
+          "value": "pdmis.saccos",
+          "line": 57
+        },
+        {
+          "value": "pdmis.special_groups",
+          "line": 57
+        },
+        {
+          "value": "wendi.transactions",
+          "line": 58
+        },
+        {
+          "value": "wendi.transactions",
+          "line": 58
+        },
+        {
+          "value": "icmn.vpm.pain001",
+          "line": 61
+        },
+        {
+          "value": "icmn.pmn.pain001",
+          "line": 61
+        },
+        {
+          "value": "cpo.psn.pain002",
+          "line": 62
+        },
+        {
+          "value": "cpo.plm.pain002",
+          "line": 62
+        },
+        {
+          "value": "wendi.pain001",
+          "line": 63
+        },
+        {
+          "value": "wendi.pain002",
+          "line": 63
+        },
+        {
+          "value": "wendi.camt052",
+          "line": 64
+        },
+        {
+          "value": "wendi.camt053",
+          "line": 64
+        },
+        {
+          "value": "wendi.camt054",
+          "line": 64
+        },
+        {
+          "value": "mobile.mtn.pacs008",
+          "line": 65
+        },
+        {
+          "value": "mobile.mtn.pacs002",
+          "line": 66
+        },
+        {
+          "value": "mobile.airtel.pacs008",
+          "line": 67
+        },
+        {
+          "value": "mobile.airtel.pacs002",
+          "line": 68
+        },
+        {
+          "value": "agent.transactions",
+          "line": 69
+        },
+        {
+          "value": ".//GrpHdr",
+          "line": 105
+        },
+        {
+          "value": ".//InstdAmt",
+          "line": 106
+        },
+        {
+          "value": ".//IntrBkSttlmAmt",
+          "line": 106
+        },
+        {
+          "value": "payment_event.avsc",
+          "line": 151
+        },
+        {
+          "value": "technical_payment_event.avsc",
+          "line": 152
+        },
+        {
+          "value": "bootstrap.servers",
+          "line": 381
+        },
+        {
+          "value": "compression.type",
+          "line": 382
+        },
+        {
+          "value": "linger.ms",
+          "line": 382
+        },
+        {
+          "value": "icmn.vpm.pain001",
+          "line": 469
+        },
+        {
+          "value": "mobile.airtel.pacs002",
+          "line": 470
+        },
+        {
+          "value": "agent.profiles",
+          "line": 471
+        },
+        {
+          "value": "pdmis.loans",
+          "line": 472
+        },
+        {
+          "value": "source_publisher.v1",
+          "line": 293
+        },
+        {
+          "value": ".xml",
+          "line": 306
+        },
+        {
+          "value": ".pub-",
+          "line": 332
+        },
+        {
+          "value": ".json",
+          "line": 332
+        },
+        {
+          "value": "agent.locations",
+          "line": 480
+        },
+        {
+          "value": "fake/agent.locations",
+          "line": 481
+        },
+        {
+          "value": "icmn.pmn.pain001",
+          "line": 503
+        },
+        {
+          "value": "fake/icmn.pmn.pain001",
+          "line": 504
+        },
+        {
+          "value": "runtime/source-publisher/last_run.json",
+          "line": 525
+        },
+        {
+          "value": "SAFE: source_publisher installed; pass --live with --max-messages N to publish.",
+          "line": 529
+        },
+        {
+          "value": "--max-messages 1..50000",
+          "line": 531
+        },
+        {
+          "value": "--max-seconds 60..14400",
+          "line": 532
+        },
+        {
+          "value": "transactions.json",
+          "line": 76
+        },
+        {
+          "value": ".//",
+          "line": 103
+        },
+        {
+          "value": "source_publisher.v1",
+          "line": 258
+        },
+        {
+          "value": ".xml",
+          "line": 302
+        },
+        {
+          "value": ".json",
+          "line": 302
+        },
+        {
+          "value": "message.timeout.ms",
+          "line": 384
+        },
+        {
+          "value": "enable.idempotence",
+          "line": 386
+        },
+        {
+          "value": "icmn/vpm/pain001/a.xml",
+          "line": 469
+        },
+        {
+          "value": "mobile_networks/airtel/pacs002/a.xml",
+          "line": 470
+        },
+        {
+          "value": "agent_network/agent_profiles.json",
+          "line": 471
+        },
+        {
+          "value": "pdmis/loans.json",
+          "line": 472
+        },
+        {
+          "value": "other/transactions.json",
+          "line": 473
+        },
+        {
+          "value": "pdmis.",
+          "line": 83
+        }
+      ]
+    }
+  },
+  "topic_evidence": {
+    "agent.locations": {
+      "explicit_references": [
+        {
+          "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+          "matches": [
+            {
+              "line": 4,
+              "text": "\"agent.locations\": {"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/kafka/topics.yaml",
+          "matches": [
+            {
+              "line": 136,
+              "text": "- name: agent.locations"
+            }
+          ]
+        },
+        {
+          "path": "platform/source_registry/contracts/source_systems.json",
+          "matches": [
+            {
+              "line": 27,
+              "text": "\"agent.locations\","
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "matches": [
+            {
+              "line": 107,
+              "text": "\"agent.locations\": {\"category\": \"agent_network\", \"system\": \"agent\", \"msg_type\": \"locations\", \"description\": \"Agent Locations\", \"has_technical_attrs\": False},"
+            },
+            {
+              "line": 132,
+              "text": "\"agent.locations\": (\"agent_id\",),"
+            },
+            {
+              "line": 568,
+              "text": "\"agent_locations.json\": (\"agent\", \"locations\", \"agent.locations\"),"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "matches": [
+            {
+              "line": 42,
+              "text": "\"agent.locations\":       {\"system\":\"agent\",\"msg_type\":\"locations\",\"family\":\"PAYMENT_BUSINESS_EVENT\"},"
+            },
+            {
+              "line": 53,
+              "text": "\"agent_profiles.json\":\"agent.profiles\",\"agent_locations.json\":\"agent.locations\","
+            },
+            {
+              "line": 480,
+              "text": "rec_b = build_record(topic=\"agent.locations\","
+            },
+            {
+              "line": 481,
+              "text": "source_path=\"fake/agent.locations\", record_index=0,"
+            }
+          ]
+        }
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "producer_calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "producer_calls": [
+            {
+              "call": "prod.produce",
+              "line": 422,
+              "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+            }
+          ]
+        }
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "schema_validation": "NOT VERIFIED",
+      "source_payload": "NOT VERIFIED",
+      "publication_authorised": false
+    },
+    "agent.profiles": {
+      "explicit_references": [
+        {
+          "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+          "matches": [
+            {
+              "line": 12,
+              "text": "\"agent.profiles\": {"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/kafka/topics.yaml",
+          "matches": [
+            {
+              "line": 129,
+              "text": "- name: agent.profiles"
+            }
+          ]
+        },
+        {
+          "path": "platform/source_registry/contracts/source_systems.json",
+          "matches": [
+            {
+              "line": 28,
+              "text": "\"agent.profiles\","
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "matches": [
+            {
+              "line": 106,
+              "text": "\"agent.profiles\": {\"category\": \"agent_network\", \"system\": \"agent\", \"msg_type\": \"profiles\", \"description\": \"Agent Profiles\", \"has_technical_attrs\": False},"
+            },
+            {
+              "line": 131,
+              "text": "\"agent.profiles\": (\"agent_id\",),"
+            },
+            {
+              "line": 567,
+              "text": "\"agent_profiles.json\": (\"agent\", \"profiles\", \"agent.profiles\"),"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "matches": [
+            {
+              "line": 41,
+              "text": "\"agent.profiles\":        {\"system\":\"agent\",\"msg_type\":\"profiles\",\"family\":\"PAYMENT_BUSINESS_EVENT\"},"
+            },
+            {
+              "line": 53,
+              "text": "\"agent_profiles.json\":\"agent.profiles\",\"agent_locations.json\":\"agent.locations\","
+            },
+            {
+              "line": 471,
+              "text": "assert route(Path(\"agent_network/agent_profiles.json\")) == \"agent.profiles\""
+            }
+          ]
+        }
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "producer_calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "producer_calls": [
+            {
+              "call": "prod.produce",
+              "line": 422,
+              "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+            }
+          ]
+        }
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "schema_validation": "NOT VERIFIED",
+      "source_payload": "NOT VERIFIED",
+      "publication_authorised": false
+    },
+    "agent.transactions": {
+      "explicit_references": [
+        {
+          "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+          "matches": [
+            {
+              "line": 20,
+              "text": "\"agent.transactions\": {"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/kafka/topics.yaml",
+          "matches": [
+            {
+              "line": 122,
+              "text": "- name: agent.transactions"
+            }
+          ]
+        },
+        {
+          "path": "platform/source_registry/contracts/source_systems.json",
+          "matches": [
+            {
+              "line": 29,
+              "text": "\"agent.transactions\""
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "matches": [
+            {
+              "line": 108,
+              "text": "\"agent.transactions\": {\"category\": \"agent_network\", \"system\": \"agent\", \"msg_type\": \"transactions\", \"description\": \"Agent Transactions\", \"has_technical_attrs\": False},"
+            },
+            {
+              "line": 130,
+              "text": "\"agent.transactions\": (\"agent_id\", \"transaction_id\", \"payment_id\"),"
+            },
+            {
+              "line": 569,
+              "text": "\"agent_transactions.json\": (\"agent\", \"transactions\", \"agent.transactions\"),"
+            },
+            {
+              "line": 602,
+              "text": "(\"/agent_network/agent_transactions/\", (\"agent\", \"transactions\", \"agent.transactions\")),"
+            },
+            {
+              "line": 670,
+              "text": "if topic == \"agent.transactions\" and root_name == \"AgentTransaction\":"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "matches": [
+            {
+              "line": 40,
+              "text": "\"agent.transactions\":    {\"system\":\"agent\",\"msg_type\":\"transactions\",\"family\":\"PAYMENT_BUSINESS_EVENT\"},"
+            },
+            {
+              "line": 54,
+              "text": "\"agent_transactions.json\":\"agent.transactions\",\"beneficiaries.json\":\"pdmis.beneficiaries\","
+            },
+            {
+              "line": 69,
+              "text": "(\"/agent_network/agent_transactions/\",\"agent.transactions\"),"
+            }
+          ]
+        }
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "producer_calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "producer_calls": [
+            {
+              "call": "prod.produce",
+              "line": 422,
+              "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+            }
+          ]
+        }
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "schema_validation": "NOT VERIFIED",
+      "source_payload": "NOT VERIFIED",
+      "publication_authorised": false
+    },
+    "cpo.plm.pain002": {
+      "explicit_references": [
+        {
+          "path": "platform/flink/jobs/j1_lifecycle_state_skeleton.py",
+          "matches": [
+            {
+              "line": 116,
+              "text": "_env(\"J1_INPUT_TOPIC_2\", \"cpo.plm.pain002\"),"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+          "matches": [
+            {
+              "line": 36,
+              "text": "\"cpo.plm.pain002\": {"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/kafka/topics.yaml",
+          "matches": [
+            {
+              "line": 36,
+              "text": "- name: cpo.plm.pain002"
+            }
+          ]
+        },
+        {
+          "path": "platform/source_registry/contracts/source_systems.json",
+          "matches": [
+            {
+              "line": 47,
+              "text": "\"cpo.plm.pain002\","
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "matches": [
+            {
+              "line": 89,
+              "text": "\"cpo.plm.pain002\": {\"category\": \"cpo\", \"system\": \"plm\", \"msg_type\": \"technical_payment_event\", \"description\": \"PLM Technical Payment Event\", \"event_family\": \"TECHNICAL_PAYMENT_EVENT\"},"
+            },
+            {
+              "line": 122,
+              "text": "\"cpo.plm.pain002\": (\"end_to_end_id\", \"instruction_id\", \"correlation_id\", \"transaction_id\"),"
+            },
+            {
+              "line": 592,
+              "text": "(\"/cpo/plm/pain002/\", (\"plm\", \"pain002\", \"cpo.plm.pain002\")),"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "matches": [
+            {
+              "line": 29,
+              "text": "\"cpo.plm.pain002\":       {\"system\":\"plm\",\"msg_type\":\"technical_payment_event\",\"family\":\"TECHNICAL_PAYMENT_EVENT\"},"
+            },
+            {
+              "line": 62,
+              "text": "(\"/cpo/psn/pain002/\",\"cpo.psn.pain002\"),(\"/cpo/plm/pain002/\",\"cpo.plm.pain002\"),"
+            }
+          ]
+        }
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "producer_calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "producer_calls": [
+            {
+              "call": "prod.produce",
+              "line": 422,
+              "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+            }
+          ]
+        }
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "schema_validation": "NOT VERIFIED",
+      "source_payload": "NOT VERIFIED",
+      "publication_authorised": false
+    },
+    "cpo.psn.pain002": {
+      "explicit_references": [
+        {
+          "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+          "matches": [
+            {
+              "line": 44,
+              "text": "\"cpo.psn.pain002\": {"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/kafka/topics.yaml",
+          "matches": [
+            {
+              "line": 29,
+              "text": "- name: cpo.psn.pain002"
+            }
+          ]
+        },
+        {
+          "path": "platform/source_registry/contracts/source_systems.json",
+          "matches": [
+            {
+              "line": 48,
+              "text": "\"cpo.psn.pain002\""
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "matches": [
+            {
+              "line": 88,
+              "text": "\"cpo.psn.pain002\": {\"category\": \"cpo\", \"system\": \"psn\", \"msg_type\": \"pain002\", \"description\": \"PSN Payment Status\", \"has_technical_attrs\": False},"
+            },
+            {
+              "line": 591,
+              "text": "(\"/cpo/psn/pain002/\", (\"psn\", \"pain002\", \"cpo.psn.pain002\")),"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "matches": [
+            {
+              "line": 28,
+              "text": "\"cpo.psn.pain002\":       {\"system\":\"cpo\",\"msg_type\":\"pain002\",\"family\":\"PAYMENT_BUSINESS_EVENT\"},"
+            },
+            {
+              "line": 62,
+              "text": "(\"/cpo/psn/pain002/\",\"cpo.psn.pain002\"),(\"/cpo/plm/pain002/\",\"cpo.plm.pain002\"),"
+            }
+          ]
+        }
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "producer_calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "producer_calls": [
+            {
+              "call": "prod.produce",
+              "line": 422,
+              "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+            }
+          ]
+        }
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "schema_validation": "NOT VERIFIED",
+      "source_payload": "NOT VERIFIED",
+      "publication_authorised": false
+    },
+    "icmn.pmn.pain001": {
+      "explicit_references": [
+        {
+          "path": "platform/flink/jobs/j1_lifecycle_state_skeleton.py",
+          "matches": [
+            {
+              "line": 115,
+              "text": "_env(\"J1_INPUT_TOPIC_1\", \"icmn.pmn.pain001\"),"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+          "matches": [
+            {
+              "line": 52,
+              "text": "\"icmn.pmn.pain001\": {"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/kafka/topics.yaml",
+          "matches": [
+            {
+              "line": 19,
+              "text": "- name: icmn.pmn.pain001"
+            }
+          ]
+        },
+        {
+          "path": "platform/source_registry/contracts/source_systems.json",
+          "matches": [
+            {
+              "line": 66,
+              "text": "\"icmn.pmn.pain001\","
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "matches": [
+            {
+              "line": 85,
+              "text": "\"icmn.pmn.pain001\": {\"category\": \"icmn\", \"system\": \"pmn\", \"msg_type\": \"technical_payment_event\", \"description\": \"PMN Technical Payment Event\", \"event_family\": \"TECHNICAL_PAYMENT_EVENT\"},"
+            },
+            {
+              "line": 121,
+              "text": "\"icmn.pmn.pain001\": (\"end_to_end_id\", \"instruction_id\", \"correlation_id\", \"transaction_id\"),"
+            },
+            {
+              "line": 590,
+              "text": "(\"/icmn/pmn/pain001/\", (\"pmn\", \"pain001\", \"icmn.pmn.pain001\")),"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "matches": [
+            {
+              "line": 27,
+              "text": "\"icmn.pmn.pain001\":      {\"system\":\"pmn\",\"msg_type\":\"technical_payment_event\",\"family\":\"TECHNICAL_PAYMENT_EVENT\"},"
+            },
+            {
+              "line": 61,
+              "text": "(\"/icmn/vpm/pain001/\",\"icmn.vpm.pain001\"),(\"/icmn/pmn/pain001/\",\"icmn.pmn.pain001\"),"
+            },
+            {
+              "line": 503,
+              "text": "rec_t = build_record(topic=\"icmn.pmn.pain001\","
+            },
+            {
+              "line": 504,
+              "text": "source_path=\"fake/icmn.pmn.pain001\", record_index=0,"
+            }
+          ]
+        }
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "producer_calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "producer_calls": [
+            {
+              "call": "prod.produce",
+              "line": 422,
+              "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+            }
+          ]
+        }
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "schema_validation": "NOT VERIFIED",
+      "source_payload": "NOT VERIFIED",
+      "publication_authorised": false
+    },
+    "icmn.vpm.pain001": {
+      "explicit_references": [
+        {
+          "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+          "matches": [
+            {
+              "line": 60,
+              "text": "\"icmn.vpm.pain001\": {"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/kafka/topics.yaml",
+          "matches": [
+            {
+              "line": 12,
+              "text": "- name: icmn.vpm.pain001"
+            }
+          ]
+        },
+        {
+          "path": "platform/source_registry/contracts/source_systems.json",
+          "matches": [
+            {
+              "line": 67,
+              "text": "\"icmn.vpm.pain001\""
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "matches": [
+            {
+              "line": 84,
+              "text": "\"icmn.vpm.pain001\": {\"category\": \"icmn\", \"system\": \"vpm\", \"msg_type\": \"pain001\", \"description\": \"VPM Payment Initiation\", \"has_technical_attrs\": False},"
+            },
+            {
+              "line": 589,
+              "text": "(\"/icmn/vpm/pain001/\", (\"vpm\", \"pain001\", \"icmn.vpm.pain001\")),"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "matches": [
+            {
+              "line": 26,
+              "text": "\"icmn.vpm.pain001\":      {\"system\":\"icmn\",\"msg_type\":\"pain001\",\"family\":\"PAYMENT_BUSINESS_EVENT\"},"
+            },
+            {
+              "line": 61,
+              "text": "(\"/icmn/vpm/pain001/\",\"icmn.vpm.pain001\"),(\"/icmn/pmn/pain001/\",\"icmn.pmn.pain001\"),"
+            },
+            {
+              "line": 469,
+              "text": "assert route(Path(\"icmn/vpm/pain001/a.xml\")) == \"icmn.vpm.pain001\""
+            }
+          ]
+        }
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "producer_calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "producer_calls": [
+            {
+              "call": "prod.produce",
+              "line": 422,
+              "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+            }
+          ]
+        }
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "schema_validation": "NOT VERIFIED",
+      "source_payload": "NOT VERIFIED",
+      "publication_authorised": false
+    },
+    "mobile.airtel.pacs002": {
+      "explicit_references": [
+        {
+          "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+          "matches": [
+            {
+              "line": 107,
+              "text": "\"mobile.airtel.pacs002\": {"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/kafka/topics.yaml",
+          "matches": [
+            {
+              "line": 112,
+              "text": "- name: mobile.airtel.pacs002"
+            }
+          ]
+        },
+        {
+          "path": "platform/source_registry/contracts/source_systems.json",
+          "matches": [
+            {
+              "line": 89,
+              "text": "\"mobile.airtel.pacs002\","
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "matches": [
+            {
+              "line": 103,
+              "text": "\"mobile.airtel.pacs002\": {\"category\": \"mobile_networks\", \"system\": \"airtel\", \"msg_type\": \"pacs002\", \"description\": \"Airtel Payment Status\", \"has_technical_attrs\": False},"
+            },
+            {
+              "line": 601,
+              "text": "(\"/mobile_networks/airtel/pacs002/\", (\"airtel\", \"pacs002\", \"mobile.airtel.pacs002\")),"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "matches": [
+            {
+              "line": 39,
+              "text": "\"mobile.airtel.pacs002\": {\"system\":\"airtel\",\"msg_type\":\"pacs002\",\"family\":\"PAYMENT_BUSINESS_EVENT\"},"
+            },
+            {
+              "line": 68,
+              "text": "(\"/mobile_networks/airtel/pacs002/\",\"mobile.airtel.pacs002\"),"
+            },
+            {
+              "line": 470,
+              "text": "assert route(Path(\"mobile_networks/airtel/pacs002/a.xml\")) == \"mobile.airtel.pacs002\""
+            }
+          ]
+        }
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "producer_calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "producer_calls": [
+            {
+              "call": "prod.produce",
+              "line": 422,
+              "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+            }
+          ]
+        }
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "schema_validation": "NOT VERIFIED",
+      "source_payload": "NOT VERIFIED",
+      "publication_authorised": false
+    },
+    "mobile.airtel.pacs008": {
+      "explicit_references": [
+        {
+          "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+          "matches": [
+            {
+              "line": 115,
+              "text": "\"mobile.airtel.pacs008\": {"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/kafka/topics.yaml",
+          "matches": [
+            {
+              "line": 105,
+              "text": "- name: mobile.airtel.pacs008"
+            }
+          ]
+        },
+        {
+          "path": "platform/source_registry/contracts/source_systems.json",
+          "matches": [
+            {
+              "line": 90,
+              "text": "\"mobile.airtel.pacs008\""
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "matches": [
+            {
+              "line": 102,
+              "text": "\"mobile.airtel.pacs008\": {\"category\": \"mobile_networks\", \"system\": \"airtel\", \"msg_type\": \"pacs008\", \"description\": \"Airtel FI-to-FI Customer Credit Transfer\", \"has_technical_attrs\": False},"
+            },
+            {
+              "line": 600,
+              "text": "(\"/mobile_networks/airtel/pacs008/\", (\"airtel\", \"pacs008\", \"mobile.airtel.pacs008\")),"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "matches": [
+            {
+              "line": 38,
+              "text": "\"mobile.airtel.pacs008\": {\"system\":\"airtel\",\"msg_type\":\"pacs008\",\"family\":\"PAYMENT_BUSINESS_EVENT\"},"
+            },
+            {
+              "line": 67,
+              "text": "(\"/mobile_networks/airtel/pacs008/\",\"mobile.airtel.pacs008\"),"
+            }
+          ]
+        }
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "producer_calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "producer_calls": [
+            {
+              "call": "prod.produce",
+              "line": 422,
+              "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+            }
+          ]
+        }
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "schema_validation": "NOT VERIFIED",
+      "source_payload": "NOT VERIFIED",
+      "publication_authorised": false
+    },
+    "mobile.mtn.pacs002": {
+      "explicit_references": [
+        {
+          "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+          "matches": [
+            {
+              "line": 123,
+              "text": "\"mobile.mtn.pacs002\": {"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/kafka/topics.yaml",
+          "matches": [
+            {
+              "line": 98,
+              "text": "- name: mobile.mtn.pacs002"
+            }
+          ]
+        },
+        {
+          "path": "platform/source_registry/contracts/source_systems.json",
+          "matches": [
+            {
+              "line": 87,
+              "text": "\"mobile.mtn.pacs002\","
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "matches": [
+            {
+              "line": 101,
+              "text": "\"mobile.mtn.pacs002\": {\"category\": \"mobile_networks\", \"system\": \"mtn\", \"msg_type\": \"pacs002\", \"description\": \"MTN Payment Status\", \"has_technical_attrs\": False},"
+            },
+            {
+              "line": 599,
+              "text": "(\"/mobile_networks/mtn/pacs002/\", (\"mtn\", \"pacs002\", \"mobile.mtn.pacs002\")),"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "matches": [
+            {
+              "line": 37,
+              "text": "\"mobile.mtn.pacs002\":    {\"system\":\"mtn\",\"msg_type\":\"pacs002\",\"family\":\"PAYMENT_BUSINESS_EVENT\"},"
+            },
+            {
+              "line": 66,
+              "text": "(\"/mobile_networks/mtn/pacs002/\",\"mobile.mtn.pacs002\"),"
+            }
+          ]
+        }
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "producer_calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "producer_calls": [
+            {
+              "call": "prod.produce",
+              "line": 422,
+              "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+            }
+          ]
+        }
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "schema_validation": "NOT VERIFIED",
+      "source_payload": "NOT VERIFIED",
+      "publication_authorised": false
+    },
+    "mobile.mtn.pacs008": {
+      "explicit_references": [
+        {
+          "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+          "matches": [
+            {
+              "line": 131,
+              "text": "\"mobile.mtn.pacs008\": {"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/kafka/topics.yaml",
+          "matches": [
+            {
+              "line": 91,
+              "text": "- name: mobile.mtn.pacs008"
+            }
+          ]
+        },
+        {
+          "path": "platform/source_registry/contracts/source_systems.json",
+          "matches": [
+            {
+              "line": 88,
+              "text": "\"mobile.mtn.pacs008\","
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "matches": [
+            {
+              "line": 100,
+              "text": "\"mobile.mtn.pacs008\": {\"category\": \"mobile_networks\", \"system\": \"mtn\", \"msg_type\": \"pacs008\", \"description\": \"MTN FI-to-FI Customer Credit Transfer\", \"has_technical_attrs\": False},"
+            },
+            {
+              "line": 598,
+              "text": "(\"/mobile_networks/mtn/pacs008/\", (\"mtn\", \"pacs008\", \"mobile.mtn.pacs008\")),"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "matches": [
+            {
+              "line": 36,
+              "text": "\"mobile.mtn.pacs008\":    {\"system\":\"mtn\",\"msg_type\":\"pacs008\",\"family\":\"PAYMENT_BUSINESS_EVENT\"},"
+            },
+            {
+              "line": 65,
+              "text": "(\"/mobile_networks/mtn/pacs008/\",\"mobile.mtn.pacs008\"),"
+            }
+          ]
+        }
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "producer_calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "producer_calls": [
+            {
+              "call": "prod.produce",
+              "line": 422,
+              "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+            }
+          ]
+        }
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "schema_validation": "NOT VERIFIED",
+      "source_payload": "NOT VERIFIED",
+      "publication_authorised": false
+    },
+    "pdmis.beneficiaries": {
+      "explicit_references": [
+        {
+          "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+          "matches": [
+            {
+              "line": 186,
+              "text": "\"pdmis.beneficiaries\": {"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/kafka/topics.yaml",
+          "matches": [
+            {
+              "line": 146,
+              "text": "- name: pdmis.beneficiaries"
+            }
+          ]
+        },
+        {
+          "path": "platform/source_registry/contracts/source_systems.json",
+          "matches": [
+            {
+              "line": 113,
+              "text": "\"pdmis.beneficiaries\","
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "matches": [
+            {
+              "line": 111,
+              "text": "\"pdmis.beneficiaries\": {\"category\": \"pdmis\", \"system\": \"pdmis\", \"msg_type\": \"beneficiaries\", \"description\": \"PDMIS Beneficiaries\", \"has_technical_attrs\": False},"
+            },
+            {
+              "line": 125,
+              "text": "\"pdmis.beneficiaries\": (\"beneficiary_id\",),"
+            },
+            {
+              "line": 570,
+              "text": "\"beneficiaries.json\": (\"pdmis\", \"beneficiaries\", \"pdmis.beneficiaries\"),"
+            },
+            {
+              "line": 706,
+              "text": "\"pdmis.beneficiaries\": (\"beneficiary_id\", \"updated_at\"),"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "matches": [
+            {
+              "line": 43,
+              "text": "\"pdmis.beneficiaries\":   {\"system\":\"pdmis\",\"msg_type\":\"beneficiaries\",\"family\":\"PAYMENT_BUSINESS_EVENT\"},"
+            },
+            {
+              "line": 54,
+              "text": "\"agent_transactions.json\":\"agent.transactions\",\"beneficiaries.json\":\"pdmis.beneficiaries\","
+            }
+          ]
+        }
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "producer_calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "producer_calls": [
+            {
+              "call": "prod.produce",
+              "line": 422,
+              "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+            }
+          ]
+        }
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "schema_validation": "NOT VERIFIED",
+      "source_payload": "NOT VERIFIED",
+      "publication_authorised": false
+    },
+    "pdmis.business_plans": {
+      "explicit_references": [
+        {
+          "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+          "matches": [
+            {
+              "line": 194,
+              "text": "\"pdmis.business_plans\": {"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/kafka/topics.yaml",
+          "matches": [
+            {
+              "line": 181,
+              "text": "- name: pdmis.business_plans"
+            }
+          ]
+        },
+        {
+          "path": "platform/source_registry/contracts/source_systems.json",
+          "matches": [
+            {
+              "line": 114,
+              "text": "\"pdmis.business_plans\","
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "matches": [
+            {
+              "line": 112,
+              "text": "\"pdmis.business_plans\": {\"category\": \"pdmis\", \"system\": \"pdmis\", \"msg_type\": \"business_plans\", \"description\": \"PDMIS Business Plans\", \"has_technical_attrs\": False},"
+            },
+            {
+              "line": 128,
+              "text": "\"pdmis.business_plans\": (\"business_plan_id\",),"
+            },
+            {
+              "line": 571,
+              "text": "\"business_plans.json\": (\"pdmis\", \"business_plans\", \"pdmis.business_plans\"),"
+            },
+            {
+              "line": 709,
+              "text": "\"pdmis.business_plans\": (\"business_plan_id\", None),"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "matches": [
+            {
+              "line": 44,
+              "text": "\"pdmis.business_plans\":  {\"system\":\"pdmis\",\"msg_type\":\"business_plans\",\"family\":\"PAYMENT_BUSINESS_EVENT\"},"
+            },
+            {
+              "line": 55,
+              "text": "\"business_plans.json\":\"pdmis.business_plans\",\"households.json\":\"pdmis.households\","
+            }
+          ]
+        }
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "producer_calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "producer_calls": [
+            {
+              "call": "prod.produce",
+              "line": 422,
+              "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+            }
+          ]
+        }
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "schema_validation": "NOT VERIFIED",
+      "source_payload": "NOT VERIFIED",
+      "publication_authorised": false
+    },
+    "pdmis.households": {
+      "explicit_references": [
+        {
+          "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+          "matches": [
+            {
+              "line": 202,
+              "text": "\"pdmis.households\": {"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/kafka/topics.yaml",
+          "matches": [
+            {
+              "line": 174,
+              "text": "- name: pdmis.households"
+            }
+          ]
+        },
+        {
+          "path": "platform/source_registry/contracts/source_systems.json",
+          "matches": [
+            {
+              "line": 115,
+              "text": "\"pdmis.households\","
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "matches": [
+            {
+              "line": 113,
+              "text": "\"pdmis.households\": {\"category\": \"pdmis\", \"system\": \"pdmis\", \"msg_type\": \"households\", \"description\": \"PDMIS Households\", \"has_technical_attrs\": False},"
+            },
+            {
+              "line": 127,
+              "text": "\"pdmis.households\": (\"household_id\",),"
+            },
+            {
+              "line": 572,
+              "text": "\"households.json\": (\"pdmis\", \"households\", \"pdmis.households\"),"
+            },
+            {
+              "line": 707,
+              "text": "\"pdmis.households\": (\"household_id\", \"updated_at\"),"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "matches": [
+            {
+              "line": 45,
+              "text": "\"pdmis.households\":      {\"system\":\"pdmis\",\"msg_type\":\"households\",\"family\":\"PAYMENT_BUSINESS_EVENT\"},"
+            },
+            {
+              "line": 55,
+              "text": "\"business_plans.json\":\"pdmis.business_plans\",\"households.json\":\"pdmis.households\","
+            }
+          ]
+        }
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "producer_calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "producer_calls": [
+            {
+              "call": "prod.produce",
+              "line": 422,
+              "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+            }
+          ]
+        }
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "schema_validation": "NOT VERIFIED",
+      "source_payload": "NOT VERIFIED",
+      "publication_authorised": false
+    },
+    "pdmis.loans": {
+      "explicit_references": [
+        {
+          "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+          "matches": [
+            {
+              "line": 210,
+              "text": "\"pdmis.loans\": {"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/kafka/topics.yaml",
+          "matches": [
+            {
+              "line": 153,
+              "text": "- name: pdmis.loans"
+            }
+          ]
+        },
+        {
+          "path": "platform/source_registry/contracts/source_systems.json",
+          "matches": [
+            {
+              "line": 116,
+              "text": "\"pdmis.loans\","
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "matches": [
+            {
+              "line": 114,
+              "text": "\"pdmis.loans\": {\"category\": \"pdmis\", \"system\": \"pdmis\", \"msg_type\": \"loans\", \"description\": \"PDMIS Loans\", \"has_technical_attrs\": False},"
+            },
+            {
+              "line": 123,
+              "text": "\"pdmis.loans\": (\"loan_id\",),"
+            },
+            {
+              "line": 573,
+              "text": "\"loans.json\": (\"pdmis\", \"loans\", \"pdmis.loans\"),"
+            },
+            {
+              "line": 705,
+              "text": "\"pdmis.loans\": (\"loan_id\", \"as_of_date\"),"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "matches": [
+            {
+              "line": 46,
+              "text": "\"pdmis.loans\":           {\"system\":\"pdmis\",\"msg_type\":\"loans\",\"family\":\"PAYMENT_BUSINESS_EVENT\"},"
+            },
+            {
+              "line": 56,
+              "text": "\"loans.json\":\"pdmis.loans\",\"repayments.json\":\"pdmis.repayments\","
+            },
+            {
+              "line": 472,
+              "text": "assert route(Path(\"pdmis/loans.json\")) == \"pdmis.loans\""
+            }
+          ]
+        }
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "producer_calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "producer_calls": [
+            {
+              "call": "prod.produce",
+              "line": 422,
+              "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+            }
+          ]
+        }
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "schema_validation": "NOT VERIFIED",
+      "source_payload": "NOT VERIFIED",
+      "publication_authorised": false
+    },
+    "pdmis.repayments": {
+      "explicit_references": [
+        {
+          "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+          "matches": [
+            {
+              "line": 218,
+              "text": "\"pdmis.repayments\": {"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/kafka/topics.yaml",
+          "matches": [
+            {
+              "line": 160,
+              "text": "- name: pdmis.repayments"
+            }
+          ]
+        },
+        {
+          "path": "platform/source_registry/contracts/source_systems.json",
+          "matches": [
+            {
+              "line": 117,
+              "text": "\"pdmis.repayments\","
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "matches": [
+            {
+              "line": 115,
+              "text": "\"pdmis.repayments\": {\"category\": \"pdmis\", \"system\": \"pdmis\", \"msg_type\": \"repayments\", \"description\": \"PDMIS Repayment Events\", \"has_technical_attrs\": False},"
+            },
+            {
+              "line": 124,
+              "text": "\"pdmis.repayments\": (\"loan_id\", \"payment_id\", \"repayment_id\"),"
+            },
+            {
+              "line": 574,
+              "text": "\"repayments.json\": (\"pdmis\", \"repayments\", \"pdmis.repayments\"),"
+            },
+            {
+              "line": 838,
+              "text": "elif topic == \"pdmis.repayments\":"
+            },
+            {
+              "line": 845,
+              "text": "if topic in (\"wendi.transactions\", \"pdmis.repayments\"):"
+            },
+            {
+              "line": 856,
+              "text": "\"wendi.transactions\", \"pdmis.repayments\","
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "matches": [
+            {
+              "line": 47,
+              "text": "\"pdmis.repayments\":      {\"system\":\"pdmis\",\"msg_type\":\"repayments\",\"family\":\"PAYMENT_BUSINESS_EVENT\"},"
+            },
+            {
+              "line": 56,
+              "text": "\"loans.json\":\"pdmis.loans\",\"repayments.json\":\"pdmis.repayments\","
+            }
+          ]
+        }
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "producer_calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "producer_calls": [
+            {
+              "call": "prod.produce",
+              "line": 422,
+              "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+            }
+          ]
+        }
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "schema_validation": "NOT VERIFIED",
+      "source_payload": "NOT VERIFIED",
+      "publication_authorised": false
+    },
+    "pdmis.saccos": {
+      "explicit_references": [
+        {
+          "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+          "matches": [
+            {
+              "line": 226,
+              "text": "\"pdmis.saccos\": {"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/kafka/topics.yaml",
+          "matches": [
+            {
+              "line": 167,
+              "text": "- name: pdmis.saccos"
+            }
+          ]
+        },
+        {
+          "path": "platform/source_registry/contracts/source_systems.json",
+          "matches": [
+            {
+              "line": 118,
+              "text": "\"pdmis.saccos\","
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "matches": [
+            {
+              "line": 116,
+              "text": "\"pdmis.saccos\": {\"category\": \"pdmis\", \"system\": \"pdmis\", \"msg_type\": \"saccos\", \"description\": \"PDMIS SACCOs\", \"has_technical_attrs\": False},"
+            },
+            {
+              "line": 126,
+              "text": "\"pdmis.saccos\": (\"sacco_id\",),"
+            },
+            {
+              "line": 575,
+              "text": "\"saccos.json\": (\"pdmis\", \"saccos\", \"pdmis.saccos\"),"
+            },
+            {
+              "line": 708,
+              "text": "\"pdmis.saccos\": (\"sacco_id\", \"updated_at\"),"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "matches": [
+            {
+              "line": 48,
+              "text": "\"pdmis.saccos\":          {\"system\":\"pdmis\",\"msg_type\":\"saccos\",\"family\":\"PAYMENT_BUSINESS_EVENT\"},"
+            },
+            {
+              "line": 57,
+              "text": "\"saccos.json\":\"pdmis.saccos\",\"special_groups.json\":\"pdmis.special_groups\","
+            }
+          ]
+        }
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "producer_calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "producer_calls": [
+            {
+              "call": "prod.produce",
+              "line": 422,
+              "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+            }
+          ]
+        }
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "schema_validation": "NOT VERIFIED",
+      "source_payload": "NOT VERIFIED",
+      "publication_authorised": false
+    },
+    "pdmis.special_groups": {
+      "explicit_references": [
+        {
+          "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+          "matches": [
+            {
+              "line": 234,
+              "text": "\"pdmis.special_groups\": {"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/kafka/topics.yaml",
+          "matches": [
+            {
+              "line": 188,
+              "text": "- name: pdmis.special_groups"
+            }
+          ]
+        },
+        {
+          "path": "platform/source_registry/contracts/source_systems.json",
+          "matches": [
+            {
+              "line": 119,
+              "text": "\"pdmis.special_groups\""
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "matches": [
+            {
+              "line": 117,
+              "text": "\"pdmis.special_groups\": {\"category\": \"pdmis\", \"system\": \"pdmis\", \"msg_type\": \"special_groups\", \"description\": \"PDMIS Special Groups\", \"has_technical_attrs\": False},"
+            },
+            {
+              "line": 129,
+              "text": "\"pdmis.special_groups\": (\"group_code\",),"
+            },
+            {
+              "line": 576,
+              "text": "\"special_groups.json\": (\"pdmis\", \"special_groups\", \"pdmis.special_groups\"),"
+            },
+            {
+              "line": 710,
+              "text": "\"pdmis.special_groups\": (\"group_code\", None),"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "matches": [
+            {
+              "line": 49,
+              "text": "\"pdmis.special_groups\":  {\"system\":\"pdmis\",\"msg_type\":\"special_groups\",\"family\":\"PAYMENT_BUSINESS_EVENT\"},"
+            },
+            {
+              "line": 57,
+              "text": "\"saccos.json\":\"pdmis.saccos\",\"special_groups.json\":\"pdmis.special_groups\","
+            }
+          ]
+        }
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "producer_calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "producer_calls": [
+            {
+              "call": "prod.produce",
+              "line": 422,
+              "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+            }
+          ]
+        }
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "schema_validation": "NOT VERIFIED",
+      "source_payload": "NOT VERIFIED",
+      "publication_authorised": false
+    },
+    "wendi.camt052": {
+      "explicit_references": [
+        {
+          "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+          "matches": [
+            {
+              "line": 242,
+              "text": "\"wendi.camt052\": {"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/kafka/topics.yaml",
+          "matches": [
+            {
+              "line": 53,
+              "text": "- name: wendi.camt052"
+            }
+          ]
+        },
+        {
+          "path": "platform/source_registry/contracts/source_systems.json",
+          "matches": [
+            {
+              "line": 141,
+              "text": "\"wendi.camt052\","
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "matches": [
+            {
+              "line": 94,
+              "text": "\"wendi.camt052\": {\"category\": \"wendi\", \"system\": \"wendi\", \"msg_type\": \"camt052\", \"description\": \"Wendi Account Report\", \"has_technical_attrs\": False},"
+            },
+            {
+              "line": 595,
+              "text": "(\"/wendi/camt052/\", (\"wendi\", \"camt052\", \"wendi.camt052\")),"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "matches": [
+            {
+              "line": 30,
+              "text": "\"wendi.camt052\":         {\"system\":\"wendi\",\"msg_type\":\"camt052\",\"family\":\"PAYMENT_BUSINESS_EVENT\"},"
+            },
+            {
+              "line": 64,
+              "text": "(\"/wendi/camt052/\",\"wendi.camt052\"),(\"/wendi/camt053/\",\"wendi.camt053\"),(\"/wendi/camt054/\",\"wendi.camt054\"),"
+            }
+          ]
+        }
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "producer_calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "producer_calls": [
+            {
+              "call": "prod.produce",
+              "line": 422,
+              "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+            }
+          ]
+        }
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "schema_validation": "NOT VERIFIED",
+      "source_payload": "NOT VERIFIED",
+      "publication_authorised": false
+    },
+    "wendi.camt053": {
+      "explicit_references": [
+        {
+          "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+          "matches": [
+            {
+              "line": 250,
+              "text": "\"wendi.camt053\": {"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/kafka/topics.yaml",
+          "matches": [
+            {
+              "line": 46,
+              "text": "- name: wendi.camt053"
+            }
+          ]
+        },
+        {
+          "path": "platform/source_registry/contracts/source_systems.json",
+          "matches": [
+            {
+              "line": 142,
+              "text": "\"wendi.camt053\","
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "matches": [
+            {
+              "line": 95,
+              "text": "\"wendi.camt053\": {\"category\": \"wendi\", \"system\": \"wendi\", \"msg_type\": \"camt053\", \"description\": \"Wendi Account Statement\", \"has_technical_attrs\": False},"
+            },
+            {
+              "line": 596,
+              "text": "(\"/wendi/camt053/\", (\"wendi\", \"camt053\", \"wendi.camt053\")),"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "matches": [
+            {
+              "line": 31,
+              "text": "\"wendi.camt053\":         {\"system\":\"wendi\",\"msg_type\":\"camt053\",\"family\":\"PAYMENT_BUSINESS_EVENT\"},"
+            },
+            {
+              "line": 64,
+              "text": "(\"/wendi/camt052/\",\"wendi.camt052\"),(\"/wendi/camt053/\",\"wendi.camt053\"),(\"/wendi/camt054/\",\"wendi.camt054\"),"
+            }
+          ]
+        }
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "producer_calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "producer_calls": [
+            {
+              "call": "prod.produce",
+              "line": 422,
+              "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+            }
+          ]
+        }
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "schema_validation": "NOT VERIFIED",
+      "source_payload": "NOT VERIFIED",
+      "publication_authorised": false
+    },
+    "wendi.camt054": {
+      "explicit_references": [
+        {
+          "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+          "matches": [
+            {
+              "line": 258,
+              "text": "\"wendi.camt054\": {"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/kafka/topics.yaml",
+          "matches": [
+            {
+              "line": 60,
+              "text": "- name: wendi.camt054"
+            }
+          ]
+        },
+        {
+          "path": "platform/source_registry/contracts/source_systems.json",
+          "matches": [
+            {
+              "line": 143,
+              "text": "\"wendi.camt054\","
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "matches": [
+            {
+              "line": 96,
+              "text": "\"wendi.camt054\": {\"category\": \"wendi\", \"system\": \"wendi\", \"msg_type\": \"camt054\", \"description\": \"Wendi Debit/Credit Notification\", \"has_technical_attrs\": False},"
+            },
+            {
+              "line": 597,
+              "text": "(\"/wendi/camt054/\", (\"wendi\", \"camt054\", \"wendi.camt054\")),"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "matches": [
+            {
+              "line": 32,
+              "text": "\"wendi.camt054\":         {\"system\":\"wendi\",\"msg_type\":\"camt054\",\"family\":\"PAYMENT_BUSINESS_EVENT\"},"
+            },
+            {
+              "line": 64,
+              "text": "(\"/wendi/camt052/\",\"wendi.camt052\"),(\"/wendi/camt053/\",\"wendi.camt053\"),(\"/wendi/camt054/\",\"wendi.camt054\"),"
+            }
+          ]
+        }
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "producer_calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "producer_calls": [
+            {
+              "call": "prod.produce",
+              "line": 422,
+              "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+            }
+          ]
+        }
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "schema_validation": "NOT VERIFIED",
+      "source_payload": "NOT VERIFIED",
+      "publication_authorised": false
+    },
+    "wendi.pain001": {
+      "explicit_references": [
+        {
+          "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+          "matches": [
+            {
+              "line": 266,
+              "text": "\"wendi.pain001\": {"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/kafka/topics.yaml",
+          "matches": [
+            {
+              "line": 74,
+              "text": "- name: wendi.pain001"
+            }
+          ]
+        },
+        {
+          "path": "platform/source_registry/contracts/source_systems.json",
+          "matches": [
+            {
+              "line": 144,
+              "text": "\"wendi.pain001\","
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "matches": [
+            {
+              "line": 92,
+              "text": "\"wendi.pain001\": {\"category\": \"wendi\", \"system\": \"wendi\", \"msg_type\": \"pain001\", \"description\": \"Wendi Payment Initiation\", \"has_technical_attrs\": False},"
+            },
+            {
+              "line": 593,
+              "text": "(\"/wendi/pain001/\", (\"wendi\", \"pain001\", \"wendi.pain001\")),"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "matches": [
+            {
+              "line": 34,
+              "text": "\"wendi.pain001\":         {\"system\":\"wendi\",\"msg_type\":\"pain001\",\"family\":\"PAYMENT_BUSINESS_EVENT\"},"
+            },
+            {
+              "line": 63,
+              "text": "(\"/wendi/pain001/\",\"wendi.pain001\"),(\"/wendi/pain002/\",\"wendi.pain002\"),"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-xml-generator/pdm_stage6_orchestrator.py",
+          "matches": [
+            {
+              "line": 107,
+              "text": "add('wendi/pain001',r['instruction_id'],wendi.pain001(r),xsd001)"
+            }
+          ]
+        }
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "producer_calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "producer_calls": [
+            {
+              "call": "prod.produce",
+              "line": 422,
+              "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+            }
+          ]
+        }
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "schema_validation": "NOT VERIFIED",
+      "source_payload": "NOT VERIFIED",
+      "publication_authorised": false
+    },
+    "wendi.pain002": {
+      "explicit_references": [
+        {
+          "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+          "matches": [
+            {
+              "line": 274,
+              "text": "\"wendi.pain002\": {"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/kafka/topics.yaml",
+          "matches": [
+            {
+              "line": 81,
+              "text": "- name: wendi.pain002"
+            }
+          ]
+        },
+        {
+          "path": "platform/source_registry/contracts/source_systems.json",
+          "matches": [
+            {
+              "line": 145,
+              "text": "\"wendi.pain002\","
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "matches": [
+            {
+              "line": 93,
+              "text": "\"wendi.pain002\": {\"category\": \"wendi\", \"system\": \"wendi\", \"msg_type\": \"pain002\", \"description\": \"Wendi Payment Status\", \"has_technical_attrs\": True},"
+            },
+            {
+              "line": 594,
+              "text": "(\"/wendi/pain002/\", (\"wendi\", \"pain002\", \"wendi.pain002\")),"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "matches": [
+            {
+              "line": 35,
+              "text": "\"wendi.pain002\":         {\"system\":\"wendi\",\"msg_type\":\"pain002\",\"family\":\"PAYMENT_BUSINESS_EVENT\"},"
+            },
+            {
+              "line": 63,
+              "text": "(\"/wendi/pain001/\",\"wendi.pain001\"),(\"/wendi/pain002/\",\"wendi.pain002\"),"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-xml-generator/pdm_stage6_orchestrator.py",
+          "matches": [
+            {
+              "line": 113,
+              "text": "add('wendi/pain002',s['status_id'],wendi.pain002(original,s['status_id'],s['status'],s['created_at'],s.get('reason')),xsd002)"
+            }
+          ]
+        }
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "producer_calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "producer_calls": [
+            {
+              "call": "prod.produce",
+              "line": 422,
+              "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+            }
+          ]
+        }
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "schema_validation": "NOT VERIFIED",
+      "source_payload": "NOT VERIFIED",
+      "publication_authorised": false
+    },
+    "wendi.transactions": {
+      "explicit_references": [
+        {
+          "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+          "matches": [
+            {
+              "line": 282,
+              "text": "\"wendi.transactions\": {"
+            }
+          ]
+        },
+        {
+          "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+          "matches": [
+            {
+              "line": 12,
+              "text": "TOPIC_MAP = {'icmn.vpm.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'vpm', 'msg_type': 'pain001', 'processing_mode': 'real-time'}, 'icmn.pmn.pain001': {'category': 'icmn', 'source_group': 'icmn', 'system': 'pmn', 'msg_type': 'technical_payment_event', 'processing_mode': 'real-tim"
+            }
+          ]
+        },
+        {
+          "path": "platform/kafka/topics.yaml",
+          "matches": [
+            {
+              "line": 67,
+              "text": "- name: wendi.transactions"
+            }
+          ]
+        },
+        {
+          "path": "platform/source_registry/contracts/source_systems.json",
+          "matches": [
+            {
+              "line": 146,
+              "text": "\"wendi.transactions\""
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "matches": [
+            {
+              "line": 97,
+              "text": "\"wendi.transactions\": {\"category\": \"wendi\", \"system\": \"wendi\", \"msg_type\": \"transactions\", \"description\": \"Wendi Transactions\", \"has_technical_attrs\": False},"
+            },
+            {
+              "line": 133,
+              "text": "\"wendi.transactions\": (\"payment_id\", \"transaction_id\", \"loan_id\"),"
+            },
+            {
+              "line": 577,
+              "text": "\"transactions.json\": (\"wendi\", \"transactions\", \"wendi.transactions\"),"
+            },
+            {
+              "line": 578,
+              "text": "\"wendi_transactions.json\": (\"wendi\", \"transactions\", \"wendi.transactions\"),"
+            },
+            {
+              "line": 836,
+              "text": "if topic == \"wendi.transactions\":"
+            },
+            {
+              "line": 845,
+              "text": "if topic in (\"wendi.transactions\", \"pdmis.repayments\"):"
+            },
+            {
+              "line": 856,
+              "text": "\"wendi.transactions\", \"pdmis.repayments\","
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "matches": [
+            {
+              "line": 33,
+              "text": "\"wendi.transactions\":    {\"system\":\"wendi\",\"msg_type\":\"transactions\",\"family\":\"PAYMENT_BUSINESS_EVENT\"},"
+            },
+            {
+              "line": 58,
+              "text": "\"wendi_transactions.json\":\"wendi.transactions\",\"transactions.json\":\"wendi.transactions\","
+            }
+          ]
+        }
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "producer_calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019,
+              "expression": "producer.produce(topic=topic, key=key, value=event, on_delivery=delivery.callback(event['event_id'], key))"
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "producer_calls": [
+            {
+              "call": "prod.produce",
+              "line": 422,
+              "expression": "prod.produce(topic=topic, key=key.encode(), value=wire, on_delivery=make_cb(rec))"
+            }
+          ]
+        }
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "schema_validation": "NOT VERIFIED",
+      "source_payload": "NOT VERIFIED",
+      "publication_authorised": false
+    }
+  },
+  "schema_inventory": [
+    "platform/cdc/contracts/cdc_raw_event.avsc",
+    "platform/kafka/payment_event.avsc",
+    "platform/kafka/technical_payment_event.avsc"
+  ],
+  "service_inventory": {
+    "agent-api": {
+      "path": "services/agent-api",
+      "python_files": 0,
+      "configuration_files": 0
+    },
+    "geospatial": {
+      "path": "services/geospatial",
+      "python_files": 1,
+      "configuration_files": 0
+    },
+    "kafka-consumer-events": {
+      "path": "services/kafka-consumer-events",
+      "python_files": 0,
+      "configuration_files": 0
+    },
+    "mdm-publisher": {
+      "path": "services/mdm-publisher",
+      "python_files": 1,
+      "configuration_files": 0
+    },
+    "payment-producer": {
+      "path": "services/payment-producer",
+      "python_files": 7,
+      "configuration_files": 0
+    },
+    "payment-xml-generator": {
+      "path": "services/payment-xml-generator",
+      "python_files": 21,
+      "configuration_files": 0
+    },
+    "pdm-ml": {
+      "path": "services/pdm-ml",
+      "python_files": 3,
+      "configuration_files": 7
+    },
+    "shared": {
+      "path": "services/shared",
+      "python_files": 17,
+      "configuration_files": 0
+    }
+  },
+  "summary": {
+    "business_topics": 24,
+    "files_inspected": 132,
+    "producer_implementations_found": 11,
+    "schema_files_found": 3,
+    "topics_with_producer_candidates": 24,
+    "topics_without_producer_candidates": 0,
+    "verified_producer_mappings": 0,
+    "verified_schema_validations": 0,
+    "publication_authorised": 0
+  }
+}

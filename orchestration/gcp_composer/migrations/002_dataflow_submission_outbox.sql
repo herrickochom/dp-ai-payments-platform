@@ -1,5 +1,5 @@
 -- Stage 9 additive design migration. REVIEW ONLY; NOT applied by this script.
--- Requires migration 007. Existing transform ledgers are untouched.
+-- Requires migration 001_payment_execution_ledger.sql. Existing transform ledgers are untouched.
 -- One durable submission identity per execution/attempt; no automatic re-submission
 -- after an ambiguous external request until provider reconciliation is conclusive.
 CREATE TABLE IF NOT EXISTS gcp_dataflow_submission_intents (

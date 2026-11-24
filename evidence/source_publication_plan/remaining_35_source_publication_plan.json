@@ -1,0 +1,3121 @@
+{
+  "timestamp_utc": "2026-11-20T20:28:00.686235+00:00",
+  "repository": "/home/hochom/projects/dp-ai-payments-platform-gcp",
+  "scope": "35 remaining governed Kafka topics",
+  "status": "SOURCE INVENTORY COMPLETED",
+  "accepted_mdm_excluded": [
+    "mdm.agent.golden",
+    "mdm.geography.golden",
+    "mdm.sacco.golden"
+  ],
+  "results": {
+    "agent.locations": {
+      "processing_mode": "streaming",
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "classification": "BUSINESS_SOURCE_CANDIDATE",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/agent_network/agent_locations.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_profiles.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0001.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0002.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0003.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0004.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0005.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0006.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0007.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0008.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0009.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0010.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0011.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0012.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0013.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0014.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0015.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0016.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0017.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0018.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        }
+      ],
+      "candidate_count": 20,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "SOURCE CONTRACT VERIFICATION REQUIRED"
+    },
+    "agent.profiles": {
+      "processing_mode": "batch",
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "classification": "BUSINESS_SOURCE_CANDIDATE",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/agent_network/agent_profiles.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_locations.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0001.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0002.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0003.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0004.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0005.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0006.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0007.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0008.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0009.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0010.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0011.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0012.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0013.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0014.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0015.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0016.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0017.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0018.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        }
+      ],
+      "candidate_count": 20,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "SOURCE CONTRACT VERIFICATION REQUIRED"
+    },
+    "agent.transactions": {
+      "processing_mode": "streaming",
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "classification": "BUSINESS_SOURCE_CANDIDATE",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0001.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0002.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0003.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0004.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0005.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0006.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0007.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0008.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0009.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0010.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0011.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0012.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0013.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0014.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0015.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0016.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0017.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0018.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0019.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0020.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        }
+      ],
+      "candidate_count": 20,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "SOURCE CONTRACT VERIFICATION REQUIRED"
+    },
+    "cdc.pdm_mdm.mdm.sacco_master_sources": {
+      "processing_mode": "streaming",
+      "route_status": "contract_only",
+      "source_format": "json",
+      "classification": "CDC_CONTROLLED",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/mdm/sacco_master_sources.json",
+          "filename_match_score": 5,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/cdc/debezium/templates/pdm_mdm_sacco_connector.json",
+          "filename_match_score": 5,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/agent_master_sources.json",
+          "filename_match_score": 4,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/beneficiary_master_sources.json",
+          "filename_match_score": 4,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/geography_master_sources.json",
+          "filename_match_score": 4,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/cdc/contracts/pdm_mdm_source.json",
+          "filename_match_score": 4,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/golden_saccos.json",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/beneficiary_identity_alerts_restricted.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/golden_agents.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/golden_beneficiaries_restricted.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/golden_geography.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/source_crosswalk.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/saccos.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/cdc/contracts/pdm_cdc_contract.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/mdm/contracts/mdm_crosswalk.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/mdm/contracts/mdm_domains.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/mdm/contracts/mdm_event.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/mdm/contracts/mdm_kafka_topics.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/mdm/contracts/mdm_publish_registry.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/mdm/contracts/mdm_resolution_policy.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        }
+      ],
+      "candidate_count": 20,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "CONTROLLED \u2014 NOT AUTHORISED"
+    },
+    "cpo.plm.pain002": {
+      "processing_mode": "real-time",
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "classification": "BUSINESS_SOURCE_CANDIDATE",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/cpo/plm/pain002/plm_0001.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/plm/pain002/plm_0002.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/plm/pain002/plm_0003.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/plm/pain002/plm_0004.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/plm/pain002/plm_0005.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/plm/pain002/plm_0006.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/plm/pain002/plm_0007.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/plm/pain002/plm_0008.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/plm/pain002/plm_0009.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/plm/pain002/plm_0010.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/plm/pain002/plm_0011.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/plm/pain002/plm_0012.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/plm/pain002/plm_0013.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/plm/pain002/plm_0014.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/plm/pain002/plm_0015.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/plm/pain002/plm_0016.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/plm/pain002/plm_0017.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/plm/pain002/plm_0018.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/plm/pain002/plm_0019.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/plm/pain002/plm_0020.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        }
+      ],
+      "candidate_count": 20,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "SOURCE CONTRACT VERIFICATION REQUIRED"
+    },
+    "cpo.psn.pain002": {
+      "processing_mode": "real-time",
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "classification": "BUSINESS_SOURCE_CANDIDATE",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/cpo/psn/pain002/psn_0001.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/psn/pain002/psn_0002.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/psn/pain002/psn_0003.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/psn/pain002/psn_0004.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/psn/pain002/psn_0005.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/psn/pain002/psn_0006.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/psn/pain002/psn_0007.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/psn/pain002/psn_0008.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/psn/pain002/psn_0009.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/psn/pain002/psn_0010.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/psn/pain002/psn_0011.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/psn/pain002/psn_0012.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/psn/pain002/psn_0013.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/psn/pain002/psn_0014.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/psn/pain002/psn_0015.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/psn/pain002/psn_0016.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/psn/pain002/psn_0017.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/psn/pain002/psn_0018.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/psn/pain002/psn_0019.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/cpo/psn/pain002/psn_0020.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        }
+      ],
+      "candidate_count": 20,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "SOURCE CONTRACT VERIFICATION REQUIRED"
+    },
+    "icmn.pmn.pain001": {
+      "processing_mode": "real-time",
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "classification": "BUSINESS_SOURCE_CANDIDATE",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/icmn/pmn/pain001/pmn_0001.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/pmn/pain001/pmn_0002.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/pmn/pain001/pmn_0003.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/pmn/pain001/pmn_0004.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/pmn/pain001/pmn_0005.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/pmn/pain001/pmn_0006.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/pmn/pain001/pmn_0007.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/pmn/pain001/pmn_0008.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/pmn/pain001/pmn_0009.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/pmn/pain001/pmn_0010.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/pmn/pain001/pmn_0011.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/pmn/pain001/pmn_0012.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/pmn/pain001/pmn_0013.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/pmn/pain001/pmn_0014.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/pmn/pain001/pmn_0015.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/pmn/pain001/pmn_0016.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/pmn/pain001/pmn_0017.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/pmn/pain001/pmn_0018.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/pmn/pain001/pmn_0019.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/pmn/pain001/pmn_0020.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        }
+      ],
+      "candidate_count": 20,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "SOURCE CONTRACT VERIFICATION REQUIRED"
+    },
+    "icmn.vpm.pain001": {
+      "processing_mode": "real-time",
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "classification": "BUSINESS_SOURCE_CANDIDATE",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/icmn/vpm/pain001/vpm_0001.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/vpm/pain001/vpm_0002.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/vpm/pain001/vpm_0003.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/vpm/pain001/vpm_0004.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/vpm/pain001/vpm_0005.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/vpm/pain001/vpm_0006.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/vpm/pain001/vpm_0007.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/vpm/pain001/vpm_0008.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/vpm/pain001/vpm_0009.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/vpm/pain001/vpm_0010.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/vpm/pain001/vpm_0011.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/vpm/pain001/vpm_0012.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/vpm/pain001/vpm_0013.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/vpm/pain001/vpm_0014.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/vpm/pain001/vpm_0015.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/vpm/pain001/vpm_0016.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/vpm/pain001/vpm_0017.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/vpm/pain001/vpm_0018.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/vpm/pain001/vpm_0019.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/icmn/vpm/pain001/vpm_0020.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        }
+      ],
+      "candidate_count": 20,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "SOURCE CONTRACT VERIFICATION REQUIRED"
+    },
+    "mdm.beneficiary.golden.restricted": {
+      "processing_mode": "real-time",
+      "route_status": "blocked_restricted",
+      "source_format": "json",
+      "classification": "RESTRICTED_MDM",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/mdm/beneficiary_identity_alerts_restricted.json",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/beneficiary_master_sources.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/golden_beneficiaries_restricted.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/agent_master_sources.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/geography_master_sources.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/golden_agents.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/golden_geography.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/golden_saccos.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/sacco_master_sources.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/source_crosswalk.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/cdc/contracts/pdm_mdm_source.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/cdc/debezium/templates/pdm_mdm_sacco_connector.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/mdm/contracts/mdm_crosswalk.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/mdm/contracts/mdm_domains.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/mdm/contracts/mdm_event.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/mdm/contracts/mdm_kafka_topics.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/mdm/contracts/mdm_publish_registry.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/mdm/contracts/mdm_resolution_policy.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "services/mdm-publisher/mdm_publisher.py",
+          "filename_match_score": 1,
+          "producer_functions": [
+            "build_publish_plan",
+            "execute_publish"
+          ]
+        },
+        {
+          "path": "services/payment-xml-generator/mdm_generator.py",
+          "filename_match_score": 1,
+          "producer_functions": [
+            "generate"
+          ]
+        }
+      ],
+      "candidate_count": 20,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "CONTROLLED \u2014 NOT AUTHORISED"
+    },
+    "mdm.beneficiary.identity-alert.restricted": {
+      "processing_mode": "real-time",
+      "route_status": "blocked_restricted",
+      "source_format": "json",
+      "classification": "RESTRICTED_MDM",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/mdm/beneficiary_identity_alerts_restricted.json",
+          "filename_match_score": 5,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/beneficiary_master_sources.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/golden_beneficiaries_restricted.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/agent_master_sources.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/geography_master_sources.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/golden_agents.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/golden_geography.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/golden_saccos.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/sacco_master_sources.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/source_crosswalk.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/cdc/contracts/pdm_mdm_source.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/cdc/debezium/templates/pdm_mdm_sacco_connector.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/mdm/contracts/mdm_crosswalk.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/mdm/contracts/mdm_domains.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/mdm/contracts/mdm_event.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/mdm/contracts/mdm_kafka_topics.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/mdm/contracts/mdm_publish_registry.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/mdm/contracts/mdm_resolution_policy.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "services/mdm-publisher/mdm_publisher.py",
+          "filename_match_score": 1,
+          "producer_functions": [
+            "build_publish_plan",
+            "execute_publish"
+          ]
+        },
+        {
+          "path": "services/payment-xml-generator/mdm_generator.py",
+          "filename_match_score": 1,
+          "producer_functions": [
+            "generate"
+          ]
+        }
+      ],
+      "candidate_count": 20,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "CONTROLLED \u2014 NOT AUTHORISED"
+    },
+    "mdm.crosswalk.restricted": {
+      "processing_mode": "real-time",
+      "route_status": "blocked_restricted",
+      "source_format": "json",
+      "classification": "RESTRICTED_MDM",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/mdm/beneficiary_identity_alerts_restricted.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/golden_beneficiaries_restricted.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/source_crosswalk.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/mdm/contracts/mdm_crosswalk.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/agent_master_sources.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/beneficiary_master_sources.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/geography_master_sources.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/golden_agents.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/golden_geography.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/golden_saccos.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/sacco_master_sources.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/cdc/contracts/pdm_mdm_source.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/cdc/debezium/templates/pdm_mdm_sacco_connector.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/mdm/contracts/mdm_domains.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/mdm/contracts/mdm_event.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/mdm/contracts/mdm_kafka_topics.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/mdm/contracts/mdm_publish_registry.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "platform/mdm/contracts/mdm_resolution_policy.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "services/mdm-publisher/mdm_publisher.py",
+          "filename_match_score": 1,
+          "producer_functions": [
+            "build_publish_plan",
+            "execute_publish"
+          ]
+        },
+        {
+          "path": "services/payment-xml-generator/mdm_generator.py",
+          "filename_match_score": 1,
+          "producer_functions": [
+            "generate"
+          ]
+        }
+      ],
+      "candidate_count": 20,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "CONTROLLED \u2014 NOT AUTHORISED"
+    },
+    "mobile.airtel.pacs002": {
+      "processing_mode": "real-time",
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "classification": "BUSINESS_SOURCE_CANDIDATE",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/mobile_networks/airtel/pacs002/pacs002_airtel_0012.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs002/pacs002_airtel_0023.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs002/pacs002_airtel_0035.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs002/pacs002_airtel_0046.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs002/pacs002_airtel_0069.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs002/pacs002_airtel_0080.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs002/pacs002_airtel_0092.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs002/pacs002_airtel_0103.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs002/pacs002_airtel_0126.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs002/pacs002_airtel_0137.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs002/pacs002_airtel_0149.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs002/pacs002_airtel_0160.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs002/pacs002_airtel_0183.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs002/pacs002_airtel_0194.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs002/pacs002_airtel_0206.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs002/pacs002_airtel_0217.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0012.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0023.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0035.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0046.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        }
+      ],
+      "candidate_count": 20,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "SOURCE CONTRACT VERIFICATION REQUIRED"
+    },
+    "mobile.airtel.pacs008": {
+      "processing_mode": "real-time",
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "classification": "BUSINESS_SOURCE_CANDIDATE",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0012.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0023.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0035.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0046.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0069.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0080.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0092.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0103.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0126.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0137.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0149.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0160.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0183.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0194.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0206.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0217.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs002/pacs002_airtel_0012.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs002/pacs002_airtel_0023.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs002/pacs002_airtel_0035.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/airtel/pacs002/pacs002_airtel_0046.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        }
+      ],
+      "candidate_count": 20,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "SOURCE CONTRACT VERIFICATION REQUIRED"
+    },
+    "mobile.mtn.pacs002": {
+      "processing_mode": "real-time",
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "classification": "BUSINESS_SOURCE_CANDIDATE",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/mobile_networks/mtn/pacs002/pacs002_mtn_0001.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs002/pacs002_mtn_0002.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs002/pacs002_mtn_0003.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs002/pacs002_mtn_0004.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs002/pacs002_mtn_0005.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs002/pacs002_mtn_0006.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs002/pacs002_mtn_0007.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs002/pacs002_mtn_0008.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs002/pacs002_mtn_0009.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs002/pacs002_mtn_0010.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs002/pacs002_mtn_0011.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs002/pacs002_mtn_0013.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs002/pacs002_mtn_0014.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs002/pacs002_mtn_0015.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs002/pacs002_mtn_0016.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs002/pacs002_mtn_0017.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs002/pacs002_mtn_0018.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs002/pacs002_mtn_0019.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs002/pacs002_mtn_0020.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs002/pacs002_mtn_0021.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        }
+      ],
+      "candidate_count": 20,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "SOURCE CONTRACT VERIFICATION REQUIRED"
+    },
+    "mobile.mtn.pacs008": {
+      "processing_mode": "streaming",
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "classification": "BUSINESS_SOURCE_CANDIDATE",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0001.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0002.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0003.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0004.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0005.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0006.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0007.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0008.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0009.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0010.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0011.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0013.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0014.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0015.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0016.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0017.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0018.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0019.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0020.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0021.xml",
+          "filename_match_score": 3,
+          "producer_functions": []
+        }
+      ],
+      "candidate_count": 20,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "SOURCE CONTRACT VERIFICATION REQUIRED"
+    },
+    "payment-events.dlq": {
+      "processing_mode": "streaming",
+      "route_status": "contract_only",
+      "source_format": "json",
+      "classification": "DERIVED_OR_OPERATIONAL",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [],
+      "candidate_count": 0,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "CONTROLLED \u2014 NOT AUTHORISED"
+    },
+    "payment-events.retry": {
+      "processing_mode": "streaming",
+      "route_status": "contract_only",
+      "source_format": "json",
+      "classification": "DERIVED_OR_OPERATIONAL",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [],
+      "candidate_count": 0,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "CONTROLLED \u2014 NOT AUTHORISED"
+    },
+    "payments.lifecycle.audit.v1": {
+      "processing_mode": "real-time",
+      "route_status": "blocked_unverified_format",
+      "source_format": "unverified",
+      "classification": "DERIVED_OR_OPERATIONAL",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "platform/flink/jobs/j1_lifecycle_state_skeleton.py",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "services/shared/lifecycle_planner.py",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "services/shared/lifecycle_planner_demo.py",
+          "filename_match_score": 1,
+          "producer_functions": []
+        }
+      ],
+      "candidate_count": 3,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "CONTROLLED \u2014 NOT AUTHORISED"
+    },
+    "payments.lifecycle.dlq.v1": {
+      "processing_mode": "real-time",
+      "route_status": "blocked_unverified_format",
+      "source_format": "unverified",
+      "classification": "DERIVED_OR_OPERATIONAL",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "platform/flink/jobs/j1_lifecycle_state_skeleton.py",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "services/shared/lifecycle_planner.py",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "services/shared/lifecycle_planner_demo.py",
+          "filename_match_score": 1,
+          "producer_functions": []
+        }
+      ],
+      "candidate_count": 3,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "CONTROLLED \u2014 NOT AUTHORISED"
+    },
+    "payments.lifecycle.exceptions.v1": {
+      "processing_mode": "real-time",
+      "route_status": "blocked_unverified_format",
+      "source_format": "unverified",
+      "classification": "DERIVED_OR_OPERATIONAL",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "platform/flink/jobs/j1_lifecycle_state_skeleton.py",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "services/shared/lifecycle_planner.py",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "services/shared/lifecycle_planner_demo.py",
+          "filename_match_score": 1,
+          "producer_functions": []
+        }
+      ],
+      "candidate_count": 3,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "CONTROLLED \u2014 NOT AUTHORISED"
+    },
+    "payments.lifecycle.state.v1": {
+      "processing_mode": "real-time",
+      "route_status": "contract_only",
+      "source_format": "confluent_avro",
+      "classification": "DERIVED_OR_OPERATIONAL",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "platform/flink/jobs/j1_lifecycle_state_skeleton.py",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "services/shared/lifecycle_planner.py",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "services/shared/lifecycle_planner_demo.py",
+          "filename_match_score": 1,
+          "producer_functions": []
+        }
+      ],
+      "candidate_count": 3,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "CONTROLLED \u2014 NOT AUTHORISED"
+    },
+    "payments.lifecycle.transitions.v1": {
+      "processing_mode": "real-time",
+      "route_status": "contract_only",
+      "source_format": "confluent_avro",
+      "classification": "DERIVED_OR_OPERATIONAL",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "platform/flink/jobs/j1_lifecycle_state_skeleton.py",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "services/shared/lifecycle_planner.py",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "services/shared/lifecycle_planner_demo.py",
+          "filename_match_score": 1,
+          "producer_functions": []
+        }
+      ],
+      "candidate_count": 3,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "CONTROLLED \u2014 NOT AUTHORISED"
+    },
+    "pdmis.beneficiaries": {
+      "processing_mode": "batch",
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "classification": "BUSINESS_SOURCE_CANDIDATE",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/pdmis/beneficiaries.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/golden_beneficiaries_restricted.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/business_plans.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/households.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/loans.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/repayments.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/saccos.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/special_groups.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "services/payment-xml-generator/pdmis_generator.py",
+          "filename_match_score": 1,
+          "producer_functions": [
+            "generate_saccos",
+            "generate_beneficiaries",
+            "generate_households",
+            "generate_loans",
+            "generate_repayments",
+            "generate_business_plans"
+          ]
+        }
+      ],
+      "candidate_count": 9,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "SOURCE CONTRACT VERIFICATION REQUIRED"
+    },
+    "pdmis.business_plans": {
+      "processing_mode": "batch",
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "classification": "BUSINESS_SOURCE_CANDIDATE",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/pdmis/business_plans.json",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/beneficiaries.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/households.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/loans.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/repayments.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/saccos.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/special_groups.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "services/payment-xml-generator/pdmis_generator.py",
+          "filename_match_score": 1,
+          "producer_functions": [
+            "generate_saccos",
+            "generate_beneficiaries",
+            "generate_households",
+            "generate_loans",
+            "generate_repayments",
+            "generate_business_plans"
+          ]
+        }
+      ],
+      "candidate_count": 8,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "SOURCE CONTRACT VERIFICATION REQUIRED"
+    },
+    "pdmis.households": {
+      "processing_mode": "batch",
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "classification": "BUSINESS_SOURCE_CANDIDATE",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/pdmis/households.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/beneficiaries.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/business_plans.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/loans.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/repayments.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/saccos.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/special_groups.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "services/payment-xml-generator/pdmis_generator.py",
+          "filename_match_score": 1,
+          "producer_functions": [
+            "generate_saccos",
+            "generate_beneficiaries",
+            "generate_households",
+            "generate_loans",
+            "generate_repayments",
+            "generate_business_plans"
+          ]
+        }
+      ],
+      "candidate_count": 8,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "SOURCE CONTRACT VERIFICATION REQUIRED"
+    },
+    "pdmis.loans": {
+      "processing_mode": "batch",
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "classification": "BUSINESS_SOURCE_CANDIDATE",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/pdmis/loans.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/beneficiaries.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/business_plans.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/households.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/repayments.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/saccos.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/special_groups.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "services/payment-xml-generator/pdmis_generator.py",
+          "filename_match_score": 1,
+          "producer_functions": [
+            "generate_saccos",
+            "generate_beneficiaries",
+            "generate_households",
+            "generate_loans",
+            "generate_repayments",
+            "generate_business_plans"
+          ]
+        }
+      ],
+      "candidate_count": 8,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "SOURCE CONTRACT VERIFICATION REQUIRED"
+    },
+    "pdmis.repayments": {
+      "processing_mode": "streaming",
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "classification": "BUSINESS_SOURCE_CANDIDATE",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/pdmis/repayments.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/beneficiaries.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/business_plans.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/households.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/loans.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/saccos.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/special_groups.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "services/payment-xml-generator/pdmis_generator.py",
+          "filename_match_score": 1,
+          "producer_functions": [
+            "generate_saccos",
+            "generate_beneficiaries",
+            "generate_households",
+            "generate_loans",
+            "generate_repayments",
+            "generate_business_plans"
+          ]
+        }
+      ],
+      "candidate_count": 8,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "SOURCE CONTRACT VERIFICATION REQUIRED"
+    },
+    "pdmis.saccos": {
+      "processing_mode": "batch",
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "classification": "BUSINESS_SOURCE_CANDIDATE",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/pdmis/saccos.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/mdm/golden_saccos.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/beneficiaries.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/business_plans.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/households.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/loans.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/repayments.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/special_groups.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "services/payment-xml-generator/pdmis_generator.py",
+          "filename_match_score": 1,
+          "producer_functions": [
+            "generate_saccos",
+            "generate_beneficiaries",
+            "generate_households",
+            "generate_loans",
+            "generate_repayments",
+            "generate_business_plans"
+          ]
+        }
+      ],
+      "candidate_count": 9,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "SOURCE CONTRACT VERIFICATION REQUIRED"
+    },
+    "pdmis.special_groups": {
+      "processing_mode": "batch",
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "classification": "BUSINESS_SOURCE_CANDIDATE",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/pdmis/special_groups.json",
+          "filename_match_score": 3,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/beneficiaries.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/business_plans.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/households.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/loans.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/repayments.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/pdmis/saccos.json",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "services/payment-xml-generator/pdmis_generator.py",
+          "filename_match_score": 1,
+          "producer_functions": [
+            "generate_saccos",
+            "generate_beneficiaries",
+            "generate_households",
+            "generate_loans",
+            "generate_repayments",
+            "generate_business_plans"
+          ]
+        }
+      ],
+      "candidate_count": 8,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "SOURCE CONTRACT VERIFICATION REQUIRED"
+    },
+    "wendi.camt052": {
+      "processing_mode": "streaming",
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "classification": "BUSINESS_SOURCE_CANDIDATE",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/wendi/camt052/camt052_report_001.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt052/camt052_report_002.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt052/camt052_report_003.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt052/camt052_report_004.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt052/camt052_report_005.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt052/camt052_report_006.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt052/camt052_report_007.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt052/camt052_report_008.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt052/camt052_report_009.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt052/camt052_report_010.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt052/camt052_report_011.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt052/camt052_report_012.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt052/camt052_report_013.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt052/camt052_report_014.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt052/camt052_report_015.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt052/camt052_report_016.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt052/camt052_report_017.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt052/camt052_report_018.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt052/camt052_report_019.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt052/camt052_report_020.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        }
+      ],
+      "candidate_count": 20,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "SOURCE CONTRACT VERIFICATION REQUIRED"
+    },
+    "wendi.camt053": {
+      "processing_mode": "streaming",
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "classification": "BUSINESS_SOURCE_CANDIDATE",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/wendi/camt053/camt053_0001.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt053/camt053_0002.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt053/camt053_0003.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt053/camt053_0004.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt053/camt053_0006.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt053/camt053_0008.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt053/camt053_0009.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt053/camt053_0011.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt053/camt053_0013.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt053/camt053_0016.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt053/camt053_0017.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt053/camt053_0019.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt053/camt053_0020.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt053/camt053_0021.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt053/camt053_0022.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt053/camt053_0023.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt053/camt053_0025.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt053/camt053_0027.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt053/camt053_0028.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt053/camt053_0030.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        }
+      ],
+      "candidate_count": 20,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "SOURCE CONTRACT VERIFICATION REQUIRED"
+    },
+    "wendi.camt054": {
+      "processing_mode": "streaming",
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "classification": "BUSINESS_SOURCE_CANDIDATE",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/wendi/camt054/camt054_0001.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt054/camt054_0002.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt054/camt054_0003.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt054/camt054_0004.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt054/camt054_0006.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt054/camt054_0008.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt054/camt054_0009.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt054/camt054_0011.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt054/camt054_0013.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt054/camt054_0016.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt054/camt054_0017.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt054/camt054_0019.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt054/camt054_0020.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt054/camt054_0021.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt054/camt054_0022.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt054/camt054_0023.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt054/camt054_0025.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt054/camt054_0027.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt054/camt054_0028.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/camt054/camt054_0030.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        }
+      ],
+      "candidate_count": 20,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "SOURCE CONTRACT VERIFICATION REQUIRED"
+    },
+    "wendi.pain001": {
+      "processing_mode": "real-time",
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "classification": "BUSINESS_SOURCE_CANDIDATE",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/wendi/pain001/pain001_0001.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain001/pain001_0002.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain001/pain001_0003.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain001/pain001_0004.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain001/pain001_0005.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain001/pain001_0006.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain001/pain001_0007.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain001/pain001_0008.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain001/pain001_0009.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain001/pain001_0010.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain001/pain001_0011.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain001/pain001_0012.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain001/pain001_0013.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain001/pain001_0014.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain001/pain001_0015.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain001/pain001_0016.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain001/pain001_0017.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain001/pain001_0018.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain001/pain001_0019.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain001/pain001_0020.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        }
+      ],
+      "candidate_count": 20,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "SOURCE CONTRACT VERIFICATION REQUIRED"
+    },
+    "wendi.pain002": {
+      "processing_mode": "real-time",
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "classification": "BUSINESS_SOURCE_CANDIDATE",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/wendi/pain002/pain002_0001.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain002/pain002_0002.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain002/pain002_0003.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain002/pain002_0004.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain002/pain002_0005.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain002/pain002_0006.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain002/pain002_0007.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain002/pain002_0008.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain002/pain002_0009.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain002/pain002_0010.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain002/pain002_0011.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain002/pain002_0012.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain002/pain002_0013.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain002/pain002_0014.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain002/pain002_0015.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain002/pain002_0016.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain002/pain002_0017.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain002/pain002_0018.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain002/pain002_0019.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/wendi/pain002/pain002_0020.xml",
+          "filename_match_score": 2,
+          "producer_functions": []
+        }
+      ],
+      "candidate_count": 20,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "SOURCE CONTRACT VERIFICATION REQUIRED"
+    },
+    "wendi.transactions": {
+      "processing_mode": "streaming",
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "classification": "BUSINESS_SOURCE_CANDIDATE",
+      "kafka_topic": "PASS",
+      "retained_offset_span": 0,
+      "candidate_files": [
+        {
+          "path": "data/wendi/wendi_transactions.json",
+          "filename_match_score": 2,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0001.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0002.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0003.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0004.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0005.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0006.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0007.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0008.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0009.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0010.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0011.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0012.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0013.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0014.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0015.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0016.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0017.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0018.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        },
+        {
+          "path": "data/agent_network/agent_transactions/agent_tx_0019.xml",
+          "filename_match_score": 1,
+          "producer_functions": []
+        }
+      ],
+      "candidate_count": 20,
+      "producer_contract_verified": false,
+      "payload_schema_verified": false,
+      "source_record_verified": false,
+      "authorised_for_live_publication": false,
+      "status": "SOURCE CONTRACT VERIFICATION REQUIRED"
+    }
+  },
+  "summary": {
+    "governed_topics": 38,
+    "accepted_mdm_topics": 3,
+    "remaining_topics": 35,
+    "classification_counts": {
+      "BUSINESS_SOURCE_CANDIDATE": 24,
+      "CDC_CONTROLLED": 1,
+      "RESTRICTED_MDM": 3,
+      "DERIVED_OR_OPERATIONAL": 7
+    },
+    "business_source_candidates": 24,
+    "live_publications_authorised": 0
+  },
+  "mutations": {
+    "kafka_publications": 0,
+    "kafka_commits": 0,
+    "pubsub_publications": 0,
+    "pubsub_acknowledgements": 0,
+    "gcs_writes": 0,
+    "data_regeneration": 0
+  }
+}

@@ -1,0 +1,611 @@
+{
+  "examples": {},
+  "finding_counts": {
+    "NOT VERIFIED": 2
+  },
+  "findings": [
+    {
+      "area": "business",
+      "code": "FINANCIAL_RECONCILIATION_CONTRACT_REQUIRED",
+      "detail": "Amount profiling does not prove settlement, repayment, loan or SACCO ledger reconciliation.",
+      "status": "NOT VERIFIED"
+    },
+    {
+      "area": "producer",
+      "code": "RUNTIME_CONTRACT_NOT_TESTED",
+      "detail": "Static source inspection cannot establish Kafka publish success, Schema Registry compatibility, offset handling or live delivery.",
+      "status": "NOT VERIFIED"
+    }
+  ],
+  "gcp_operations": 0,
+  "inventory": {
+    "iso": 1768,
+    "iso_families": {
+      "camt.052.001.08": 38,
+      "camt.053.001.08": 151,
+      "camt.054.001.08": 151,
+      "pacs.002.001.10": 238,
+      "pacs.008.001.08": 238,
+      "pain.001.001.09": 476,
+      "pain.002.001.12": 476
+    },
+    "non_iso": 627,
+    "non_iso_groups": [
+      {
+        "count": 151,
+        "namespace": "",
+        "root": "AgentTransaction"
+      },
+      {
+        "count": 476,
+        "namespace": "",
+        "root": "TechnicalPaymentEvent"
+      }
+    ],
+    "parse_failures": 0,
+    "parsed": 2395,
+    "total_xml": 2395
+  },
+  "kafka_operations": 0,
+  "repository": "/home/hochom/projects/dp-ai-payments-platform-gcp",
+  "runtime_execution": false,
+  "sections": {
+    "business": {
+      "amount_field_counts": [
+        {
+          "count": 38,
+          "family": "camt.052.001.08",
+          "field": "Amt"
+        },
+        {
+          "count": 680,
+          "family": "camt.053.001.08",
+          "field": "Amt"
+        },
+        {
+          "count": 302,
+          "family": "camt.054.001.08",
+          "field": "Amt"
+        },
+        {
+          "count": 238,
+          "family": "pacs.008.001.08",
+          "field": "InstdAmt"
+        },
+        {
+          "count": 238,
+          "family": "pacs.008.001.08",
+          "field": "IntrBkSttlmAmt"
+        },
+        {
+          "count": 952,
+          "family": "pain.001.001.09",
+          "field": "CtrlSum"
+        },
+        {
+          "count": 476,
+          "family": "pain.001.001.09",
+          "field": "InstdAmt"
+        }
+      ],
+      "amount_samples": [
+        {
+          "amount": "1000000",
+          "currency": null,
+          "family": "pain.001.001.09",
+          "field": "CtrlSum",
+          "xml_path": "/Document/CstmrCdtTrfInitn/GrpHdr/CtrlSum"
+        },
+        {
+          "amount": "1000000",
+          "currency": null,
+          "family": "pain.001.001.09",
+          "field": "CtrlSum",
+          "xml_path": "/Document/CstmrCdtTrfInitn/PmtInf/CtrlSum"
+        },
+        {
+          "amount": "1000000",
+          "currency": "UGX",
+          "family": "pain.001.001.09",
+          "field": "InstdAmt",
+          "xml_path": "/Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf/Amt/InstdAmt"
+        },
+        {
+          "amount": "1000000",
+          "currency": null,
+          "family": "pain.001.001.09",
+          "field": "CtrlSum",
+          "xml_path": "/Document/CstmrCdtTrfInitn/GrpHdr/CtrlSum"
+        },
+        {
+          "amount": "1000000",
+          "currency": null,
+          "family": "pain.001.001.09",
+          "field": "CtrlSum",
+          "xml_path": "/Document/CstmrCdtTrfInitn/PmtInf/CtrlSum"
+        },
+        {
+          "amount": "1000000",
+          "currency": "UGX",
+          "family": "pain.001.001.09",
+          "field": "InstdAmt",
+          "xml_path": "/Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf/Amt/InstdAmt"
+        },
+        {
+          "amount": "1000000",
+          "currency": null,
+          "family": "pain.001.001.09",
+          "field": "CtrlSum",
+          "xml_path": "/Document/CstmrCdtTrfInitn/GrpHdr/CtrlSum"
+        },
+        {
+          "amount": "1000000",
+          "currency": null,
+          "family": "pain.001.001.09",
+          "field": "CtrlSum",
+          "xml_path": "/Document/CstmrCdtTrfInitn/PmtInf/CtrlSum"
+        },
+        {
+          "amount": "1000000",
+          "currency": "UGX",
+          "family": "pain.001.001.09",
+          "field": "InstdAmt",
+          "xml_path": "/Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf/Amt/InstdAmt"
+        },
+        {
+          "amount": "1000000",
+          "currency": null,
+          "family": "pain.001.001.09",
+          "field": "CtrlSum",
+          "xml_path": "/Document/CstmrCdtTrfInitn/GrpHdr/CtrlSum"
+        },
+        {
+          "amount": "1000000",
+          "currency": null,
+          "family": "pain.001.001.09",
+          "field": "CtrlSum",
+          "xml_path": "/Document/CstmrCdtTrfInitn/PmtInf/CtrlSum"
+        },
+        {
+          "amount": "1000000",
+          "currency": "UGX",
+          "family": "pain.001.001.09",
+          "field": "InstdAmt",
+          "xml_path": "/Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf/Amt/InstdAmt"
+        },
+        {
+          "amount": "1000000",
+          "currency": null,
+          "family": "pain.001.001.09",
+          "field": "CtrlSum",
+          "xml_path": "/Document/CstmrCdtTrfInitn/GrpHdr/CtrlSum"
+        },
+        {
+          "amount": "1000000",
+          "currency": null,
+          "family": "pain.001.001.09",
+          "field": "CtrlSum",
+          "xml_path": "/Document/CstmrCdtTrfInitn/PmtInf/CtrlSum"
+        },
+        {
+          "amount": "1000000",
+          "currency": "UGX",
+          "family": "pain.001.001.09",
+          "field": "InstdAmt",
+          "xml_path": "/Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf/Amt/InstdAmt"
+        },
+        {
+          "amount": "1000000",
+          "currency": null,
+          "family": "pain.001.001.09",
+          "field": "CtrlSum",
+          "xml_path": "/Document/CstmrCdtTrfInitn/GrpHdr/CtrlSum"
+        },
+        {
+          "amount": "1000000",
+          "currency": null,
+          "family": "pain.001.001.09",
+          "field": "CtrlSum",
+          "xml_path": "/Document/CstmrCdtTrfInitn/PmtInf/CtrlSum"
+        },
+        {
+          "amount": "1000000",
+          "currency": "UGX",
+          "family": "pain.001.001.09",
+          "field": "InstdAmt",
+          "xml_path": "/Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf/Amt/InstdAmt"
+        },
+        {
+          "amount": "1000000",
+          "currency": null,
+          "family": "pain.001.001.09",
+          "field": "CtrlSum",
+          "xml_path": "/Document/CstmrCdtTrfInitn/GrpHdr/CtrlSum"
+        },
+        {
+          "amount": "1000000",
+          "currency": null,
+          "family": "pain.001.001.09",
+          "field": "CtrlSum",
+          "xml_path": "/Document/CstmrCdtTrfInitn/PmtInf/CtrlSum"
+        }
+      ],
+      "currency_counts": {
+        "UGX": 1972
+      },
+      "duplicate_message_ids": 0,
+      "identifier_cardinalities": {
+        "NON_ISO:TechnicalPaymentEvent": {
+          "EndToEndId": 238
+        },
+        "camt.052.001.08": {
+          "MsgId": 38
+        },
+        "camt.053.001.08": {
+          "EndToEndId": 152,
+          "MsgId": 151,
+          "TxId": 189
+        },
+        "camt.054.001.08": {
+          "EndToEndId": 151,
+          "MsgId": 151,
+          "TxId": 151
+        },
+        "pacs.002.001.10": {
+          "MsgId": 238,
+          "OrgnlEndToEndId": 238,
+          "OrgnlInstrId": 238,
+          "OrgnlMsgId": 238,
+          "OrgnlTxId": 238
+        },
+        "pacs.008.001.08": {
+          "EndToEndId": 238,
+          "InstrId": 238,
+          "MsgId": 238,
+          "TxId": 238
+        },
+        "pain.001.001.09": {
+          "EndToEndId": 238,
+          "InstrId": 476,
+          "MsgId": 476
+        },
+        "pain.002.001.12": {
+          "MsgId": 476,
+          "OrgnlEndToEndId": 238,
+          "OrgnlInstrId": 476,
+          "OrgnlMsgId": 476
+        }
+      },
+      "invalid_numeric_values": 0,
+      "negative_amount_examples": [],
+      "negative_amount_observations": 0,
+      "reference_checks": {
+        "pacs.002.001.10.OrgnlMsgId->pacs.008.001.08.MsgId": {
+          "distinct_source_values": 238,
+          "matched_values": 238,
+          "unmatched_examples": [],
+          "unmatched_values": 0
+        },
+        "pain.002.001.12.OrgnlMsgId->pain.001.001.09.MsgId": {
+          "distinct_source_values": 476,
+          "matched_values": 476,
+          "unmatched_examples": [],
+          "unmatched_values": 0
+        }
+      },
+      "status": "NOT VERIFIED",
+      "status_counts": [
+        {
+          "count": 151,
+          "family": "pacs.002.001.10",
+          "field": "TxSts",
+          "value": "ACSC"
+        },
+        {
+          "count": 37,
+          "family": "pacs.002.001.10",
+          "field": "TxSts",
+          "value": "PDNG"
+        },
+        {
+          "count": 50,
+          "family": "pacs.002.001.10",
+          "field": "TxSts",
+          "value": "RJCT"
+        },
+        {
+          "count": 302,
+          "family": "pain.002.001.12",
+          "field": "GrpSts",
+          "value": "ACSC"
+        },
+        {
+          "count": 74,
+          "family": "pain.002.001.12",
+          "field": "GrpSts",
+          "value": "PDNG"
+        },
+        {
+          "count": 100,
+          "family": "pain.002.001.12",
+          "field": "GrpSts",
+          "value": "RJCT"
+        },
+        {
+          "count": 302,
+          "family": "pain.002.001.12",
+          "field": "TxSts",
+          "value": "ACSC"
+        },
+        {
+          "count": 74,
+          "family": "pain.002.001.12",
+          "field": "TxSts",
+          "value": "PDNG"
+        },
+        {
+          "count": 100,
+          "family": "pain.002.001.12",
+          "field": "TxSts",
+          "value": "RJCT"
+        }
+      ]
+    },
+    "inventory": {
+      "iso": 1768,
+      "iso_families": {
+        "camt.052.001.08": 38,
+        "camt.053.001.08": 151,
+        "camt.054.001.08": 151,
+        "pacs.002.001.10": 238,
+        "pacs.008.001.08": 238,
+        "pain.001.001.09": 476,
+        "pain.002.001.12": 476
+      },
+      "non_iso": 627,
+      "non_iso_groups": [
+        {
+          "count": 151,
+          "namespace": "",
+          "root": "AgentTransaction"
+        },
+        {
+          "count": 476,
+          "namespace": "",
+          "root": "TechnicalPaymentEvent"
+        }
+      ],
+      "parse_failures": 0,
+      "parsed": 2395,
+      "status": "PASS",
+      "total_xml": 2395
+    },
+    "iso": {
+      "invalid_by_family": {},
+      "invalid_total": 0,
+      "status": "PASS",
+      "valid_by_family": {
+        "camt.052.001.08": 38,
+        "camt.053.001.08": 151,
+        "camt.054.001.08": 151,
+        "pacs.002.001.10": 238,
+        "pacs.008.001.08": 238,
+        "pain.001.001.09": 476,
+        "pain.002.001.12": 476
+      },
+      "valid_total": 1768
+    },
+    "kafka": {
+      "processing_modes": {
+        "batch": 7,
+        "real-time": 18,
+        "streaming": 13
+      },
+      "status": "PASS",
+      "topic_count": 38,
+      "topics": [
+        {
+          "name": "icmn.vpm.pain001",
+          "processing_mode": "real-time"
+        },
+        {
+          "name": "icmn.pmn.pain001",
+          "processing_mode": "real-time"
+        },
+        {
+          "name": "cpo.psn.pain002",
+          "processing_mode": "real-time"
+        },
+        {
+          "name": "cpo.plm.pain002",
+          "processing_mode": "real-time"
+        },
+        {
+          "name": "wendi.camt053",
+          "processing_mode": "streaming"
+        },
+        {
+          "name": "wendi.camt052",
+          "processing_mode": "streaming"
+        },
+        {
+          "name": "wendi.camt054",
+          "processing_mode": "streaming"
+        },
+        {
+          "name": "wendi.transactions",
+          "processing_mode": "streaming"
+        },
+        {
+          "name": "wendi.pain001",
+          "processing_mode": "real-time"
+        },
+        {
+          "name": "wendi.pain002",
+          "processing_mode": "real-time"
+        },
+        {
+          "name": "mobile.mtn.pacs008",
+          "processing_mode": "streaming"
+        },
+        {
+          "name": "mobile.mtn.pacs002",
+          "processing_mode": "real-time"
+        },
+        {
+          "name": "mobile.airtel.pacs008",
+          "processing_mode": "real-time"
+        },
+        {
+          "name": "mobile.airtel.pacs002",
+          "processing_mode": "real-time"
+        },
+        {
+          "name": "agent.transactions",
+          "processing_mode": "streaming"
+        },
+        {
+          "name": "agent.profiles",
+          "processing_mode": "batch"
+        },
+        {
+          "name": "agent.locations",
+          "processing_mode": "streaming"
+        },
+        {
+          "name": "pdmis.beneficiaries",
+          "processing_mode": "batch"
+        },
+        {
+          "name": "pdmis.loans",
+          "processing_mode": "batch"
+        },
+        {
+          "name": "pdmis.repayments",
+          "processing_mode": "streaming"
+        },
+        {
+          "name": "pdmis.saccos",
+          "processing_mode": "batch"
+        },
+        {
+          "name": "pdmis.households",
+          "processing_mode": "batch"
+        },
+        {
+          "name": "pdmis.business_plans",
+          "processing_mode": "batch"
+        },
+        {
+          "name": "pdmis.special_groups",
+          "processing_mode": "batch"
+        },
+        {
+          "name": "cdc.pdm_mdm.mdm.sacco_master_sources",
+          "processing_mode": "streaming"
+        },
+        {
+          "name": "payment-events.retry",
+          "processing_mode": "streaming"
+        },
+        {
+          "name": "payment-events.dlq",
+          "processing_mode": "streaming"
+        },
+        {
+          "name": "mdm.beneficiary.golden.restricted",
+          "processing_mode": "real-time"
+        },
+        {
+          "name": "mdm.beneficiary.identity-alert.restricted",
+          "processing_mode": "real-time"
+        },
+        {
+          "name": "mdm.crosswalk.restricted",
+          "processing_mode": "real-time"
+        },
+        {
+          "name": "mdm.sacco.golden",
+          "processing_mode": "streaming"
+        },
+        {
+          "name": "mdm.agent.golden",
+          "processing_mode": "streaming"
+        },
+        {
+          "name": "mdm.geography.golden",
+          "processing_mode": "real-time"
+        },
+        {
+          "name": "payments.lifecycle.transitions.v1",
+          "processing_mode": "real-time"
+        },
+        {
+          "name": "payments.lifecycle.state.v1",
+          "processing_mode": "real-time"
+        },
+        {
+          "name": "payments.lifecycle.exceptions.v1",
+          "processing_mode": "real-time"
+        },
+        {
+          "name": "payments.lifecycle.dlq.v1",
+          "processing_mode": "real-time"
+        },
+        {
+          "name": "payments.lifecycle.audit.v1",
+          "processing_mode": "real-time"
+        }
+      ]
+    },
+    "non_iso": {
+      "discovered_schema_files": 9,
+      "indexed_contract_roots": 9,
+      "note": "Only explicit targetNamespace/root-element XSD matches are validated; application-level JSON/Python contracts require separate adapters.",
+      "results": {
+        "xsd_pass": 627
+      },
+      "status": "PASS",
+      "unreadable_schema_files": []
+    },
+    "preservation": {
+      "modified_examples": [],
+      "modified_xml_files": 0,
+      "status": "PASS",
+      "xml_files_after": 2395,
+      "xml_files_before": 2395
+    },
+    "producer": {
+      "generator_directory_present": true,
+      "producer_candidates": [
+        "services/mdm-publisher/mdm_publisher.py",
+        "services/payment-producer/delivery_coordinator.py",
+        "services/payment-producer/delivery_journal.py",
+        "services/payment-producer/event_admission_policy.py",
+        "services/payment-producer/guarded_delivery_adapter.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py",
+        "services/payment-producer/source_quarantine.py"
+      ],
+      "python_files_checked": 50,
+      "python_syntax_fail": 0,
+      "python_syntax_pass": 50,
+      "status": "NOT VERIFIED"
+    },
+    "routing": {
+      "extracted_route_names": 38,
+      "missing_topics": [],
+      "root_type": "dict",
+      "route_container": "routes",
+      "status": "PASS",
+      "top_level_keys": [
+        "contract_version",
+        "routes"
+      ],
+      "unknown_topics": []
+    }
+  },
+  "source_modifications": 0,
+  "status": "NOT VERIFIED",
+  "timestamp_utc": "2026-11-20T21:55:55.289944+00:00"
+}

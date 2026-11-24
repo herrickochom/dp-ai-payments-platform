@@ -1,0 +1,25 @@
+{
+  "allocation_count": 38,
+  "cloud_actions": "NONE",
+  "evidence_type": "SYNTHETIC_TECHNICAL_ACCEPTANCE",
+  "financial_totals_ugx": {
+    "allocated_ugx": 4541000,
+    "credited_ugx": 3971000,
+    "instructed_ugx": 4161000,
+    "uncredited_allocation_ugx": 570000
+  },
+  "formal_stage3_closure": "OPEN",
+  "formal_stage4_closure": "OPEN",
+  "independent_bank_evidence": "NOT_VERIFIED",
+  "instruction_count": 38,
+  "journal_entries": 76,
+  "operational_accounting_journal": "NOT_VERIFIED",
+  "pain001_xsd_valid": 38,
+  "pain002_xsd_valid": 38,
+  "sacco_count": 38,
+  "simulated_bank_credit_count": 38,
+  "stage3_synthetic_journal": "PASS",
+  "stage3_synthetic_settlement": "PASS",
+  "stage4_synthetic_iso": "PASS",
+  "status_count": 38
+}

@@ -44,3 +44,18 @@ variable "deletion_protection" {
     error_message = "Deletion protection must remain enabled."
   }
 }
+
+variable "public_ip_enabled" {
+  description = "Enable public IP on the Cloud SQL instance (required for dev-host ingestion without VPN)."
+  type        = bool
+  default     = false
+}
+
+variable "authorized_networks" {
+  description = "CIDR whitelist for public IP access. Each entry: {name=string, value=string}."
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default = []
+}

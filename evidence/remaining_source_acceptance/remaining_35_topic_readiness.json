@@ -1,0 +1,1695 @@
+{
+  "timestamp_utc": "2026-11-20T20:25:54.572305+00:00",
+  "repository": "/home/hochom/projects/dp-ai-payments-platform-gcp",
+  "kafka_bootstrap": "127.0.0.1:9094",
+  "scope": "Remaining governed source-topic readiness",
+  "accepted_mdm_excluded": [
+    "mdm.agent.golden",
+    "mdm.geography.golden",
+    "mdm.sacco.golden"
+  ],
+  "results": {
+    "agent.locations": {
+      "processing_mode": "streaming",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "agent.profiles": {
+      "processing_mode": "batch",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "agent.transactions": {
+      "processing_mode": "streaming",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 4,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 5,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 6,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 7,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "cdc.pdm_mdm.mdm.sacco_master_sources": {
+      "processing_mode": "streaming",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "contract_only",
+      "source_format": "json",
+      "reason": "No retained Kafka source records"
+    },
+    "cpo.plm.pain002": {
+      "processing_mode": "real-time",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 4,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 5,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "cpo.psn.pain002": {
+      "processing_mode": "real-time",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 4,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 5,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "icmn.pmn.pain001": {
+      "processing_mode": "real-time",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 4,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 5,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "icmn.vpm.pain001": {
+      "processing_mode": "real-time",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 4,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 5,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "mdm.beneficiary.golden.restricted": {
+      "processing_mode": "real-time",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "blocked_restricted",
+      "source_format": "json",
+      "reason": "No retained Kafka source records"
+    },
+    "mdm.beneficiary.identity-alert.restricted": {
+      "processing_mode": "real-time",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "blocked_restricted",
+      "source_format": "json",
+      "reason": "No retained Kafka source records"
+    },
+    "mdm.crosswalk.restricted": {
+      "processing_mode": "real-time",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "blocked_restricted",
+      "source_format": "json",
+      "reason": "No retained Kafka source records"
+    },
+    "mobile.airtel.pacs002": {
+      "processing_mode": "real-time",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "mobile.airtel.pacs008": {
+      "processing_mode": "real-time",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 4,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 5,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "mobile.mtn.pacs002": {
+      "processing_mode": "real-time",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "mobile.mtn.pacs008": {
+      "processing_mode": "streaming",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 4,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 5,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "payment-events.dlq": {
+      "processing_mode": "streaming",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 4,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 5,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 6,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 7,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "contract_only",
+      "source_format": "json",
+      "reason": "No retained Kafka source records"
+    },
+    "payment-events.retry": {
+      "processing_mode": "streaming",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 4,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 5,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 6,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 7,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "contract_only",
+      "source_format": "json",
+      "reason": "No retained Kafka source records"
+    },
+    "payments.lifecycle.audit.v1": {
+      "processing_mode": "real-time",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 4,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 5,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "blocked_unverified_format",
+      "source_format": "unverified",
+      "reason": "No retained Kafka source records"
+    },
+    "payments.lifecycle.dlq.v1": {
+      "processing_mode": "real-time",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 4,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 5,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "blocked_unverified_format",
+      "source_format": "unverified",
+      "reason": "No retained Kafka source records"
+    },
+    "payments.lifecycle.exceptions.v1": {
+      "processing_mode": "real-time",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 4,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 5,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "blocked_unverified_format",
+      "source_format": "unverified",
+      "reason": "No retained Kafka source records"
+    },
+    "payments.lifecycle.state.v1": {
+      "processing_mode": "real-time",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 4,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 5,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "contract_only",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "payments.lifecycle.transitions.v1": {
+      "processing_mode": "real-time",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 4,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 5,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "contract_only",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "pdmis.beneficiaries": {
+      "processing_mode": "batch",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 4,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 5,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 6,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 7,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "pdmis.business_plans": {
+      "processing_mode": "batch",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "pdmis.households": {
+      "processing_mode": "batch",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "pdmis.loans": {
+      "processing_mode": "batch",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 4,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 5,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 6,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 7,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "pdmis.repayments": {
+      "processing_mode": "streaming",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 4,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 5,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 6,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 7,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "pdmis.saccos": {
+      "processing_mode": "batch",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "pdmis.special_groups": {
+      "processing_mode": "batch",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "wendi.camt052": {
+      "processing_mode": "streaming",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "wendi.camt053": {
+      "processing_mode": "streaming",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "wendi.camt054": {
+      "processing_mode": "streaming",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 4,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 5,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 6,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 7,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "wendi.pain001": {
+      "processing_mode": "real-time",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 4,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 5,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "wendi.pain002": {
+      "processing_mode": "real-time",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 4,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 5,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    },
+    "wendi.transactions": {
+      "processing_mode": "streaming",
+      "catalogue": "PASS",
+      "route": "PASS",
+      "kafka_topic": "PASS",
+      "source_readiness": "BLOCKED",
+      "partitions": [
+        {
+          "partition": 0,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 1,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 2,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 3,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 4,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 5,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 6,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        },
+        {
+          "partition": 7,
+          "earliest_offset": 0,
+          "next_offset": 0,
+          "retained_offset_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "eligible_for_live_ingestion": false,
+      "route_status": "legacy_payment_event",
+      "source_format": "confluent_avro",
+      "reason": "No retained Kafka source records"
+    }
+  },
+  "summary": {
+    "governed_topics": 38,
+    "previously_accepted_mdm": 3,
+    "remaining_topics": 35,
+    "processing_modes": {
+      "streaming": 11,
+      "batch": 7,
+      "real-time": 17
+    },
+    "source_readiness": {
+      "BLOCKED": 35
+    },
+    "eligible_for_live_ingestion": 0
+  },
+  "status": "READINESS INCOMPLETE",
+  "mutations": {
+    "kafka_publications": 0,
+    "kafka_commits": 0,
+    "pubsub_publications": 0,
+    "pubsub_acknowledgements": 0,
+    "gcs_writes": 0
+  }
+}

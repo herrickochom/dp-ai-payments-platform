@@ -1,0 +1,456 @@
+{
+  "checks": {
+    "evidence_full_source": {
+      "detail": "Previous evidence successfully loaded",
+      "path": "evidence/full_source_acceptance/full_source_acceptance.json",
+      "recorded_acceptance_status": "NOT VERIFIED",
+      "sha256": "47c34f35948c6847e8ffc7a5100ed982e80675dd7ffd1d602563572b00db642d",
+      "status": "PASS"
+    },
+    "evidence_reconciliation": {
+      "detail": "Previous evidence successfully loaded",
+      "path": "evidence/reconciliation_contract_v1/reconciliation_contract_audit.json",
+      "recorded_acceptance_status": "NOT VERIFIED",
+      "sha256": "1c1a474e0db71bce11627153baf00253a29f43031d00d8a88f7cfc26d53a25af",
+      "status": "PASS"
+    },
+    "evidence_semantic": {
+      "detail": "Previous evidence successfully loaded",
+      "path": "evidence/stage9_semantic_contract_investigation/semantic_contract_investigation_corrected.json",
+      "recorded_acceptance_status": "NOT VERIFIED",
+      "sha256": "8ffa3f73c01826adf6fae4f4a198e616fe2e19adba1b21815655bfac0f3bde1f",
+      "status": "PASS"
+    },
+    "evidence_targeted": {
+      "detail": "Previous evidence successfully loaded",
+      "path": "evidence/targeted_acceptance/targeted_acceptance.json",
+      "recorded_acceptance_status": "NOT VERIFIED",
+      "sha256": "05a603924303639745a73795925fff9d63733ff4369ba57da3d27159d3cb8e4a",
+      "status": "PASS"
+    },
+    "financial_source_discovery": {
+      "count": 28,
+      "detail": "Candidate financial source and contract files",
+      "files": [
+        "data/mdm/golden_saccos.json",
+        "data/mdm/sacco_master_sources.json",
+        "data/pdmis/repayments.json",
+        "data/pdmis/saccos.json",
+        "platform/cdc/debezium/templates/pdm_mdm_sacco_connector.json",
+        "platform/gcp/pubsub_raw_ingestion/source_acknowledger_v1.py",
+        "services/payment-producer/delivery_journal.py",
+        "services/payment-xml-generator/pdm_account_posting_contract.py",
+        "services/payment-xml-generator/pdm_account_posting_evidence_v1.py",
+        "services/payment-xml-generator/pdm_funding_contract.py",
+        "services/payment-xml-generator/pdm_funding_iso20022.py",
+        "services/payment-xml-generator/pdm_funding_settlement_contract.py",
+        "services/payment-xml-generator/pdm_governed_synthetic_ledger_v1.py",
+        "services/payment-xml-generator/pdm_wendi_disbursement_iso20022.py",
+        "services/shared/replay_ledger.py",
+        "services/shared/replay_ledger_demo.py",
+        "tests/gcp/test_delivery_journal.py",
+        "tests/gcp/test_delivery_journal_hardening.py",
+        "tests/gcp/test_delivery_ledger_watchdog.py",
+        "tests/gcp/test_live_pipeline_reconciliation.py",
+        "tests/gcp/test_remote_job_reconciliation.py",
+        "tests/gcp/test_source_acknowledger_v1.py",
+        "tests/test_pdm_account_posting_contract.py",
+        "tests/test_pdm_account_posting_evidence_v1.py",
+        "tests/test_pdm_funding_contract.py",
+        "tests/test_pdm_funding_iso20022.py",
+        "tests/test_pdm_funding_settlement_contract.py",
+        "tests/test_pdm_wendi_disbursement_iso20022.py"
+      ],
+      "status": "PASS"
+    },
+    "financial_xml_parsing": {
+      "detail": "Financial source XML parsing",
+      "errors": [],
+      "parsed": 2395,
+      "status": "PASS"
+    },
+    "independent_financial_reconciliation": {
+      "candidate_files": 28,
+      "detail": "Financial identifiers and amounts profiled; independent source-to-ledger and journal reconciliation not established",
+      "status": "NOT VERIFIED",
+      "xml_families": {
+        "NON_ISO:AgentTransaction": 151,
+        "NON_ISO:TechnicalPaymentEvent": 476,
+        "camt.052.001.08": 38,
+        "camt.053.001.08": 151,
+        "camt.054.001.08": 151,
+        "pacs.002.001.10": 238,
+        "pacs.008.001.08": 238,
+        "pain.001.001.09": 476,
+        "pain.002.001.12": 476
+      }
+    },
+    "kafka_catalogue": {
+      "detail": "Governed Kafka topic inventory",
+      "duplicates": [],
+      "invalid": [],
+      "processing_modes": {
+        "batch": 7,
+        "real-time": 18,
+        "streaming": 13
+      },
+      "status": "PASS",
+      "topics": 38
+    },
+    "kafka_route_alignment": {
+      "detail": "Static topic-to-route coverage",
+      "missing": [],
+      "routes": 38,
+      "status": "PASS",
+      "unknown": []
+    },
+    "producer_python_syntax": {
+      "detail": "Producer Python syntax inspection",
+      "errors": [],
+      "modules": 7,
+      "status": "PASS"
+    },
+    "producer_runtime_delivery": {
+      "detail": "No Kafka publish, broker acknowledgement, consumer offset or delivery confirmation executed",
+      "status": "NOT VERIFIED"
+    },
+    "producer_static_contract": {
+      "detail": "Producer implementation discovered",
+      "modules": [
+        {
+          "file": "services/payment-producer/delivery_coordinator.py",
+          "imports": [
+            "delivery_journal"
+          ],
+          "literal_governed_topics": [],
+          "relevant_calls": [
+            "flush",
+            "poll",
+            "produce"
+          ],
+          "schema_registry_references": false
+        },
+        {
+          "file": "services/payment-producer/delivery_journal.py",
+          "imports": [
+            "fcntl",
+            "hashlib",
+            "os",
+            "pathlib",
+            "sqlite3"
+          ],
+          "literal_governed_topics": [],
+          "relevant_calls": [],
+          "schema_registry_references": false
+        },
+        {
+          "file": "services/payment-producer/event_admission_policy.py",
+          "imports": [
+            "dataclasses",
+            "enum"
+          ],
+          "literal_governed_topics": [],
+          "relevant_calls": [],
+          "schema_registry_references": false
+        },
+        {
+          "file": "services/payment-producer/guarded_delivery_adapter.py",
+          "imports": [
+            "delivery_coordinator",
+            "event_admission_policy",
+            "hashlib"
+          ],
+          "literal_governed_topics": [],
+          "relevant_calls": [
+            "publish"
+          ],
+          "schema_registry_references": false
+        },
+        {
+          "file": "services/payment-producer/kafka_producer.py",
+          "imports": [
+            "avro.schema",
+            "confluent_kafka",
+            "confluent_kafka.schema_registry",
+            "confluent_kafka.schema_registry.avro",
+            "confluent_kafka.serialization",
+            "datetime",
+            "glob",
+            "hashlib",
+            "json",
+            "logging",
+            "os",
+            "pathlib",
+            "services.shared.security.runtime_security",
+            "services.shared.security.secret_provider",
+            "sys",
+            "threading",
+            "time",
+            "typing",
+            "uuid",
+            "xml.etree.ElementTree"
+          ],
+          "literal_governed_topics": [
+            "agent.locations",
+            "agent.profiles",
+            "agent.transactions",
+            "cpo.plm.pain002",
+            "cpo.psn.pain002",
+            "icmn.pmn.pain001",
+            "icmn.vpm.pain001",
+            "mobile.airtel.pacs002",
+            "mobile.airtel.pacs008",
+            "mobile.mtn.pacs002",
+            "mobile.mtn.pacs008",
+            "pdmis.beneficiaries",
+            "pdmis.business_plans",
+            "pdmis.households",
+            "pdmis.loans",
+            "pdmis.repayments",
+            "pdmis.saccos",
+            "pdmis.special_groups",
+            "wendi.camt052",
+            "wendi.camt053",
+            "wendi.camt054",
+            "wendi.pain001",
+            "wendi.pain002",
+            "wendi.transactions"
+          ],
+          "relevant_calls": [
+            "flush",
+            "poll",
+            "produce"
+          ],
+          "schema_registry_references": true
+        },
+        {
+          "file": "services/payment-producer/source_publisher.py",
+          "imports": [
+            "__future__",
+            "argparse",
+            "confluent_kafka",
+            "confluent_kafka.schema_registry",
+            "confluent_kafka.schema_registry.avro",
+            "confluent_kafka.serialization",
+            "dataclasses",
+            "datetime",
+            "fastavro",
+            "hashlib",
+            "io",
+            "json",
+            "os",
+            "pathlib",
+            "sys",
+            "tempfile",
+            "time",
+            "xml.etree"
+          ],
+          "literal_governed_topics": [
+            "agent.locations",
+            "agent.profiles",
+            "agent.transactions",
+            "cpo.plm.pain002",
+            "cpo.psn.pain002",
+            "icmn.pmn.pain001",
+            "icmn.vpm.pain001",
+            "mobile.airtel.pacs002",
+            "mobile.airtel.pacs008",
+            "mobile.mtn.pacs002",
+            "mobile.mtn.pacs008",
+            "pdmis.beneficiaries",
+            "pdmis.business_plans",
+            "pdmis.households",
+            "pdmis.loans",
+            "pdmis.repayments",
+            "pdmis.saccos",
+            "pdmis.special_groups",
+            "wendi.camt052",
+            "wendi.camt053",
+            "wendi.camt054",
+            "wendi.pain001",
+            "wendi.pain002",
+            "wendi.transactions"
+          ],
+          "relevant_calls": [
+            "flush",
+            "poll",
+            "produce"
+          ],
+          "schema_registry_references": true
+        },
+        {
+          "file": "services/payment-producer/source_quarantine.py",
+          "imports": [
+            "dataclasses",
+            "hashlib",
+            "json",
+            "pathlib",
+            "typing"
+          ],
+          "literal_governed_topics": [],
+          "relevant_calls": [],
+          "schema_registry_references": false
+        }
+      ],
+      "status": "PASS"
+    },
+    "schema_contract_discovery": {
+      "count": 7,
+      "detail": "Available schema artefacts discovered",
+      "schemas": [
+        {
+          "file": "contracts/kafka/lifecycle_audit.avsc",
+          "sha256": "dc31d08befe818eebd398c98ef94d600c95da3adc86742acb0e0a913dad1a89f"
+        },
+        {
+          "file": "contracts/kafka/lifecycle_dlq.avsc",
+          "sha256": "1ebb05704280aee7224e1b1e21255537de8e800bbae94c5cf580039ed2f57cbc"
+        },
+        {
+          "file": "contracts/kafka/lifecycle_exception.avsc",
+          "sha256": "f21194c3b0c6f0e55a1bf9acc095407ebef4eff1e3922f2ca651033326a86637"
+        },
+        {
+          "file": "contracts/kafka/lifecycle_state.avsc",
+          "sha256": "dd4400e8ac63765267e64ef19c26f4fa768844baba5cacf5d838efa779d6d32c"
+        },
+        {
+          "file": "contracts/kafka/lifecycle_transition.avsc",
+          "sha256": "cc828c97a8d6a95be526ae54a85aece5ff05ab57486ca8da5a89e3f23d047dda"
+        },
+        {
+          "file": "contracts/kafka/payment_event.avsc",
+          "sha256": "96def68cdff3a3d530e59d3486fb09b4a6efaba548aa99b24891309a6027b8e0"
+        },
+        {
+          "file": "contracts/kafka/technical_payment_event.avsc",
+          "sha256": "50e8b24f852d1c8c9ec316f6fbb1a126b4ac4b9aeee08146f8e507359d8d53b2"
+        }
+      ],
+      "status": "PASS"
+    },
+    "schema_registry_runtime_compatibility": {
+      "detail": "No live Schema Registry registration, lookup or compatibility operation authorised or executed",
+      "status": "NOT VERIFIED"
+    },
+    "source_preservation": {
+      "after": 2395,
+      "before": 2395,
+      "changed": [],
+      "detail": "XML source preservation",
+      "status": "PASS"
+    },
+    "xml_inventory": {
+      "actual": 2395,
+      "detail": "Expected XML source population",
+      "expected": 2395,
+      "status": "PASS"
+    }
+  },
+  "evidence": {
+    "financial_profiles": {
+      "amount_fields": {
+        "camt.052.001.08:Amt": {
+          "count": 38,
+          "sum": "151000000.00"
+        },
+        "camt.053.001.08:Amt": {
+          "count": 680,
+          "sum": "1164000000.00"
+        },
+        "camt.054.001.08:Amt": {
+          "count": 302,
+          "sum": "302000000.00"
+        },
+        "pacs.008.001.08:InstdAmt": {
+          "count": 238,
+          "sum": "238000000"
+        },
+        "pacs.008.001.08:IntrBkSttlmAmt": {
+          "count": 238,
+          "sum": "238000000"
+        },
+        "pain.001.001.09:CtrlSum": {
+          "count": 952,
+          "sum": "952000000"
+        },
+        "pain.001.001.09:InstdAmt": {
+          "count": 476,
+          "sum": "476000000"
+        }
+      },
+      "families": {
+        "NON_ISO:AgentTransaction": 151,
+        "NON_ISO:TechnicalPaymentEvent": 476,
+        "camt.052.001.08": 38,
+        "camt.053.001.08": 151,
+        "camt.054.001.08": 151,
+        "pacs.002.001.10": 238,
+        "pacs.008.001.08": 238,
+        "pain.001.001.09": 476,
+        "pain.002.001.12": 476
+      },
+      "identifiers": {
+        "NON_ISO:TechnicalPaymentEvent:EndToEndId": 238,
+        "camt.052.001.08:MsgId": 38,
+        "camt.053.001.08:EndToEndId": 152,
+        "camt.053.001.08:MsgId": 151,
+        "camt.053.001.08:TxId": 189,
+        "camt.054.001.08:EndToEndId": 151,
+        "camt.054.001.08:MsgId": 151,
+        "camt.054.001.08:TxId": 151,
+        "pacs.002.001.10:MsgId": 238,
+        "pacs.002.001.10:OrgnlEndToEndId": 238,
+        "pacs.002.001.10:OrgnlMsgId": 238,
+        "pacs.002.001.10:OrgnlTxId": 238,
+        "pacs.008.001.08:EndToEndId": 238,
+        "pacs.008.001.08:InstrId": 238,
+        "pacs.008.001.08:MsgId": 238,
+        "pacs.008.001.08:TxId": 238,
+        "pain.001.001.09:EndToEndId": 238,
+        "pain.001.001.09:InstrId": 476,
+        "pain.001.001.09:MsgId": 476,
+        "pain.002.001.12:MsgId": 476,
+        "pain.002.001.12:OrgnlEndToEndId": 238,
+        "pain.002.001.12:OrgnlMsgId": 476
+      },
+      "statuses": {
+        "pacs.002.001.10:ACSC": 151,
+        "pacs.002.001.10:PDNG": 37,
+        "pacs.002.001.10:RJCT": 50,
+        "pain.002.001.12:ACSC": 302,
+        "pain.002.001.12:PDNG": 74,
+        "pain.002.001.12:RJCT": 100
+      }
+    },
+    "full_source": {
+      "overall": "NOT VERIFIED",
+      "path": "evidence/full_source_acceptance/full_source_acceptance.json"
+    },
+    "reconciliation": {
+      "overall": "NOT VERIFIED",
+      "path": "evidence/reconciliation_contract_v1/reconciliation_contract_audit.json"
+    },
+    "semantic": {
+      "overall": "NOT VERIFIED",
+      "path": "evidence/stage9_semantic_contract_investigation/semantic_contract_investigation_corrected.json"
+    },
+    "targeted": {
+      "overall": "NOT VERIFIED",
+      "path": "evidence/targeted_acceptance/targeted_acceptance.json"
+    }
+  },
+  "findings": [],
+  "gcp_operations": 0,
+  "kafka_operations": 0,
+  "overall": "NOT VERIFIED",
+  "repository": "/home/hochom/projects/dp-ai-payments-platform-gcp",
+  "runtime_executed": false,
+  "schema_registry_operations": 0,
+  "source_modifications": 0,
+  "status_counts": {
+    "NOT VERIFIED": 3,
+    "PASS": 13
+  },
+  "timestamp_utc": "2026-11-20T22:16:28.375782+00:00"
+}

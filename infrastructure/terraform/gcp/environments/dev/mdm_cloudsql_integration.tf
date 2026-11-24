@@ -7,4 +7,6 @@ module "mdm_cloudsql" {
   availability_type         = "ZONAL"
   private_network_self_link = google_compute_network.platform.self_link
   depends_on                = [google_service_networking_connection.mdm_cloudsql_psa]
+  public_ip_enabled         = var.mdm_dev_public_ip != ""
+  authorized_networks       = var.mdm_dev_public_ip != "" ? [{ name = "dev-home", value = "${var.mdm_dev_public_ip}/32" }] : []
 }

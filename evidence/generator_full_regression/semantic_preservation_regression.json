@@ -1,0 +1,65 @@
+{
+  "timestamp_utc": "2026-11-20T21:00:18.723970+00:00",
+  "mode": "READ_ONLY_SEMANTIC_CANONICALISATION",
+  "candidate_hashes": {
+    "mobile_networks_generator.v3.py": "607b358dae165cd08dcb54f7cd543a2299d535d61879e16cd74f23b25af83ed1",
+    "wendi_generator.v2.py": "3e10303b58d80427d3dfd216c13ea7809d50c99cb095b86404e93ebc8f9672f2"
+  },
+  "context_count": 238,
+  "sacco_count": 38,
+  "expected_files": 514,
+  "actual_files": 514,
+  "missing": [],
+  "unexpected": [],
+  "results": {
+    "PASS": 514
+  },
+  "family_results": {
+    "pacs002": {
+      "PASS": 238
+    },
+    "pacs008": {
+      "PASS": 238
+    },
+    "camt052": {
+      "PASS": 38
+    }
+  },
+  "failures": [],
+  "preservation_exceptions": {
+    "pacs002_StsReqId_count": 238
+  },
+  "source_mutations": 0,
+  "existing_data_mutations": 0,
+  "kafka_publications": 0,
+  "cloud_operations": 0,
+  "baseline_existing_xml": {
+    "NOT_VERIFIED": 627,
+    "PASS": 1254,
+    "FAIL_XSD": 514
+  },
+  "existing_xml_count": 2395,
+  "baseline_by_source_root": {
+    "agent_network": {
+      "NOT_VERIFIED": 151
+    },
+    "cpo": {
+      "NOT_VERIFIED": 238,
+      "PASS": 238
+    },
+    "icmn": {
+      "NOT_VERIFIED": 238,
+      "PASS": 238
+    },
+    "mobile_networks": {
+      "FAIL_XSD": 476
+    },
+    "wendi": {
+      "FAIL_XSD": 38,
+      "PASS": 778
+    }
+  },
+  "target_inventory_complete": true,
+  "candidate_regression_pass": true,
+  "overall": "PASS_CANDIDATE_REGRESSION_NO_PROMOTION"
+}

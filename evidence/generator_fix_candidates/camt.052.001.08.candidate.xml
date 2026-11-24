@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.052.001.08"><BkToCstmrAcctRpt><GrpHdr><MsgId>WENDI-INTRA-SACCO-KLA-001</MsgId><CreDtTm>2026-09-08T17:00:00+03:00</CreDtTm></GrpHdr><Rpt><Id>WENDI-INTRA-SACCO-KLA-001</Id><CreDtTm>2026-09-08T17:00:00+03:00</CreDtTm><Acct><Id><Othr><Id>256790000001</Id><Issr>WENDI</Issr><SchmeNm>WENDI</SchmeNm></Othr></Id></Acct><Bal><Tp><CdOrPrtry>XPCD</CdOrPrtry></Tp><Amt Ccy="UGX">0.00</Amt><CdtDbtInd>CRDT</CdtDbtInd><Dt>2026-09-08</Dt></Bal></Rpt></BkToCstmrAcctRpt></Document>

@@ -1,0 +1,17 @@
+{
+  "pacs.008.001.08": {
+    "status": "PASS",
+    "errors": [],
+    "sha256": "84b925f34a75bc75f60bff82f2b8a2a902dcd32be7f6b29ba70b5554b2623ad8"
+  },
+  "pacs.002.001.10": {
+    "status": "PASS",
+    "errors": [],
+    "sha256": "5f3b047c3a1e882587f41b82031915eb0e81c0ef51cd9f20e2cb614745d0a1b7"
+  },
+  "camt.052.001.08": {
+    "status": "PASS",
+    "errors": [],
+    "sha256": "74867cb1190d80a56e5cecd373794cd85d26d4a77c611824b67f5d99d3b56036"
+  }
+}

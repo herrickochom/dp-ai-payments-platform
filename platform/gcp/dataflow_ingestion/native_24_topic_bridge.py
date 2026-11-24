@@ -21,9 +21,52 @@ def load_bridge():
 
 def validate_topics(path):
     data = json.loads(Path(path).read_text())
-    if not isinstance(data, list) or len(data) != 24 or any(not isinstance(x, str) or not x.strip() for x in data) or len(set(data)) != 24:
-        raise ValueError('approved inventory must be a JSON array of exactly 24 distinct topic names')
+    if not isinstance(data, list) or not data:
+        raise ValueError('approved inventory must be a non-empty JSON array')
+    if any(not isinstance(x, str) or not x.strip() for x in data):
+        raise ValueError('approved inventory must contain only non-empty strings')
+    if len(set(data)) != len(data):
+        raise ValueError('approved inventory must not contain duplicate topics')
+    _catalog = _load_canonical_catalog()
+    _unknown = sorted(set(data) - set(_catalog))
+    if _unknown:
+        raise ValueError('approved inventory contains topics not in canonical catalog: '
+                         + ', '.join(_unknown))
     return data
+
+
+def _load_canonical_catalog():
+    import os
+    import yaml as _yaml
+    _here = os.path.dirname(os.path.abspath(__file__))
+    _path = os.path.normpath(
+        os.path.join(_here, '..', '..', '..', 'platform', 'kafka', 'topics.yaml'))
+    if not os.path.isfile(_path):
+        raise ValueError('canonical topic catalog not found at ' + _path)
+    with open(_path) as _f:
+        _doc = _yaml.safe_load(_f)
+    if isinstance(_doc, dict):
+        _topics = _doc.get('topics') or _doc.get('kafka_topics') or []
+    elif isinstance(_doc, list):
+        _topics = _doc
+    else:
+        raise ValueError('canonical catalog must be a list or mapping')
+    _names = []
+    for _t in _topics:
+        if isinstance(_t, str):
+            _names.append(_t.strip())
+        elif isinstance(_t, dict):
+            _n = _t.get('name') or _t.get('topic') or _t.get('id')
+            if not isinstance(_n, str) or not _n.strip():
+                raise ValueError('catalog entry missing name: ' + repr(_t))
+            _names.append(_n.strip())
+        else:
+            raise ValueError('catalog entries must be strings or dicts')
+    if len(_names) != len(set(_names)):
+        raise ValueError('catalog has duplicate names')
+    return _names
+
+
 
 def run(args):
     topics = validate_topics(args.approved_topics)

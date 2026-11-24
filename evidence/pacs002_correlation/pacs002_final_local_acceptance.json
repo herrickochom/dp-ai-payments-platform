@@ -1,0 +1,23 @@
+{
+  "timestamp_utc": "2026-11-20T21:11:36.666448+00:00",
+  "status": "BLOCKED_LOCAL_ACCEPTANCE",
+  "checks": {
+    "238 unique four-key mapping records": {
+      "status": "PASS",
+      "detail": ""
+    },
+    "Original 238 XML SHA256 fingerprints": {
+      "status": "PASS",
+      "detail": ""
+    },
+    "Corrected PACS.002 candidates discoverable": {
+      "status": "FAIL",
+      "detail": "1/238 unique identities; 3 matching candidate files"
+    }
+  },
+  "cloud_operations": 0,
+  "kafka_publications": 0,
+  "xml_modifications": 0,
+  "promotion": 0,
+  "error": "corrected PACS.002 candidates missing; stop without promotion"
+}

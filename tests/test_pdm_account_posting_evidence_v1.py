@@ -33,12 +33,18 @@ class EvidenceBoundaryTests(unittest.TestCase):
                 document_type="camt.054",
             )
 
-    def test_camt053_fails_closed(self):
-        with self.assertRaises(MissingAuthoritativePostingEvidence):
+    def test_camt053_requires_synthetic_ledger_preflight(self):
+        with self.assertRaisesRegex(
+            RuntimeError,
+            "synthetic ledger preflight required",
+        ):
             generate_camt053({})
 
-    def test_camt054_fails_closed(self):
-        with self.assertRaises(MissingAuthoritativePostingEvidence):
+    def test_camt054_requires_synthetic_ledger_preflight(self):
+        with self.assertRaisesRegex(
+            RuntimeError,
+            "synthetic ledger preflight required",
+        ):
             generate_camt054({})
 
     def test_unsupported_document(self):

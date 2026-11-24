@@ -1,0 +1,26 @@
+{
+  "pacs.008.001.08": {
+    "status": "FAIL",
+    "errors": [
+      "<string>:2:0:ERROR:SCHEMASV:SCHEMAV_ELEMENT_CONTENT: Element '{urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}TwnNm': This element is not expected.",
+      "<string>:2:0:ERROR:SCHEMASV:SCHEMAV_ELEMENT_CONTENT: Element '{urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}UltmtDbtr': This element is not expected. Expected is one of ( {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}DbtrAcct, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}DbtrAgt )."
+    ],
+    "sha256": "83539b4e8838d2f58eb0715db0a0c4e6e953eed2947a7581e237dcb61c5f1cb7"
+  },
+  "pacs.002.001.10": {
+    "status": "PASS",
+    "errors": [],
+    "sha256": "5f3b047c3a1e882587f41b82031915eb0e81c0ef51cd9f20e2cb614745d0a1b7"
+  },
+  "camt.052.001.08": {
+    "status": "FAIL",
+    "errors": [
+      "<string>:2:0:ERROR:SCHEMASV:SCHEMAV_ELEMENT_CONTENT: Element '{urn:iso:std:iso:20022:tech:xsd:camt.052.001.08}SchmeNm': This element is not expected.",
+      "<string>:2:0:ERROR:SCHEMASV:SCHEMAV_CVC_COMPLEX_TYPE_2_3: Element '{urn:iso:std:iso:20022:tech:xsd:camt.052.001.08}CdOrPrtry': Character content other than whitespace is not allowed because the content type is 'element-only'.",
+      "<string>:2:0:ERROR:SCHEMASV:SCHEMAV_ELEMENT_CONTENT: Element '{urn:iso:std:iso:20022:tech:xsd:camt.052.001.08}CdOrPrtry': Missing child element(s). Expected is one of ( {urn:iso:std:iso:20022:tech:xsd:camt.052.001.08}Cd, {urn:iso:std:iso:20022:tech:xsd:camt.052.001.08}Prtry ).",
+      "<string>:2:0:ERROR:SCHEMASV:SCHEMAV_CVC_COMPLEX_TYPE_2_3: Element '{urn:iso:std:iso:20022:tech:xsd:camt.052.001.08}Dt': Character content other than whitespace is not allowed because the content type is 'element-only'.",
+      "<string>:2:0:ERROR:SCHEMASV:SCHEMAV_ELEMENT_CONTENT: Element '{urn:iso:std:iso:20022:tech:xsd:camt.052.001.08}Dt': Missing child element(s). Expected is one of ( {urn:iso:std:iso:20022:tech:xsd:camt.052.001.08}Dt, {urn:iso:std:iso:20022:tech:xsd:camt.052.001.08}DtTm )."
+    ],
+    "sha256": "4b2d53d3a4f9ed8ff66b585bfa3c289b30de62d95d643c76d2f97198682e499f"
+  }
+}

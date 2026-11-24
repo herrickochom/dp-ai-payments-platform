@@ -181,17 +181,21 @@ def generate_camt052(sacco: dict, total: int, as_of_date: str) -> bytes:
     child(header, "MsgId", f"WENDI-INTRA-{sacco['sacco_id']}")
     child(header, "CreDtTm", f"{as_of_date}T17:00:00+03:00")
 
-    account = child(report, "Acct")
+    statement = child(report, "Rpt")
+    child(statement, "Id", f"WENDI-INTRA-{sacco['sacco_id']}")
+    child(statement, "CreDtTm", f"{as_of_date}T17:00:00+03:00")
+
+    account = child(statement, "Acct")
     other = child(child(account, "Id"), "Othr")
     child(other, "Id", sacco["wendi_account"])
+    child(child(other, "SchmeNm"), "Prtry", "WENDI")
     child(other, "Issr", "WENDI")
-    child(other, "SchmeNm", "WENDI")
 
-    balance = child(report, "Bal")
-    child(child(balance, "Tp"), "CdOrPrtry", "XPCD")
+    balance = child(statement, "Bal")
+    child(child(child(balance, "Tp"), "CdOrPrtry"), "Cd", "XPCD")
     child(balance, "Amt", f"{total:.2f}", Ccy="UGX")
     child(balance, "CdtDbtInd", "CRDT")
-    child(balance, "Dt", as_of_date)
+    child(child(balance, "Dt"), "Dt", as_of_date)
 
     xml = ET.tostring(root, encoding="utf-8", xml_declaration=True)
     validate_xml_no_empty_text(xml, f"Wendi CAMT052 {sacco['sacco_id']}")

@@ -1,0 +1,4853 @@
+{
+  "timestamp_utc": "2026-11-20T20:44:33.690842+00:00",
+  "repository": "/home/hochom/projects/dp-ai-payments-platform-gcp",
+  "mode": "READ_ONLY",
+  "status": "CONTRACT VERIFICATION COMPLETED",
+  "topics": {
+    "agent.locations": {
+      "category": "BUSINESS_SOURCE",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "source_candidates": 0,
+      "source_examples": [],
+      "producer_candidates": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py",
+        "tests/gcp/test_raw_v1_recovery.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "BLOCKED \u2014 SOURCE MAPPING"
+    },
+    "agent.profiles": {
+      "category": "BUSINESS_SOURCE",
+      "processing_mode": "batch",
+      "route": "PASS",
+      "source_candidates": 0,
+      "source_examples": [],
+      "producer_candidates": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "BLOCKED \u2014 SOURCE MAPPING"
+    },
+    "agent.transactions": {
+      "category": "BUSINESS_SOURCE",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "source_candidates": 0,
+      "source_examples": [],
+      "producer_candidates": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py",
+        "tests/gcp/test_delivery_coordinator.py",
+        "tests/gcp/test_delivery_journal.py",
+        "tests/gcp/test_delivery_journal_hardening.py",
+        "tests/gcp/test_event_admission_policy.py",
+        "tests/gcp/test_guarded_delivery_adapter.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "BLOCKED \u2014 SOURCE MAPPING"
+    },
+    "cdc.pdm_mdm.mdm.sacco_master_sources": {
+      "category": "CDC",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "source_candidates": 0,
+      "source_examples": [],
+      "producer_candidates": [
+        "platform/gcp/kafka_pubsub_bridge/source_envelope_v1.py",
+        "tests/gcp/test_source_envelope_v1.py",
+        "tests/gcp/test_source_operational_runtime_v1.py",
+        "tests/gcp/test_source_runtime_adapter_v1.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "CONTROLLED \u2014 NOT EXECUTED"
+    },
+    "cpo.plm.pain002": {
+      "category": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "source_candidates": 476,
+      "source_examples": [
+        "data/cpo/plm/pain002/plm_0001.xml",
+        "data/cpo/plm/pain002/plm_0002.xml",
+        "data/cpo/plm/pain002/plm_0003.xml",
+        "data/cpo/plm/pain002/plm_0004.xml",
+        "data/cpo/plm/pain002/plm_0005.xml"
+      ],
+      "producer_candidates": [
+        "platform/flink/jobs/j1_lifecycle_state_skeleton.py",
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "xml_validation": {
+        "NOT VERIFIED \u2014 NO COMPILED XSD": 238,
+        "PASS": 238
+      },
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES \u2014 VALIDATION PENDING"
+    },
+    "cpo.psn.pain002": {
+      "category": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "source_candidates": 476,
+      "source_examples": [
+        "data/cpo/plm/pain002/plm_0001.xml",
+        "data/cpo/plm/pain002/plm_0002.xml",
+        "data/cpo/plm/pain002/plm_0003.xml",
+        "data/cpo/plm/pain002/plm_0004.xml",
+        "data/cpo/plm/pain002/plm_0005.xml"
+      ],
+      "producer_candidates": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "xml_validation": {
+        "NOT VERIFIED \u2014 NO COMPILED XSD": 238,
+        "PASS": 238
+      },
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES \u2014 VALIDATION PENDING"
+    },
+    "icmn.pmn.pain001": {
+      "category": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "source_candidates": 476,
+      "source_examples": [
+        "data/icmn/pmn/pain001/pmn_0001.xml",
+        "data/icmn/pmn/pain001/pmn_0002.xml",
+        "data/icmn/pmn/pain001/pmn_0003.xml",
+        "data/icmn/pmn/pain001/pmn_0004.xml",
+        "data/icmn/pmn/pain001/pmn_0005.xml"
+      ],
+      "producer_candidates": [
+        "platform/flink/jobs/j1_lifecycle_state_skeleton.py",
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py",
+        "tests/gcp/test_pubsub_raw_offline.py",
+        "tests/gcp/test_raw_pubsub_adapter.py",
+        "tests/gcp/test_raw_v1_contract.py",
+        "tests/streaming/test_j1_schema_binding.py"
+      ],
+      "xml_validation": {
+        "NOT VERIFIED \u2014 NO COMPILED XSD": 238,
+        "PASS": 238
+      },
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES \u2014 VALIDATION PENDING"
+    },
+    "icmn.vpm.pain001": {
+      "category": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "source_candidates": 476,
+      "source_examples": [
+        "data/icmn/pmn/pain001/pmn_0001.xml",
+        "data/icmn/pmn/pain001/pmn_0002.xml",
+        "data/icmn/pmn/pain001/pmn_0003.xml",
+        "data/icmn/pmn/pain001/pmn_0004.xml",
+        "data/icmn/pmn/pain001/pmn_0005.xml"
+      ],
+      "producer_candidates": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py",
+        "tests/gcp/test_source_bounded_entrypoint_v1.py",
+        "tests/gcp/test_source_delivery_v1.py",
+        "tests/gcp/test_source_operational_runtime_v1.py",
+        "tests/gcp/test_source_runtime_adapter_v1.py"
+      ],
+      "xml_validation": {
+        "NOT VERIFIED \u2014 NO COMPILED XSD": 238,
+        "PASS": 238
+      },
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES \u2014 VALIDATION PENDING"
+    },
+    "mdm.agent.golden": {
+      "category": "PREVIOUSLY_ACCEPTED_MDM",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "source_candidates": 0,
+      "source_examples": [],
+      "producer_candidates": [
+        "platform/gcp/kafka_pubsub_bridge/source_delivery_v1.py",
+        "source_target_full_audit.py",
+        "tests/mdm/test_mdm_publisher.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "PREVIOUS ACCEPTANCE PRESERVED"
+    },
+    "mdm.beneficiary.golden.restricted": {
+      "category": "RESTRICTED_MDM",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "source_candidates": 0,
+      "source_examples": [],
+      "producer_candidates": [
+        "source_target_full_audit.py",
+        "tests/gcp/test_source_envelope_v1.py",
+        "tests/mdm/test_mdm_publisher.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "CONTROLLED \u2014 NOT EXECUTED"
+    },
+    "mdm.beneficiary.identity-alert.restricted": {
+      "category": "RESTRICTED_MDM",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "source_candidates": 0,
+      "source_examples": [],
+      "producer_candidates": [
+        "source_target_full_audit.py",
+        "tests/gcp/test_source_envelope_v1.py",
+        "tests/mdm/test_mdm_publisher.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "CONTROLLED \u2014 NOT EXECUTED"
+    },
+    "mdm.crosswalk.restricted": {
+      "category": "RESTRICTED_MDM",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "source_candidates": 0,
+      "source_examples": [],
+      "producer_candidates": [
+        "source_target_full_audit.py",
+        "tests/gcp/test_source_bounded_entrypoint_v1.py",
+        "tests/gcp/test_source_delivery_v1.py",
+        "tests/gcp/test_source_envelope_v1.py",
+        "tests/gcp/test_source_live_callbacks_v1.py",
+        "tests/gcp/test_source_operational_runtime_v1.py",
+        "tests/gcp/test_source_runtime_adapter_v1.py",
+        "tests/mdm/test_mdm_publisher.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "CONTROLLED \u2014 NOT EXECUTED"
+    },
+    "mdm.geography.golden": {
+      "category": "PREVIOUSLY_ACCEPTED_MDM",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "source_candidates": 0,
+      "source_examples": [],
+      "producer_candidates": [
+        "platform/gcp/kafka_pubsub_bridge/source_delivery_v1.py",
+        "source_target_full_audit.py",
+        "tests/mdm/test_mdm_publisher.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "PREVIOUS ACCEPTANCE PRESERVED"
+    },
+    "mdm.sacco.golden": {
+      "category": "PREVIOUSLY_ACCEPTED_MDM",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "source_candidates": 0,
+      "source_examples": [],
+      "producer_candidates": [
+        "platform/gcp/kafka_pubsub_bridge/source_delivery_v1.py",
+        "source_target_full_audit.py",
+        "tests/gcp/test_raw_v1_recovery.py",
+        "tests/gcp/test_source_envelope_v1.py",
+        "tests/gcp/test_source_runtime_adapter_v1.py",
+        "tests/mdm/test_mdm_publisher.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "PREVIOUS ACCEPTANCE PRESERVED"
+    },
+    "mobile.airtel.pacs002": {
+      "category": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "source_candidates": 0,
+      "source_examples": [],
+      "producer_candidates": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py",
+        "source_target_full_audit.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "BLOCKED \u2014 SOURCE MAPPING"
+    },
+    "mobile.airtel.pacs008": {
+      "category": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "source_candidates": 0,
+      "source_examples": [],
+      "producer_candidates": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py",
+        "source_target_full_audit.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "BLOCKED \u2014 SOURCE MAPPING"
+    },
+    "mobile.mtn.pacs002": {
+      "category": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "source_candidates": 0,
+      "source_examples": [],
+      "producer_candidates": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py",
+        "source_target_full_audit.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "BLOCKED \u2014 SOURCE MAPPING"
+    },
+    "mobile.mtn.pacs008": {
+      "category": "BUSINESS_SOURCE",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "source_candidates": 0,
+      "source_examples": [],
+      "producer_candidates": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py",
+        "source_target_full_audit.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "BLOCKED \u2014 SOURCE MAPPING"
+    },
+    "payment-events.dlq": {
+      "category": "OPERATIONAL_DERIVED",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "source_candidates": 0,
+      "source_examples": [],
+      "producer_candidates": [
+        "tests/gcp/test_source_envelope_v1.py",
+        "tests/gcp/test_source_runtime_adapter_v1.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "CONTROLLED \u2014 NOT EXECUTED"
+    },
+    "payment-events.retry": {
+      "category": "OPERATIONAL_DERIVED",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "source_candidates": 0,
+      "source_examples": [],
+      "producer_candidates": [
+        "tests/gcp/test_source_bounded_entrypoint_v1.py",
+        "tests/gcp/test_source_delivery_v1.py",
+        "tests/gcp/test_source_envelope_v1.py",
+        "tests/gcp/test_source_live_callbacks_v1.py",
+        "tests/gcp/test_source_operational_runtime_v1.py",
+        "tests/gcp/test_source_pulled_subscriber_integration_v1.py",
+        "tests/gcp/test_source_runtime_adapter_v1.py",
+        "tests/gcp/test_source_runtime_v1.py",
+        "tests/gcp/test_source_subscriber_routing_v1.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "CONTROLLED \u2014 NOT EXECUTED"
+    },
+    "payments.lifecycle.audit.v1": {
+      "category": "OPERATIONAL_DERIVED",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "source_candidates": 0,
+      "source_examples": [],
+      "producer_candidates": [],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "CONTROLLED \u2014 NOT EXECUTED"
+    },
+    "payments.lifecycle.dlq.v1": {
+      "category": "OPERATIONAL_DERIVED",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "source_candidates": 0,
+      "source_examples": [],
+      "producer_candidates": [],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "CONTROLLED \u2014 NOT EXECUTED"
+    },
+    "payments.lifecycle.exceptions.v1": {
+      "category": "OPERATIONAL_DERIVED",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "source_candidates": 0,
+      "source_examples": [],
+      "producer_candidates": [],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "CONTROLLED \u2014 NOT EXECUTED"
+    },
+    "payments.lifecycle.state.v1": {
+      "category": "OPERATIONAL_DERIVED",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "source_candidates": 0,
+      "source_examples": [],
+      "producer_candidates": [
+        "platform/flink/jobs/j1_lifecycle_state_skeleton.py",
+        "tests/gcp/test_source_envelope_v1.py",
+        "tests/gcp/test_source_runtime_adapter_v1.py",
+        "tests/streaming/test_j1_runtime_validation.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "CONTROLLED \u2014 NOT EXECUTED"
+    },
+    "payments.lifecycle.transitions.v1": {
+      "category": "OPERATIONAL_DERIVED",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "source_candidates": 0,
+      "source_examples": [],
+      "producer_candidates": [
+        "platform/flink/jobs/j1_lifecycle_state_skeleton.py",
+        "tests/gcp/test_source_envelope_v1.py",
+        "tests/streaming/test_j1_runtime_validation.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "CONTROLLED \u2014 NOT EXECUTED"
+    },
+    "pdmis.beneficiaries": {
+      "category": "BUSINESS_SOURCE",
+      "processing_mode": "batch",
+      "route": "PASS",
+      "source_candidates": 1,
+      "source_examples": [
+        "data/pdmis/beneficiaries.json"
+      ],
+      "producer_candidates": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES \u2014 VALIDATION PENDING"
+    },
+    "pdmis.business_plans": {
+      "category": "BUSINESS_SOURCE",
+      "processing_mode": "batch",
+      "route": "PASS",
+      "source_candidates": 1,
+      "source_examples": [
+        "data/pdmis/business_plans.json"
+      ],
+      "producer_candidates": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES \u2014 VALIDATION PENDING"
+    },
+    "pdmis.households": {
+      "category": "BUSINESS_SOURCE",
+      "processing_mode": "batch",
+      "route": "PASS",
+      "source_candidates": 1,
+      "source_examples": [
+        "data/pdmis/households.json"
+      ],
+      "producer_candidates": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES \u2014 VALIDATION PENDING"
+    },
+    "pdmis.loans": {
+      "category": "BUSINESS_SOURCE",
+      "processing_mode": "batch",
+      "route": "PASS",
+      "source_candidates": 1,
+      "source_examples": [
+        "data/pdmis/loans.json"
+      ],
+      "producer_candidates": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py",
+        "tests/gcp/test_delivery_journal.py",
+        "tests/gcp/test_delivery_journal_hardening.py",
+        "tests/gcp/test_raw_v1_bridge_acceptance.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES \u2014 VALIDATION PENDING"
+    },
+    "pdmis.repayments": {
+      "category": "BUSINESS_SOURCE",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "source_candidates": 1,
+      "source_examples": [
+        "data/pdmis/repayments.json"
+      ],
+      "producer_candidates": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py",
+        "tests/gcp/test_delivery_journal.py",
+        "tests/gcp/test_legacy_subscriber_operational_acceptance.py",
+        "tests/gcp/test_raw_v1_bridge_acceptance.py",
+        "tests/gcp/test_raw_v1_cloud_ingestion.py",
+        "tests/gcp/test_raw_v1_recovery.py",
+        "tests/gcp/test_source_legacy_envelope_discriminator.py",
+        "tests/gcp/test_source_pulled_subscriber_integration_v1.py",
+        "tests/gcp/test_source_subscriber_routing_v1.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES \u2014 VALIDATION PENDING"
+    },
+    "pdmis.saccos": {
+      "category": "BUSINESS_SOURCE",
+      "processing_mode": "batch",
+      "route": "PASS",
+      "source_candidates": 1,
+      "source_examples": [
+        "data/pdmis/saccos.json"
+      ],
+      "producer_candidates": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES \u2014 VALIDATION PENDING"
+    },
+    "pdmis.special_groups": {
+      "category": "BUSINESS_SOURCE",
+      "processing_mode": "batch",
+      "route": "PASS",
+      "source_candidates": 1,
+      "source_examples": [
+        "data/pdmis/special_groups.json"
+      ],
+      "producer_candidates": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES \u2014 VALIDATION PENDING"
+    },
+    "wendi.camt052": {
+      "category": "BUSINESS_SOURCE",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "source_candidates": 38,
+      "source_examples": [
+        "data/wendi/camt052/camt052_report_001.xml",
+        "data/wendi/camt052/camt052_report_002.xml",
+        "data/wendi/camt052/camt052_report_003.xml",
+        "data/wendi/camt052/camt052_report_004.xml",
+        "data/wendi/camt052/camt052_report_005.xml"
+      ],
+      "producer_candidates": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "xml_validation": {
+        "FAIL_XSD": 38
+      },
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES \u2014 VALIDATION PENDING"
+    },
+    "wendi.camt053": {
+      "category": "BUSINESS_SOURCE",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "source_candidates": 151,
+      "source_examples": [
+        "data/wendi/camt053/camt053_0001.xml",
+        "data/wendi/camt053/camt053_0002.xml",
+        "data/wendi/camt053/camt053_0003.xml",
+        "data/wendi/camt053/camt053_0004.xml",
+        "data/wendi/camt053/camt053_0006.xml"
+      ],
+      "producer_candidates": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "xml_validation": {
+        "PASS": 151
+      },
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES \u2014 VALIDATION PENDING"
+    },
+    "wendi.camt054": {
+      "category": "BUSINESS_SOURCE",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "source_candidates": 151,
+      "source_examples": [
+        "data/wendi/camt054/camt054_0001.xml",
+        "data/wendi/camt054/camt054_0002.xml",
+        "data/wendi/camt054/camt054_0003.xml",
+        "data/wendi/camt054/camt054_0004.xml",
+        "data/wendi/camt054/camt054_0006.xml"
+      ],
+      "producer_candidates": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "xml_validation": {
+        "PASS": 151
+      },
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES \u2014 VALIDATION PENDING"
+    },
+    "wendi.pain001": {
+      "category": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "source_candidates": 238,
+      "source_examples": [
+        "data/wendi/pain001/pain001_0001.xml",
+        "data/wendi/pain001/pain001_0002.xml",
+        "data/wendi/pain001/pain001_0003.xml",
+        "data/wendi/pain001/pain001_0004.xml",
+        "data/wendi/pain001/pain001_0005.xml"
+      ],
+      "producer_candidates": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "xml_validation": {
+        "PASS": 238
+      },
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES \u2014 VALIDATION PENDING"
+    },
+    "wendi.pain002": {
+      "category": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "source_candidates": 238,
+      "source_examples": [
+        "data/wendi/pain002/pain002_0001.xml",
+        "data/wendi/pain002/pain002_0002.xml",
+        "data/wendi/pain002/pain002_0003.xml",
+        "data/wendi/pain002/pain002_0004.xml",
+        "data/wendi/pain002/pain002_0005.xml"
+      ],
+      "producer_candidates": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "xml_validation": {
+        "PASS": 238
+      },
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "SOURCE CANDIDATES \u2014 VALIDATION PENDING"
+    },
+    "wendi.transactions": {
+      "category": "BUSINESS_SOURCE",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "source_candidates": 0,
+      "source_examples": [],
+      "producer_candidates": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "xml_validation": {},
+      "producer_mapping": "NOT VERIFIED",
+      "publication": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "acceptance": "BLOCKED \u2014 SOURCE MAPPING"
+    }
+  },
+  "schemas": [
+    {
+      "path": "contracts/custom/xsd/AgentTransaction.xsd",
+      "namespace": null,
+      "compilation": "PASS",
+      "error": null
+    },
+    {
+      "path": "contracts/custom/xsd/TechnicalPaymentEvent.xsd",
+      "namespace": null,
+      "compilation": "PASS",
+      "error": null
+    },
+    {
+      "path": "contracts/iso20022/xsd/camt.052.001.08.xsd",
+      "namespace": "urn:iso:std:iso:20022:tech:xsd:camt.052.001.08",
+      "compilation": "PASS",
+      "error": null
+    },
+    {
+      "path": "contracts/iso20022/xsd/camt.053.001.08.xsd",
+      "namespace": "urn:iso:std:iso:20022:tech:xsd:camt.053.001.08",
+      "compilation": "PASS",
+      "error": null
+    },
+    {
+      "path": "contracts/iso20022/xsd/camt.054.001.08.xsd",
+      "namespace": "urn:iso:std:iso:20022:tech:xsd:camt.054.001.08",
+      "compilation": "PASS",
+      "error": null
+    },
+    {
+      "path": "contracts/iso20022/xsd/pacs.002.001.10.xsd",
+      "namespace": "urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10",
+      "compilation": "PASS",
+      "error": null
+    },
+    {
+      "path": "contracts/iso20022/xsd/pacs.008.001.08.xsd",
+      "namespace": "urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08",
+      "compilation": "PASS",
+      "error": null
+    },
+    {
+      "path": "contracts/iso20022/xsd/pain.001.001.09.xsd",
+      "namespace": "urn:iso:std:iso:20022:tech:xsd:pain.001.001.09",
+      "compilation": "PASS",
+      "error": null
+    },
+    {
+      "path": "contracts/iso20022/xsd/pain.002.001.12.xsd",
+      "namespace": "urn:iso:std:iso:20022:tech:xsd:pain.002.001.12",
+      "compilation": "PASS",
+      "error": null
+    }
+  ],
+  "producer_implementations": [
+    {
+      "path": "infrastructure/terraform/gcp/scripts/validate_retention.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 135,
+          "function": "POLICY.open",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "orchestration/gcp_composer/runtime/bounded_controller.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 160,
+          "function": "open",
+          "args": [
+            "path"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "orchestration/gcp_composer/runtime/deployment_gate.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 33,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "orchestration/gcp_composer/tests/test_gcp_composer_contract.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 31,
+          "function": "DAG_PATH.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 82,
+          "function": "(MODULE_PATH / 'main.tf').read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 75,
+          "function": "DEV_PATH.glob",
+          "args": [
+            "'*.tf'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 77,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "orchestration/gcp_composer/tests/test_local_integration.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 106,
+          "function": "(RUNTIME / 'local_integration.py').read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "orchestration/gcp_composer/tests/test_stage7_contract.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 11,
+          "function": "RT.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 11,
+          "function": "SQL.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "pipelines/gcp/raw_to_bronze/execution_contracts.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 34,
+          "function": "schema_path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "pipelines/gcp/raw_to_bronze/pipeline.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 184,
+          "function": "open",
+          "args": [
+            "schema_path"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 187,
+          "function": "open",
+          "args": [
+            "q_schema_path"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 37,
+          "function": "readable_file.open",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "pipelines/gcp/raw_to_bronze/unified_pipeline_runner.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 46,
+          "function": "path.read_bytes",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 83,
+          "function": "Path(args.manifest).read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "platform/flink/jobs/j1_lifecycle_state_skeleton.py",
+      "topic_literals": [
+        {
+          "topic": "payments.lifecycle.state.v1",
+          "line": 102
+        },
+        {
+          "topic": "payments.lifecycle.transitions.v1",
+          "line": 103
+        },
+        {
+          "topic": "icmn.pmn.pain001",
+          "line": 115
+        },
+        {
+          "topic": "cpo.plm.pain002",
+          "line": 116
+        }
+      ],
+      "calls": []
+    },
+    {
+      "path": "platform/gcp/bronze_exporter/exporter.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 96,
+          "function": "(dest / 'bronze.jsonl').open",
+          "args": [
+            "'wb'"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "platform/gcp/catalogue_commit_contract/plan.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 33,
+          "function": "hashlib.file_digest(source.open('rb'), 'sha256').hexdigest",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 39,
+          "function": "hashlib.file_digest(parquet.open('rb'), 'sha256').hexdigest",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 28,
+          "function": "(root / 'bronze-full-20403/manifest.json').read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 29,
+          "function": "(root / 'parquet-full-20403/manifest.json').read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 83,
+          "function": "a.output.open",
+          "args": [
+            "'x'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 33,
+          "function": "source.open",
+          "args": [
+            "'rb'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 39,
+          "function": "parquet.open",
+          "args": [
+            "'rb'"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "platform/gcp/catalogue_contract_validation/plan.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 33,
+          "function": "hashlib.file_digest(source.open('rb'), 'sha256').hexdigest",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 39,
+          "function": "hashlib.file_digest(parquet.open('rb'), 'sha256').hexdigest",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 28,
+          "function": "(root / 'bronze-full-20403/manifest.json').read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 29,
+          "function": "(root / 'parquet-full-20403/manifest.json').read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 83,
+          "function": "a.output.open",
+          "args": [
+            "'x'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 33,
+          "function": "source.open",
+          "args": [
+            "'rb'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 39,
+          "function": "parquet.open",
+          "args": [
+            "'rb'"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "platform/gcp/dataflow_ingestion/native_24_topic_bridge.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 84,
+          "function": "pubsub_v1.PublisherClient",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 23,
+          "function": "Path(path).read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 46,
+          "function": "open",
+          "args": [
+            "_path"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 109,
+          "function": "bridge.publish_wire_then_commit",
+          "args": [
+            "consumer",
+            "publisher",
+            "topic_path"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "platform/gcp/dataflow_ingestion/raw_v1.py",
+      "topic_literals": [
+        {
+          "topic": "icmn.vpm.pain001",
+          "line": 12
+        },
+        {
+          "topic": "icmn.pmn.pain001",
+          "line": 12
+        },
+        {
+          "topic": "cpo.psn.pain002",
+          "line": 12
+        },
+        {
+          "topic": "cpo.plm.pain002",
+          "line": 12
+        },
+        {
+          "topic": "wendi.camt052",
+          "line": 12
+        },
+        {
+          "topic": "wendi.camt053",
+          "line": 12
+        },
+        {
+          "topic": "wendi.camt054",
+          "line": 12
+        },
+        {
+          "topic": "wendi.transactions",
+          "line": 12
+        },
+        {
+          "topic": "wendi.pain001",
+          "line": 12
+        },
+        {
+          "topic": "wendi.pain002",
+          "line": 12
+        },
+        {
+          "topic": "mobile.mtn.pacs008",
+          "line": 12
+        },
+        {
+          "topic": "mobile.mtn.pacs002",
+          "line": 12
+        },
+        {
+          "topic": "mobile.airtel.pacs008",
+          "line": 12
+        },
+        {
+          "topic": "mobile.airtel.pacs002",
+          "line": 12
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 12
+        },
+        {
+          "topic": "agent.profiles",
+          "line": 12
+        },
+        {
+          "topic": "agent.locations",
+          "line": 12
+        },
+        {
+          "topic": "pdmis.beneficiaries",
+          "line": 12
+        },
+        {
+          "topic": "pdmis.business_plans",
+          "line": 12
+        },
+        {
+          "topic": "pdmis.households",
+          "line": 12
+        },
+        {
+          "topic": "pdmis.loans",
+          "line": 12
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 12
+        },
+        {
+          "topic": "pdmis.saccos",
+          "line": 12
+        },
+        {
+          "topic": "pdmis.special_groups",
+          "line": 12
+        }
+      ],
+      "calls": []
+    },
+    {
+      "path": "platform/gcp/iceberg_commit_planner/planner.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 18,
+          "function": "hashlib.file_digest(source.open('rb'), 'sha256').hexdigest",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 16,
+          "function": "Path(export_manifest).read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 17,
+          "function": "Path(stage_manifest).read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 18,
+          "function": "source.open",
+          "args": [
+            "'rb'"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "platform/gcp/kafka_pubsub_bridge/bridge.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 53,
+          "function": "publisher.publish",
+          "args": [
+            "topic_path",
+            "payload"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 83,
+          "function": "pubsub_v1.PublisherClient",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 150,
+          "function": "publisher.publish(topic_path, data).result",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 150,
+          "function": "publisher.publish",
+          "args": [
+            "topic_path",
+            "data"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "platform/gcp/kafka_pubsub_bridge/raw_topic_governance_v1.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 17,
+          "function": "(root / 'platform/kafka/topics.yaml').read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 23,
+          "function": "Path(__file__).with_name('topic_routes_v1.json').read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "platform/gcp/kafka_pubsub_bridge/raw_v1_bridge_live.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 125,
+          "function": "pubsub_v1.PublisherClient",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 52,
+          "function": "publisher.publish(topic_path, body).result",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 93,
+          "function": "contract.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 256,
+          "function": "contract_path.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 276,
+          "function": "plan_path.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 348,
+          "function": "pubsub_v1.PublisherClient",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 155,
+          "function": "bridge.publish_wire_then_commit",
+          "args": [
+            "consumer",
+            "publisher",
+            "topic_path"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 398,
+          "function": "bridge.publish_wire_then_commit",
+          "args": [
+            "consumer",
+            "publisher",
+            "topic_path"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 52,
+          "function": "publisher.publish",
+          "args": [
+            "topic_path",
+            "body"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "platform/gcp/kafka_pubsub_bridge/source_bounded_entrypoint_v1.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 59,
+          "function": "callbacks.publish_kafka_record",
+          "args": [
+            "record",
+            "publisher",
+            "topic_path"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "platform/gcp/kafka_pubsub_bridge/source_delivery_v1.py",
+      "topic_literals": [
+        {
+          "topic": "mdm.sacco.golden",
+          "line": 20
+        },
+        {
+          "topic": "mdm.agent.golden",
+          "line": 21
+        },
+        {
+          "topic": "mdm.geography.golden",
+          "line": 22
+        }
+      ],
+      "calls": []
+    },
+    {
+      "path": "platform/gcp/kafka_pubsub_bridge/source_envelope_v1.py",
+      "topic_literals": [
+        {
+          "topic": "cdc.pdm_mdm.mdm.sacco_master_sources",
+          "line": 60
+        }
+      ],
+      "calls": [
+        {
+          "line": 12,
+          "function": "Path(__file__).with_name('topic_routes_v1.json').read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "platform/gcp/kafka_pubsub_bridge/source_live_callbacks_v1.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 36,
+          "function": "delivery.publish_then_commit",
+          "args": [
+            "envelope",
+            "publish",
+            "commit"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 34,
+          "function": "publisher.publish",
+          "args": [
+            "pubsub_topic_path",
+            "payload"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "platform/gcp/kafka_pubsub_bridge/source_operational_runtime_v1.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 228,
+          "function": "pubsub_v1.PublisherClient",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 242,
+          "function": "ENTRY.publish_one",
+          "args": [
+            "msg",
+            "consumer",
+            "publisher"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+      "topic_literals": [
+        {
+          "topic": "icmn.vpm.pain001",
+          "line": 12
+        },
+        {
+          "topic": "icmn.pmn.pain001",
+          "line": 12
+        },
+        {
+          "topic": "cpo.psn.pain002",
+          "line": 12
+        },
+        {
+          "topic": "cpo.plm.pain002",
+          "line": 12
+        },
+        {
+          "topic": "wendi.camt052",
+          "line": 12
+        },
+        {
+          "topic": "wendi.camt053",
+          "line": 12
+        },
+        {
+          "topic": "wendi.camt054",
+          "line": 12
+        },
+        {
+          "topic": "wendi.transactions",
+          "line": 12
+        },
+        {
+          "topic": "wendi.pain001",
+          "line": 12
+        },
+        {
+          "topic": "wendi.pain002",
+          "line": 12
+        },
+        {
+          "topic": "mobile.mtn.pacs008",
+          "line": 12
+        },
+        {
+          "topic": "mobile.mtn.pacs002",
+          "line": 12
+        },
+        {
+          "topic": "mobile.airtel.pacs008",
+          "line": 12
+        },
+        {
+          "topic": "mobile.airtel.pacs002",
+          "line": 12
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 12
+        },
+        {
+          "topic": "agent.profiles",
+          "line": 12
+        },
+        {
+          "topic": "agent.locations",
+          "line": 12
+        },
+        {
+          "topic": "pdmis.beneficiaries",
+          "line": 12
+        },
+        {
+          "topic": "pdmis.business_plans",
+          "line": 12
+        },
+        {
+          "topic": "pdmis.households",
+          "line": 12
+        },
+        {
+          "topic": "pdmis.loans",
+          "line": 12
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 12
+        },
+        {
+          "topic": "pdmis.saccos",
+          "line": 12
+        },
+        {
+          "topic": "pdmis.special_groups",
+          "line": 12
+        }
+      ],
+      "calls": []
+    },
+    {
+      "path": "platform/gcp/staging_bronze_writer/writer.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 130,
+          "function": "src.open",
+          "args": [
+            "'rb'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 144,
+          "function": "(out / 'quarantine.jsonl').open",
+          "args": [
+            "'w'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 153,
+          "function": "(out / 'validated_staging.jsonl').open",
+          "args": [
+            "'w'"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "platform/kafka/topic_admin.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 24,
+          "function": "open",
+          "args": [
+            "path"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "programme/tooling/programme_control/collectors/base.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 93,
+          "function": "path.read_bytes",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "programme/tooling/programme_control/collectors/compose_inventory.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 59,
+          "function": "path.read_text(encoding='utf-8', errors='replace').splitlines",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 59,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "programme/tooling/programme_control/collectors/contract_inventory.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 102,
+          "function": "root.rglob",
+          "args": [
+            "'*'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 46,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 67,
+          "function": "base.glob",
+          "args": [
+            "pattern"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 135,
+          "function": "(root / KAFKA_TOPICS).read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "programme/tooling/programme_control/collectors/dbt_evidence.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 33,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 50,
+          "function": "(root / MODELS_DIR).rglob",
+          "args": [
+            "'*.sql'"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "programme/tooling/programme_control/collectors/documentation.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 98,
+          "function": "docs_root.rglob",
+          "args": [
+            "'*'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 118,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 128,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "programme/tooling/programme_control/collectors/terraform_evidence.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 31,
+          "function": "base.rglob",
+          "args": [
+            "'*.tf'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 33,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 47,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 63,
+          "function": "contracts_dir.glob",
+          "args": [
+            "'*.json'"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "programme/tooling/programme_control/collectors/test_evidence.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 73,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 85,
+          "function": "root.glob",
+          "args": [
+            "pattern"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 145,
+          "function": "base.rglob",
+          "args": [
+            "'test_*.py'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 90,
+          "function": "path.read_bytes",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "programme/tooling/programme_control/config.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 44,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "programme/tooling/programme_control/loader.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 27,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "programme/tooling/programme_control/validation.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 233,
+          "function": "programme.global_ids",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 366,
+          "function": "programme.global_ids",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 436,
+          "function": "openpyxl.load_workbook",
+          "args": [
+            "workbook_path"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "programme/tooling/programme_control/workbook/sheets.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 1298,
+          "function": "_openpyxl",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "programme/tooling/update_workbook.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 77,
+          "function": "openpyxl.load_workbook",
+          "args": [
+            "workbook_path"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 280,
+          "function": "evidence_path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "scripts/execute_guarded_pipeline.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 157,
+          "function": "pubsub_v1.PublisherClient",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 111,
+          "function": "publish_ev.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 193,
+          "function": "publisher.publish(topic_path, envelope).result",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 193,
+          "function": "publisher.publish",
+          "args": [
+            "topic_path",
+            "envelope"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "services/geospatial/build_uganda_district_geojson_seed.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 48,
+          "function": "ISO_SEED_PATH.open",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 76,
+          "function": "GEOJSON_PATH.open",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 172,
+          "function": "OUTPUT_PATH.open",
+          "args": [
+            "'w'"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "services/mdm-publisher/mdm_publisher.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 33,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 288,
+          "function": "producer.produce",
+          "args": [
+            "item['topic']"
+          ],
+          "keywords": [
+            {
+              "name": "key",
+              "value": "item['key'].encode('utf-8')"
+            },
+            {
+              "name": "value",
+              "value": "json.dumps(item['record'], separators=(',', ':')).encode('utf-8')"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "services/payment-producer/delivery_coordinator.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 95,
+          "function": "self.producer.produce",
+          "args": [],
+          "keywords": [
+            {
+              "name": "topic",
+              "value": "topic"
+            },
+            {
+              "name": "key",
+              "value": "key"
+            },
+            {
+              "name": "value",
+              "value": "wire"
+            }
+          ]
+        },
+        {
+          "line": 103,
+          "function": "self.producer.poll",
+          "args": [
+            "0"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 107,
+          "function": "self.producer.flush",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "services/payment-producer/delivery_journal.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 25,
+          "function": "os.open",
+          "args": [
+            "lock_path",
+            "os.O_CREAT | os.O_RDWR",
+            "384"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "services/payment-producer/guarded_delivery_adapter.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 90,
+          "function": "self.coordinator.publish",
+          "args": [
+            "topic",
+            "event_id",
+            "content"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "services/payment-producer/kafka_producer.py",
+      "topic_literals": [
+        {
+          "topic": "icmn.vpm.pain001",
+          "line": 84
+        },
+        {
+          "topic": "icmn.pmn.pain001",
+          "line": 85
+        },
+        {
+          "topic": "cpo.psn.pain002",
+          "line": 88
+        },
+        {
+          "topic": "cpo.plm.pain002",
+          "line": 89
+        },
+        {
+          "topic": "wendi.pain001",
+          "line": 92
+        },
+        {
+          "topic": "wendi.pain002",
+          "line": 93
+        },
+        {
+          "topic": "wendi.camt052",
+          "line": 94
+        },
+        {
+          "topic": "wendi.camt053",
+          "line": 95
+        },
+        {
+          "topic": "wendi.camt054",
+          "line": 96
+        },
+        {
+          "topic": "wendi.transactions",
+          "line": 97
+        },
+        {
+          "topic": "mobile.mtn.pacs008",
+          "line": 100
+        },
+        {
+          "topic": "mobile.mtn.pacs002",
+          "line": 101
+        },
+        {
+          "topic": "mobile.airtel.pacs008",
+          "line": 102
+        },
+        {
+          "topic": "mobile.airtel.pacs002",
+          "line": 103
+        },
+        {
+          "topic": "agent.profiles",
+          "line": 106
+        },
+        {
+          "topic": "agent.locations",
+          "line": 107
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 108
+        },
+        {
+          "topic": "pdmis.beneficiaries",
+          "line": 111
+        },
+        {
+          "topic": "pdmis.business_plans",
+          "line": 112
+        },
+        {
+          "topic": "pdmis.households",
+          "line": 113
+        },
+        {
+          "topic": "pdmis.loans",
+          "line": 114
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 115
+        },
+        {
+          "topic": "pdmis.saccos",
+          "line": 116
+        },
+        {
+          "topic": "pdmis.special_groups",
+          "line": 117
+        },
+        {
+          "topic": "icmn.pmn.pain001",
+          "line": 121
+        },
+        {
+          "topic": "cpo.plm.pain002",
+          "line": 122
+        },
+        {
+          "topic": "pdmis.loans",
+          "line": 123
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 124
+        },
+        {
+          "topic": "pdmis.beneficiaries",
+          "line": 125
+        },
+        {
+          "topic": "pdmis.saccos",
+          "line": 126
+        },
+        {
+          "topic": "pdmis.households",
+          "line": 127
+        },
+        {
+          "topic": "pdmis.business_plans",
+          "line": 128
+        },
+        {
+          "topic": "pdmis.special_groups",
+          "line": 129
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 130
+        },
+        {
+          "topic": "agent.profiles",
+          "line": 131
+        },
+        {
+          "topic": "agent.locations",
+          "line": 132
+        },
+        {
+          "topic": "wendi.transactions",
+          "line": 133
+        },
+        {
+          "topic": "pdmis.loans",
+          "line": 705
+        },
+        {
+          "topic": "pdmis.beneficiaries",
+          "line": 706
+        },
+        {
+          "topic": "pdmis.households",
+          "line": 707
+        },
+        {
+          "topic": "pdmis.saccos",
+          "line": 708
+        },
+        {
+          "topic": "pdmis.business_plans",
+          "line": 709
+        },
+        {
+          "topic": "pdmis.special_groups",
+          "line": 710
+        },
+        {
+          "topic": "agent.profiles",
+          "line": 567
+        },
+        {
+          "topic": "agent.locations",
+          "line": 568
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 569
+        },
+        {
+          "topic": "pdmis.beneficiaries",
+          "line": 570
+        },
+        {
+          "topic": "pdmis.business_plans",
+          "line": 571
+        },
+        {
+          "topic": "pdmis.households",
+          "line": 572
+        },
+        {
+          "topic": "pdmis.loans",
+          "line": 573
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 574
+        },
+        {
+          "topic": "pdmis.saccos",
+          "line": 575
+        },
+        {
+          "topic": "pdmis.special_groups",
+          "line": 576
+        },
+        {
+          "topic": "wendi.transactions",
+          "line": 577
+        },
+        {
+          "topic": "wendi.transactions",
+          "line": 578
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 670
+        },
+        {
+          "topic": "wendi.transactions",
+          "line": 836
+        },
+        {
+          "topic": "icmn.vpm.pain001",
+          "line": 589
+        },
+        {
+          "topic": "icmn.pmn.pain001",
+          "line": 590
+        },
+        {
+          "topic": "cpo.psn.pain002",
+          "line": 591
+        },
+        {
+          "topic": "cpo.plm.pain002",
+          "line": 592
+        },
+        {
+          "topic": "wendi.pain001",
+          "line": 593
+        },
+        {
+          "topic": "wendi.pain002",
+          "line": 594
+        },
+        {
+          "topic": "wendi.camt052",
+          "line": 595
+        },
+        {
+          "topic": "wendi.camt053",
+          "line": 596
+        },
+        {
+          "topic": "wendi.camt054",
+          "line": 597
+        },
+        {
+          "topic": "mobile.mtn.pacs008",
+          "line": 598
+        },
+        {
+          "topic": "mobile.mtn.pacs002",
+          "line": 599
+        },
+        {
+          "topic": "mobile.airtel.pacs008",
+          "line": 600
+        },
+        {
+          "topic": "mobile.airtel.pacs002",
+          "line": 601
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 602
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 838
+        },
+        {
+          "topic": "wendi.transactions",
+          "line": 845
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 845
+        },
+        {
+          "topic": "wendi.transactions",
+          "line": 856
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 856
+        }
+      ],
+      "calls": [
+        {
+          "line": 950,
+          "function": "glob.glob",
+          "args": [
+            "f'{Config.DATA_ROOT}/**/*.xml'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 951,
+          "function": "glob.glob",
+          "args": [
+            "f'{Config.DATA_ROOT}/**/*.json'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 649,
+          "function": "Path(file_path).read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 206,
+          "function": "open",
+          "args": [
+            "Config.SCHEMA_PATH",
+            "'r'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 772,
+          "function": "Path(file_path).read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 1000,
+          "function": "producer.produce",
+          "args": [],
+          "keywords": [
+            {
+              "name": "topic",
+              "value": "topic"
+            },
+            {
+              "name": "key",
+              "value": "key"
+            },
+            {
+              "name": "value",
+              "value": "event"
+            }
+          ]
+        },
+        {
+          "line": 1019,
+          "function": "producer.produce",
+          "args": [],
+          "keywords": [
+            {
+              "name": "topic",
+              "value": "topic"
+            },
+            {
+              "name": "key",
+              "value": "key"
+            },
+            {
+              "name": "value",
+              "value": "event"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "services/payment-producer/source_publisher.py",
+      "topic_literals": [
+        {
+          "topic": "icmn.vpm.pain001",
+          "line": 26
+        },
+        {
+          "topic": "icmn.pmn.pain001",
+          "line": 27
+        },
+        {
+          "topic": "cpo.psn.pain002",
+          "line": 28
+        },
+        {
+          "topic": "cpo.plm.pain002",
+          "line": 29
+        },
+        {
+          "topic": "wendi.camt052",
+          "line": 30
+        },
+        {
+          "topic": "wendi.camt053",
+          "line": 31
+        },
+        {
+          "topic": "wendi.camt054",
+          "line": 32
+        },
+        {
+          "topic": "wendi.transactions",
+          "line": 33
+        },
+        {
+          "topic": "wendi.pain001",
+          "line": 34
+        },
+        {
+          "topic": "wendi.pain002",
+          "line": 35
+        },
+        {
+          "topic": "mobile.mtn.pacs008",
+          "line": 36
+        },
+        {
+          "topic": "mobile.mtn.pacs002",
+          "line": 37
+        },
+        {
+          "topic": "mobile.airtel.pacs008",
+          "line": 38
+        },
+        {
+          "topic": "mobile.airtel.pacs002",
+          "line": 39
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 40
+        },
+        {
+          "topic": "agent.profiles",
+          "line": 41
+        },
+        {
+          "topic": "agent.locations",
+          "line": 42
+        },
+        {
+          "topic": "pdmis.beneficiaries",
+          "line": 43
+        },
+        {
+          "topic": "pdmis.business_plans",
+          "line": 44
+        },
+        {
+          "topic": "pdmis.households",
+          "line": 45
+        },
+        {
+          "topic": "pdmis.loans",
+          "line": 46
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 47
+        },
+        {
+          "topic": "pdmis.saccos",
+          "line": 48
+        },
+        {
+          "topic": "pdmis.special_groups",
+          "line": 49
+        },
+        {
+          "topic": "agent.profiles",
+          "line": 53
+        },
+        {
+          "topic": "agent.locations",
+          "line": 53
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 54
+        },
+        {
+          "topic": "pdmis.beneficiaries",
+          "line": 54
+        },
+        {
+          "topic": "pdmis.business_plans",
+          "line": 55
+        },
+        {
+          "topic": "pdmis.households",
+          "line": 55
+        },
+        {
+          "topic": "pdmis.loans",
+          "line": 56
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 56
+        },
+        {
+          "topic": "pdmis.saccos",
+          "line": 57
+        },
+        {
+          "topic": "pdmis.special_groups",
+          "line": 57
+        },
+        {
+          "topic": "wendi.transactions",
+          "line": 58
+        },
+        {
+          "topic": "wendi.transactions",
+          "line": 58
+        },
+        {
+          "topic": "icmn.vpm.pain001",
+          "line": 61
+        },
+        {
+          "topic": "icmn.pmn.pain001",
+          "line": 61
+        },
+        {
+          "topic": "cpo.psn.pain002",
+          "line": 62
+        },
+        {
+          "topic": "cpo.plm.pain002",
+          "line": 62
+        },
+        {
+          "topic": "wendi.pain001",
+          "line": 63
+        },
+        {
+          "topic": "wendi.pain002",
+          "line": 63
+        },
+        {
+          "topic": "wendi.camt052",
+          "line": 64
+        },
+        {
+          "topic": "wendi.camt053",
+          "line": 64
+        },
+        {
+          "topic": "wendi.camt054",
+          "line": 64
+        },
+        {
+          "topic": "mobile.mtn.pacs008",
+          "line": 65
+        },
+        {
+          "topic": "mobile.mtn.pacs002",
+          "line": 66
+        },
+        {
+          "topic": "mobile.airtel.pacs008",
+          "line": 67
+        },
+        {
+          "topic": "mobile.airtel.pacs002",
+          "line": 68
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 69
+        },
+        {
+          "topic": "icmn.vpm.pain001",
+          "line": 469
+        },
+        {
+          "topic": "mobile.airtel.pacs002",
+          "line": 470
+        },
+        {
+          "topic": "agent.profiles",
+          "line": 471
+        },
+        {
+          "topic": "pdmis.loans",
+          "line": 472
+        },
+        {
+          "topic": "agent.locations",
+          "line": 480
+        },
+        {
+          "topic": "icmn.pmn.pain001",
+          "line": 503
+        }
+      ],
+      "calls": [
+        {
+          "line": 156,
+          "function": "pay.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 156,
+          "function": "tech.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 300,
+          "function": "root.rglob",
+          "args": [
+            "'*'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 305,
+          "function": "path.read_bytes",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 155,
+          "function": "pay.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 155,
+          "function": "tech.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 334,
+          "function": "os.fdopen",
+          "args": [
+            "fd",
+            "'w'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 422,
+          "function": "prod.produce",
+          "args": [],
+          "keywords": [
+            {
+              "name": "topic",
+              "value": "topic"
+            },
+            {
+              "name": "key",
+              "value": "key.encode()"
+            },
+            {
+              "name": "value",
+              "value": "wire"
+            }
+          ]
+        },
+        {
+          "line": 361,
+          "function": "ev_path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "services/payment-xml-generator/generator_common.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 120,
+          "function": "path.glob",
+          "args": [
+            "f'*{suffix}'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 98,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "services/payment-xml-generator/mdm_generator.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 35,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "services/payment-xml-generator/pdm_funding_contract.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 13,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "services/payment-xml-generator/pdm_history_generator.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 363,
+          "function": "path.open",
+          "args": [
+            "'w'"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "services/payment-xml-generator/pdm_stage7_runtime.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 24,
+          "function": "manifest_path.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 37,
+          "function": "hashlib.sha256(manifest_path.read_bytes()).hexdigest",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 37,
+          "function": "manifest_path.read_bytes",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "services/payment-xml-generator/pdmis_generator.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 2706,
+          "function": "output_root.glob",
+          "args": [
+            "'*.json'"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "services/pdm-ml/features/build_current_default_risk_features.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 108,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 600,
+          "function": "args.output.open",
+          "args": [
+            "'w'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 295,
+          "function": "path.read_text(encoding='utf-8').splitlines",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 295,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "services/pdm-ml/scoring/score_default_risk.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 71,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "services/shared/cdc/activation.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 40,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "services/shared/security/secret_provider.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 86,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "source_target_full_audit.py",
+      "topic_literals": [
+        {
+          "topic": "mdm.agent.golden",
+          "line": 58
+        },
+        {
+          "topic": "mdm.geography.golden",
+          "line": 59
+        },
+        {
+          "topic": "mdm.sacco.golden",
+          "line": 60
+        },
+        {
+          "topic": "mdm.beneficiary.golden.restricted",
+          "line": 61
+        },
+        {
+          "topic": "mdm.crosswalk.restricted",
+          "line": 62
+        },
+        {
+          "topic": "mdm.beneficiary.identity-alert.restricted",
+          "line": 63
+        },
+        {
+          "topic": "mobile.mtn.pacs008",
+          "line": 68
+        },
+        {
+          "topic": "mobile.mtn.pacs002",
+          "line": 68
+        },
+        {
+          "topic": "mobile.airtel.pacs008",
+          "line": 69
+        },
+        {
+          "topic": "mobile.airtel.pacs002",
+          "line": 69
+        },
+        {
+          "topic": "mdm.beneficiary.golden.restricted",
+          "line": 73
+        },
+        {
+          "topic": "mdm.crosswalk.restricted",
+          "line": 74
+        },
+        {
+          "topic": "mdm.beneficiary.identity-alert.restricted",
+          "line": 75
+        },
+        {
+          "topic": "mdm.agent.golden",
+          "line": 530
+        },
+        {
+          "topic": "mdm.geography.golden",
+          "line": 530
+        },
+        {
+          "topic": "mdm.sacco.golden",
+          "line": 530
+        }
+      ],
+      "calls": [
+        {
+          "line": 486,
+          "function": "repo_root.rglob",
+          "args": [
+            "'*.py'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 164,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 436,
+          "function": "mobile_dir.rglob",
+          "args": [
+            "'*'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 491,
+          "function": "p.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 448,
+          "function": "src.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "source_target_record_audit.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 42,
+          "function": "config_path.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 70,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 76,
+          "function": "path.rglob",
+          "args": [
+            "'*'"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/cdc/test_cdc_operations.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 35,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/cdc/test_debezium_production_contract.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 42,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/ci/generate_compose_validation_env.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 30,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/ci/validate_gcp_dbt.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 174,
+          "function": "manifest_path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/gcp/test_delivery_coordinator.py",
+      "topic_literals": [
+        {
+          "topic": "agent.transactions",
+          "line": 67
+        }
+      ],
+      "calls": [
+        {
+          "line": 66,
+          "function": "coordinator.publish",
+          "args": [
+            "'agent.transactions'",
+            "event_id",
+            "content"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 183,
+          "function": "(BASE / 'source_publisher.py').read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/gcp/test_delivery_journal.py",
+      "topic_literals": [
+        {
+          "topic": "agent.transactions",
+          "line": 24
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 25
+        },
+        {
+          "topic": "pdmis.loans",
+          "line": 36
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 45
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 56
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 64
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 65
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 73
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 81
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 59
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 68
+        },
+        {
+          "topic": "pdmis.loans",
+          "line": 76
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 84
+        }
+      ],
+      "calls": []
+    },
+    {
+      "path": "tests/gcp/test_delivery_journal_hardening.py",
+      "topic_literals": [
+        {
+          "topic": "agent.transactions",
+          "line": 41
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 59
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 63
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 75
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 86
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 127
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 139
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 141
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 154
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 213
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 48
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 118
+        },
+        {
+          "topic": "pdmis.loans",
+          "line": 131
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 146
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 158
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 218
+        }
+      ],
+      "calls": []
+    },
+    {
+      "path": "tests/gcp/test_durable_execution_contracts.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 59,
+          "function": "(BASE / 'transactional_recovery.py').read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 63,
+          "function": "(BASE / 'recovery_orchestrator.py').read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/gcp/test_durable_recovery_contracts.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 38,
+          "function": "(ROOT / 'orchestration/gcp_composer/runtime/recovery_contracts.py').read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/gcp/test_event_admission_policy.py",
+      "topic_literals": [
+        {
+          "topic": "agent.transactions",
+          "line": 35
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 42
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 49
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 57
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 65
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 72
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 87
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 96
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 105
+        }
+      ],
+      "calls": []
+    },
+    {
+      "path": "tests/gcp/test_guarded_delivery_adapter.py",
+      "topic_literals": [
+        {
+          "topic": "agent.transactions",
+          "line": 97
+        },
+        {
+          "topic": "agent.transactions",
+          "line": 264
+        }
+      ],
+      "calls": [
+        {
+          "line": 96,
+          "function": "adapter.publish",
+          "args": [
+            "'agent.transactions'",
+            "event_id",
+            "b'canonical-content'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 263,
+          "function": "adapter.publish",
+          "args": [
+            "'agent.transactions'",
+            "'new:event-001'",
+            "b'content'"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/gcp/test_legacy_subscriber_operational_acceptance.py",
+      "topic_literals": [
+        {
+          "topic": "pdmis.repayments",
+          "line": 52
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 40
+        }
+      ],
+      "calls": []
+    },
+    {
+      "path": "tests/gcp/test_offline_pipeline_operations.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 41,
+          "function": "(ROOT / 'orchestration/gcp_composer/runtime/dataflow_provider.py').read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/gcp/test_postgres_execution_contract.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 12,
+          "function": "MIG.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 13,
+          "function": "BASE.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/gcp/test_pubsub_raw_offline.py",
+      "topic_literals": [
+        {
+          "topic": "icmn.pmn.pain001",
+          "line": 18
+        }
+      ],
+      "calls": []
+    },
+    {
+      "path": "tests/gcp/test_raw_pubsub_adapter.py",
+      "topic_literals": [
+        {
+          "topic": "icmn.pmn.pain001",
+          "line": 16
+        }
+      ],
+      "calls": []
+    },
+    {
+      "path": "tests/gcp/test_raw_to_bronze_avro_integration.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 77,
+          "function": "(PIPELINE.parent / 'bronze_schema.json').read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/gcp/test_raw_to_bronze_offline_safety.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 12,
+          "function": "PIPELINE.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 35,
+          "function": "(folder / 'bronze_schema.json').read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 36,
+          "function": "(folder / 'quarantine_schema.json').read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/gcp/test_raw_v1_bridge_acceptance.py",
+      "topic_literals": [
+        {
+          "topic": "pdmis.repayments",
+          "line": 83
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 148
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 461
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 299
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 368
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 448
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 544
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 198
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 199
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 200
+        },
+        {
+          "topic": "pdmis.loans",
+          "line": 201
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 482
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 505
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 471
+        }
+      ],
+      "calls": [
+        {
+          "line": 127,
+          "function": "bridge.publish",
+          "args": [
+            "consumer",
+            "publisher",
+            "'offline-topic'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 170,
+          "function": "publisher.publish.assert_not_called",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 235,
+          "function": "bridge.pubsub.PublisherClient.assert_not_called",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 312,
+          "function": "publisher.publish.assert_not_called",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 380,
+          "function": "publisher.publish.assert_not_called",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 168,
+          "function": "bridge.publish",
+          "args": [
+            "consumer",
+            "publisher",
+            "'offline-topic'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 182,
+          "function": "bridge.publish",
+          "args": [
+            "consumer",
+            "publisher",
+            "'offline-topic'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 191,
+          "function": "bridge.publish",
+          "args": [
+            "consumer",
+            "publisher",
+            "'offline-topic'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 211,
+          "function": "bridge.publish",
+          "args": [
+            "consumer",
+            "publisher",
+            "'offline-topic'"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/gcp/test_raw_v1_cloud_ingestion.py",
+      "topic_literals": [
+        {
+          "topic": "pdmis.repayments",
+          "line": 134
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 226
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 92
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 97
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 100
+        }
+      ],
+      "calls": []
+    },
+    {
+      "path": "tests/gcp/test_raw_v1_contract.py",
+      "topic_literals": [
+        {
+          "topic": "icmn.pmn.pain001",
+          "line": 32
+        },
+        {
+          "topic": "icmn.pmn.pain001",
+          "line": 27
+        }
+      ],
+      "calls": []
+    },
+    {
+      "path": "tests/gcp/test_raw_v1_recovery.py",
+      "topic_literals": [
+        {
+          "topic": "agent.locations",
+          "line": 18
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 18
+        },
+        {
+          "topic": "agent.locations",
+          "line": 22
+        },
+        {
+          "topic": "agent.locations",
+          "line": 34
+        },
+        {
+          "topic": "mdm.sacco.golden",
+          "line": 39
+        }
+      ],
+      "calls": []
+    },
+    {
+      "path": "tests/gcp/test_runtime_boundary.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 31,
+          "function": "(ROOT / 'docker-compose.yaml').read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 14,
+          "function": "base.rglob",
+          "args": [
+            "'*.py'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 17,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 25,
+          "function": "path.read_text(encoding='utf-8').splitlines",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 25,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/gcp/test_source_avro_integration.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 16,
+          "function": "(ROOT / 'contracts/kafka/payment_event.avsc').read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 17,
+          "function": "(ROOT / 'contracts/kafka/technical_payment_event.avsc').read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 18,
+          "function": "(ROOT / 'infrastructure/terraform/gcp/experiments/pubsub_payments/payment-event-v1.avsc').read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 79,
+          "function": "bridge.publish_then_commit",
+          "args": [
+            "consumer",
+            "publisher",
+            "'projects/test/topics/mock'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 87,
+          "function": "bridge.publish_then_commit",
+          "args": [
+            "consumer",
+            "publisher",
+            "'test'"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/gcp/test_source_bounded_entrypoint_v1.py",
+      "topic_literals": [
+        {
+          "topic": "payment-events.retry",
+          "line": 8
+        },
+        {
+          "topic": "mdm.crosswalk.restricted",
+          "line": 53
+        },
+        {
+          "topic": "icmn.vpm.pain001",
+          "line": 57
+        },
+        {
+          "topic": "payment-events.retry",
+          "line": 79
+        },
+        {
+          "topic": "payment-events.retry",
+          "line": 80
+        },
+        {
+          "topic": "payment-events.retry",
+          "line": 81
+        },
+        {
+          "topic": "payment-events.retry",
+          "line": 43
+        },
+        {
+          "topic": "payment-events.retry",
+          "line": 64
+        },
+        {
+          "topic": "payment-events.retry",
+          "line": 71
+        },
+        {
+          "topic": "payment-events.retry",
+          "line": 76
+        },
+        {
+          "topic": "payment-events.retry",
+          "line": 97
+        },
+        {
+          "topic": "payment-events.retry",
+          "line": 99
+        }
+      ],
+      "calls": [
+        {
+          "line": 49,
+          "function": "m.publish_one",
+          "args": [
+            "Message()",
+            "c",
+            "p"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 53,
+          "function": "m.publish_one",
+          "args": [
+            "Message('mdm.crosswalk.restricted')",
+            "c",
+            "p"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 57,
+          "function": "m.publish_one",
+          "args": [
+            "Message('icmn.vpm.pain001', b'\\x00\\x00\\x00\\x00\\x01x')",
+            "c",
+            "p"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 61,
+          "function": "m.publish_one",
+          "args": [
+            "Message(error=RuntimeError('bad'))",
+            "c",
+            "p"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 45,
+          "function": "m.publish_one",
+          "args": [
+            "Message()",
+            "c",
+            "p"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 72,
+          "function": "m.publish_one",
+          "args": [
+            "Message()",
+            "Consumer(True)",
+            "Publisher()"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 92,
+          "function": "m.publish_one",
+          "args": [
+            "Message()",
+            "c",
+            "p"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 105,
+          "function": "m.publish_one",
+          "args": [
+            "Message()",
+            "Consumer(result_override=result)",
+            "Publisher()"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/gcp/test_source_delivery_v1.py",
+      "topic_literals": [
+        {
+          "topic": "payment-events.retry",
+          "line": 9
+        },
+        {
+          "topic": "icmn.vpm.pain001",
+          "line": 47
+        },
+        {
+          "topic": "mdm.crosswalk.restricted",
+          "line": 43
+        },
+        {
+          "topic": "payment-events.retry",
+          "line": 11
+        }
+      ],
+      "calls": [
+        {
+          "line": 18,
+          "function": "m.publish_then_commit",
+          "args": [
+            "self.e",
+            "lambda e: (_ for _ in ()).throw(RuntimeError('offline failure'))",
+            "lambda: steps.append('commit')"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 22,
+          "function": "m.publish_then_commit",
+          "args": [
+            "self.e",
+            "lambda e: None",
+            "lambda: steps.append('commit')"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 44,
+          "function": "m.publish_then_commit",
+          "args": [
+            "e",
+            "lambda e: steps.append('publish')",
+            "lambda: steps.append('commit')"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 48,
+          "function": "m.publish_then_commit",
+          "args": [
+            "e",
+            "lambda e: 'id'",
+            "lambda: None"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 13,
+          "function": "m.publish_then_commit",
+          "args": [
+            "self.e",
+            "lambda e: steps.append('publish') or 'id-1'",
+            "lambda: steps.append('commit')"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/gcp/test_source_envelope_v1.py",
+      "topic_literals": [
+        {
+          "topic": "mdm.beneficiary.golden.restricted",
+          "line": 37
+        },
+        {
+          "topic": "mdm.beneficiary.identity-alert.restricted",
+          "line": 37
+        },
+        {
+          "topic": "mdm.crosswalk.restricted",
+          "line": 37
+        },
+        {
+          "topic": "payment-events.retry",
+          "line": 52
+        },
+        {
+          "topic": "payment-events.retry",
+          "line": 58
+        },
+        {
+          "topic": "cdc.pdm_mdm.mdm.sacco_master_sources",
+          "line": 70
+        },
+        {
+          "topic": "cdc.pdm_mdm.mdm.sacco_master_sources",
+          "line": 76
+        },
+        {
+          "topic": "payment-events.dlq",
+          "line": 90
+        },
+        {
+          "topic": "mdm.sacco.golden",
+          "line": 42
+        },
+        {
+          "topic": "payment-events.retry",
+          "line": 46
+        },
+        {
+          "topic": "cdc.pdm_mdm.mdm.sacco_master_sources",
+          "line": 49
+        },
+        {
+          "topic": "payments.lifecycle.state.v1",
+          "line": 87
+        },
+        {
+          "topic": "cdc.pdm_mdm.mdm.sacco_master_sources",
+          "line": 66
+        },
+        {
+          "topic": "payment-events.retry",
+          "line": 83
+        },
+        {
+          "topic": "payments.lifecycle.transitions.v1",
+          "line": 96
+        }
+      ],
+      "calls": []
+    },
+    {
+      "path": "tests/gcp/test_source_legacy_envelope_discriminator.py",
+      "topic_literals": [
+        {
+          "topic": "pdmis.repayments",
+          "line": 65
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 92
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 50
+        }
+      ],
+      "calls": []
+    },
+    {
+      "path": "tests/gcp/test_source_live_callbacks_v1.py",
+      "topic_literals": [
+        {
+          "topic": "payment-events.retry",
+          "line": 31
+        },
+        {
+          "topic": "mdm.crosswalk.restricted",
+          "line": 43
+        },
+        {
+          "topic": "payment-events.retry",
+          "line": 79
+        },
+        {
+          "topic": "payment-events.retry",
+          "line": 34
+        }
+      ],
+      "calls": [
+        {
+          "line": 40,
+          "function": "m.publish_kafka_record",
+          "args": [
+            "self.record",
+            "FakePublisher(FakeFuture(error=RuntimeError('failed')))",
+            "'topic'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 44,
+          "function": "m.publish_kafka_record",
+          "args": [
+            "r",
+            "p",
+            "'topic'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 36,
+          "function": "m.publish_kafka_record",
+          "args": [
+            "self.record",
+            "p",
+            "'projects/test/topics/ordinary'"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/gcp/test_source_operational_runtime_v1.py",
+      "topic_literals": [
+        {
+          "topic": "payment-events.retry",
+          "line": 91
+        },
+        {
+          "topic": "icmn.vpm.pain001",
+          "line": 26
+        },
+        {
+          "topic": "cdc.pdm_mdm.mdm.sacco_master_sources",
+          "line": 141
+        },
+        {
+          "topic": "mdm.crosswalk.restricted",
+          "line": 162
+        },
+        {
+          "topic": "payment-events.retry",
+          "line": 230
+        }
+      ],
+      "calls": []
+    },
+    {
+      "path": "tests/gcp/test_source_publisher_evidence_recovery.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 9,
+          "function": "PUBLISHER.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/gcp/test_source_pulled_subscriber_integration_v1.py",
+      "topic_literals": [
+        {
+          "topic": "payment-events.retry",
+          "line": 54
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 70
+        },
+        {
+          "topic": "payment-events.retry",
+          "line": 335
+        }
+      ],
+      "calls": []
+    },
+    {
+      "path": "tests/gcp/test_source_runtime_adapter_v1.py",
+      "topic_literals": [
+        {
+          "topic": "payment-events.retry",
+          "line": 155
+        },
+        {
+          "topic": "payment-events.dlq",
+          "line": 172
+        },
+        {
+          "topic": "payment-events.retry",
+          "line": 12
+        },
+        {
+          "topic": "cdc.pdm_mdm.mdm.sacco_master_sources",
+          "line": 47
+        },
+        {
+          "topic": "cdc.pdm_mdm.mdm.sacco_master_sources",
+          "line": 54
+        },
+        {
+          "topic": "cdc.pdm_mdm.mdm.sacco_master_sources",
+          "line": 68
+        },
+        {
+          "topic": "mdm.sacco.golden",
+          "line": 86
+        },
+        {
+          "topic": "icmn.vpm.pain001",
+          "line": 93
+        },
+        {
+          "topic": "payments.lifecycle.state.v1",
+          "line": 97
+        },
+        {
+          "topic": "payment-events.dlq",
+          "line": 100
+        },
+        {
+          "topic": "cdc.pdm_mdm.mdm.sacco_master_sources",
+          "line": 190
+        },
+        {
+          "topic": "cdc.pdm_mdm.mdm.sacco_master_sources",
+          "line": 80
+        },
+        {
+          "topic": "mdm.crosswalk.restricted",
+          "line": 83
+        },
+        {
+          "topic": "cdc.pdm_mdm.mdm.sacco_master_sources",
+          "line": 108
+        },
+        {
+          "topic": "payment-events.retry",
+          "line": 116
+        },
+        {
+          "topic": "payments.lifecycle.state.v1",
+          "line": 124
+        }
+      ],
+      "calls": []
+    },
+    {
+      "path": "tests/gcp/test_source_runtime_v1.py",
+      "topic_literals": [
+        {
+          "topic": "payment-events.retry",
+          "line": 40
+        },
+        {
+          "topic": "payment-events.retry",
+          "line": 83
+        }
+      ],
+      "calls": [
+        {
+          "line": 88,
+          "function": "delivery.publish_then_commit",
+          "args": [
+            "self.envelope()",
+            "lambda envelope: calls.append('publish') or 'id'",
+            "lambda: calls.append('commit')"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/gcp/test_source_subscriber_result_reporting_v1.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 15,
+          "function": "RUNTIME.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/gcp/test_source_subscriber_routing_v1.py",
+      "topic_literals": [
+        {
+          "topic": "payment-events.retry",
+          "line": 81
+        },
+        {
+          "topic": "pdmis.repayments",
+          "line": 172
+        },
+        {
+          "topic": "payment-events.retry",
+          "line": 155
+        }
+      ],
+      "calls": []
+    },
+    {
+      "path": "tests/gcp/test_source_topic_mapping.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 22,
+          "function": "(ROOT / 'infrastructure/terraform/gcp/experiments/pubsub_payments/payment-event-v1.avsc').read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 18,
+          "function": "(ROOT / path).read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/gcp/test_unified_pipeline_runner.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 23,
+          "function": "self.source.open",
+          "args": [
+            "'wb'"
+          ],
+          "keywords": []
+        },
+        {
+          "line": 27,
+          "function": "hashlib.sha256(self.source.read_bytes()).hexdigest",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 41,
+          "function": "(self.root / 'evidence.json').read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 27,
+          "function": "self.source.read_bytes",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/mdm/test_cloudsql_mdm_migration_guard.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 25,
+          "function": "(ROOT / 'platform/cdc/contracts/pdm_cdc_contract.json').read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 26,
+          "function": "(ROOT / 'platform/cdc/debezium/templates/pdm_mdm_sacco_connector.json').read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/mdm/test_mdm_publisher.py",
+      "topic_literals": [
+        {
+          "topic": "mdm.beneficiary.golden.restricted",
+          "line": 34
+        },
+        {
+          "topic": "mdm.beneficiary.identity-alert.restricted",
+          "line": 35
+        },
+        {
+          "topic": "mdm.crosswalk.restricted",
+          "line": 36
+        },
+        {
+          "topic": "mdm.sacco.golden",
+          "line": 37
+        },
+        {
+          "topic": "mdm.agent.golden",
+          "line": 38
+        },
+        {
+          "topic": "mdm.geography.golden",
+          "line": 39
+        },
+        {
+          "topic": "mdm.sacco.golden",
+          "line": 113
+        },
+        {
+          "topic": "mdm.agent.golden",
+          "line": 114
+        },
+        {
+          "topic": "mdm.geography.golden",
+          "line": 115
+        },
+        {
+          "topic": "mdm.beneficiary.golden.restricted",
+          "line": 132
+        },
+        {
+          "topic": "mdm.beneficiary.identity-alert.restricted",
+          "line": 133
+        },
+        {
+          "topic": "mdm.crosswalk.restricted",
+          "line": 134
+        },
+        {
+          "topic": "mdm.beneficiary.golden.restricted",
+          "line": 148
+        }
+      ],
+      "calls": []
+    },
+    {
+      "path": "tests/streaming/test_j1_runtime_validation.py",
+      "topic_literals": [
+        {
+          "topic": "payments.lifecycle.state.v1",
+          "line": 27
+        },
+        {
+          "topic": "payments.lifecycle.transitions.v1",
+          "line": 28
+        }
+      ],
+      "calls": [
+        {
+          "line": 82,
+          "function": "p.produce",
+          "args": [
+            "topic"
+          ],
+          "keywords": [
+            {
+              "name": "key",
+              "value": "key.encode() if isinstance(key, str) else key"
+            },
+            {
+              "name": "value",
+              "value": "value.encode() if isinstance(value, str) else value"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "tests/streaming/test_j1_schema_binding.py",
+      "topic_literals": [
+        {
+          "topic": "icmn.pmn.pain001",
+          "line": 77
+        },
+        {
+          "topic": "icmn.pmn.pain001",
+          "line": 133
+        },
+        {
+          "topic": "icmn.pmn.pain001",
+          "line": 147
+        }
+      ],
+      "calls": []
+    },
+    {
+      "path": "tests/terraform/ci/test_ci_dependency_boundary.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 22,
+          "function": "REQUIREMENTS.read_text().lower",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 28,
+          "function": "REQUIREMENTS.read_text().lower",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 41,
+          "function": "WORKFLOW.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 54,
+          "function": "CONTRACT.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 22,
+          "function": "REQUIREMENTS.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 28,
+          "function": "REQUIREMENTS.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/terraform/ci/test_github_actions_ci_contract.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 16,
+          "function": "CONTRACT.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/terraform/ci/test_github_actions_ci_workflow.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 9,
+          "function": "WORKFLOW.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/terraform/contracts/test_deployment_targets.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 24,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/terraform/contracts/test_local_ownership.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 18,
+          "function": "CONTRACT.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 23,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 24,
+          "function": "TF.rglob",
+          "args": [
+            "'*.tf'"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/terraform/contracts/test_local_plan_contract.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 18,
+          "function": "CONTRACT.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 91,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/terraform/contracts/test_platform_iac_contract.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 23,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/terraform/foundation/test_terraform_foundation.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 15,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 46,
+          "function": "DEV.glob",
+          "args": [
+            "'*.tf'"
+          ],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/terraform/gcp/test_interoperability_iam.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 22,
+          "function": "path.open",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/terraform/gcp/test_retention.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 30,
+          "function": "POLICY.open",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/terraform/gcp/test_storage_domains.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 28,
+          "function": "POLICY.open",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 31,
+          "function": "(ENV / 'storage_domains.tf').open",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 36,
+          "function": "(ENV / 'storage_variables.tf').open",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 152,
+          "function": "module_path.open",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 193,
+          "function": "variables_path.open",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/terraform/local/test_local_cdc_dormancy.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 21,
+          "function": "CONTRACT.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/terraform/local/test_local_deployment_command.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 20,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/terraform/local/test_local_deployment_convergence.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 28,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/terraform/local/test_local_deployment_enablement.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 19,
+          "function": "path.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/terraform/local/test_local_deployment_interface.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 18,
+          "function": "CONTRACT.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/terraform/local/test_local_deployment_preflight.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 18,
+          "function": "CONTRACT.read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/test_lifecycle_planner_demo.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 79,
+          "function": "Path(demo.__file__).read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/test_pdm_stage7_runtime.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 24,
+          "function": "(target / 'audit.json').read_text",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    },
+    {
+      "path": "tests/test_source_quarantine.py",
+      "topic_literals": [],
+      "calls": [
+        {
+          "line": 30,
+          "function": "path.read_bytes",
+          "args": [],
+          "keywords": []
+        },
+        {
+          "line": 33,
+          "function": "path.read_bytes",
+          "args": [],
+          "keywords": []
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "governed_topics": 38,
+    "source_files": 2415,
+    "xml_files": 2395,
+    "schemas_found": 9,
+    "schemas_compiled": 9,
+    "producer_implementation_candidates": 121,
+    "xml_validation_results": {
+      "NOT VERIFIED \u2014 NO COMPILED XSD": 627,
+      "PASS": 1254,
+      "FAIL_XSD": 514
+    },
+    "topics_with_source_candidates": 16,
+    "verified_producer_mappings": 0,
+    "new_publications": 0
+  },
+  "limitations": [
+    "Source paths remain candidates until producer ownership is established",
+    "Dynamic topic configuration requires runtime verification",
+    "XML XSD validation does not establish business-semantic validity",
+    "JSON, CSV, Avro and Parquet payload schemas are not validated here",
+    "No Kafka publishing, generator execution or cloud operations",
+    "Previous MDM acceptance is preserved, not re-executed"
+  ]
+}

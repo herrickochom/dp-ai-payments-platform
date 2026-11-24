@@ -1,0 +1,19 @@
+{
+  "status": "PASS_SOURCE_PATCH_AND_MAPPING_TESTS",
+  "note": "Existing XML unchanged; full runtime and end-to-end tests still required",
+  "source_documents": 238,
+  "mapped_status_request_ids": 238,
+  "mapping_file": "platform/contracts/pacs002_status_request_map_v1.json",
+  "patched_files": [
+    "services/payment-producer/kafka_producer.py",
+    "services/payment-xml-generator/mobile_networks_generator.py"
+  ],
+  "backup_directory": "evidence/pacs002_correlation/fix_backup_20261120T210828Z",
+  "original_source_sha256": {
+    "producer": "ca19c1f7eae6c515490d59afbe81f9aa53ce5e071b22e142dd487bf7ab52fed9",
+    "generator": "ad5522646acb2b8e13b977d9b1db7a788d89d8f18a28102e748d6dab1e139422"
+  },
+  "cloud_operations": 0,
+  "existing_xml_modified": 0,
+  "candidate_xml_promoted": 0
+}

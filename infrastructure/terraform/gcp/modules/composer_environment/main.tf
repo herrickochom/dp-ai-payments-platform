@@ -29,9 +29,6 @@ resource "google_composer_environment" "composer" {
     software_config {
       image_version = var.composer_image_version
 
-      airflow_config_overrides = {
-        core-load_examples = "False"
-      }
     }
 
     node_config {

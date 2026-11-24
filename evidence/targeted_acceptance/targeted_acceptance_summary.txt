@@ -1,0 +1,30 @@
+GCP PAYMENTS AI PLATFORM
+TARGETED SOURCE AND PRODUCER ACCEPTANCE
+==================================================
+Timestamp: 2026-11-20T21:58:56.536541+00:00
+Overall: NOT VERIFIED
+
+xml_index                        PASS
+  All expected XML documents indexed
+message_identity                 PASS
+  No duplicate message identifiers found within a family
+cross_message_correlation        NOT VERIFIED
+  Correlation inventory produced; domain-specific message relationships must be checked against authoritative contracts
+financial_reconciliation         NOT VERIFIED
+  Financial profiles and source structures collected. No unsupported ledger or settlement equality has been assumed.
+payment_status_semantics         NOT VERIFIED
+  Statuses enumerated; source-to-response state transition rules require authoritative business contracts
+producer_static_contract         PASS
+  Python producer source inspected without execution
+kafka_catalogue                  PASS
+  38 governed Kafka topics identified
+kafka_route_alignment            PASS
+  Static topic-to-route coverage
+schema_registry_delivery         NOT VERIFIED
+  Integration source and contracts inspected statically; runtime compatibility and delivery are not asserted
+source_preservation              PASS
+  Before-and-after source XML SHA-256 verification
+
+Source modifications: 0
+Kafka operations: 0
+GCP operations: 0

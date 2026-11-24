@@ -1,0 +1,4483 @@
+{
+  "timestamp_utc": "2026-11-20T20:59:20.750673+00:00",
+  "mode": "READ_ONLY_SOURCE_AND_DATA",
+  "candidate_hashes": {
+    "mobile_networks_generator.v3.py": "607b358dae165cd08dcb54f7cd543a2299d535d61879e16cd74f23b25af83ed1",
+    "wendi_generator.v2.py": "3e10303b58d80427d3dfd216c13ea7809d50c99cb095b86404e93ebc8f9672f2"
+  },
+  "context_count": 238,
+  "sacco_count": 38,
+  "expected_files": 514,
+  "actual_files": 514,
+  "missing": [],
+  "unexpected": [],
+  "results": {
+    "PASS": 238,
+    "FAIL": 276
+  },
+  "family_results": {
+    "pacs002": {
+      "PASS": 238
+    },
+    "pacs008": {
+      "FAIL": 238
+    },
+    "camt052": {
+      "FAIL": 38
+    }
+  },
+  "failures": [
+    {
+      "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0012.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0023.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0035.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0046.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0069.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0080.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0092.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0103.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0126.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0137.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0149.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0160.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0183.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0194.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0206.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/airtel/pacs008/pacs008_airtel_0217.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0001.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0002.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0003.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0004.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0005.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0006.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0007.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0008.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0009.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0010.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0011.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0013.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0014.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0015.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0016.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0017.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0018.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0019.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0020.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0021.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0022.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0024.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0025.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0026.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0027.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0028.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0029.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0030.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0031.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0032.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0033.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0034.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0036.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0037.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0038.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0039.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0040.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0041.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0042.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0043.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0044.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0045.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0047.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0048.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0049.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0050.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0051.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0052.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0053.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0054.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0055.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0056.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0057.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0058.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0059.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0060.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0061.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0062.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0063.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0064.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0065.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0066.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0067.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0068.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0070.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0071.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0072.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0073.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0074.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0075.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0076.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0077.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0078.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0079.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0081.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0082.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0083.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0084.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0085.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0086.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0087.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0088.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0089.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0090.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0091.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0093.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0094.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0095.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0096.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0097.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0098.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0099.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0100.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0101.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0102.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0104.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0105.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0106.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0107.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0108.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0109.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0110.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0111.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0112.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0113.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0114.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0115.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0116.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0117.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0118.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0119.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0120.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0121.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0122.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0123.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0124.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0125.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0127.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0128.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0129.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0130.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0131.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0132.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0133.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0134.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0135.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0136.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0138.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0139.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0140.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0141.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0142.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0143.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0144.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0145.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0146.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0147.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0148.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0150.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0151.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0152.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0153.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0154.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0155.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0156.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0157.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0158.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0159.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0161.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0162.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0163.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0164.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0165.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0166.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0167.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0168.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0169.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0170.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0171.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0172.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0173.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0174.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0175.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0176.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0177.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0178.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0179.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0180.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0181.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0182.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0184.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0185.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0186.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0187.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0188.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0189.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0190.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0191.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0192.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0193.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0195.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0196.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0197.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0198.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0199.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0200.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0201.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0202.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0203.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0204.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0205.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0207.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0208.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0209.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0210.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0211.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0212.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0213.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0214.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0215.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0216.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0218.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0219.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0220.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0221.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0222.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0223.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0224.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0225.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0226.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0227.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0228.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0229.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0230.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0231.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0232.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0233.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0234.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0235.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0236.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0237.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/mobile_networks/mtn/pacs008/pacs008_mtn_0238.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('SchmeNm', 'MSISDN', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 2
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_001.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_002.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_003.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_004.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_005.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_006.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_007.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_008.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_009.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_010.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_011.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_012.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_013.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_014.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_015.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_016.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_017.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_018.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_019.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_020.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_021.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_022.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_023.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_024.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_025.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_026.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_027.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_028.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_029.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_030.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_031.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_032.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_033.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_034.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_035.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_036.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_037.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    },
+    {
+      "path": "data/wendi/camt052/camt052_report_038.xml",
+      "status": "FAIL",
+      "xsd_errors": [],
+      "unexpected_removed": [
+        [
+          "('SchmeNm', 'WENDI', ())",
+          1
+        ],
+        [
+          "('CdOrPrtry', 'XPCD', ())",
+          1
+        ]
+      ],
+      "added_leaf_count": 4
+    }
+  ],
+  "preservation_exceptions": {
+    "pacs002_StsReqId_count": 238
+  },
+  "source_mutations": 0,
+  "existing_data_mutations": 0,
+  "kafka_publications": 0,
+  "cloud_operations": 0,
+  "baseline_existing_xml": {
+    "NOT_VERIFIED": 627,
+    "PASS": 1254,
+    "FAIL_XSD": 514
+  },
+  "existing_xml_count": 2395,
+  "baseline_by_source_root": {
+    "agent_network": {
+      "NOT_VERIFIED": 151
+    },
+    "cpo": {
+      "NOT_VERIFIED": 238,
+      "PASS": 238
+    },
+    "icmn": {
+      "NOT_VERIFIED": 238,
+      "PASS": 238
+    },
+    "mobile_networks": {
+      "FAIL_XSD": 476
+    },
+    "wendi": {
+      "FAIL_XSD": 38,
+      "PASS": 778
+    }
+  },
+  "target_inventory_complete": true,
+  "candidate_regression_pass": false,
+  "overall": "BLOCKED"
+}

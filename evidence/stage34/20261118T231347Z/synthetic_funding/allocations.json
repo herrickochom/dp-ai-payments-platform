@@ -1,0 +1,268 @@
+[
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0001",
+    "amount_ugx": 101000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-ADJ-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0002",
+    "amount_ugx": 102000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-AGA-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0003",
+    "amount_ugx": 103000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-ARP-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0004",
+    "amount_ugx": 104000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-BGR-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0005",
+    "amount_ugx": 105000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-BUK-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0006",
+    "amount_ugx": 106000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-BUS-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0007",
+    "amount_ugx": 107000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-FPO-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0008",
+    "amount_ugx": 108000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-GBU-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0009",
+    "amount_ugx": 109000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-HOM-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0010",
+    "amount_ugx": 110000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-IGG-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0011",
+    "amount_ugx": 111000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-JIN-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0012",
+    "amount_ugx": 112000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-KAM-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0013",
+    "amount_ugx": 113000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-KBG-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0014",
+    "amount_ugx": 114000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-KIT-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0015",
+    "amount_ugx": 115000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-KLA-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0016",
+    "amount_ugx": 116000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-KSE-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0017",
+    "amount_ugx": 117000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-KTD-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0018",
+    "amount_ugx": 118000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-KUM-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0019",
+    "amount_ugx": 119000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-LRA-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0020",
+    "amount_ugx": 120000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-MBA-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0021",
+    "amount_ugx": 121000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-MBR-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0022",
+    "amount_ugx": 122000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-MKN-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0023",
+    "amount_ugx": 123000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-MPG-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0024",
+    "amount_ugx": 124000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-MRT-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0025",
+    "amount_ugx": 125000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-MSD-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0026",
+    "amount_ugx": 126000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-MSK-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0027",
+    "amount_ugx": 127000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-MYG-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0028",
+    "amount_ugx": 128000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-NAP-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0029",
+    "amount_ugx": 129000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-NEB-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0030",
+    "amount_ugx": 130000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-NPK-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0031",
+    "amount_ugx": 131000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-NTG-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0032",
+    "amount_ugx": 132000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-RAK-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0033",
+    "amount_ugx": 133000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-RUK-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0034",
+    "amount_ugx": 134000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-SRG-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0035",
+    "amount_ugx": 135000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-SRT-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0036",
+    "amount_ugx": 136000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-TOR-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0037",
+    "amount_ugx": 137000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-WAK-001"
+  },
+  {
+    "allocation_date": "2026-11-01",
+    "allocation_id": "ALLOC-SYN-0038",
+    "amount_ugx": 138000,
+    "funding_status": "ALLOCATED",
+    "sacco_id": "SACCO-YBE-001"
+  }
+]

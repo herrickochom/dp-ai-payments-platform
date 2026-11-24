@@ -1,0 +1,18 @@
+GCP PAYMENTS AI PLATFORM - SOURCE ACCEPTANCE
+==========================================
+Timestamp: 2026-11-20T21:55:55.289944+00:00
+Overall status: NOT VERIFIED
+
+INVENTORY: PASS
+ISO: PASS
+NON_ISO: PASS
+BUSINESS: NOT VERIFIED
+KAFKA: PASS
+ROUTING: PASS
+PRODUCER: NOT VERIFIED
+PRESERVATION: PASS
+
+FINDINGS
+--------
+[NOT VERIFIED] business/FINANCIAL_RECONCILIATION_CONTRACT_REQUIRED: Amount profiling does not prove settlement, repayment, loan or SACCO ledger reconciliation.
+[NOT VERIFIED] producer/RUNTIME_CONTRACT_NOT_TESTED: Static source inspection cannot establish Kafka publish success, Schema Registry compatibility, offset handling or live delivery.

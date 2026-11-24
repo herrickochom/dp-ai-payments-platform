@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="unqualified">
+  <xs:element name="AgentTransaction">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="transaction_id" type="xs:string"/>
+        <xs:element name="agent_id" type="xs:string"/>
+        <xs:element name="sacco_id" type="xs:string"/>
+        <xs:element name="loan_id" type="xs:string"/>
+        <xs:element name="beneficiary_id" type="xs:string"/>
+        <xs:element name="beneficiary_name" type="xs:string"/>
+        <xs:element name="transaction_timestamp" type="xs:dateTime"/>
+        <xs:element name="transaction_type" type="xs:string"/>
+        <xs:element name="amount" type="xs:decimal"/>
+        <xs:element name="fee_amount" type="xs:decimal"/>
+        <xs:element name="is_assisted_withdrawal" type="xs:boolean"/>
+        <xs:element name="beneficiary_verified" type="xs:boolean"/>
+        <xs:element name="verification_method" type="xs:string"/>
+        <xs:element name="status" type="xs:string"/>
+        <xs:element name="reference" type="xs:string"/>
+        <xs:element name="location">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="latitude" type="xs:decimal"/>
+              <xs:element name="longitude" type="xs:decimal"/>
+              <xs:element name="address" type="xs:string"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

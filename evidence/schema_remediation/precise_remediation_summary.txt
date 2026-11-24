@@ -1,0 +1,90 @@
+GCP PAYMENTS — PRECISE SCHEMA REMEDIATION
+XML DOCUMENTS: 2395
+VALIDATION: {'NOT VERIFIED': 627, 'PASS': 1254, 'FAIL_XSD': 514}
+XSD FILES: 9
+PRODUCER CALL SITES: 20
+
+VALIDATION BY MESSAGE FAMILY
+CUSTOM_OR_UNKNOWN: {'NOT VERIFIED': 627}
+camt.052: {'FAIL_XSD': 38}
+camt.053: {'PASS': 151}
+camt.054: {'PASS': 151}
+pacs.002: {'FAIL_XSD': 238}
+pacs.008: {'FAIL_XSD': 238}
+pain.001: {'PASS': 476}
+pain.002: {'PASS': 476}
+
+FAILURE EXAMPLES — UP TO FIVE PER FAMILY
+
+camt.052: 38 failures
+  FILE: data/wendi/camt052/camt052_report_001.xml
+  XSD: contracts/iso20022/xsd/camt.052.001.08.xsd
+  LINE 2 SCHEMAV_ELEMENT_CONTENT: Element '{urn:iso:std:iso:20022:tech:xsd:camt.052.001.08}Acct': This element is not expected. Expected is ( {urn:iso:std:iso:20022:tech:xsd:camt.052.001.08}Rpt ).
+  FILE: data/wendi/camt052/camt052_report_002.xml
+  XSD: contracts/iso20022/xsd/camt.052.001.08.xsd
+  LINE 2 SCHEMAV_ELEMENT_CONTENT: Element '{urn:iso:std:iso:20022:tech:xsd:camt.052.001.08}Acct': This element is not expected. Expected is ( {urn:iso:std:iso:20022:tech:xsd:camt.052.001.08}Rpt ).
+  FILE: data/wendi/camt052/camt052_report_003.xml
+  XSD: contracts/iso20022/xsd/camt.052.001.08.xsd
+  LINE 2 SCHEMAV_ELEMENT_CONTENT: Element '{urn:iso:std:iso:20022:tech:xsd:camt.052.001.08}Acct': This element is not expected. Expected is ( {urn:iso:std:iso:20022:tech:xsd:camt.052.001.08}Rpt ).
+  FILE: data/wendi/camt052/camt052_report_004.xml
+  XSD: contracts/iso20022/xsd/camt.052.001.08.xsd
+  LINE 2 SCHEMAV_ELEMENT_CONTENT: Element '{urn:iso:std:iso:20022:tech:xsd:camt.052.001.08}Acct': This element is not expected. Expected is ( {urn:iso:std:iso:20022:tech:xsd:camt.052.001.08}Rpt ).
+  FILE: data/wendi/camt052/camt052_report_005.xml
+  XSD: contracts/iso20022/xsd/camt.052.001.08.xsd
+  LINE 2 SCHEMAV_ELEMENT_CONTENT: Element '{urn:iso:std:iso:20022:tech:xsd:camt.052.001.08}Acct': This element is not expected. Expected is ( {urn:iso:std:iso:20022:tech:xsd:camt.052.001.08}Rpt ).
+
+pacs.002: 238 failures
+  FILE: data/mobile_networks/airtel/pacs002/pacs002_airtel_0012.xml
+  XSD: contracts/iso20022/xsd/pacs.002.001.10.xsd
+  LINE 2 SCHEMAV_ELEMENT_CONTENT: Element '{urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}StsReqId': This element is not expected. Expected is one of ( {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}StsRsnInf, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}ChrgsInf, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}AccptncDtTm, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}FctvIntrBkSttlmDt, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}AcctSvcrRef, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}ClrSysRef, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}InstgAgt, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}InstdAgt, 
+  FILE: data/mobile_networks/airtel/pacs002/pacs002_airtel_0023.xml
+  XSD: contracts/iso20022/xsd/pacs.002.001.10.xsd
+  LINE 2 SCHEMAV_ELEMENT_CONTENT: Element '{urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}StsReqId': This element is not expected. Expected is one of ( {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}StsRsnInf, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}ChrgsInf, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}AccptncDtTm, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}FctvIntrBkSttlmDt, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}AcctSvcrRef, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}ClrSysRef, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}InstgAgt, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}InstdAgt, 
+  FILE: data/mobile_networks/airtel/pacs002/pacs002_airtel_0035.xml
+  XSD: contracts/iso20022/xsd/pacs.002.001.10.xsd
+  LINE 2 SCHEMAV_ELEMENT_CONTENT: Element '{urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}StsReqId': This element is not expected. Expected is one of ( {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}StsRsnInf, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}ChrgsInf, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}AccptncDtTm, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}FctvIntrBkSttlmDt, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}AcctSvcrRef, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}ClrSysRef, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}InstgAgt, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}InstdAgt, 
+  FILE: data/mobile_networks/airtel/pacs002/pacs002_airtel_0046.xml
+  XSD: contracts/iso20022/xsd/pacs.002.001.10.xsd
+  LINE 2 SCHEMAV_ELEMENT_CONTENT: Element '{urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}StsReqId': This element is not expected. Expected is one of ( {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}StsRsnInf, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}ChrgsInf, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}AccptncDtTm, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}FctvIntrBkSttlmDt, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}AcctSvcrRef, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}ClrSysRef, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}InstgAgt, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}InstdAgt, 
+  FILE: data/mobile_networks/airtel/pacs002/pacs002_airtel_0069.xml
+  XSD: contracts/iso20022/xsd/pacs.002.001.10.xsd
+  LINE 2 SCHEMAV_ELEMENT_CONTENT: Element '{urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}StsReqId': This element is not expected. Expected is one of ( {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}StsRsnInf, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}ChrgsInf, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}AccptncDtTm, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}FctvIntrBkSttlmDt, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}AcctSvcrRef, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}ClrSysRef, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}InstgAgt, {urn:iso:std:iso:20022:tech:xsd:pacs.002.001.10}InstdAgt, 
+
+pacs.008: 238 failures
+  FILE: data/mobile_networks/airtel/pacs008/pacs008_airtel_0012.xml
+  XSD: contracts/iso20022/xsd/pacs.008.001.08.xsd
+  LINE 2 SCHEMAV_ELEMENT_CONTENT: Element '{urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}Purp': This element is not expected. Expected is one of ( {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}ChrgsInf, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt1, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt1Acct, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt2, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt2Acct, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt3, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt3Acct, {urn:iso:std:iso:20022:tech:xsd:pacs.
+  FILE: data/mobile_networks/airtel/pacs008/pacs008_airtel_0023.xml
+  XSD: contracts/iso20022/xsd/pacs.008.001.08.xsd
+  LINE 2 SCHEMAV_ELEMENT_CONTENT: Element '{urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}Purp': This element is not expected. Expected is one of ( {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}ChrgsInf, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt1, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt1Acct, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt2, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt2Acct, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt3, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt3Acct, {urn:iso:std:iso:20022:tech:xsd:pacs.
+  FILE: data/mobile_networks/airtel/pacs008/pacs008_airtel_0035.xml
+  XSD: contracts/iso20022/xsd/pacs.008.001.08.xsd
+  LINE 2 SCHEMAV_ELEMENT_CONTENT: Element '{urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}Purp': This element is not expected. Expected is one of ( {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}ChrgsInf, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt1, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt1Acct, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt2, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt2Acct, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt3, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt3Acct, {urn:iso:std:iso:20022:tech:xsd:pacs.
+  FILE: data/mobile_networks/airtel/pacs008/pacs008_airtel_0046.xml
+  XSD: contracts/iso20022/xsd/pacs.008.001.08.xsd
+  LINE 2 SCHEMAV_ELEMENT_CONTENT: Element '{urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}Purp': This element is not expected. Expected is one of ( {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}ChrgsInf, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt1, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt1Acct, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt2, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt2Acct, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt3, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt3Acct, {urn:iso:std:iso:20022:tech:xsd:pacs.
+  FILE: data/mobile_networks/airtel/pacs008/pacs008_airtel_0069.xml
+  XSD: contracts/iso20022/xsd/pacs.008.001.08.xsd
+  LINE 2 SCHEMAV_ELEMENT_CONTENT: Element '{urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}Purp': This element is not expected. Expected is one of ( {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}ChrgsInf, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt1, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt1Acct, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt2, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt2Acct, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt3, {urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08}PrvsInstgAgt3Acct, {urn:iso:std:iso:20022:tech:xsd:pacs.
+
+PRODUCER CALL SITES
+platform/gcp/kafka_pubsub_bridge/bridge.py:53 publisher.publish args=['topic_path', 'payload'] topic_kw=-
+platform/gcp/kafka_pubsub_bridge/bridge.py:150 publisher.publish args=['topic_path', 'data'] topic_kw=-
+platform/gcp/kafka_pubsub_bridge/raw_v1_bridge_live.py:52 publisher.publish args=['topic_path', 'body'] topic_kw=-
+platform/gcp/kafka_pubsub_bridge/source_live_callbacks_v1.py:34 publisher.publish args=['pubsub_topic_path', 'payload'] topic_kw=-
+scripts/execute_guarded_pipeline.py:193 publisher.publish args=['topic_path', 'envelope'] topic_kw=-
+services/mdm-publisher/mdm_publisher.py:288 producer.produce args=["item['topic']"] topic_kw=-
+services/payment-producer/delivery_coordinator.py:95 self.producer.produce args=[] topic_kw=topic
+services/payment-producer/guarded_delivery_adapter.py:90 self.coordinator.publish args=['topic', 'event_id', 'content', 'key'] topic_kw=-
+services/payment-producer/kafka_producer.py:1000 producer.produce args=[] topic_kw=topic
+services/payment-producer/kafka_producer.py:1019 producer.produce args=[] topic_kw=topic
+services/payment-producer/source_publisher.py:422 prod.produce args=[] topic_kw=topic
+tests/gcp/test_delivery_coordinator.py:66 coordinator.publish args=["'agent.transactions'", 'event_id', 'content', "b'k'"] topic_kw=-
+tests/gcp/test_guarded_delivery_adapter.py:96 adapter.publish args=["'agent.transactions'", 'event_id', "b'canonical-content'", "b'business-key'"] topic_kw=-
+tests/gcp/test_guarded_delivery_adapter.py:263 adapter.publish args=["'agent.transactions'", "'new:event-001'", "b'content'", "b'key'"] topic_kw=-
+tests/gcp/test_raw_v1_bridge_acceptance.py:127 bridge.publish args=['consumer', 'publisher', "'offline-topic'", 'message'] topic_kw=-
+tests/gcp/test_raw_v1_bridge_acceptance.py:168 bridge.publish args=['consumer', 'publisher', "'offline-topic'", 'message'] topic_kw=-
+tests/gcp/test_raw_v1_bridge_acceptance.py:182 bridge.publish args=['consumer', 'publisher', "'offline-topic'", 'message'] topic_kw=-
+tests/gcp/test_raw_v1_bridge_acceptance.py:191 bridge.publish args=['consumer', 'publisher', "'offline-topic'", 'message'] topic_kw=-
+tests/gcp/test_raw_v1_bridge_acceptance.py:211 bridge.publish args=['consumer', 'publisher', "'offline-topic'", 'message'] topic_kw=-
+tests/streaming/test_j1_runtime_validation.py:82 p.produce args=['topic'] topic_kw=-

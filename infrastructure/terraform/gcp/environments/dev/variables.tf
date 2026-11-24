@@ -33,3 +33,9 @@ variable "platform_name" {
   type        = string
   default     = "dp-pdm-ai-platform"
 }
+
+variable "mdm_dev_public_ip" {
+  description = "Developer host public IP for MDM Cloud SQL whitelist. Empty = no public access (private-IP only)."
+  type        = string
+  default     = ""
+}

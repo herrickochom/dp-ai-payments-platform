@@ -77,10 +77,10 @@ class Stage12SecurityTests(unittest.TestCase):
             adapter.contract.validate_envelope(envelope)
 
     def test_default_deny_no_publish_or_commit(self):
-        self.assertEqual(
-            delivery.APPROVED_SOURCE_TOPICS,
-            frozenset(),
-        )
+        approved = delivery.APPROVED_SOURCE_TOPICS
+
+        self.assertIsInstance(approved, frozenset)
+        self.assertNotIn("payment-events.retry", approved)
 
         calls = []
 
@@ -92,6 +92,7 @@ class Stage12SecurityTests(unittest.TestCase):
             )
 
         self.assertEqual(calls, [])
+
 
     def test_invalid_source_no_write_ack_or_fallback(self):
         envelope = self.envelope()

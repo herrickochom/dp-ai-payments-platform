@@ -1,0 +1,531 @@
+{
+  "checks": {
+    "funding_disbursement_reconciliation": {
+      "amount_mismatches": 0,
+      "compared_pairs": 151,
+      "missing_independent_funding_evidence": true,
+      "status": "NOT VERIFIED"
+    },
+    "independent_financial_reconciliation": {
+      "reason": "Independent funding, ledger and settlement controls not fully evidenced",
+      "status": "NOT VERIFIED"
+    },
+    "journal_balancing": {
+      "candidate_files": [],
+      "reason": "No independently validated journal entry schema or debit-credit grouping contract",
+      "status": "NOT VERIFIED"
+    },
+    "repayment_ledger_reconciliation": {
+      "candidate_amount_mismatches": 93,
+      "compared_loans": 250,
+      "missing_independent_ledger_evidence": true,
+      "status": "NOT VERIFIED"
+    },
+    "settlement_payment_reconciliation": {
+      "camt_documents": {
+        "camt.052.001.08": 38,
+        "camt.053.001.08": 151,
+        "camt.054.001.08": 151
+      },
+      "camt_entries": {
+        "camt.053.001.08": 189,
+        "camt.054.001.08": 151
+      },
+      "reason": "CAMT entry-to-payment transaction mapping and settlement semantics not established",
+      "status": "NOT VERIFIED"
+    },
+    "source_preservation": {
+      "status": "PASS",
+      "verified_files": 4
+    }
+  },
+  "findings": {
+    "business_statuses": {
+      "loans": {
+        "loan_status": {
+          "APPROVED": 87,
+          "DISBURSED": 151,
+          "REJECTED": 12
+        },
+        "repayment_status": {
+          "CURRENT": 26,
+          "DEFAULTED": 54,
+          "IN_ARREARS": 17,
+          "NOT_STARTED": 106,
+          "REPAID": 47
+        }
+      },
+      "repayments": {
+        "event_type": {
+          "RECOVERY": 88,
+          "REPAYMENT": 1427
+        },
+        "payment_status": {
+          "FAILED": 90,
+          "LATE": 239,
+          "MISSED": 123,
+          "PARTIAL": 296,
+          "RECOVERED": 88,
+          "SUCCESSFUL": 679
+        }
+      },
+      "wendi": {
+        "event_type": {
+          "DISBURSEMENT": 238
+        },
+        "transaction_status": {
+          "FAILED": 50,
+          "PENDING": 37,
+          "SUCCESSFUL": 151
+        }
+      }
+    },
+    "camt_evidence": {
+      "documents": {
+        "camt.052.001.08": 38,
+        "camt.053.001.08": 151,
+        "camt.054.001.08": 151
+      },
+      "entry_counts": {
+        "camt.053.001.08": 189,
+        "camt.054.001.08": 151
+      },
+      "errors": []
+    },
+    "disbursement_comparison": {
+      "ambiguous": [],
+      "matched_pairs": 151,
+      "mismatches": [],
+      "sample": [
+        {
+          "difference": "0",
+          "loan_amount_disbursed": "1000000",
+          "loan_id": "LOAN-000001",
+          "wendi_amount": "1000000",
+          "wendi_currency": "UGX"
+        },
+        {
+          "difference": "0",
+          "loan_amount_disbursed": "1000000",
+          "loan_id": "LOAN-000002",
+          "wendi_amount": "1000000",
+          "wendi_currency": "UGX"
+        },
+        {
+          "difference": "0",
+          "loan_amount_disbursed": "1000000",
+          "loan_id": "LOAN-000003",
+          "wendi_amount": "1000000",
+          "wendi_currency": "UGX"
+        },
+        {
+          "difference": "0",
+          "loan_amount_disbursed": "1000000",
+          "loan_id": "LOAN-000004",
+          "wendi_amount": "1000000",
+          "wendi_currency": "UGX"
+        },
+        {
+          "difference": "0",
+          "loan_amount_disbursed": "1000000",
+          "loan_id": "LOAN-000006",
+          "wendi_amount": "1000000",
+          "wendi_currency": "UGX"
+        },
+        {
+          "difference": "0",
+          "loan_amount_disbursed": "1000000",
+          "loan_id": "LOAN-000008",
+          "wendi_amount": "1000000",
+          "wendi_currency": "UGX"
+        },
+        {
+          "difference": "0",
+          "loan_amount_disbursed": "1000000",
+          "loan_id": "LOAN-000009",
+          "wendi_amount": "1000000",
+          "wendi_currency": "UGX"
+        },
+        {
+          "difference": "0",
+          "loan_amount_disbursed": "1000000",
+          "loan_id": "LOAN-000011",
+          "wendi_amount": "1000000",
+          "wendi_currency": "UGX"
+        },
+        {
+          "difference": "0",
+          "loan_amount_disbursed": "1000000",
+          "loan_id": "LOAN-000013",
+          "wendi_amount": "1000000",
+          "wendi_currency": "UGX"
+        },
+        {
+          "difference": "0",
+          "loan_amount_disbursed": "1000000",
+          "loan_id": "LOAN-000016",
+          "wendi_amount": "1000000",
+          "wendi_currency": "UGX"
+        }
+      ]
+    },
+    "independent_accounting_candidates": [],
+    "repayment_comparison": {
+      "compared_loans": 250,
+      "mismatches": [
+        {
+          "completed_event_amount": "270000.0",
+          "completed_events": 3,
+          "difference": "810000.0",
+          "loan_amount_repaid": "1080000.0",
+          "loan_id": "LOAN-000002",
+          "total_events": 12
+        },
+        {
+          "completed_event_amount": "450000.0",
+          "completed_events": 5,
+          "difference": "540000.0",
+          "loan_amount_repaid": "990000.0",
+          "loan_id": "LOAN-000003",
+          "total_events": 15
+        },
+        {
+          "completed_event_amount": "0",
+          "completed_events": 0,
+          "difference": "324000.0",
+          "loan_amount_repaid": "324000.0",
+          "loan_id": "LOAN-000004",
+          "total_events": 12
+        },
+        {
+          "completed_event_amount": "450000.0",
+          "completed_events": 5,
+          "difference": "540000.0",
+          "loan_amount_repaid": "990000.0",
+          "loan_id": "LOAN-000008",
+          "total_events": 15
+        },
+        {
+          "completed_event_amount": "0",
+          "completed_events": 0,
+          "difference": "324000.0",
+          "loan_amount_repaid": "324000.0",
+          "loan_id": "LOAN-000009",
+          "total_events": 12
+        },
+        {
+          "completed_event_amount": "450000.0",
+          "completed_events": 5,
+          "difference": "540000.0",
+          "loan_amount_repaid": "990000.0",
+          "loan_id": "LOAN-000013",
+          "total_events": 15
+        },
+        {
+          "completed_event_amount": "270000.0",
+          "completed_events": 3,
+          "difference": "810000.0",
+          "loan_amount_repaid": "1080000.0",
+          "loan_id": "LOAN-000017",
+          "total_events": 12
+        },
+        {
+          "completed_event_amount": "0",
+          "completed_events": 0,
+          "difference": "324000.0",
+          "loan_amount_repaid": "324000.0",
+          "loan_id": "LOAN-000019",
+          "total_events": 12
+        },
+        {
+          "completed_event_amount": "270000.0",
+          "completed_events": 3,
+          "difference": "630000.0",
+          "loan_amount_repaid": "900000.0",
+          "loan_id": "LOAN-000022",
+          "total_events": 10
+        },
+        {
+          "completed_event_amount": "270000.0",
+          "completed_events": 3,
+          "difference": "450000.0",
+          "loan_amount_repaid": "720000.0",
+          "loan_id": "LOAN-000023",
+          "total_events": 11
+        },
+        {
+          "completed_event_amount": "0",
+          "completed_events": 0,
+          "difference": "202500.0",
+          "loan_amount_repaid": "202500.0",
+          "loan_id": "LOAN-000024",
+          "total_events": 8
+        },
+        {
+          "completed_event_amount": "90000.0",
+          "completed_events": 1,
+          "difference": "225000.0",
+          "loan_amount_repaid": "315000.0",
+          "loan_id": "LOAN-000028",
+          "total_events": 5
+        },
+        {
+          "completed_event_amount": "0",
+          "completed_events": 0,
+          "difference": "81000.0",
+          "loan_amount_repaid": "81000.0",
+          "loan_id": "LOAN-000029",
+          "total_events": 3
+        },
+        {
+          "completed_event_amount": "270000.0",
+          "completed_events": 3,
+          "difference": "810000.0",
+          "loan_amount_repaid": "1080000.0",
+          "loan_id": "LOAN-000037",
+          "total_events": 12
+        },
+        {
+          "completed_event_amount": "0",
+          "completed_events": 0,
+          "difference": "324000.0",
+          "loan_amount_repaid": "324000.0",
+          "loan_id": "LOAN-000039",
+          "total_events": 12
+        },
+        {
+          "completed_event_amount": "270000.0",
+          "completed_events": 3,
+          "difference": "810000.0",
+          "loan_amount_repaid": "1080000.0",
+          "loan_id": "LOAN-000042",
+          "total_events": 12
+        },
+        {
+          "completed_event_amount": "450000.0",
+          "completed_events": 5,
+          "difference": "540000.0",
+          "loan_amount_repaid": "990000.0",
+          "loan_id": "LOAN-000043",
+          "total_events": 15
+        },
+        {
+          "completed_event_amount": "0",
+          "completed_events": 0,
+          "difference": "324000.0",
+          "loan_amount_repaid": "324000.0",
+          "loan_id": "LOAN-000044",
+          "total_events": 12
+        },
+        {
+          "completed_event_amount": "450000.0",
+          "completed_events": 5,
+          "difference": "540000.0",
+          "loan_amount_repaid": "990000.0",
+          "loan_id": "LOAN-000048",
+          "total_events": 15
+        },
+        {
+          "completed_event_amount": "0",
+          "completed_events": 0,
+          "difference": "324000.0",
+          "loan_amount_repaid": "324000.0",
+          "loan_id": "LOAN-000049",
+          "total_events": 12
+        },
+        {
+          "completed_event_amount": "450000.0",
+          "completed_events": 5,
+          "difference": "450000.0",
+          "loan_amount_repaid": "900000.0",
+          "loan_id": "LOAN-000053",
+          "total_events": 14
+        },
+        {
+          "completed_event_amount": "180000.0",
+          "completed_events": 2,
+          "difference": "540000.0",
+          "loan_amount_repaid": "720000.0",
+          "loan_id": "LOAN-000057",
+          "total_events": 8
+        },
+        {
+          "completed_event_amount": "0",
+          "completed_events": 0,
+          "difference": "162000.0",
+          "loan_amount_repaid": "162000.0",
+          "loan_id": "LOAN-000059",
+          "total_events": 6
+        },
+        {
+          "completed_event_amount": "90000.0",
+          "completed_events": 1,
+          "difference": "180000.0",
+          "loan_amount_repaid": "270000.0",
+          "loan_id": "LOAN-000062",
+          "total_events": 3
+        },
+        {
+          "completed_event_amount": "90000.0",
+          "completed_events": 1,
+          "difference": "90000.0",
+          "loan_amount_repaid": "180000.0",
+          "loan_id": "LOAN-000063",
+          "total_events": 3
+        },
+        {
+          "completed_event_amount": "450000.0",
+          "completed_events": 5,
+          "difference": "540000.0",
+          "loan_amount_repaid": "990000.0",
+          "loan_id": "LOAN-000068",
+          "total_events": 15
+        },
+        {
+          "completed_event_amount": "0",
+          "completed_events": 0,
+          "difference": "324000.0",
+          "loan_amount_repaid": "324000.0",
+          "loan_id": "LOAN-000069",
+          "total_events": 12
+        },
+        {
+          "completed_event_amount": "450000.0",
+          "completed_events": 5,
+          "difference": "540000.0",
+          "loan_amount_repaid": "990000.0",
+          "loan_id": "LOAN-000073",
+          "total_events": 15
+        },
+        {
+          "completed_event_amount": "270000.0",
+          "completed_events": 3,
+          "difference": "810000.0",
+          "loan_amount_repaid": "1080000.0",
+          "loan_id": "LOAN-000077",
+          "total_events": 12
+        },
+        {
+          "completed_event_amount": "0",
+          "completed_events": 0,
+          "difference": "324000.0",
+          "loan_amount_repaid": "324000.0",
+          "loan_id": "LOAN-000079",
+          "total_events": 12
+        }
+      ],
+      "sample": [
+        {
+          "completed_event_amount": "1080000.0",
+          "completed_events": 12,
+          "difference": "0.0",
+          "loan_amount_repaid": "1080000.0",
+          "loan_id": "LOAN-000001",
+          "total_events": 12
+        },
+        {
+          "completed_event_amount": "270000.0",
+          "completed_events": 3,
+          "difference": "810000.0",
+          "loan_amount_repaid": "1080000.0",
+          "loan_id": "LOAN-000002",
+          "total_events": 12
+        },
+        {
+          "completed_event_amount": "450000.0",
+          "completed_events": 5,
+          "difference": "540000.0",
+          "loan_amount_repaid": "990000.0",
+          "loan_id": "LOAN-000003",
+          "total_events": 15
+        },
+        {
+          "completed_event_amount": "0",
+          "completed_events": 0,
+          "difference": "324000.0",
+          "loan_amount_repaid": "324000.0",
+          "loan_id": "LOAN-000004",
+          "total_events": 12
+        },
+        {
+          "completed_event_amount": "0",
+          "completed_events": 0,
+          "difference": "0",
+          "loan_amount_repaid": "0",
+          "loan_id": "LOAN-000005",
+          "total_events": 0
+        },
+        {
+          "completed_event_amount": "1080000.0",
+          "completed_events": 12,
+          "difference": "0.0",
+          "loan_amount_repaid": "1080000.0",
+          "loan_id": "LOAN-000006",
+          "total_events": 12
+        },
+        {
+          "completed_event_amount": "0",
+          "completed_events": 0,
+          "difference": "0",
+          "loan_amount_repaid": "0",
+          "loan_id": "LOAN-000007",
+          "total_events": 0
+        },
+        {
+          "completed_event_amount": "450000.0",
+          "completed_events": 5,
+          "difference": "540000.0",
+          "loan_amount_repaid": "990000.0",
+          "loan_id": "LOAN-000008",
+          "total_events": 15
+        },
+        {
+          "completed_event_amount": "0",
+          "completed_events": 0,
+          "difference": "324000.0",
+          "loan_amount_repaid": "324000.0",
+          "loan_id": "LOAN-000009",
+          "total_events": 12
+        },
+        {
+          "completed_event_amount": "0",
+          "completed_events": 0,
+          "difference": "0",
+          "loan_amount_repaid": "0",
+          "loan_id": "LOAN-000010",
+          "total_events": 0
+        }
+      ],
+      "unknown_statuses": [
+        "LATE",
+        "MISSED",
+        "PARTIAL",
+        "RECOVERED"
+      ],
+      "unresolved": []
+    },
+    "source_inventory": {
+      "duplicate_loan_ids": [],
+      "loans": 250,
+      "repayment_loans_without_master": [],
+      "repayments": 1515,
+      "wendi": 238,
+      "wendi_loans_without_master": []
+    }
+  },
+  "gcp_operations": 0,
+  "kafka_operations": 0,
+  "overall": "NOT VERIFIED",
+  "previous_evidence": "evidence/stage9_transaction_correlation/transaction_correlation_v1.json",
+  "repository": "/home/hochom/projects/dp-ai-payments-platform-gcp",
+  "schema_registry_operations": 0,
+  "source_hashes": {
+    "data/pdmis/loans.json": "86dbfbcd195faf25a9035591b5ed84736ce5cce6afd9eb892fbe36eb427d4fff",
+    "data/pdmis/repayments.json": "ad08debd4fa09bbaa9b9eb5aa8c530ab94a361b434a57e357a153caaa0f6441a",
+    "data/wendi/wendi_transactions.json": "4b9ba84f00bd3be3c957836a72d0d471f269a0cd44ad61dfce27cfbfa23b1e17",
+    "evidence/stage9_transaction_correlation/transaction_correlation_v1.json": "2b7559d10efd36602f4a45888f3a3d23fd09dde13c02f18c4189847191a696ea"
+  },
+  "source_modifications": 0,
+  "timestamp_utc": "2026-11-20T22:28:08.335919+00:00",
+  "unrecognised_wendi_statuses": []
+}

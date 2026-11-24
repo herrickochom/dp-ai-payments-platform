@@ -1,0 +1,20 @@
+{
+  "backup_count": 514,
+  "backup_directory": "/home/hochom/projects/dp-ai-payments-platform-gcp/evidence/generator_full_regression/promotion_20261120T215133Z/backup",
+  "errors": [],
+  "expected": {
+    "camt052": 38,
+    "pacs002": 238,
+    "pacs008": 238
+  },
+  "gcp_operations": 0,
+  "kafka_operations": 0,
+  "post_regression": {
+    "iso_xsd_pass": 1768,
+    "non_iso_parsed": 627,
+    "total_xml": 2395
+  },
+  "promoted": 514,
+  "status": "PASS_PROMOTION_AND_ISO_REGRESSION",
+  "timestamp": "20261120T215133Z"
+}

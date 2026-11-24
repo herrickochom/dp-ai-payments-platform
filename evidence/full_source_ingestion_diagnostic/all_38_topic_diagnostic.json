@@ -1,0 +1,3255 @@
+{
+  "timestamp_utc": "2026-11-20T20:40:21.949333+00:00",
+  "repository": "/home/hochom/projects/dp-ai-payments-platform-gcp",
+  "scope": "All 38 governed Kafka topics",
+  "execution_mode": "READ_ONLY",
+  "status": "DIAGNOSTIC COMPLETED",
+  "topics": {
+    "agent.locations": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "calls": [
+            {
+              "call": "prod.produce",
+              "line": 422
+            }
+          ]
+        }
+      ],
+      "source_data_candidates": [
+        "data/agent_network/agent_locations.json",
+        "data/agent_network/agent_profiles.json",
+        "data/agent_network/agent_transactions/agent_tx_0001.xml",
+        "data/agent_network/agent_transactions/agent_tx_0002.xml",
+        "data/agent_network/agent_transactions/agent_tx_0003.xml",
+        "data/agent_network/agent_transactions/agent_tx_0004.xml",
+        "data/agent_network/agent_transactions/agent_tx_0005.xml",
+        "data/agent_network/agent_transactions/agent_tx_0006.xml",
+        "data/agent_network/agent_transactions/agent_tx_0007.xml",
+        "data/agent_network/agent_transactions/agent_tx_0008.xml",
+        "data/agent_network/agent_transactions/agent_tx_0009.xml",
+        "data/agent_network/agent_transactions/agent_tx_0010.xml",
+        "data/agent_network/agent_transactions/agent_tx_0011.xml",
+        "data/agent_network/agent_transactions/agent_tx_0012.xml",
+        "data/agent_network/agent_transactions/agent_tx_0013.xml",
+        "data/agent_network/agent_transactions/agent_tx_0014.xml",
+        "data/agent_network/agent_transactions/agent_tx_0015.xml",
+        "data/agent_network/agent_transactions/agent_tx_0016.xml",
+        "data/agent_network/agent_transactions/agent_tx_0017.xml",
+        "data/agent_network/agent_transactions/agent_tx_0018.xml"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "BLOCKED \u2014 NO RETAINED SOURCE RECORDS",
+      "route_status": "legacy_payment_event"
+    },
+    "agent.profiles": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "batch",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "calls": [
+            {
+              "call": "prod.produce",
+              "line": 422
+            }
+          ]
+        }
+      ],
+      "source_data_candidates": [
+        "data/agent_network/agent_locations.json",
+        "data/agent_network/agent_profiles.json",
+        "data/agent_network/agent_transactions/agent_tx_0001.xml",
+        "data/agent_network/agent_transactions/agent_tx_0002.xml",
+        "data/agent_network/agent_transactions/agent_tx_0003.xml",
+        "data/agent_network/agent_transactions/agent_tx_0004.xml",
+        "data/agent_network/agent_transactions/agent_tx_0005.xml",
+        "data/agent_network/agent_transactions/agent_tx_0006.xml",
+        "data/agent_network/agent_transactions/agent_tx_0007.xml",
+        "data/agent_network/agent_transactions/agent_tx_0008.xml",
+        "data/agent_network/agent_transactions/agent_tx_0009.xml",
+        "data/agent_network/agent_transactions/agent_tx_0010.xml",
+        "data/agent_network/agent_transactions/agent_tx_0011.xml",
+        "data/agent_network/agent_transactions/agent_tx_0012.xml",
+        "data/agent_network/agent_transactions/agent_tx_0013.xml",
+        "data/agent_network/agent_transactions/agent_tx_0014.xml",
+        "data/agent_network/agent_transactions/agent_tx_0015.xml",
+        "data/agent_network/agent_transactions/agent_tx_0016.xml",
+        "data/agent_network/agent_transactions/agent_tx_0017.xml",
+        "data/agent_network/agent_transactions/agent_tx_0018.xml"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "BLOCKED \u2014 NO RETAINED SOURCE RECORDS",
+      "route_status": "legacy_payment_event"
+    },
+    "agent.transactions": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 4,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 5,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 6,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 7,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "calls": [
+            {
+              "call": "prod.produce",
+              "line": 422
+            }
+          ]
+        }
+      ],
+      "source_data_candidates": [
+        "data/agent_network/agent_locations.json",
+        "data/agent_network/agent_profiles.json",
+        "data/agent_network/agent_transactions/agent_tx_0001.xml",
+        "data/agent_network/agent_transactions/agent_tx_0002.xml",
+        "data/agent_network/agent_transactions/agent_tx_0003.xml",
+        "data/agent_network/agent_transactions/agent_tx_0004.xml",
+        "data/agent_network/agent_transactions/agent_tx_0005.xml",
+        "data/agent_network/agent_transactions/agent_tx_0006.xml",
+        "data/agent_network/agent_transactions/agent_tx_0007.xml",
+        "data/agent_network/agent_transactions/agent_tx_0008.xml",
+        "data/agent_network/agent_transactions/agent_tx_0009.xml",
+        "data/agent_network/agent_transactions/agent_tx_0010.xml",
+        "data/agent_network/agent_transactions/agent_tx_0011.xml",
+        "data/agent_network/agent_transactions/agent_tx_0012.xml",
+        "data/agent_network/agent_transactions/agent_tx_0013.xml",
+        "data/agent_network/agent_transactions/agent_tx_0014.xml",
+        "data/agent_network/agent_transactions/agent_tx_0015.xml",
+        "data/agent_network/agent_transactions/agent_tx_0016.xml",
+        "data/agent_network/agent_transactions/agent_tx_0017.xml",
+        "data/agent_network/agent_transactions/agent_tx_0018.xml"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "BLOCKED \u2014 NO RETAINED SOURCE RECORDS",
+      "route_status": "legacy_payment_event"
+    },
+    "cdc.pdm_mdm.mdm.sacco_master_sources": {
+      "classification": "CDC",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/cdc/contracts/pdm_mdm_source.json",
+        "platform/gcp/kafka_pubsub_bridge/source_envelope_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json"
+      ],
+      "producer_candidates": [],
+      "source_data_candidates": [
+        "data/mdm/agent_master_sources.json",
+        "data/mdm/beneficiary_master_sources.json",
+        "data/mdm/geography_master_sources.json",
+        "data/mdm/golden_saccos.json",
+        "data/mdm/sacco_master_sources.json",
+        "data/pdmis/saccos.json"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "CONTROLLED \u2014 SEPARATE ACCEPTANCE",
+      "route_status": "contract_only"
+    },
+    "cpo.plm.pain002": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 4,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 5,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/flink/jobs/j1_lifecycle_state_skeleton.py",
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "calls": [
+            {
+              "call": "prod.produce",
+              "line": 422
+            }
+          ]
+        }
+      ],
+      "source_data_candidates": [
+        "data/cpo/plm/pain002/plm_0001.xml",
+        "data/cpo/plm/pain002/plm_0002.xml",
+        "data/cpo/plm/pain002/plm_0003.xml",
+        "data/cpo/plm/pain002/plm_0004.xml",
+        "data/cpo/plm/pain002/plm_0005.xml",
+        "data/cpo/plm/pain002/plm_0006.xml",
+        "data/cpo/plm/pain002/plm_0007.xml",
+        "data/cpo/plm/pain002/plm_0008.xml",
+        "data/cpo/plm/pain002/plm_0009.xml",
+        "data/cpo/plm/pain002/plm_0010.xml",
+        "data/cpo/plm/pain002/plm_0011.xml",
+        "data/cpo/plm/pain002/plm_0012.xml",
+        "data/cpo/plm/pain002/plm_0013.xml",
+        "data/cpo/plm/pain002/plm_0014.xml",
+        "data/cpo/plm/pain002/plm_0015.xml",
+        "data/cpo/plm/pain002/plm_0016.xml",
+        "data/cpo/plm/pain002/plm_0017.xml",
+        "data/cpo/plm/pain002/plm_0018.xml",
+        "data/cpo/plm/pain002/plm_0019.xml",
+        "data/cpo/plm/pain002/plm_0020.xml"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "BLOCKED \u2014 NO RETAINED SOURCE RECORDS",
+      "route_status": "legacy_payment_event"
+    },
+    "cpo.psn.pain002": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 4,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 5,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "calls": [
+            {
+              "call": "prod.produce",
+              "line": 422
+            }
+          ]
+        }
+      ],
+      "source_data_candidates": [
+        "data/cpo/plm/pain002/plm_0001.xml",
+        "data/cpo/plm/pain002/plm_0002.xml",
+        "data/cpo/plm/pain002/plm_0003.xml",
+        "data/cpo/plm/pain002/plm_0004.xml",
+        "data/cpo/plm/pain002/plm_0005.xml",
+        "data/cpo/plm/pain002/plm_0006.xml",
+        "data/cpo/plm/pain002/plm_0007.xml",
+        "data/cpo/plm/pain002/plm_0008.xml",
+        "data/cpo/plm/pain002/plm_0009.xml",
+        "data/cpo/plm/pain002/plm_0010.xml",
+        "data/cpo/plm/pain002/plm_0011.xml",
+        "data/cpo/plm/pain002/plm_0012.xml",
+        "data/cpo/plm/pain002/plm_0013.xml",
+        "data/cpo/plm/pain002/plm_0014.xml",
+        "data/cpo/plm/pain002/plm_0015.xml",
+        "data/cpo/plm/pain002/plm_0016.xml",
+        "data/cpo/plm/pain002/plm_0017.xml",
+        "data/cpo/plm/pain002/plm_0018.xml",
+        "data/cpo/plm/pain002/plm_0019.xml",
+        "data/cpo/plm/pain002/plm_0020.xml"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "BLOCKED \u2014 NO RETAINED SOURCE RECORDS",
+      "route_status": "legacy_payment_event"
+    },
+    "icmn.pmn.pain001": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 4,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 5,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/flink/jobs/j1_lifecycle_state_skeleton.py",
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "calls": [
+            {
+              "call": "prod.produce",
+              "line": 422
+            }
+          ]
+        }
+      ],
+      "source_data_candidates": [
+        "data/icmn/pmn/pain001/pmn_0001.xml",
+        "data/icmn/pmn/pain001/pmn_0002.xml",
+        "data/icmn/pmn/pain001/pmn_0003.xml",
+        "data/icmn/pmn/pain001/pmn_0004.xml",
+        "data/icmn/pmn/pain001/pmn_0005.xml",
+        "data/icmn/pmn/pain001/pmn_0006.xml",
+        "data/icmn/pmn/pain001/pmn_0007.xml",
+        "data/icmn/pmn/pain001/pmn_0008.xml",
+        "data/icmn/pmn/pain001/pmn_0009.xml",
+        "data/icmn/pmn/pain001/pmn_0010.xml",
+        "data/icmn/pmn/pain001/pmn_0011.xml",
+        "data/icmn/pmn/pain001/pmn_0012.xml",
+        "data/icmn/pmn/pain001/pmn_0013.xml",
+        "data/icmn/pmn/pain001/pmn_0014.xml",
+        "data/icmn/pmn/pain001/pmn_0015.xml",
+        "data/icmn/pmn/pain001/pmn_0016.xml",
+        "data/icmn/pmn/pain001/pmn_0017.xml",
+        "data/icmn/pmn/pain001/pmn_0018.xml",
+        "data/icmn/pmn/pain001/pmn_0019.xml",
+        "data/icmn/pmn/pain001/pmn_0020.xml"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "BLOCKED \u2014 NO RETAINED SOURCE RECORDS",
+      "route_status": "legacy_payment_event"
+    },
+    "icmn.vpm.pain001": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 4,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 5,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "calls": [
+            {
+              "call": "prod.produce",
+              "line": 422
+            }
+          ]
+        }
+      ],
+      "source_data_candidates": [
+        "data/icmn/pmn/pain001/pmn_0001.xml",
+        "data/icmn/pmn/pain001/pmn_0002.xml",
+        "data/icmn/pmn/pain001/pmn_0003.xml",
+        "data/icmn/pmn/pain001/pmn_0004.xml",
+        "data/icmn/pmn/pain001/pmn_0005.xml",
+        "data/icmn/pmn/pain001/pmn_0006.xml",
+        "data/icmn/pmn/pain001/pmn_0007.xml",
+        "data/icmn/pmn/pain001/pmn_0008.xml",
+        "data/icmn/pmn/pain001/pmn_0009.xml",
+        "data/icmn/pmn/pain001/pmn_0010.xml",
+        "data/icmn/pmn/pain001/pmn_0011.xml",
+        "data/icmn/pmn/pain001/pmn_0012.xml",
+        "data/icmn/pmn/pain001/pmn_0013.xml",
+        "data/icmn/pmn/pain001/pmn_0014.xml",
+        "data/icmn/pmn/pain001/pmn_0015.xml",
+        "data/icmn/pmn/pain001/pmn_0016.xml",
+        "data/icmn/pmn/pain001/pmn_0017.xml",
+        "data/icmn/pmn/pain001/pmn_0018.xml",
+        "data/icmn/pmn/pain001/pmn_0019.xml",
+        "data/icmn/pmn/pain001/pmn_0020.xml"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "BLOCKED \u2014 NO RETAINED SOURCE RECORDS",
+      "route_status": "legacy_payment_event"
+    },
+    "mdm.agent.golden": {
+      "classification": "ORDINARY_MDM_ACCEPTED",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 1,
+          "retained_span": 1
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 1,
+      "source_references": [
+        "platform/gcp/kafka_pubsub_bridge/source_delivery_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/kafka/topics.yaml",
+        "platform/mdm/contracts/mdm_kafka_topics.json",
+        "platform/mdm/contracts/mdm_publish_registry.json"
+      ],
+      "producer_candidates": [],
+      "source_data_candidates": [
+        "data/agent_network/agent_locations.json",
+        "data/agent_network/agent_profiles.json",
+        "data/agent_network/agent_transactions/agent_tx_0001.xml",
+        "data/agent_network/agent_transactions/agent_tx_0002.xml",
+        "data/agent_network/agent_transactions/agent_tx_0003.xml",
+        "data/agent_network/agent_transactions/agent_tx_0004.xml",
+        "data/agent_network/agent_transactions/agent_tx_0005.xml",
+        "data/agent_network/agent_transactions/agent_tx_0006.xml",
+        "data/agent_network/agent_transactions/agent_tx_0007.xml",
+        "data/agent_network/agent_transactions/agent_tx_0008.xml",
+        "data/agent_network/agent_transactions/agent_tx_0009.xml",
+        "data/agent_network/agent_transactions/agent_tx_0010.xml",
+        "data/agent_network/agent_transactions/agent_tx_0011.xml",
+        "data/agent_network/agent_transactions/agent_tx_0012.xml",
+        "data/agent_network/agent_transactions/agent_tx_0013.xml",
+        "data/agent_network/agent_transactions/agent_tx_0014.xml",
+        "data/agent_network/agent_transactions/agent_tx_0015.xml",
+        "data/agent_network/agent_transactions/agent_tx_0016.xml",
+        "data/agent_network/agent_transactions/agent_tx_0017.xml",
+        "data/agent_network/agent_transactions/agent_tx_0018.xml"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "PREVIOUSLY ACCEPTED \u2014 SEE LIVE EVIDENCE",
+      "status": "PREVIOUS ACCEPTANCE \u2014 NOT RECHECKED",
+      "route_status": "contract_only"
+    },
+    "mdm.beneficiary.golden.restricted": {
+      "classification": "RESTRICTED_MDM",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/kafka/topics.yaml",
+        "platform/mdm/contracts/mdm_kafka_topics.json",
+        "platform/mdm/contracts/mdm_publish_registry.json"
+      ],
+      "producer_candidates": [],
+      "source_data_candidates": [
+        "data/mdm/beneficiary_identity_alerts_restricted.json",
+        "data/mdm/beneficiary_master_sources.json",
+        "data/mdm/golden_agents.json",
+        "data/mdm/golden_beneficiaries_restricted.json",
+        "data/mdm/golden_geography.json",
+        "data/mdm/golden_saccos.json"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "CONTROLLED \u2014 SEPARATE ACCEPTANCE",
+      "route_status": "blocked_restricted"
+    },
+    "mdm.beneficiary.identity-alert.restricted": {
+      "classification": "RESTRICTED_MDM",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/kafka/topics.yaml",
+        "platform/mdm/contracts/mdm_kafka_topics.json",
+        "platform/mdm/contracts/mdm_publish_registry.json"
+      ],
+      "producer_candidates": [],
+      "source_data_candidates": [
+        "data/mdm/beneficiary_identity_alerts_restricted.json",
+        "data/mdm/beneficiary_master_sources.json",
+        "data/mdm/golden_beneficiaries_restricted.json"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "CONTROLLED \u2014 SEPARATE ACCEPTANCE",
+      "route_status": "blocked_restricted"
+    },
+    "mdm.crosswalk.restricted": {
+      "classification": "RESTRICTED_MDM",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/kafka/topics.yaml",
+        "platform/mdm/contracts/mdm_kafka_topics.json",
+        "platform/mdm/contracts/mdm_publish_registry.json"
+      ],
+      "producer_candidates": [],
+      "source_data_candidates": [
+        "data/mdm/beneficiary_identity_alerts_restricted.json",
+        "data/mdm/golden_beneficiaries_restricted.json",
+        "data/mdm/source_crosswalk.json"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "CONTROLLED \u2014 SEPARATE ACCEPTANCE",
+      "route_status": "blocked_restricted"
+    },
+    "mdm.geography.golden": {
+      "classification": "ORDINARY_MDM_ACCEPTED",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 1,
+          "retained_span": 1
+        }
+      ],
+      "retained_offset_span": 1,
+      "source_references": [
+        "platform/gcp/kafka_pubsub_bridge/source_delivery_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/kafka/topics.yaml",
+        "platform/mdm/contracts/mdm_kafka_topics.json",
+        "platform/mdm/contracts/mdm_publish_registry.json"
+      ],
+      "producer_candidates": [],
+      "source_data_candidates": [
+        "data/mdm/geography_master_sources.json",
+        "data/mdm/golden_agents.json",
+        "data/mdm/golden_beneficiaries_restricted.json",
+        "data/mdm/golden_geography.json",
+        "data/mdm/golden_saccos.json"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "PREVIOUSLY ACCEPTED \u2014 SEE LIVE EVIDENCE",
+      "status": "PREVIOUS ACCEPTANCE \u2014 NOT RECHECKED",
+      "route_status": "contract_only"
+    },
+    "mdm.sacco.golden": {
+      "classification": "ORDINARY_MDM_ACCEPTED",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 1,
+          "retained_span": 1
+        }
+      ],
+      "retained_offset_span": 1,
+      "source_references": [
+        "platform/gcp/kafka_pubsub_bridge/source_delivery_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/kafka/topics.yaml",
+        "platform/mdm/contracts/mdm_kafka_topics.json",
+        "platform/mdm/contracts/mdm_publish_registry.json"
+      ],
+      "producer_candidates": [],
+      "source_data_candidates": [
+        "data/mdm/golden_agents.json",
+        "data/mdm/golden_beneficiaries_restricted.json",
+        "data/mdm/golden_geography.json",
+        "data/mdm/golden_saccos.json",
+        "data/mdm/sacco_master_sources.json",
+        "data/pdmis/saccos.json"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "PREVIOUSLY ACCEPTED \u2014 SEE LIVE EVIDENCE",
+      "status": "PREVIOUS ACCEPTANCE \u2014 NOT RECHECKED",
+      "route_status": "contract_only"
+    },
+    "mobile.airtel.pacs002": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "calls": [
+            {
+              "call": "prod.produce",
+              "line": 422
+            }
+          ]
+        }
+      ],
+      "source_data_candidates": [
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0012.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0023.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0035.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0046.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0069.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0080.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0092.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0103.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0126.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0137.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0149.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0160.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0183.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0194.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0206.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0217.xml",
+        "data/mobile_networks/airtel/pacs008/pacs008_airtel_0012.xml",
+        "data/mobile_networks/airtel/pacs008/pacs008_airtel_0023.xml",
+        "data/mobile_networks/airtel/pacs008/pacs008_airtel_0035.xml",
+        "data/mobile_networks/airtel/pacs008/pacs008_airtel_0046.xml"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "BLOCKED \u2014 NO RETAINED SOURCE RECORDS",
+      "route_status": "legacy_payment_event"
+    },
+    "mobile.airtel.pacs008": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 4,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 5,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "calls": [
+            {
+              "call": "prod.produce",
+              "line": 422
+            }
+          ]
+        }
+      ],
+      "source_data_candidates": [
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0012.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0023.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0035.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0046.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0069.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0080.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0092.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0103.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0126.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0137.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0149.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0160.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0183.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0194.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0206.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0217.xml",
+        "data/mobile_networks/airtel/pacs008/pacs008_airtel_0012.xml",
+        "data/mobile_networks/airtel/pacs008/pacs008_airtel_0023.xml",
+        "data/mobile_networks/airtel/pacs008/pacs008_airtel_0035.xml",
+        "data/mobile_networks/airtel/pacs008/pacs008_airtel_0046.xml"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "BLOCKED \u2014 NO RETAINED SOURCE RECORDS",
+      "route_status": "legacy_payment_event"
+    },
+    "mobile.mtn.pacs002": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "calls": [
+            {
+              "call": "prod.produce",
+              "line": 422
+            }
+          ]
+        }
+      ],
+      "source_data_candidates": [
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0012.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0023.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0035.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0046.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0069.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0080.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0092.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0103.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0126.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0137.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0149.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0160.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0183.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0194.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0206.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0217.xml",
+        "data/mobile_networks/airtel/pacs008/pacs008_airtel_0012.xml",
+        "data/mobile_networks/airtel/pacs008/pacs008_airtel_0023.xml",
+        "data/mobile_networks/airtel/pacs008/pacs008_airtel_0035.xml",
+        "data/mobile_networks/airtel/pacs008/pacs008_airtel_0046.xml"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "BLOCKED \u2014 NO RETAINED SOURCE RECORDS",
+      "route_status": "legacy_payment_event"
+    },
+    "mobile.mtn.pacs008": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 4,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 5,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "calls": [
+            {
+              "call": "prod.produce",
+              "line": 422
+            }
+          ]
+        }
+      ],
+      "source_data_candidates": [
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0012.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0023.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0035.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0046.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0069.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0080.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0092.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0103.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0126.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0137.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0149.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0160.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0183.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0194.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0206.xml",
+        "data/mobile_networks/airtel/pacs002/pacs002_airtel_0217.xml",
+        "data/mobile_networks/airtel/pacs008/pacs008_airtel_0012.xml",
+        "data/mobile_networks/airtel/pacs008/pacs008_airtel_0023.xml",
+        "data/mobile_networks/airtel/pacs008/pacs008_airtel_0035.xml",
+        "data/mobile_networks/airtel/pacs008/pacs008_airtel_0046.xml"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "BLOCKED \u2014 NO RETAINED SOURCE RECORDS",
+      "route_status": "legacy_payment_event"
+    },
+    "payment-events.dlq": {
+      "classification": "OPERATIONAL_DERIVED",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 4,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 5,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 6,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 7,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/kafka/topics.yaml"
+      ],
+      "producer_candidates": [],
+      "source_data_candidates": [
+        "data/pdmis/repayments.json"
+      ],
+      "schema_candidates": [
+        "platform/kafka/payment_event.avsc",
+        "platform/kafka/technical_payment_event.avsc"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "CONTROLLED \u2014 SEPARATE ACCEPTANCE",
+      "route_status": "contract_only"
+    },
+    "payment-events.retry": {
+      "classification": "OPERATIONAL_DERIVED",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 4,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 5,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 6,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 7,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/kafka/topics.yaml"
+      ],
+      "producer_candidates": [],
+      "source_data_candidates": [
+        "data/pdmis/repayments.json"
+      ],
+      "schema_candidates": [
+        "platform/kafka/payment_event.avsc",
+        "platform/kafka/technical_payment_event.avsc"
+      ],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "CONTROLLED \u2014 SEPARATE ACCEPTANCE",
+      "route_status": "contract_only"
+    },
+    "payments.lifecycle.audit.v1": {
+      "classification": "OPERATIONAL_DERIVED",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 4,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 5,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/kafka/configure-schema-registry.sh",
+        "platform/kafka/topics.yaml"
+      ],
+      "producer_candidates": [],
+      "source_data_candidates": [
+        "data/pdmis/repayments.json"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "CONTROLLED \u2014 SEPARATE ACCEPTANCE",
+      "route_status": "blocked_unverified_format"
+    },
+    "payments.lifecycle.dlq.v1": {
+      "classification": "OPERATIONAL_DERIVED",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 4,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 5,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/kafka/configure-schema-registry.sh",
+        "platform/kafka/topics.yaml"
+      ],
+      "producer_candidates": [],
+      "source_data_candidates": [
+        "data/pdmis/repayments.json"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "CONTROLLED \u2014 SEPARATE ACCEPTANCE",
+      "route_status": "blocked_unverified_format"
+    },
+    "payments.lifecycle.exceptions.v1": {
+      "classification": "OPERATIONAL_DERIVED",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 4,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 5,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/kafka/configure-schema-registry.sh",
+        "platform/kafka/topics.yaml"
+      ],
+      "producer_candidates": [],
+      "source_data_candidates": [
+        "data/pdmis/repayments.json"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "CONTROLLED \u2014 SEPARATE ACCEPTANCE",
+      "route_status": "blocked_unverified_format"
+    },
+    "payments.lifecycle.state.v1": {
+      "classification": "OPERATIONAL_DERIVED",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 4,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 5,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/flink/jobs/j1_lifecycle_state_skeleton.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/kafka/configure-schema-registry.sh",
+        "platform/kafka/topics.yaml"
+      ],
+      "producer_candidates": [],
+      "source_data_candidates": [
+        "data/pdmis/repayments.json"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "CONTROLLED \u2014 SEPARATE ACCEPTANCE",
+      "route_status": "contract_only"
+    },
+    "payments.lifecycle.transitions.v1": {
+      "classification": "OPERATIONAL_DERIVED",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 4,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 5,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/flink/jobs/j1_lifecycle_state_skeleton.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/kafka/configure-schema-registry.sh",
+        "platform/kafka/topics.yaml"
+      ],
+      "producer_candidates": [],
+      "source_data_candidates": [
+        "data/pdmis/repayments.json"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "CONTROLLED \u2014 SEPARATE ACCEPTANCE",
+      "route_status": "contract_only"
+    },
+    "pdmis.beneficiaries": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "batch",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 4,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 5,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 6,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 7,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "calls": [
+            {
+              "call": "prod.produce",
+              "line": 422
+            }
+          ]
+        }
+      ],
+      "source_data_candidates": [
+        "data/mdm/golden_beneficiaries_restricted.json",
+        "data/pdmis/beneficiaries.json",
+        "data/pdmis/business_plans.json",
+        "data/pdmis/households.json",
+        "data/pdmis/loans.json",
+        "data/pdmis/repayments.json",
+        "data/pdmis/saccos.json",
+        "data/pdmis/special_groups.json"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "BLOCKED \u2014 NO RETAINED SOURCE RECORDS",
+      "route_status": "legacy_payment_event"
+    },
+    "pdmis.business_plans": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "batch",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "calls": [
+            {
+              "call": "prod.produce",
+              "line": 422
+            }
+          ]
+        }
+      ],
+      "source_data_candidates": [
+        "data/pdmis/beneficiaries.json",
+        "data/pdmis/business_plans.json",
+        "data/pdmis/households.json",
+        "data/pdmis/loans.json",
+        "data/pdmis/repayments.json",
+        "data/pdmis/saccos.json",
+        "data/pdmis/special_groups.json"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "BLOCKED \u2014 NO RETAINED SOURCE RECORDS",
+      "route_status": "legacy_payment_event"
+    },
+    "pdmis.households": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "batch",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "calls": [
+            {
+              "call": "prod.produce",
+              "line": 422
+            }
+          ]
+        }
+      ],
+      "source_data_candidates": [
+        "data/pdmis/beneficiaries.json",
+        "data/pdmis/business_plans.json",
+        "data/pdmis/households.json",
+        "data/pdmis/loans.json",
+        "data/pdmis/repayments.json",
+        "data/pdmis/saccos.json",
+        "data/pdmis/special_groups.json"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "BLOCKED \u2014 NO RETAINED SOURCE RECORDS",
+      "route_status": "legacy_payment_event"
+    },
+    "pdmis.loans": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "batch",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 4,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 5,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 6,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 7,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "calls": [
+            {
+              "call": "prod.produce",
+              "line": 422
+            }
+          ]
+        }
+      ],
+      "source_data_candidates": [
+        "data/pdmis/beneficiaries.json",
+        "data/pdmis/business_plans.json",
+        "data/pdmis/households.json",
+        "data/pdmis/loans.json",
+        "data/pdmis/repayments.json",
+        "data/pdmis/saccos.json",
+        "data/pdmis/special_groups.json"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "BLOCKED \u2014 NO RETAINED SOURCE RECORDS",
+      "route_status": "legacy_payment_event"
+    },
+    "pdmis.repayments": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 4,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 5,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 6,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 7,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "calls": [
+            {
+              "call": "prod.produce",
+              "line": 422
+            }
+          ]
+        }
+      ],
+      "source_data_candidates": [
+        "data/pdmis/beneficiaries.json",
+        "data/pdmis/business_plans.json",
+        "data/pdmis/households.json",
+        "data/pdmis/loans.json",
+        "data/pdmis/repayments.json",
+        "data/pdmis/saccos.json",
+        "data/pdmis/special_groups.json"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "BLOCKED \u2014 NO RETAINED SOURCE RECORDS",
+      "route_status": "legacy_payment_event"
+    },
+    "pdmis.saccos": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "batch",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "calls": [
+            {
+              "call": "prod.produce",
+              "line": 422
+            }
+          ]
+        }
+      ],
+      "source_data_candidates": [
+        "data/mdm/golden_saccos.json",
+        "data/pdmis/beneficiaries.json",
+        "data/pdmis/business_plans.json",
+        "data/pdmis/households.json",
+        "data/pdmis/loans.json",
+        "data/pdmis/repayments.json",
+        "data/pdmis/saccos.json",
+        "data/pdmis/special_groups.json"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "BLOCKED \u2014 NO RETAINED SOURCE RECORDS",
+      "route_status": "legacy_payment_event"
+    },
+    "pdmis.special_groups": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "batch",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "calls": [
+            {
+              "call": "prod.produce",
+              "line": 422
+            }
+          ]
+        }
+      ],
+      "source_data_candidates": [
+        "data/pdmis/beneficiaries.json",
+        "data/pdmis/business_plans.json",
+        "data/pdmis/households.json",
+        "data/pdmis/loans.json",
+        "data/pdmis/repayments.json",
+        "data/pdmis/saccos.json",
+        "data/pdmis/special_groups.json"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "BLOCKED \u2014 NO RETAINED SOURCE RECORDS",
+      "route_status": "legacy_payment_event"
+    },
+    "wendi.camt052": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "calls": [
+            {
+              "call": "prod.produce",
+              "line": 422
+            }
+          ]
+        }
+      ],
+      "source_data_candidates": [
+        "data/wendi/camt052/camt052_report_001.xml",
+        "data/wendi/camt052/camt052_report_002.xml",
+        "data/wendi/camt052/camt052_report_003.xml",
+        "data/wendi/camt052/camt052_report_004.xml",
+        "data/wendi/camt052/camt052_report_005.xml",
+        "data/wendi/camt052/camt052_report_006.xml",
+        "data/wendi/camt052/camt052_report_007.xml",
+        "data/wendi/camt052/camt052_report_008.xml",
+        "data/wendi/camt052/camt052_report_009.xml",
+        "data/wendi/camt052/camt052_report_010.xml",
+        "data/wendi/camt052/camt052_report_011.xml",
+        "data/wendi/camt052/camt052_report_012.xml",
+        "data/wendi/camt052/camt052_report_013.xml",
+        "data/wendi/camt052/camt052_report_014.xml",
+        "data/wendi/camt052/camt052_report_015.xml",
+        "data/wendi/camt052/camt052_report_016.xml",
+        "data/wendi/camt052/camt052_report_017.xml",
+        "data/wendi/camt052/camt052_report_018.xml",
+        "data/wendi/camt052/camt052_report_019.xml",
+        "data/wendi/camt052/camt052_report_020.xml"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "BLOCKED \u2014 NO RETAINED SOURCE RECORDS",
+      "route_status": "legacy_payment_event"
+    },
+    "wendi.camt053": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "calls": [
+            {
+              "call": "prod.produce",
+              "line": 422
+            }
+          ]
+        }
+      ],
+      "source_data_candidates": [
+        "data/wendi/camt052/camt052_report_001.xml",
+        "data/wendi/camt052/camt052_report_002.xml",
+        "data/wendi/camt052/camt052_report_003.xml",
+        "data/wendi/camt052/camt052_report_004.xml",
+        "data/wendi/camt052/camt052_report_005.xml",
+        "data/wendi/camt052/camt052_report_006.xml",
+        "data/wendi/camt052/camt052_report_007.xml",
+        "data/wendi/camt052/camt052_report_008.xml",
+        "data/wendi/camt052/camt052_report_009.xml",
+        "data/wendi/camt052/camt052_report_010.xml",
+        "data/wendi/camt052/camt052_report_011.xml",
+        "data/wendi/camt052/camt052_report_012.xml",
+        "data/wendi/camt052/camt052_report_013.xml",
+        "data/wendi/camt052/camt052_report_014.xml",
+        "data/wendi/camt052/camt052_report_015.xml",
+        "data/wendi/camt052/camt052_report_016.xml",
+        "data/wendi/camt052/camt052_report_017.xml",
+        "data/wendi/camt052/camt052_report_018.xml",
+        "data/wendi/camt052/camt052_report_019.xml",
+        "data/wendi/camt052/camt052_report_020.xml"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "BLOCKED \u2014 NO RETAINED SOURCE RECORDS",
+      "route_status": "legacy_payment_event"
+    },
+    "wendi.camt054": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 4,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 5,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 6,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 7,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "calls": [
+            {
+              "call": "prod.produce",
+              "line": 422
+            }
+          ]
+        }
+      ],
+      "source_data_candidates": [
+        "data/wendi/camt052/camt052_report_001.xml",
+        "data/wendi/camt052/camt052_report_002.xml",
+        "data/wendi/camt052/camt052_report_003.xml",
+        "data/wendi/camt052/camt052_report_004.xml",
+        "data/wendi/camt052/camt052_report_005.xml",
+        "data/wendi/camt052/camt052_report_006.xml",
+        "data/wendi/camt052/camt052_report_007.xml",
+        "data/wendi/camt052/camt052_report_008.xml",
+        "data/wendi/camt052/camt052_report_009.xml",
+        "data/wendi/camt052/camt052_report_010.xml",
+        "data/wendi/camt052/camt052_report_011.xml",
+        "data/wendi/camt052/camt052_report_012.xml",
+        "data/wendi/camt052/camt052_report_013.xml",
+        "data/wendi/camt052/camt052_report_014.xml",
+        "data/wendi/camt052/camt052_report_015.xml",
+        "data/wendi/camt052/camt052_report_016.xml",
+        "data/wendi/camt052/camt052_report_017.xml",
+        "data/wendi/camt052/camt052_report_018.xml",
+        "data/wendi/camt052/camt052_report_019.xml",
+        "data/wendi/camt052/camt052_report_020.xml"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "BLOCKED \u2014 NO RETAINED SOURCE RECORDS",
+      "route_status": "legacy_payment_event"
+    },
+    "wendi.pain001": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 4,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 5,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py",
+        "services/payment-xml-generator/pdm_stage6_orchestrator.py"
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "calls": [
+            {
+              "call": "prod.produce",
+              "line": 422
+            }
+          ]
+        }
+      ],
+      "source_data_candidates": [
+        "data/icmn/pmn/pain001/pmn_0001.xml",
+        "data/icmn/pmn/pain001/pmn_0002.xml",
+        "data/icmn/pmn/pain001/pmn_0003.xml",
+        "data/icmn/pmn/pain001/pmn_0004.xml",
+        "data/icmn/pmn/pain001/pmn_0005.xml",
+        "data/icmn/pmn/pain001/pmn_0006.xml",
+        "data/icmn/pmn/pain001/pmn_0007.xml",
+        "data/icmn/pmn/pain001/pmn_0008.xml",
+        "data/icmn/pmn/pain001/pmn_0009.xml",
+        "data/icmn/pmn/pain001/pmn_0010.xml",
+        "data/icmn/pmn/pain001/pmn_0011.xml",
+        "data/icmn/pmn/pain001/pmn_0012.xml",
+        "data/icmn/pmn/pain001/pmn_0013.xml",
+        "data/icmn/pmn/pain001/pmn_0014.xml",
+        "data/icmn/pmn/pain001/pmn_0015.xml",
+        "data/icmn/pmn/pain001/pmn_0016.xml",
+        "data/icmn/pmn/pain001/pmn_0017.xml",
+        "data/icmn/pmn/pain001/pmn_0018.xml",
+        "data/icmn/pmn/pain001/pmn_0019.xml",
+        "data/icmn/pmn/pain001/pmn_0020.xml"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "BLOCKED \u2014 NO RETAINED SOURCE RECORDS",
+      "route_status": "legacy_payment_event"
+    },
+    "wendi.pain002": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "real-time",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 4,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 5,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py",
+        "services/payment-xml-generator/pdm_stage6_orchestrator.py"
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "calls": [
+            {
+              "call": "prod.produce",
+              "line": 422
+            }
+          ]
+        }
+      ],
+      "source_data_candidates": [
+        "data/cpo/plm/pain002/plm_0001.xml",
+        "data/cpo/plm/pain002/plm_0002.xml",
+        "data/cpo/plm/pain002/plm_0003.xml",
+        "data/cpo/plm/pain002/plm_0004.xml",
+        "data/cpo/plm/pain002/plm_0005.xml",
+        "data/cpo/plm/pain002/plm_0006.xml",
+        "data/cpo/plm/pain002/plm_0007.xml",
+        "data/cpo/plm/pain002/plm_0008.xml",
+        "data/cpo/plm/pain002/plm_0009.xml",
+        "data/cpo/plm/pain002/plm_0010.xml",
+        "data/cpo/plm/pain002/plm_0011.xml",
+        "data/cpo/plm/pain002/plm_0012.xml",
+        "data/cpo/plm/pain002/plm_0013.xml",
+        "data/cpo/plm/pain002/plm_0014.xml",
+        "data/cpo/plm/pain002/plm_0015.xml",
+        "data/cpo/plm/pain002/plm_0016.xml",
+        "data/cpo/plm/pain002/plm_0017.xml",
+        "data/cpo/plm/pain002/plm_0018.xml",
+        "data/cpo/plm/pain002/plm_0019.xml",
+        "data/cpo/plm/pain002/plm_0020.xml"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "BLOCKED \u2014 NO RETAINED SOURCE RECORDS",
+      "route_status": "legacy_payment_event"
+    },
+    "wendi.transactions": {
+      "classification": "BUSINESS_SOURCE",
+      "processing_mode": "streaming",
+      "route": "PASS",
+      "kafka": "PASS",
+      "partitions": [
+        {
+          "partition": 0,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 1,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 2,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 3,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 4,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 5,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 6,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        },
+        {
+          "partition": 7,
+          "low": 0,
+          "high": 0,
+          "retained_span": 0
+        }
+      ],
+      "retained_offset_span": 0,
+      "source_references": [
+        "platform/gcp/dataflow_ingestion/raw_v1.py",
+        "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+        "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+        "platform/kafka/topics.yaml",
+        "platform/source_registry/contracts/source_systems.json",
+        "services/payment-producer/kafka_producer.py",
+        "services/payment-producer/source_publisher.py"
+      ],
+      "producer_candidates": [
+        {
+          "path": "services/payment-producer/kafka_producer.py",
+          "calls": [
+            {
+              "call": "producer.produce",
+              "line": 1000
+            },
+            {
+              "call": "producer.produce",
+              "line": 1019
+            }
+          ]
+        },
+        {
+          "path": "services/payment-producer/source_publisher.py",
+          "calls": [
+            {
+              "call": "prod.produce",
+              "line": 422
+            }
+          ]
+        }
+      ],
+      "source_data_candidates": [
+        "data/agent_network/agent_transactions/agent_tx_0001.xml",
+        "data/agent_network/agent_transactions/agent_tx_0002.xml",
+        "data/agent_network/agent_transactions/agent_tx_0003.xml",
+        "data/agent_network/agent_transactions/agent_tx_0004.xml",
+        "data/agent_network/agent_transactions/agent_tx_0005.xml",
+        "data/agent_network/agent_transactions/agent_tx_0006.xml",
+        "data/agent_network/agent_transactions/agent_tx_0007.xml",
+        "data/agent_network/agent_transactions/agent_tx_0008.xml",
+        "data/agent_network/agent_transactions/agent_tx_0009.xml",
+        "data/agent_network/agent_transactions/agent_tx_0010.xml",
+        "data/agent_network/agent_transactions/agent_tx_0011.xml",
+        "data/agent_network/agent_transactions/agent_tx_0012.xml",
+        "data/agent_network/agent_transactions/agent_tx_0013.xml",
+        "data/agent_network/agent_transactions/agent_tx_0014.xml",
+        "data/agent_network/agent_transactions/agent_tx_0015.xml",
+        "data/agent_network/agent_transactions/agent_tx_0016.xml",
+        "data/agent_network/agent_transactions/agent_tx_0017.xml",
+        "data/agent_network/agent_transactions/agent_tx_0018.xml",
+        "data/agent_network/agent_transactions/agent_tx_0019.xml",
+        "data/agent_network/agent_transactions/agent_tx_0020.xml"
+      ],
+      "schema_candidates": [],
+      "producer_mapping": "NOT VERIFIED",
+      "payload_validation": "NOT VERIFIED",
+      "cloud_ingestion": "NOT VERIFIED",
+      "status": "BLOCKED \u2014 NO RETAINED SOURCE RECORDS",
+      "route_status": "legacy_payment_event"
+    }
+  },
+  "summary": {
+    "governed_topics": 38,
+    "classification_counts": {
+      "BUSINESS_SOURCE": 24,
+      "CDC": 1,
+      "ORDINARY_MDM_ACCEPTED": 3,
+      "RESTRICTED_MDM": 3,
+      "OPERATIONAL_DERIVED": 7
+    },
+    "status_counts": {
+      "BLOCKED \u2014 NO RETAINED SOURCE RECORDS": 24,
+      "CONTROLLED \u2014 SEPARATE ACCEPTANCE": 11,
+      "PREVIOUS ACCEPTANCE \u2014 NOT RECHECKED": 3
+    },
+    "files_inspected": 2547,
+    "producer_candidate_files": 11,
+    "schema_files_discovered": 3,
+    "data_files_discovered": 2415,
+    "topics_with_retained_records": 3,
+    "topics_without_retained_records": 35,
+    "producer_mappings_verified": 0,
+    "payload_validations_verified": 0,
+    "new_cloud_ingestions_verified": 0
+  },
+  "limitations": [
+    "XML well-formedness is not XSD validation",
+    "Topic references are not verified producer mappings",
+    "Kafka offsets do not prove payload correctness",
+    "Previous MDM acceptance is not re-executed",
+    "Cloud ingestion is not executed",
+    "Data generators are not executed"
+  ]
+}

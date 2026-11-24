@@ -1,0 +1,268 @@
+{
+  "ALLOC-SYN-0001": {
+    "allocated_ugx": 101000,
+    "credited_ugx": 86000,
+    "instructed_ugx": 91000,
+    "sacco_id": "SACCO-ADJ-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0002": {
+    "allocated_ugx": 102000,
+    "credited_ugx": 87000,
+    "instructed_ugx": 92000,
+    "sacco_id": "SACCO-AGA-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0003": {
+    "allocated_ugx": 103000,
+    "credited_ugx": 88000,
+    "instructed_ugx": 93000,
+    "sacco_id": "SACCO-ARP-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0004": {
+    "allocated_ugx": 104000,
+    "credited_ugx": 89000,
+    "instructed_ugx": 94000,
+    "sacco_id": "SACCO-BGR-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0005": {
+    "allocated_ugx": 105000,
+    "credited_ugx": 90000,
+    "instructed_ugx": 95000,
+    "sacco_id": "SACCO-BUK-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0006": {
+    "allocated_ugx": 106000,
+    "credited_ugx": 91000,
+    "instructed_ugx": 96000,
+    "sacco_id": "SACCO-BUS-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0007": {
+    "allocated_ugx": 107000,
+    "credited_ugx": 92000,
+    "instructed_ugx": 97000,
+    "sacco_id": "SACCO-FPO-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0008": {
+    "allocated_ugx": 108000,
+    "credited_ugx": 93000,
+    "instructed_ugx": 98000,
+    "sacco_id": "SACCO-GBU-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0009": {
+    "allocated_ugx": 109000,
+    "credited_ugx": 94000,
+    "instructed_ugx": 99000,
+    "sacco_id": "SACCO-HOM-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0010": {
+    "allocated_ugx": 110000,
+    "credited_ugx": 95000,
+    "instructed_ugx": 100000,
+    "sacco_id": "SACCO-IGG-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0011": {
+    "allocated_ugx": 111000,
+    "credited_ugx": 96000,
+    "instructed_ugx": 101000,
+    "sacco_id": "SACCO-JIN-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0012": {
+    "allocated_ugx": 112000,
+    "credited_ugx": 97000,
+    "instructed_ugx": 102000,
+    "sacco_id": "SACCO-KAM-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0013": {
+    "allocated_ugx": 113000,
+    "credited_ugx": 98000,
+    "instructed_ugx": 103000,
+    "sacco_id": "SACCO-KBG-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0014": {
+    "allocated_ugx": 114000,
+    "credited_ugx": 99000,
+    "instructed_ugx": 104000,
+    "sacco_id": "SACCO-KIT-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0015": {
+    "allocated_ugx": 115000,
+    "credited_ugx": 100000,
+    "instructed_ugx": 105000,
+    "sacco_id": "SACCO-KLA-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0016": {
+    "allocated_ugx": 116000,
+    "credited_ugx": 101000,
+    "instructed_ugx": 106000,
+    "sacco_id": "SACCO-KSE-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0017": {
+    "allocated_ugx": 117000,
+    "credited_ugx": 102000,
+    "instructed_ugx": 107000,
+    "sacco_id": "SACCO-KTD-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0018": {
+    "allocated_ugx": 118000,
+    "credited_ugx": 103000,
+    "instructed_ugx": 108000,
+    "sacco_id": "SACCO-KUM-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0019": {
+    "allocated_ugx": 119000,
+    "credited_ugx": 104000,
+    "instructed_ugx": 109000,
+    "sacco_id": "SACCO-LRA-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0020": {
+    "allocated_ugx": 120000,
+    "credited_ugx": 105000,
+    "instructed_ugx": 110000,
+    "sacco_id": "SACCO-MBA-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0021": {
+    "allocated_ugx": 121000,
+    "credited_ugx": 106000,
+    "instructed_ugx": 111000,
+    "sacco_id": "SACCO-MBR-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0022": {
+    "allocated_ugx": 122000,
+    "credited_ugx": 107000,
+    "instructed_ugx": 112000,
+    "sacco_id": "SACCO-MKN-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0023": {
+    "allocated_ugx": 123000,
+    "credited_ugx": 108000,
+    "instructed_ugx": 113000,
+    "sacco_id": "SACCO-MPG-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0024": {
+    "allocated_ugx": 124000,
+    "credited_ugx": 109000,
+    "instructed_ugx": 114000,
+    "sacco_id": "SACCO-MRT-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0025": {
+    "allocated_ugx": 125000,
+    "credited_ugx": 110000,
+    "instructed_ugx": 115000,
+    "sacco_id": "SACCO-MSD-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0026": {
+    "allocated_ugx": 126000,
+    "credited_ugx": 111000,
+    "instructed_ugx": 116000,
+    "sacco_id": "SACCO-MSK-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0027": {
+    "allocated_ugx": 127000,
+    "credited_ugx": 112000,
+    "instructed_ugx": 117000,
+    "sacco_id": "SACCO-MYG-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0028": {
+    "allocated_ugx": 128000,
+    "credited_ugx": 113000,
+    "instructed_ugx": 118000,
+    "sacco_id": "SACCO-NAP-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0029": {
+    "allocated_ugx": 129000,
+    "credited_ugx": 114000,
+    "instructed_ugx": 119000,
+    "sacco_id": "SACCO-NEB-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0030": {
+    "allocated_ugx": 130000,
+    "credited_ugx": 115000,
+    "instructed_ugx": 120000,
+    "sacco_id": "SACCO-NPK-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0031": {
+    "allocated_ugx": 131000,
+    "credited_ugx": 116000,
+    "instructed_ugx": 121000,
+    "sacco_id": "SACCO-NTG-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0032": {
+    "allocated_ugx": 132000,
+    "credited_ugx": 117000,
+    "instructed_ugx": 122000,
+    "sacco_id": "SACCO-RAK-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0033": {
+    "allocated_ugx": 133000,
+    "credited_ugx": 118000,
+    "instructed_ugx": 123000,
+    "sacco_id": "SACCO-RUK-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0034": {
+    "allocated_ugx": 134000,
+    "credited_ugx": 119000,
+    "instructed_ugx": 124000,
+    "sacco_id": "SACCO-SRG-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0035": {
+    "allocated_ugx": 135000,
+    "credited_ugx": 120000,
+    "instructed_ugx": 125000,
+    "sacco_id": "SACCO-SRT-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0036": {
+    "allocated_ugx": 136000,
+    "credited_ugx": 121000,
+    "instructed_ugx": 126000,
+    "sacco_id": "SACCO-TOR-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0037": {
+    "allocated_ugx": 137000,
+    "credited_ugx": 122000,
+    "instructed_ugx": 127000,
+    "sacco_id": "SACCO-WAK-001",
+    "uncredited_allocation_ugx": 15000
+  },
+  "ALLOC-SYN-0038": {
+    "allocated_ugx": 138000,
+    "credited_ugx": 123000,
+    "instructed_ugx": 128000,
+    "sacco_id": "SACCO-YBE-001",
+    "uncredited_allocation_ugx": 15000
+  }
+}

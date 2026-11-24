@@ -1,0 +1,230 @@
+[
+  {
+    "allocation_id": "ALLOC-SYN-0001",
+    "amount_ugx": 91000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0001"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0002",
+    "amount_ugx": 92000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0002"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0003",
+    "amount_ugx": 93000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0003"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0004",
+    "amount_ugx": 94000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0004"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0005",
+    "amount_ugx": 95000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0005"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0006",
+    "amount_ugx": 96000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0006"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0007",
+    "amount_ugx": 97000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0007"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0008",
+    "amount_ugx": 98000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0008"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0009",
+    "amount_ugx": 99000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0009"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0010",
+    "amount_ugx": 100000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0010"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0011",
+    "amount_ugx": 101000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0011"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0012",
+    "amount_ugx": 102000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0012"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0013",
+    "amount_ugx": 103000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0013"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0014",
+    "amount_ugx": 104000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0014"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0015",
+    "amount_ugx": 105000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0015"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0016",
+    "amount_ugx": 106000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0016"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0017",
+    "amount_ugx": 107000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0017"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0018",
+    "amount_ugx": 108000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0018"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0019",
+    "amount_ugx": 109000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0019"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0020",
+    "amount_ugx": 110000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0020"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0021",
+    "amount_ugx": 111000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0021"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0022",
+    "amount_ugx": 112000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0022"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0023",
+    "amount_ugx": 113000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0023"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0024",
+    "amount_ugx": 114000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0024"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0025",
+    "amount_ugx": 115000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0025"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0026",
+    "amount_ugx": 116000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0026"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0027",
+    "amount_ugx": 117000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0027"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0028",
+    "amount_ugx": 118000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0028"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0029",
+    "amount_ugx": 119000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0029"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0030",
+    "amount_ugx": 120000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0030"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0031",
+    "amount_ugx": 121000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0031"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0032",
+    "amount_ugx": 122000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0032"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0033",
+    "amount_ugx": 123000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0033"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0034",
+    "amount_ugx": 124000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0034"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0035",
+    "amount_ugx": 125000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0035"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0036",
+    "amount_ugx": 126000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0036"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0037",
+    "amount_ugx": 127000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0037"
+  },
+  {
+    "allocation_id": "ALLOC-SYN-0038",
+    "amount_ugx": 128000,
+    "instruction_date": "2026-11-02",
+    "instruction_id": "INST-SYN-0038"
+  }
+]

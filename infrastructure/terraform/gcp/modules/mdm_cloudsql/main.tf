@@ -12,11 +12,18 @@ resource "google_sql_database_instance" "mdm" {
     availability_type = var.availability_type
     disk_autoresize   = true
     backup_configuration {
-      enabled                        = true
-      point_in_time_recovery_enabled = true
+      enabled                        = false
+      point_in_time_recovery_enabled = false
     }
     ip_configuration {
-      ipv4_enabled                                  = false
+      ipv4_enabled = var.public_ip_enabled
+      dynamic "authorized_networks" {
+        for_each = var.authorized_networks
+        content {
+          name  = authorized_networks.value.name
+          value = authorized_networks.value.value
+        }
+      }
       private_network                               = var.private_network_self_link
       enable_private_path_for_google_cloud_services = false
       ssl_mode                                      = "ENCRYPTED_ONLY"
