@@ -1,0 +1,130 @@
+{
+  "contract_name": "Enterprise Raw v1 Object Metadata",
+  "contract_version": "1.0.0",
+  "storage_contract_version": "v1",
+  "approval_status": "APPROVED_DESIGN",
+  "approval_date": "2026-11-26",
+  "implementation_status": "NOT_IMPLEMENTED",
+  "storage_layer": "raw",
+  "payload_format": "avro",
+  "payload_preservation": "lossless",
+  "environment_baseline": {
+    "project": "dp-pdm-ai-dev-0b4da804",
+    "project_number": "324778038883",
+    "bucket": "dp-pdm-ai-dev-0b4da804-data",
+    "region": "europe-west2"
+  },
+  "object_path": "raw/v1/{processing_mode}/category={category}/source_group={source_group}/source_system={source_system}/year={year}/month={month}/day={day}/topic={topic}/partition={partition}/offset={offset}/record.avro",
+  "mandatory_custom_metadata": {
+    "data-domain": "approved_domain_taxonomy",
+    "data-layer": "constant:raw",
+    "storage-contract-version": "constant:v1",
+    "metadata-contract-version": "constant:1.0.0",
+    "processing-mode": "topic_registry",
+    "category": "routing_contract",
+    "source-group": "routing_contract",
+    "source-system": "routing_contract",
+    "source-topic": "validated_source_envelope",
+    "source-partition": "validated_source_envelope",
+    "source-offset": "validated_source_envelope"
+  },
+  "enterprise_domain_taxonomy": {
+    "icmn": "payments",
+    "cpo": "payments",
+    "wendi": "payments",
+    "mobile_networks": "payments",
+    "payment_lifecycle": "payments",
+    "agent_network": "agent_management",
+    "pdmis": "programme_management",
+    "mdm": "master_data_management",
+    "mdm_cdc": "master_data_management",
+    "shared_operations": "platform_operations"
+  },
+  "taxonomy_mapping_status": "APPROVED_FAMILIES; EXACT_TOPIC_BINDINGS_REQUIRE_METADATA_VALIDATION",
+  "native_metadata": {
+    "content_type": "application/avro",
+    "cache_control": "no-store",
+    "content_encoding": null,
+    "content_disposition": null,
+    "content_language": null,
+    "custom_time": null
+  },
+  "native_integrity_attributes": [
+    "generation",
+    "metageneration",
+    "crc32c",
+    "md5_hash_if_available",
+    "size"
+  ],
+  "conditional_metadata_candidates": {
+    "status": "NOT_AUTHORISED_FOR_AUTOMATIC_EMISSION",
+    "attributes": [
+      "schema-registry-id",
+      "source-payload-format",
+      "data-classification",
+      "source-envelope-version"
+    ]
+  },
+  "source_contracts": {
+    "topic_registry": {
+      "path": "platform/kafka/topics.yaml",
+      "sha256": "1ccd93670e102e24273854572d54017c7080120bfaa420b3b85a0b75c3843cae"
+    },
+    "routing_contract": {
+      "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+      "sha256": "90ecdfa2d364f0bbee79c86800a03a549359796e0d18b16df732668086fad83a"
+    },
+    "source_envelope": {
+      "path": "platform/gcp/kafka_pubsub_bridge/source_envelope_v1.py",
+      "sha256": "d32280da26ccf70987e8ff18eb01751df808fec6f1ef366ea228ec05a5d98ded"
+    },
+    "governance_policy": {
+      "path": "platform/config/governance/governance_policies.yaml",
+      "sha256": "3f3c825ea703871d1651c1c9a8ea843ef1a434604d63c1d866325bc52fb1a57b"
+    }
+  },
+  "admission": {
+    "preserve_existing_controls": true,
+    "parallel_topic_registry": false,
+    "unknown_topic": "REJECT",
+    "restricted_topic": "PRESERVE_EXISTING_POLICY",
+    "unverified_format": "REJECT",
+    "contract_only": "REQUIRE_EXISTING_APPROVAL"
+  },
+  "security": {
+    "classification_authority": "platform/config/governance/governance_policies.yaml",
+    "domain_and_sensitivity_are_independent": true,
+    "sensitive_payload_values_in_metadata": false,
+    "credentials_in_metadata": false,
+    "personal_identifiers_in_metadata": false
+  },
+  "creation": {
+    "metadata_applied_at_initial_creation": true,
+    "if_generation_match": 0,
+    "overwrite_existing_payload": false
+  },
+  "verification_before_acknowledgement": [
+    "payload_integrity",
+    "source_coordinates",
+    "mandatory_metadata",
+    "native_metadata",
+    "object_generation",
+    "valid_execution_lease"
+  ],
+  "recovery": {
+    "identical_compliant_object": "NO_CHANGE",
+    "identical_noncompliant_object": "CONTROLLED_METADATA_REMEDIATION_ONLY",
+    "conflicting_metadata": "FAIL_CLOSED",
+    "conflicting_payload": "FAIL_CLOSED",
+    "stale_generation": "REJECT",
+    "stale_metageneration": "REJECT",
+    "expired_lease": "NO_ACKNOWLEDGEMENT",
+    "verification_failure": "NO_ACKNOWLEDGEMENT",
+    "existing_object_metadata_update": "REQUIRE_GENERATION_AND_METAGENERATION_PRECONDITIONS"
+  },
+  "deployment_authorisation": {
+    "bulk_metadata_updates": false,
+    "cloud_infrastructure_changes": false,
+    "restricted_source_admission_changes": false
+  }
+}

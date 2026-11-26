@@ -1,0 +1,110 @@
+{
+  "status": "OPEN",
+  "bulk_deployment_authorised": false,
+  "risks": [
+    {
+      "id": "MD-GAP-001",
+      "description": "Historical environment references",
+      "priority": "HIGH",
+      "target": "Before Stage 7",
+      "status": "OPEN"
+    },
+    {
+      "id": "MD-GAP-002",
+      "description": "Implement and test approved metadata contract",
+      "priority": "HIGH",
+      "target": "Stages 4 and 7",
+      "status": "OPEN"
+    },
+    {
+      "id": "MD-GAP-003",
+      "description": "Metadata verification before acknowledgement",
+      "priority": "HIGH",
+      "target": "Stage 7",
+      "status": "OPEN"
+    },
+    {
+      "id": "MD-GAP-004",
+      "description": "Existing pilot domain classification migration",
+      "priority": "MEDIUM",
+      "target": "Stage 6",
+      "status": "OPEN"
+    },
+    {
+      "id": "MD-GAP-005",
+      "description": "GCS SDK dependency declaration and mutation branch testing",
+      "priority": "MEDIUM",
+      "target": "Stage 4",
+      "status": "OPEN"
+    },
+    {
+      "id": "MD-GAP-006",
+      "description": "Dataplex deployment, Terraform state and asset scope",
+      "priority": "HIGH",
+      "target": "Before Stage 8 closure",
+      "status": "OPEN"
+    },
+    {
+      "id": "MD-GAP-007",
+      "description": "National identification number log redaction defect",
+      "priority": "HIGH",
+      "target": "Security remediation",
+      "status": "OPEN"
+    },
+    {
+      "id": "MD-GAP-008",
+      "description": "Empty Bronze lineage evidence",
+      "priority": "MEDIUM",
+      "target": "Lineage acceptance",
+      "status": "OPEN"
+    },
+    {
+      "id": "MD-GAP-009",
+      "description": "Complete historical ingestion execution provenance",
+      "priority": "HIGH",
+      "target": "Before Stage 8 closure",
+      "status": "OPEN"
+    },
+    {
+      "id": "MD-GAP-010",
+      "description": "Current Kafka-to-Raw reconciliation",
+      "priority": "HIGH",
+      "target": "Stage 8",
+      "status": "OPEN"
+    },
+    {
+      "id": "MD-GAP-011",
+      "description": "Enterprise retention enforcement not verified",
+      "priority": "HIGH",
+      "target": "Governance acceptance",
+      "status": "OPEN"
+    },
+    {
+      "id": "MD-GAP-012",
+      "description": "Projected versus lossless Raw implementation divergence",
+      "priority": "HIGH",
+      "target": "Before Stage 7",
+      "status": "OPEN"
+    },
+    {
+      "id": "MD-GAP-013",
+      "description": "Exact domain mapping and validation across 38 topics",
+      "priority": "HIGH",
+      "target": "Stage 4",
+      "status": "OPEN"
+    }
+  ],
+  "stage8_mandatory_gates": [
+    "dataplex_deployment_and_governance_alignment",
+    "current_kafka_to_raw_reconciliation",
+    "end_to_end_metadata_compliance",
+    "payload_integrity",
+    "operational_recovery",
+    "source_admission_control_preservation"
+  ],
+  "historical_reconciliation": {
+    "unmatched_offset_positions": 5044,
+    "current_backlog_verified": false,
+    "interpretation": "Historical offset positions; not a current missing-record count"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "capability": "enterprise_raw_metadata_architecture",
+  "contract_version": "1.0.0",
+  "approval_date": "2026-11-26",
+  "approval_authority": "user",
+  "timestamp_utc": "20261126T125806Z",
+  "repository_commit": "ca084191b8db148cdd0346e9f6c54081da43d76f",
+  "formal_closure": "CLOSED",
+  "closure_scope": "ARCHITECTURAL_DESIGN",
+  "implementation_status": "PENDING",
+  "acceptance_evidence": {
+    "path": "evidence/metadata/raw-v1-metadata-architecture/20261126T125625Z/raw-v1-metadata-architecture-acceptance.json",
+    "sha256": "f30b8c7d8ea8a321a5b1d86340bfb04d0a2027ed21324acbd7926b483d21fd34"
+  },
+  "approved_artefacts": [
+    {
+      "path": "contracts/metadata/raw-v1/raw-v1-metadata-architecture.md",
+      "sha256": "365065244510f779983d67308c23a8336e1aa68ef7088c2c326d45a06dfaa618",
+      "size_bytes": 3225
+    },
+    {
+      "path": "contracts/metadata/raw-v1/raw-v1-metadata-contract.json",
+      "sha256": "4ab88237b1efb3e4240ab860ac48b87fc14199abcbe690a508adeb1f09b34556",
+      "size_bytes": 4658
+    },
+    {
+      "path": "contracts/metadata/raw-v1/raw-v1-metadata-decisions.json",
+      "sha256": "b54ce0cde43ced89948bfa30812b4d445185e947874209f782d0c2d189b78cbe",
+      "size_bytes": 1243
+    },
+    {
+      "path": "contracts/metadata/raw-v1/raw-v1-metadata-remediation.json",
+      "sha256": "e602aa1faa43966bc8c70c7b28ce6a3ba71bc2029fd05f3ebc916efb8ede10a0",
+      "size_bytes": 3427
+    }
+  ],
+  "mandatory_attributes": 11,
+  "approved_decisions": 8,
+  "outstanding_risks": 13,
+  "operational_acceptance_mandatory_gates": [
+    "dataplex_deployment_and_governance_alignment",
+    "current_kafka_to_raw_reconciliation",
+    "end_to_end_metadata_compliance",
+    "payload_integrity",
+    "operational_recovery",
+    "source_admission_control_preservation"
+  ],
+  "next_capability": "raw_metadata_implementation_and_validation",
+  "cloud_operations": "NONE",
+  "bulk_metadata_updates_authorised": false,
+  "git_commit_created": false
+}

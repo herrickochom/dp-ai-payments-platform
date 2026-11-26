@@ -60,8 +60,8 @@ governance:
 
   data_retention:
     enforcement_enabled: true
-    auto_archival: true
-    archival_path: "s3a://archived-data"
+    auto_archival: false
+    archival_path: null  # Explicit GCS archival destination required before activation
     deletion_enabled: false  # Manual deletion only
 
   audit_logging:

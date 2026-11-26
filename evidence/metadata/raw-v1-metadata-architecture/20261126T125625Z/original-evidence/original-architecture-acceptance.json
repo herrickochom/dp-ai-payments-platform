@@ -1,0 +1,54 @@
+{
+  "stage": 3,
+  "contract_version": "1.0.0",
+  "timestamp_utc": "20261126T125412Z",
+  "repository_commit": "ca084191b8db148cdd0346e9f6c54081da43d76f",
+  "architectural_approval": "APPROVED",
+  "contract_persistence": "PASS",
+  "verification": "PASS",
+  "formal_closure": "AWAITING_EVIDENCE_REVIEW",
+  "checks": {
+    "contract_roundtrip": true,
+    "decision_roundtrip": true,
+    "remediation_roundtrip": true,
+    "contract_version": true,
+    "mandatory_attributes": true,
+    "approved_decisions": true,
+    "five_enterprise_domains": true,
+    "lossless_preservation": true,
+    "conditional_creation": true,
+    "no_payload_overwrite": true,
+    "no_parallel_registry": true,
+    "no_bulk_authorisation": true,
+    "dataplex_obligation_retained": true,
+    "reconciliation_obligation_retained": true,
+    "source_contracts_unchanged": true,
+    "repository_commit_unchanged": true,
+    "architecture_nonempty": true
+  },
+  "artefacts": [
+    {
+      "path": "contracts/metadata/raw-v1/raw-v1-metadata-architecture.md",
+      "sha256": "be883059c13441bf266c8922d6f70133e0bc075cc28c66ea166c43d62eccf06d",
+      "size_bytes": 3123
+    },
+    {
+      "path": "contracts/metadata/raw-v1/raw-v1-metadata-contract.json",
+      "sha256": "8192bab8ff6174d72d0fa6d6f139651e1db063ed77af815c15ebde96ee42be84",
+      "size_bytes": 4656
+    },
+    {
+      "path": "contracts/metadata/raw-v1/raw-v1-metadata-decisions.json",
+      "sha256": "7bd1162738c5a89b7c3a7d69ae701861f0beb772d4c13f16ef2fe06e12f7fa76",
+      "size_bytes": 1204
+    },
+    {
+      "path": "contracts/metadata/raw-v1/raw-v1-metadata-remediation.json",
+      "sha256": "d89f60210ea39d2639569d5ee8ac019d991378e5016f447a8aa7bca0334df2cd",
+      "size_bytes": 3059
+    }
+  ],
+  "cloud_operations": "NONE",
+  "ingestion_execution": "NONE",
+  "git_commit_created": false
+}
