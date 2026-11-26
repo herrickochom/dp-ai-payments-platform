@@ -4,7 +4,7 @@ resource "google_pubsub_topic_iam_member" "canonical_payment_publisher" {
   project = var.project_id
   topic   = google_pubsub_topic.payments_source_events_v1.name
   role    = "roles/pubsub.publisher"
-  member  = "serviceAccount:pdm-dev-payment-publisher@project-e48f194e-f44f-458d-b4f.iam.gserviceaccount.com"
+  member  = google_service_account.payment_event_publisher.member
 }
 
 resource "google_pubsub_subscription_iam_member" "canonical_raw_v1_local_subscriber" {

@@ -1,0 +1,23 @@
+{
+  "capability": "raw_metadata_utility_integration",
+  "status": "PERMANENT_MODULE_VALIDATED",
+  "functional_tests": "52/52 PASS",
+  "files": [
+    {
+      "path": "scripts/metadata/raw_v1_metadata_contract.py",
+      "sha256": "000e4810da85a3f399b44fe86b9c4cd1830fe42dff254af337cd1c4f45cee1e7"
+    },
+    {
+      "path": "tests/metadata/test_raw_v1_metadata_contract.py",
+      "sha256": "08a9b45d900e8b5d39864384da7fbba5e2a35fc1732f3085df1ff885b22a0e63"
+    },
+    {
+      "path": "scripts/metadata/requirements.txt",
+      "sha256": "0a76df5c8d7b0a076223858d0bb0a796bb210d6cd963fd6316712767c5d72022"
+    }
+  ],
+  "existing_utility_modified": false,
+  "raw_avro_decoding": "PENDING",
+  "cli_integration": "PENDING",
+  "cloud_operations": "NONE"
+}

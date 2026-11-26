@@ -7,6 +7,7 @@ It performs no GCP calls, Dataflow execution or BigQuery writes.
 import hashlib
 import json
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 
 from bounded_controller import validate_manifest, execution_id
@@ -71,7 +72,7 @@ class LocalSimulator:
         ).fetchone()
 
     def inspect(self, identifier):
-        with self.connect() as con:
+        with closing(self.connect()) as con, con:
             row = self._read(con, identifier)
 
         if row is None:
@@ -91,7 +92,7 @@ class LocalSimulator:
             canonical, sort_keys=True, separators=(",", ":")
         )
 
-        with self.connect() as con:
+        with closing(self.connect()) as con, con:
             self._transaction(con)
             row = self._read(con, identifier)
 
@@ -118,7 +119,7 @@ class LocalSimulator:
         identifier = admitted["execution_id"]
         evidence = expected_evidence(manifest)
 
-        with self.connect() as con:
+        with closing(self.connect()) as con, con:
             self._transaction(con)
             row = self._read(con, identifier)
 
@@ -148,7 +149,7 @@ class LocalSimulator:
 
         # Simulated execution only. No external side effects.
         if fail_before_acceptance:
-            with self.connect() as con:
+            with closing(self.connect()) as con, con:
                 self._transaction(con)
                 con.execute(
                     "UPDATE runs SET state='FAILED', "
@@ -161,7 +162,7 @@ class LocalSimulator:
                 **self.inspect(identifier),
             }
 
-        with self.connect() as con:
+        with closing(self.connect()) as con, con:
             self._transaction(con)
             row = self._read(con, identifier)
 
@@ -182,7 +183,7 @@ class LocalSimulator:
         }
 
     def recover_failed(self, identifier):
-        with self.connect() as con:
+        with closing(self.connect()) as con, con:
             row = self._read(con, identifier)
             if row is None or row[1] != "FAILED":
                 raise ValueError("Only failed runs may be recovered")

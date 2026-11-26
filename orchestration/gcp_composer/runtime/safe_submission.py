@@ -40,7 +40,7 @@ class LaunchConfig:
 
 def build_launch_request(identity:SubmissionIdentity,config:LaunchConfig):
     identity.validate(); config.validate()
-    if identity.project != 'project-e48f194e-f44f-458d-b4f' or identity.region != 'europe-west2':
+    if identity.project != 'dp-pdm-ai-dev-0b4da804' or identity.region != 'europe-west2':
         raise SubmissionBlocked('unapproved GCP scope')
     # Dataflow labels have a 63-character value maximum. Full SHA-256 hashes
     # cannot be represented as Dataflow labels; keep full identity in Postgres.

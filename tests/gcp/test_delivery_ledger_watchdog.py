@@ -8,7 +8,7 @@ from ledger_watchdog import LedgerJob,assess_ledger_job,WatchdogBlocked
 from billing_evidence import validate_observation,CostGateBlocked
 NOW=datetime(2026,10,29,12,tzinfo=timezone.utc)
 L=LedgerJob('a'*64,1,'job-123','pdm-pilot-123',
-            'project-e48f194e-f44f-458d-b4f','europe-west2','b'*64,'OBSERVING')
+            'dp-pdm-ai-dev-0b4da804','europe-west2','b'*64,'OBSERVING')
 def job(**kwargs):
     return SimpleNamespace(id=kwargs.get('id','job-123'),name='pdm-pilot-123',
         labels=kwargs.get('labels',{'pdm_pilot':'stage10','pdm_execution':'a'*64,'pdm_spec':'b'*64}),

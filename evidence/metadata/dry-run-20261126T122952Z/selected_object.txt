@@ -1,0 +1,1 @@
+raw/v1/streaming/category=agent_network/source_group=agent/source_system=agent/year=2026/month=11/day=25/topic=agent.locations/partition=0/offset=0/record.avro

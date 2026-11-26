@@ -1,946 +1,942 @@
 version: 2
-
 models:
-  - name: cns_pdm_executive_geographic_drilldown
-    description: >
-      Privacy-limited executive drill source connecting the complete Uganda
-      coarse region/district/county/sub-county hierarchy to pseudonymous
-      beneficiaries and loan measures. Direct identity and fine residence
-      geography remain restricted.
-    config:
-      meta:
-        grain:
-          - beneficiary_sk
-          - loan_sk
-        audience:
-          - PDM Executive
-          - Government leadership
-        classification: internal
-    columns:
-      - name: beneficiary_sk
-        data_tests: [not_null]
-      - name: risk_band
-        data_tests:
-          - accepted_values:
-              values:
-                - LOW
-                - MEDIUM
-                - HIGH
-
-  - name: cns_pdm_executive_monthly_trend
-    description: >
-      Monthly leadership series combining approval-cohort funding measures
-      with payment activity recorded in the month. Outstanding and repayment
-      values in the loan section describe the current state of each approval
-      cohort and are NOT historical month-end balance snapshots
-      (see series_basis / is_flagged_non_historical).
-    config:
-      meta:
-        grain:
-          - reporting_month
-        audience:
-          - PDM Executive
-          - Government leadership
-          - Office of the President
-        metric_semantics:
-          loan_amounts: approval cohort current state (not history)
-          payment_amounts: transaction activity
-    columns:
-      - name: reporting_month
-        data_tests:
-          - not_null
-          - unique
-
-      - name: series_basis
-        description: >
-          APPROVAL_COHORT_CURRENT_STATE means the loan measures are the
-          current position of each approval cohort, not a reconstructed
-          month-end portfolio history.
-        data_tests:
-          - accepted_values:
-              values:
-                - APPROVAL_COHORT_CURRENT_STATE
-
-      - name: is_flagged_non_historical
-        description: >
-          TRUE until repayment-event ingestion backs a genuine month-end
-          portfolio history; prevents presentation of cohort state as
-          historical trend.
-
-      - name: cohort_principal_repayment_rate
-        description: >
-          Principal repaid by an approval cohort divided by the cohort's
-          principal disbursed. Principal-based per PDM POC v1 decision 1-2.
-
-  - name: cns_pdm_payments_daily_summary
-    description: >
-      Daily stakeholder payment metrics by source, currency,
-      reconciliation and entity matching.
-    config:
-      meta:
-        grain:
-          - payment_date_sk
-          - source_system
-          - currency
-        audience:
-          - PDM leadership
-          - PDM Secretariat
-          - finance operations
-
-  - name: cns_pdm_parish_performance
-    description: >
-      Parish-level loan performance attributed through SACCO office location
-      (SACCO_OFFICE_ATTRIBUTION), never beneficiary residence.
-    config:
-      meta:
-        grain:
-          - region
-          - district
-          - parish
-        audience:
-          - PDM leadership
-          - district leadership
-          - parish officers
-
-  - name: cns_pdm_agent_risk_indicators
-    description: >
-      Daily investigation-triage indicators for rapid cash-out,
-      excess amount, reconciliation and agent identity concerns.
-    config:
-      meta:
-        grain:
-          - agent_sk
-          - cashout_date_sk
-        audience:
-          - internal audit
-          - IGG
-          - investigators
-    columns:
-      - name: risk_band
-        data_tests:
-          - accepted_values:
-              values:
-                - LOW
-                - MEDIUM
-                - HIGH
-
-  - name: cns_pdm_beneficiary_insights
-    description: >
-      Beneficiary oversight view for multiple loans, verification,
-      repayment and cash-out monitoring.
-    config:
-      meta:
-        grain:
-          - beneficiary_sk
-        audience:
-          - PDM Secretariat
-          - district leadership
-          - authorised investigators
-    columns:
-      - name: beneficiary_sk
-        data_tests:
-          - not_null
-          - unique
-
-      - name: oversight_status
-        data_tests:
-          - accepted_values:
-              values:
-                - STANDARD
-                - REVIEW
-
-  - name: cns_pdm_beneficiary_identity_alerts
-    description: >-
-      Pseudonymous per-token identity-theft indicator feed (alert counts, risk
-      bands and booleans keyed by beneficiary_token). The clear-identity alert
-      detail has been RELOCATED to the RESTRICTED identity-vault product
-      silver_vault.vlt_pdm_beneficiary_identity_alerts.
-    config:
-      meta:
-        grain:
-          - beneficiary_token
-        audience:
-          - internal audit
-          - IGG
-          - authorised investigators
-        classification: internal
-    columns:
-      - name: beneficiary_token
-        data_tests:
-          - not_null
-          - unique
-
-      - name: account_substitution_count
-        description: Safe per-token count; no payment-account identifier is exposed.
-
-      - name: account_substitution_amount
-        description: Safe per-token aggregate amount; no payment-account identifier is exposed.
-
-      - name: identity_risk_band
-        data_tests:
-          - accepted_values:
-              values:
-                - LOW
-                - MEDIUM
-                - HIGH
-
-  - name: cns_pdm_lifecycle_exceptions
-    description: >
-      Investigator control view tracing approved, instructed, status,
-      settled, credited, cash-out and repaid stages with amount variances.
-    config:
-      meta:
-        grain:
-          - loan_id
-        audience:
-          - PDM Secretariat
-          - internal audit
-          - IGG
-          - authorised investigators
-    columns:
-      - name: lifecycle_sk
-        data_tests:
-          - not_null
-          - unique
-
-      - name: intervention_priority
-        data_tests:
-          - accepted_values:
-              values:
-                - LOW
-                - MEDIUM
-                - HIGH
-
-  - name: cns_pdm_duplicate_fragmentation_alerts
-    description: >
-      Same-entitlement duplicate, cross-channel, repeated-amount
-      and fragmented-payment indicators.
-    config:
-      meta:
-        grain:
-          - beneficiary_sk
-          - loan_id
-          - payment_date_sk
-          - currency
-        audience:
-          - payment operations
-          - internal audit
-          - authorised investigators
-    columns:
-      - name: payment_pattern_sk
-        data_tests:
-          - not_null
-          - unique
-
-      - name: payment_pattern_risk_band
-        data_tests:
-          - accepted_values:
-              values:
-                - LOW
-                - MEDIUM
-                - HIGH
-
-  - name: cns_pdm_district_geographic_risk
-    description: >
-      District-grain rollup of parish geographic risk. District severity is
-      the worst observed parish severity (maximum risk score), so a single
-      severe parish escalates its district. District ISO mapping drives the
-      Superset Uganda district map.
-    config:
-      meta:
-        grain:
-          - region
-          - district
-        audience:
-          - PDM leadership
-          - PDM Secretariat
-          - district leadership
-    columns:
-      - name: superset_district_iso
-        description: >
-          District subdivision code used to join the dataset to the ISO
-          property in Superset's bundled Uganda Country Map GeoJSON.
-
-      - name: map_mapping_status
-        description: >
-          MAPPED when a Superset-compatible district ISO value is available;
-          otherwise UNMAPPED.
-        data_tests:
-          - accepted_values:
-              values:
-                - MAPPED
-                - UNMAPPED
-
-      - name: geographic_risk_band
-        description: >
-          District severity band taken from the worst assessed parish in the
-          district; NO DATA when the district has no assessed parish or no
-          district ISO mapping.
-        data_tests:
-          - accepted_values:
-              values:
-                - LOW
-                - MEDIUM
-                - HIGH
-                - SEVERE
-                - NO DATA
-
-      - name: geographic_risk_score
-        description: >
-          Numeric district severity where 1 is LOW, 2 is MEDIUM, 3 is HIGH
-          and 4 is SEVERE. NULL is intentionally used for NO DATA.
-        data_tests:
-          - accepted_values:
-              values:
-                - 1
-                - 2
-                - 3
-                - 4
-              quote: false
-
-      - name: high_identity_alert_count
-        description: >
-          Sum of HIGH beneficiary identity alerts across the district's
-          parishes.
-  - name: cns_pdm_subcounty_geographic_risk
-    description: >
-      Sub-county geographic risk attributed through SACCO office locations,
-      the only platform source carrying sub_county. Loans join to the
-      sub-county of the SACCO administering them; beneficiaries inherit the
-      same attribution path. Loans with no resolvable SACCO location are
-      retained in an Unknown bucket so sub-county totals reconcile with the
-      national portfolio. Bands are not gated on district ISO mapping
-      because sub-counties have no map layer.
-    config:
-      meta:
-        grain:
-          - region
-          - district
-          - sub_county
-        audience:
-          - PDM Secretariat
-          - district leadership
-        attribution_note: >
-          SACCO office attribution, not beneficiary residence. Drill from
-          sub-county to parish is filter-driven on region and district until
-          a parish-to-sub-county mapping exists.
-    columns:
-      - name: sub_county_sk
-        data_tests:
-          - not_null
-          - unique
-
-      - name: sacco_count
-        description: Number of distinct SACCOs administering loans in the sub-county.
-
-      - name: loan_count
-        description: Number of distinct loans attributed to the sub-county.
-
-      - name: disbursement_peer_zscore
-        description: >
-          Sub-county disbursement-rate z-score relative to other sub-counties
-          in the same region.
-
-      - name: repayment_peer_zscore
-        description: >
-          Sub-county principal-repayment-rate z-score relative to other
-          sub-counties in the same region.
-
-      - name: geographic_risk_band
-        description: >
-          Sub-county severity band using the same thresholds as the parish
-          model, without district ISO gating.
-        data_tests:
-          - accepted_values:
-              values:
-                - LOW
-                - MEDIUM
-                - HIGH
-                - SEVERE
-                - NO DATA
-
-      - name: geographic_risk_score
-        description: >
-          Numeric severity where 1 is LOW, 2 is MEDIUM, 3 is HIGH and 4 is
-          SEVERE. NULL is intentionally used for NO DATA.
-        data_tests:
-          - accepted_values:
-              values:
-                - 1
-                - 2
-                - 3
-                - 4
-              quote: false
-
-  - name: cns_pdm_geographic_risk_summary
-    description: >
-      Single-row national KPI snapshot across the geographic risk hierarchy:
-      district, sub-county and parish counts by severity band, mapping
-      coverage and identity-risk totals. Powers the national KPI row of the
-      geographic risk dashboard.
-    config:
-      meta:
-        grain:
-          - snapshot_date
-        audience:
-          - PDM Executive
-          - Government leadership
-    columns:
-      - name: snapshot_date
-        data_tests:
-          - not_null
-          - unique
-
-      - name: district_mapping_pct
-        description: >
-          Percentage of districts carrying a Superset-compatible district
-          ISO value.
-
-      - name: sub_county_count
-        description: Number of sub-counties present in the sub-county risk model.
-
-      - name: high_identity_alert_count
-        description: >
-          National total of HIGH beneficiary identity alerts across
-          parishes.
-
-
-
-
-  - name: cns_pdm_parish_geographic_risk
-    description: >
-      Parish-grain operational risk model using SACCO-office attribution for
-      disbursement and repayment plus agent/reference coordinates. It contains
-      no beneficiary-location or identity-risk attribution. District products
-      may aggregate it; the village product is independently sourced agent
-      coverage and does not inherit parish risk.
-    config:
-      meta:
-        grain:
-          - region
-          - district
-          - parish
-        audience:
-          - PDM leadership
-          - PDM Secretariat
-          - district leadership
-        risk_semantics:
-          LOW: Normal peer-relative conditions.
-          MEDIUM: Moderate peer deviation requiring monitoring.
-          HIGH: Material peer deviation or at least one high identity alert.
-          SEVERE: Exceptional peer deviation or repeated high identity alerts.
-          NO DATA: No usable mapped geographic risk value is available.
-    columns:
-      - name: superset_district_iso
-        description: >
-          District subdivision code used to join the dataset to the ISO
-          property in Superset's bundled Uganda Country Map GeoJSON.
-
-      - name: map_mapping_status
-        description: >
-          MAPPED when a Superset-compatible district ISO value is available;
-          otherwise UNMAPPED.
-        data_tests:
-          - accepted_values:
-              values:
-                - MAPPED
-                - UNMAPPED
-
-      - name: latitude
-        description: >
-          Average valid agent latitude for mapping the parish, with a
-          reference-coordinate fallback where available.
-
-      - name: longitude
-        description: >
-          Average valid agent longitude for mapping the parish, with a
-          reference-coordinate fallback where available.
-
-      - name: mapped_agent_count
-        description: >
-          Number of valid agent coordinates contributing to the parish
-          centroid.
-
-      - name: coordinate_source
-        description: >
-          AGENT_GPS when valid agent coordinates are available, REFERENCE
-          when a maintained reference coordinate is used, and UNMAPPED when
-          neither source is available.
-        data_tests:
-          - accepted_values:
-              values:
-                - AGENT_GPS
-                - REFERENCE
-                - UNMAPPED
-
-      - name: high_identity_alert_count
-        description: >
-          Intentionally NULL: beneficiary identity risk is unavailable at parish grain.
-
-      - name: account_substitution_amount
-        description: >
-          Intentionally NULL: beneficiary account-substitution amounts are unavailable at parish grain.
-
-      - name: disbursement_peer_zscore
-        description: >
-          Parish disbursement-rate z-score relative to other parishes in the
-          same region.
-
-      - name: repayment_peer_zscore
-        description: >
-          Parish principal-repayment-rate z-score relative to other parishes
-          in the same region.
-
-      - name: geographic_risk_band
-        description: >
-          Executive geographic severity band. LOW, MEDIUM, HIGH and SEVERE
-          represent increasing risk; NO DATA indicates that no usable mapped
-          geographic risk value is available.
-        data_tests:
-          - accepted_values:
-              values:
-                - LOW
-                - MEDIUM
-                - HIGH
-                - SEVERE
-                - NO DATA
-
-      - name: geographic_risk_score
-        description: >
-          Numeric map severity where 1 is LOW, 2 is MEDIUM, 3 is HIGH and
-          4 is SEVERE. NULL is intentionally used for NO DATA.
-        data_tests:
-          - accepted_values:
-              values:
-                - 1
-                - 2
-                - 3
-                - 4
-              quote: false
-
-  - name: cns_pdm_geographic_risk_drivers
-    description: >
-      Parish-level explanation of what drives geographic risk: disbursement
-      deviation, repayment underperformance or beneficiary identity issues.
-      Magnitudes are normalised so the three drivers can be compared and the
-      largest is labelled the primary driver. LOW parishes carry no driver.
-    config:
-      meta:
-        grain:
-          - region
-          - district
-          - parish
-        audience:
-          - PDM leadership
-          - PDM Secretariat
-    columns:
-      - name: disbursement_risk_magnitude
-        description: >
-          Absolute disbursement peer z-score; higher values mean the parish
-          disbursed unusually fast or slow relative to regional peers.
-
-      - name: repayment_risk_magnitude
-        description: >
-          Positive repayment shortfall magnitude; higher values mean worse
-          repayment relative to regional peers.
-
-      - name: identity_risk_magnitude
-        description: Intentionally NULL; identity risk is unavailable at parish grain.
-
-      - name: primary_risk_driver
-        description: >
-          Dominant risk driver: IDENTITY, REPAYMENT, DISBURSEMENT, NONE for
-          LOW parishes with no material driver, or NO DATA when no risk
-          signal is available.
-        data_tests:
-          - accepted_values:
-              values:
-                - IDENTITY
-                - REPAYMENT
-                - DISBURSEMENT
-                - NONE
-                - NO DATA
-
-
-  - name: cns_pdm_geographic_risk_trend
-    description: >
-      Daily district-grain risk snapshot for movement-over-time analysis.
-      With iceberg_table materialization each run stores the latest
-      snapshot; retain snapshot_date in the grain when history is
-      introduced so risk movement becomes queryable.
-    config:
-      meta:
-        grain:
-          - snapshot_date
-          - region
-          - district
-        audience:
-          - PDM leadership
-          - PDM Secretariat
-    columns:
-      - name: snapshot_date
-        data_tests:
-          - not_null
-
-      - name: severe_parish_count
-        description: Number of SEVERE parishes in the district on the snapshot date.
-
-  - name: cns_pdm_geographic_coverage
-    description: >
-      District-grain mapping coverage: parish counts with Superset district
-      ISO mapping, parish coordinates and coordinate source mix, plus agent
-      GPS coverage. Use it to explain why geographies are missing from map
-      visualisations.
-    config:
-      meta:
-        grain:
-          - region
-          - district
-        audience:
-          - PDM Secretariat
-          - MIS and data engineering
-    columns:
-      - name: iso_mapping_pct
-        description: Percentage of parishes whose district carries a Superset ISO value.
-
-      - name: coordinate_mapping_pct
-        description: Percentage of parishes with latitude and longitude resolved.
-
-      - name: unmapped_coordinate_parish_count
-        description: Parishes with neither agent GPS nor reference coordinates.
-
-  - name: cns_pdm_geographic_alerts
-    description: >
-      Prioritised parish exception list: SEVERE, HIGH, MEDIUM and NO DATA
-      parishes with a typed alert reason, ordered by alert priority. The
-      operational triage queue behind the geographic risk dashboard.
-    config:
-      meta:
-        grain:
-          - region
-          - district
-          - parish
-        audience:
-          - PDM Secretariat
-          - investigators
-        risk_semantics_note: >
-          Bands are triage indicators, not proof of fraud. Follow ADR-002
-          governance before any adverse action.
-    columns:
-      - name: alert_priority
-        description: 1 for SEVERE through 4 for LOW; 5 for NO DATA.
-        data_tests:
-          - accepted_values:
-              values:
-                - 1
-                - 2
-                - 3
-                - 4
-                - 5
-              quote: false
-
-      - name: alert_type
-        description: >
-          Typed reason for the alert: repeated or single identity alerts,
-          severe or high repayment underperformance, severe or high
-          disbursement outliers, NO_DATA or MONITOR.
-        data_tests:
-          - accepted_values:
-              values:
-                - REPEATED_HIGH_IDENTITY_ALERTS
-                - SEVERE_REPAYMENT_UNDERPERFORMANCE
-                - SEVERE_DISBURSEMENT_OUTLIER
-                - IDENTITY_ALERT
-                - HIGH_REPAYMENT_UNDERPERFORMANCE
-                - HIGH_DISBURSEMENT_OUTLIER
-                - NO_DATA
-                - MONITOR
-
-  - name: cns_pdm_village_geographic_risk
-    description: >
-      Village-level operational agent coverage only. Gate 2 makes beneficiary
-      risk and financial measures unavailable at village grain.
-    config:
-      meta:
-        grain:
-          - region
-          - district
-          - parish
-          - village
-        audience:
-          - PDM Secretariat
-    columns:
-      - name: risk_grain_source
-        description: >
-          Explicitly states that only non-beneficiary operational agent
-          coverage is represented at village grain.
-        data_tests:
-          - accepted_values:
-              values:
-                - OPERATIONAL_AGENT_COVERAGE_ONLY
-
-
-  - name: cns_pdm_executive_overview
-    description: >
-      Programme-wide leadership scorecard covering fund flow,
-      repayment, reconciliation, exceptions and geographic risk.
-    config:
-      meta:
-        grain:
-          - programme_id
-          - as_of_date
-        audience:
-          - PDM Executive
-          - Government leadership
-    columns:
-      - name: programme_id
-        data_tests:
-          - not_null
-          - unique
-
-      - name: as_of_date
-        description: >
-          Authoritative source as_of_date from the canonical loan observations
-          (max as_of_date). It is never inferred from the latest approval or
-          payment activity (PDM POC v1 decision 7).
-        data_tests:
-          - not_null
-
-      - name: principal_repayment_rate
-        description: >
-          Principal repaid divided by principal disbursed across the
-          portfolio. Principal-based per PDM POC v1 decisions 1-2.
-
-      - name: repayment_rate
-        description: >
-          DEPRECATED backward-compatibility alias retained only for the legacy
-          Superset repayment gauge: total contractual repaid divided by
-          principal disbursed. Do not use for new reporting; use
-          principal_repayment_rate. Do not re-alias this column to a new
-          formula (PDM POC v1 decision 2).
-
-      - name: reporting_scope_status
-        description: >
-          Explicit qualification of whether the available reporting
-          population is nationally representative.
-        data_tests:
-          - accepted_values:
-              values:
-                - LIMITED_SAMPLE
-
-  - name: cns_pdm_loan_intervention_dashboard
-    description: >
-      Loan-level operational dashboard distinguishing normal progression
-      from cases requiring intervention.
-    config:
-      meta:
-        grain:
-          - loan_id
-        audience:
-          - PDM Secretariat
-    columns:
-      - name: lifecycle_sk
-        data_tests:
-          - not_null
-          - unique
-
-      - name: intervention_status
-        data_tests:
-          - accepted_values:
-              values:
-                - PROGRESSING
-                - REQUIRES_INTERVENTION
-
-  - name: cns_pdm_local_government_performance
-    description: >
-      Local-government presentation of parish portfolio performance
-      and peer-relative risk.
-    config:
-      meta:
-        grain:
-          - region
-          - district
-          - parish
-        audience:
-          - district leadership
-          - parish leadership
-    columns:
-      - name: parish_sk
-        data_tests:
-          - not_null
-          - unique
-
-      - name: local_performance_status
-        data_tests:
-          - accepted_values:
-              values:
-                - ON_TRACK
-                - AT_RISK
-                - CRITICAL
-
-  - name: cns_pdm_financial_fund_flow
-    description: >
-      Loan-level approved-to-repayment fund flow with adjacent-stage
-      variances and explicit recovery observability.
-    config:
-      meta:
-        grain:
-          - loan_id
-        audience:
-          - Finance
-          - Treasury
-    columns:
-      - name: lifecycle_sk
-        data_tests:
-          - not_null
-          - unique
-
-  - name: cns_pdm_fund_flow_funnel
-    description: >
-      Executive and operational fund-flow funnel dataset presenting
-      approved, instructed, settled, credited and cash-out stages
-      in ordered long-form structure for dashboard visualisation.
-    config:
-      meta:
-        grain:
-          - stage_order
-          - stage
-        audience:
-          - Finance
-          - Treasury
-          - payment operations
-          - PDM Secretariat
-        category: operations
-    columns:
-      - name: stage_order
-        data_tests:
-          - not_null
-          - unique
-
-      - name: stage
-        data_tests:
-          - not_null
-          - unique
-
-      - name: amount
-        data_tests:
-          - not_null
-
-  - name: cns_pdm_end_to_end_traceability
-    description: >
-      Restricted audit drill-through joining loan, beneficiary, SACCO
-      and available payment identifiers across the lifecycle.
-    config:
-      meta:
-        grain:
-          - loan_id
-        audience:
-          - Audit
-          - Internal Controls
-        classification: restricted
-    columns:
-      - name: lifecycle_sk
-        data_tests:
-          - not_null
-          - unique
-
-  - name: cns_pdm_fraud_risk_insights
-    description: >
-      Loan-level investigation indicators composed from identity,
-      payment-pattern, cash-out, lifecycle and geographic signals;
-      not a fraud determination.
-    config:
-      meta:
-        grain:
-          - loan_id
-        audience:
-          - Fraud
-          - Financial Crime
-          - authorised investigators
-        classification: restricted
-    columns:
-      - name: risk_case_sk
-        data_tests:
-          - not_null
-          - unique
-
-      - name: risk_band
-        data_tests:
-          - accepted_values:
-              values:
-                - LOW
-                - MEDIUM
-                - HIGH
-
-  - name: cns_pdm_payment_operations
-    description: >
-      Daily payment-channel operational performance, rejection,
-      reconciliation and entity-matching metrics.
-    config:
-      meta:
-        grain:
-          - payment_date_sk
-          - source_system
-          - currency
-        audience:
-          - payment operations
-
-  - name: cns_pdm_sacco_portfolio
-    description: >
-      SACCO-level exposure, disbursement, outstanding balance
-      and repayment portfolio.
-    config:
-      meta:
-        grain:
-          - sacco_sk
-        audience:
-          - SACCO management
-          - PDM Secretariat
-    columns:
-      - name: sacco_sk
-        data_tests:
-          - not_null
-          - unique
-
-  - name: cns_pdm_channel_agent_performance
-    description: >
-      Agent-level channel volumes, beneficiary concentration
-      and behavioural risk indicators.
-    config:
-      meta:
-        grain:
-          - agent_sk
-        audience:
-          - Agent management
-          - Channel management
-    columns:
-      - name: agent_sk
-        data_tests:
-          - not_null
-          - unique
-
-      - name: channel_risk_band
-        data_tests:
-          - accepted_values:
-              values:
-                - LOW
-                - MEDIUM
-                - HIGH
-
-  - name: cns_pdm_social_impact
-    description: >
-      Special-group view of beneficiary reach, funding delivery and repayment
-      participation. household_count is intentionally unavailable after Gate 2
-      pending an approved privacy-safe aggregate design.
-    config:
-      meta:
-        grain:
-          - special_group_sk
-        audience:
-          - Programme management
-          - Social impact
-    columns:
-      - name: special_group_sk
-        data_tests:
-          - not_null
-          - unique
+- name: cns_pdm_executive_geographic_drilldown
+  description: 'Privacy-limited executive drill source connecting the complete Uganda
+    coarse region/district/county/sub-county hierarchy to pseudonymous beneficiaries
+    and loan measures. Direct identity and fine residence geography remain restricted.
+
+    '
+  config:
+    meta:
+      grain:
+      - beneficiary_sk
+      - loan_sk
+      audience:
+      - PDM Executive
+      - Government leadership
+      classification: internal
+  columns:
+  - name: beneficiary_sk
+    data_tests:
+    - not_null
+  - name: risk_band
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - LOW
+          - MEDIUM
+          - HIGH
+- name: cns_pdm_executive_monthly_trend
+  description: 'Monthly leadership series combining approval-cohort funding measures
+    with payment activity recorded in the month. Outstanding and repayment values
+    in the loan section describe the current state of each approval cohort and are
+    NOT historical month-end balance snapshots (see series_basis / is_flagged_non_historical).
+
+    '
+  config:
+    meta:
+      grain:
+      - reporting_month
+      audience:
+      - PDM Executive
+      - Government leadership
+      - Office of the President
+      metric_semantics:
+        loan_amounts: approval cohort current state (not history)
+        payment_amounts: transaction activity
+  columns:
+  - name: reporting_month
+    data_tests:
+    - not_null
+    - unique
+  - name: series_basis
+    description: 'APPROVAL_COHORT_CURRENT_STATE means the loan measures are the current
+      position of each approval cohort, not a reconstructed month-end portfolio history.
+
+      '
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - APPROVAL_COHORT_CURRENT_STATE
+  - name: is_flagged_non_historical
+    description: 'TRUE until repayment-event ingestion backs a genuine month-end portfolio
+      history; prevents presentation of cohort state as historical trend.
+
+      '
+  - name: cohort_principal_repayment_rate
+    description: 'Principal repaid by an approval cohort divided by the cohort''s
+      principal disbursed. Principal-based per PDM POC v1 decision 1-2.
+
+      '
+- name: cns_pdm_payments_daily_summary
+  description: 'Daily stakeholder payment metrics by source, currency, reconciliation
+    and entity matching.
+
+    '
+  config:
+    meta:
+      grain:
+      - payment_date_sk
+      - source_system
+      - currency
+      audience:
+      - PDM leadership
+      - PDM Secretariat
+      - finance operations
+- name: cns_pdm_parish_performance
+  description: 'Parish-level loan performance attributed through SACCO office location
+    (SACCO_OFFICE_ATTRIBUTION), never beneficiary residence.
+
+    '
+  config:
+    meta:
+      grain:
+      - region
+      - district
+      - parish
+      audience:
+      - PDM leadership
+      - district leadership
+      - parish officers
+- name: cns_pdm_agent_risk_indicators
+  description: 'Daily investigation-triage indicators for rapid cash-out, excess amount,
+    reconciliation and agent identity concerns.
+
+    '
+  config:
+    meta:
+      grain:
+      - agent_sk
+      - cashout_date_sk
+      audience:
+      - internal audit
+      - IGG
+      - investigators
+  columns:
+  - name: risk_band
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - LOW
+          - MEDIUM
+          - HIGH
+- name: cns_pdm_beneficiary_insights
+  description: 'Beneficiary oversight view for multiple loans, verification, repayment
+    and cash-out monitoring.
+
+    '
+  config:
+    meta:
+      grain:
+      - beneficiary_sk
+      audience:
+      - PDM Secretariat
+      - district leadership
+      - authorised investigators
+  columns:
+  - name: beneficiary_sk
+    data_tests:
+    - not_null
+    - unique
+  - name: oversight_status
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - STANDARD
+          - REVIEW
+- name: cns_pdm_beneficiary_identity_alerts
+  description: Pseudonymous per-token identity-theft indicator feed (alert counts,
+    risk bands and booleans keyed by beneficiary_token). The clear-identity alert
+    detail has been RELOCATED to the RESTRICTED identity-vault product silver_vault.vlt_pdm_beneficiary_identity_alerts.
+  config:
+    meta:
+      grain:
+      - beneficiary_token
+      audience:
+      - internal audit
+      - IGG
+      - authorised investigators
+      classification: internal
+  columns:
+  - name: beneficiary_token
+    data_tests:
+    - not_null
+    - unique
+  - name: account_substitution_count
+    description: Safe per-token count; no payment-account identifier is exposed.
+  - name: account_substitution_amount
+    description: Safe per-token aggregate amount; no payment-account identifier is
+      exposed.
+  - name: identity_risk_band
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - LOW
+          - MEDIUM
+          - HIGH
+- name: cns_pdm_lifecycle_exceptions
+  description: 'Investigator control view tracing approved, instructed, status, settled,
+    credited, cash-out and repaid stages with amount variances.
+
+    '
+  config:
+    meta:
+      grain:
+      - loan_id
+      audience:
+      - PDM Secretariat
+      - internal audit
+      - IGG
+      - authorised investigators
+  columns:
+  - name: lifecycle_sk
+    data_tests:
+    - not_null
+    - unique
+  - name: intervention_priority
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - LOW
+          - MEDIUM
+          - HIGH
+- name: cns_pdm_duplicate_fragmentation_alerts
+  description: 'Same-entitlement duplicate, cross-channel, repeated-amount and fragmented-payment
+    indicators.
+
+    '
+  config:
+    meta:
+      grain:
+      - beneficiary_sk
+      - loan_id
+      - payment_date_sk
+      - currency
+      audience:
+      - payment operations
+      - internal audit
+      - authorised investigators
+  columns:
+  - name: payment_pattern_sk
+    data_tests:
+    - not_null
+    - unique
+  - name: payment_pattern_risk_band
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - LOW
+          - MEDIUM
+          - HIGH
+- name: cns_pdm_district_geographic_risk
+  description: 'District-grain rollup of parish geographic risk. District severity
+    is the worst observed parish severity (maximum risk score), so a single severe
+    parish escalates its district. District ISO mapping drives the Superset Uganda
+    district map.
+
+    '
+  config:
+    meta:
+      grain:
+      - region
+      - district
+      audience:
+      - PDM leadership
+      - PDM Secretariat
+      - district leadership
+  columns:
+  - name: superset_district_iso
+    description: 'District subdivision code used to join the dataset to the ISO property
+      in Superset''s bundled Uganda Country Map GeoJSON.
+
+      '
+  - name: map_mapping_status
+    description: 'MAPPED when a Superset-compatible district ISO value is available;
+      otherwise UNMAPPED.
+
+      '
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - MAPPED
+          - UNMAPPED
+  - name: geographic_risk_band
+    description: 'District severity band taken from the worst assessed parish in the
+      district; NO DATA when the district has no assessed parish or no district ISO
+      mapping.
+
+      '
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - LOW
+          - MEDIUM
+          - HIGH
+          - SEVERE
+          - NO DATA
+  - name: geographic_risk_score
+    description: 'Numeric district severity where 1 is LOW, 2 is MEDIUM, 3 is HIGH
+      and 4 is SEVERE. NULL is intentionally used for NO DATA.
+
+      '
+    data_tests:
+    - accepted_values:
+        arguments:
+          quote: false
+          values:
+          - 1
+          - 2
+          - 3
+          - 4
+  - name: high_identity_alert_count
+    description: 'Sum of HIGH beneficiary identity alerts across the district''s parishes.
+
+      '
+- name: cns_pdm_subcounty_geographic_risk
+  description: 'Sub-county geographic risk attributed through SACCO office locations,
+    the only platform source carrying sub_county. Loans join to the sub-county of
+    the SACCO administering them; beneficiaries inherit the same attribution path.
+    Loans with no resolvable SACCO location are retained in an Unknown bucket so sub-county
+    totals reconcile with the national portfolio. Bands are not gated on district
+    ISO mapping because sub-counties have no map layer.
+
+    '
+  config:
+    meta:
+      grain:
+      - region
+      - district
+      - sub_county
+      audience:
+      - PDM Secretariat
+      - district leadership
+      attribution_note: 'SACCO office attribution, not beneficiary residence. Drill
+        from sub-county to parish is filter-driven on region and district until a
+        parish-to-sub-county mapping exists.
+
+        '
+  columns:
+  - name: sub_county_sk
+    data_tests:
+    - not_null
+    - unique
+  - name: sacco_count
+    description: Number of distinct SACCOs administering loans in the sub-county.
+  - name: loan_count
+    description: Number of distinct loans attributed to the sub-county.
+  - name: disbursement_peer_zscore
+    description: 'Sub-county disbursement-rate z-score relative to other sub-counties
+      in the same region.
+
+      '
+  - name: repayment_peer_zscore
+    description: 'Sub-county principal-repayment-rate z-score relative to other sub-counties
+      in the same region.
+
+      '
+  - name: geographic_risk_band
+    description: 'Sub-county severity band using the same thresholds as the parish
+      model, without district ISO gating.
+
+      '
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - LOW
+          - MEDIUM
+          - HIGH
+          - SEVERE
+          - NO DATA
+  - name: geographic_risk_score
+    description: 'Numeric severity where 1 is LOW, 2 is MEDIUM, 3 is HIGH and 4 is
+      SEVERE. NULL is intentionally used for NO DATA.
+
+      '
+    data_tests:
+    - accepted_values:
+        arguments:
+          quote: false
+          values:
+          - 1
+          - 2
+          - 3
+          - 4
+- name: cns_pdm_geographic_risk_summary
+  description: 'Single-row national KPI snapshot across the geographic risk hierarchy:
+    district, sub-county and parish counts by severity band, mapping coverage and
+    identity-risk totals. Powers the national KPI row of the geographic risk dashboard.
+
+    '
+  config:
+    meta:
+      grain:
+      - snapshot_date
+      audience:
+      - PDM Executive
+      - Government leadership
+  columns:
+  - name: snapshot_date
+    data_tests:
+    - not_null
+    - unique
+  - name: district_mapping_pct
+    description: 'Percentage of districts carrying a Superset-compatible district
+      ISO value.
+
+      '
+  - name: sub_county_count
+    description: Number of sub-counties present in the sub-county risk model.
+  - name: high_identity_alert_count
+    description: 'National total of HIGH beneficiary identity alerts across parishes.
+
+      '
+- name: cns_pdm_parish_geographic_risk
+  description: 'Parish-grain operational risk model using SACCO-office attribution
+    for disbursement and repayment plus agent/reference coordinates. It contains no
+    beneficiary-location or identity-risk attribution. District products may aggregate
+    it; the village product is independently sourced agent coverage and does not inherit
+    parish risk.
+
+    '
+  config:
+    meta:
+      grain:
+      - region
+      - district
+      - parish
+      audience:
+      - PDM leadership
+      - PDM Secretariat
+      - district leadership
+      risk_semantics:
+        LOW: Normal peer-relative conditions.
+        MEDIUM: Moderate peer deviation requiring monitoring.
+        HIGH: Material peer deviation or at least one high identity alert.
+        SEVERE: Exceptional peer deviation or repeated high identity alerts.
+        NO DATA: No usable mapped geographic risk value is available.
+  columns:
+  - name: superset_district_iso
+    description: 'District subdivision code used to join the dataset to the ISO property
+      in Superset''s bundled Uganda Country Map GeoJSON.
+
+      '
+  - name: map_mapping_status
+    description: 'MAPPED when a Superset-compatible district ISO value is available;
+      otherwise UNMAPPED.
+
+      '
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - MAPPED
+          - UNMAPPED
+  - name: latitude
+    description: 'Average valid agent latitude for mapping the parish, with a reference-coordinate
+      fallback where available.
+
+      '
+  - name: longitude
+    description: 'Average valid agent longitude for mapping the parish, with a reference-coordinate
+      fallback where available.
+
+      '
+  - name: mapped_agent_count
+    description: 'Number of valid agent coordinates contributing to the parish centroid.
+
+      '
+  - name: coordinate_source
+    description: 'AGENT_GPS when valid agent coordinates are available, REFERENCE
+      when a maintained reference coordinate is used, and UNMAPPED when neither source
+      is available.
+
+      '
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - AGENT_GPS
+          - REFERENCE
+          - UNMAPPED
+  - name: high_identity_alert_count
+    description: 'Intentionally NULL: beneficiary identity risk is unavailable at
+      parish grain.
+
+      '
+  - name: account_substitution_amount
+    description: 'Intentionally NULL: beneficiary account-substitution amounts are
+      unavailable at parish grain.
+
+      '
+  - name: disbursement_peer_zscore
+    description: 'Parish disbursement-rate z-score relative to other parishes in the
+      same region.
+
+      '
+  - name: repayment_peer_zscore
+    description: 'Parish principal-repayment-rate z-score relative to other parishes
+      in the same region.
+
+      '
+  - name: geographic_risk_band
+    description: 'Executive geographic severity band. LOW, MEDIUM, HIGH and SEVERE
+      represent increasing risk; NO DATA indicates that no usable mapped geographic
+      risk value is available.
+
+      '
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - LOW
+          - MEDIUM
+          - HIGH
+          - SEVERE
+          - NO DATA
+  - name: geographic_risk_score
+    description: 'Numeric map severity where 1 is LOW, 2 is MEDIUM, 3 is HIGH and
+      4 is SEVERE. NULL is intentionally used for NO DATA.
+
+      '
+    data_tests:
+    - accepted_values:
+        arguments:
+          quote: false
+          values:
+          - 1
+          - 2
+          - 3
+          - 4
+- name: cns_pdm_geographic_risk_drivers
+  description: 'Parish-level explanation of what drives geographic risk: disbursement
+    deviation, repayment underperformance or beneficiary identity issues. Magnitudes
+    are normalised so the three drivers can be compared and the largest is labelled
+    the primary driver. LOW parishes carry no driver.
+
+    '
+  config:
+    meta:
+      grain:
+      - region
+      - district
+      - parish
+      audience:
+      - PDM leadership
+      - PDM Secretariat
+  columns:
+  - name: disbursement_risk_magnitude
+    description: 'Absolute disbursement peer z-score; higher values mean the parish
+      disbursed unusually fast or slow relative to regional peers.
+
+      '
+  - name: repayment_risk_magnitude
+    description: 'Positive repayment shortfall magnitude; higher values mean worse
+      repayment relative to regional peers.
+
+      '
+  - name: identity_risk_magnitude
+    description: Intentionally NULL; identity risk is unavailable at parish grain.
+  - name: primary_risk_driver
+    description: 'Dominant risk driver: IDENTITY, REPAYMENT, DISBURSEMENT, NONE for
+      LOW parishes with no material driver, or NO DATA when no risk signal is available.
+
+      '
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - IDENTITY
+          - REPAYMENT
+          - DISBURSEMENT
+          - NONE
+          - NO DATA
+- name: cns_pdm_geographic_risk_trend
+  description: 'Daily district-grain risk snapshot for movement-over-time analysis.
+    With iceberg_table materialization each run stores the latest snapshot; retain
+    snapshot_date in the grain when history is introduced so risk movement becomes
+    queryable.
+
+    '
+  config:
+    meta:
+      grain:
+      - snapshot_date
+      - region
+      - district
+      audience:
+      - PDM leadership
+      - PDM Secretariat
+  columns:
+  - name: snapshot_date
+    data_tests:
+    - not_null
+  - name: severe_parish_count
+    description: Number of SEVERE parishes in the district on the snapshot date.
+- name: cns_pdm_geographic_coverage
+  description: 'District-grain mapping coverage: parish counts with Superset district
+    ISO mapping, parish coordinates and coordinate source mix, plus agent GPS coverage.
+    Use it to explain why geographies are missing from map visualisations.
+
+    '
+  config:
+    meta:
+      grain:
+      - region
+      - district
+      audience:
+      - PDM Secretariat
+      - MIS and data engineering
+  columns:
+  - name: iso_mapping_pct
+    description: Percentage of parishes whose district carries a Superset ISO value.
+  - name: coordinate_mapping_pct
+    description: Percentage of parishes with latitude and longitude resolved.
+  - name: unmapped_coordinate_parish_count
+    description: Parishes with neither agent GPS nor reference coordinates.
+- name: cns_pdm_geographic_alerts
+  description: 'Prioritised parish exception list: SEVERE, HIGH, MEDIUM and NO DATA
+    parishes with a typed alert reason, ordered by alert priority. The operational
+    triage queue behind the geographic risk dashboard.
+
+    '
+  config:
+    meta:
+      grain:
+      - region
+      - district
+      - parish
+      audience:
+      - PDM Secretariat
+      - investigators
+      risk_semantics_note: 'Bands are triage indicators, not proof of fraud. Follow
+        ADR-002 governance before any adverse action.
+
+        '
+  columns:
+  - name: alert_priority
+    description: 1 for SEVERE through 4 for LOW; 5 for NO DATA.
+    data_tests:
+    - accepted_values:
+        arguments:
+          quote: false
+          values:
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
+  - name: alert_type
+    description: 'Typed reason for the alert: repeated or single identity alerts,
+      severe or high repayment underperformance, severe or high disbursement outliers,
+      NO_DATA or MONITOR.
+
+      '
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - REPEATED_HIGH_IDENTITY_ALERTS
+          - SEVERE_REPAYMENT_UNDERPERFORMANCE
+          - SEVERE_DISBURSEMENT_OUTLIER
+          - IDENTITY_ALERT
+          - HIGH_REPAYMENT_UNDERPERFORMANCE
+          - HIGH_DISBURSEMENT_OUTLIER
+          - NO_DATA
+          - MONITOR
+- name: cns_pdm_village_geographic_risk
+  description: 'Village-level operational agent coverage only. Gate 2 makes beneficiary
+    risk and financial measures unavailable at village grain.
+
+    '
+  config:
+    meta:
+      grain:
+      - region
+      - district
+      - parish
+      - village
+      audience:
+      - PDM Secretariat
+  columns:
+  - name: risk_grain_source
+    description: 'Explicitly states that only non-beneficiary operational agent coverage
+      is represented at village grain.
+
+      '
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - OPERATIONAL_AGENT_COVERAGE_ONLY
+- name: cns_pdm_executive_overview
+  description: 'Programme-wide leadership scorecard covering fund flow, repayment,
+    reconciliation, exceptions and geographic risk.
+
+    '
+  config:
+    meta:
+      grain:
+      - programme_id
+      - as_of_date
+      audience:
+      - PDM Executive
+      - Government leadership
+  columns:
+  - name: programme_id
+    data_tests:
+    - not_null
+    - unique
+  - name: as_of_date
+    description: 'Authoritative source as_of_date from the canonical loan observations
+      (max as_of_date). It is never inferred from the latest approval or payment activity
+      (PDM POC v1 decision 7).
+
+      '
+    data_tests:
+    - not_null
+  - name: principal_repayment_rate
+    description: 'Principal repaid divided by principal disbursed across the portfolio.
+      Principal-based per PDM POC v1 decisions 1-2.
+
+      '
+  - name: repayment_rate
+    description: 'DEPRECATED backward-compatibility alias retained only for the legacy
+      Superset repayment gauge: total contractual repaid divided by principal disbursed.
+      Do not use for new reporting; use principal_repayment_rate. Do not re-alias
+      this column to a new formula (PDM POC v1 decision 2).
+
+      '
+  - name: reporting_scope_status
+    description: 'Explicit qualification of whether the available reporting population
+      is nationally representative.
+
+      '
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - LIMITED_SAMPLE
+- name: cns_pdm_loan_intervention_dashboard
+  description: 'Loan-level operational dashboard distinguishing normal progression
+    from cases requiring intervention.
+
+    '
+  config:
+    meta:
+      grain:
+      - loan_id
+      audience:
+      - PDM Secretariat
+  columns:
+  - name: lifecycle_sk
+    data_tests:
+    - not_null
+    - unique
+  - name: intervention_status
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - PROGRESSING
+          - REQUIRES_INTERVENTION
+- name: cns_pdm_local_government_performance
+  description: 'Local-government presentation of parish portfolio performance and
+    peer-relative risk.
+
+    '
+  config:
+    meta:
+      grain:
+      - region
+      - district
+      - parish
+      audience:
+      - district leadership
+      - parish leadership
+  columns:
+  - name: parish_sk
+    data_tests:
+    - not_null
+    - unique
+  - name: local_performance_status
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - ON_TRACK
+          - AT_RISK
+          - CRITICAL
+- name: cns_pdm_financial_fund_flow
+  description: 'Loan-level approved-to-repayment fund flow with adjacent-stage variances
+    and explicit recovery observability.
+
+    '
+  config:
+    meta:
+      grain:
+      - loan_id
+      audience:
+      - Finance
+      - Treasury
+  columns:
+  - name: lifecycle_sk
+    data_tests:
+    - not_null
+    - unique
+- name: cns_pdm_fund_flow_funnel
+  description: 'Executive and operational fund-flow funnel dataset presenting approved,
+    instructed, settled, credited and cash-out stages in ordered long-form structure
+    for dashboard visualisation.
+
+    '
+  config:
+    meta:
+      grain:
+      - stage_order
+      - stage
+      audience:
+      - Finance
+      - Treasury
+      - payment operations
+      - PDM Secretariat
+      category: operations
+  columns:
+  - name: stage_order
+    data_tests:
+    - not_null
+    - unique
+  - name: stage
+    data_tests:
+    - not_null
+    - unique
+  - name: amount
+    data_tests:
+    - not_null
+- name: cns_pdm_end_to_end_traceability
+  description: 'Restricted audit drill-through joining loan, beneficiary, SACCO and
+    available payment identifiers across the lifecycle.
+
+    '
+  config:
+    meta:
+      grain:
+      - loan_id
+      audience:
+      - Audit
+      - Internal Controls
+      classification: restricted
+  columns:
+  - name: lifecycle_sk
+    data_tests:
+    - not_null
+    - unique
+- name: cns_pdm_fraud_risk_insights
+  description: 'Loan-level investigation indicators composed from identity, payment-pattern,
+    cash-out, lifecycle and geographic signals; not a fraud determination.
+
+    '
+  config:
+    meta:
+      grain:
+      - loan_id
+      audience:
+      - Fraud
+      - Financial Crime
+      - authorised investigators
+      classification: restricted
+  columns:
+  - name: risk_case_sk
+    data_tests:
+    - not_null
+    - unique
+  - name: risk_band
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - LOW
+          - MEDIUM
+          - HIGH
+- name: cns_pdm_payment_operations
+  description: 'Daily payment-channel operational performance, rejection, reconciliation
+    and entity-matching metrics.
+
+    '
+  config:
+    meta:
+      grain:
+      - payment_date_sk
+      - source_system
+      - currency
+      audience:
+      - payment operations
+- name: cns_pdm_sacco_portfolio
+  description: 'SACCO-level exposure, disbursement, outstanding balance and repayment
+    portfolio.
+
+    '
+  config:
+    meta:
+      grain:
+      - sacco_sk
+      audience:
+      - SACCO management
+      - PDM Secretariat
+  columns:
+  - name: sacco_sk
+    data_tests:
+    - not_null
+    - unique
+- name: cns_pdm_channel_agent_performance
+  description: 'Agent-level channel volumes, beneficiary concentration and behavioural
+    risk indicators.
+
+    '
+  config:
+    meta:
+      grain:
+      - agent_sk
+      audience:
+      - Agent management
+      - Channel management
+  columns:
+  - name: agent_sk
+    data_tests:
+    - not_null
+    - unique
+  - name: channel_risk_band
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - LOW
+          - MEDIUM
+          - HIGH
+- name: cns_pdm_social_impact
+  description: 'Special-group view of beneficiary reach, funding delivery and repayment
+    participation. household_count is intentionally unavailable after Gate 2 pending
+    an approved privacy-safe aggregate design.
+
+    '
+  config:
+    meta:
+      grain:
+      - special_group_sk
+      audience:
+      - Programme management
+      - Social impact
+  columns:
+  - name: special_group_sk
+    data_tests:
+    - not_null
+    - unique

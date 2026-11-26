@@ -7,6 +7,7 @@ SQLite provides a local durable idempotency ledger.
 import hashlib
 import json
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 
 
@@ -124,7 +125,7 @@ class ExecutionLedger:
             canonical, sort_keys=True, separators=(",", ":")
         )
 
-        with self._connect() as con:
+        with closing(self._connect()) as con, con:
             con.execute("BEGIN IMMEDIATE")
             row = con.execute(
                 "SELECT manifest_json, status FROM executions "

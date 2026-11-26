@@ -1,0 +1,44 @@
+{
+  "uri": "gs://dp-pdm-ai-dev-0b4da804-data/raw/v1/streaming/category=agent_network/source_group=agent/source_system=agent/year=2026/month=11/day=25/topic=agent.locations/partition=0/offset=0/record.avro",
+  "apply": false,
+  "proposed_custom_metadata": {
+    "data-domain": "payments",
+    "data-layer": "raw",
+    "storage-contract-version": "v1",
+    "processing-mode": "streaming",
+    "category": "agent_network",
+    "source-group": "agent",
+    "source-system": "agent",
+    "source-topic": "agent.locations",
+    "source-partition": "0",
+    "source-offset": "0"
+  },
+  "status": "DRY_RUN_PASS",
+  "before": {
+    "generation": 1795631378673810,
+    "metageneration": 1,
+    "crc32c": "X1VRVg==",
+    "md5_hash": "pVr3knRvIjP8QRpB2hCfGA==",
+    "size": 1240,
+    "content_type": "application/avro",
+    "cache_control": null,
+    "content_encoding": null,
+    "content_disposition": null,
+    "content_language": null,
+    "custom_time": null,
+    "metadata": null
+  },
+  "proposed_metadata": {
+    "data-domain": "payments",
+    "data-layer": "raw",
+    "storage-contract-version": "v1",
+    "processing-mode": "streaming",
+    "category": "agent_network",
+    "source-group": "agent",
+    "source-system": "agent",
+    "source-topic": "agent.locations",
+    "source-partition": "0",
+    "source-offset": "0"
+  },
+  "proposed_cache_control": "no-store"
+}

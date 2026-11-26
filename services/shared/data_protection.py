@@ -30,15 +30,20 @@ MISSING_KEY_VERSION_MESSAGE = (
 )
 
 
+
 def _required_token_key() -> str:
-    """Resolve the mandatory tokenisation key without ever echoing its value."""
-    try:
-        raw = require_secret("DP_TOKEN_KEY")
-    except SecretUnavailable as exc:
-        raise TokenisationKeyMissing(MISSING_KEY_MESSAGE) from exc
-    if not raw.strip():
-        raise TokenisationKeyMissing(MISSING_KEY_MESSAGE)
-    return raw
+    """Require the mounted key in mounted-files mode."""
+    import os
+
+    if os.environ.get("DP_SECRET_SOURCE") == "mounted-files":
+        try:
+            return require_mounted_secret("DP_TOKEN_KEY")
+        except Exception as exc:
+            raise TokenisationKeyMissing(
+                "Required mounted tokenisation key unavailable"
+            ) from exc
+
+    return require_secret("DP_TOKEN_KEY")
 
 
 def _active_key() -> tuple[bytes, str]:

@@ -120,19 +120,26 @@ class SourceQuarantinePersistenceError(RuntimeError):
     """Durable quarantine persistence could not be verified."""
 
 
-class S3SourceQuarantineStore:
-    """Restricted, idempotent S3-compatible quarantine adapter."""
+class GCSSourceQuarantineStore:
+    """Restricted, idempotent GCS quarantine adapter.
+
+    The caller supplies an authorised storage client.
+    No credentials are discovered by this adapter.
+    """
 
     PREFIX = "restricted/payment-source-quarantine/v1"
 
     def __init__(self, client, bucket: str):
         if not isinstance(bucket, str) or not bucket.strip():
             raise ValueError("quarantine bucket is required")
+
         self.client = client
         self.bucket = bucket
 
     def persist(self, metadata: dict) -> str:
         validate_failure_metadata(metadata)
+
+        from google.api_core.exceptions import PreconditionFailed
 
         key = (
             f"{self.PREFIX}/"
@@ -146,25 +153,28 @@ class S3SourceQuarantineStore:
         ).encode("utf-8")
 
         try:
-            self.client.put_object(
-                Bucket=self.bucket,
-                Key=key,
-                Body=payload,
-                ContentType="application/json",
-                IfNoneMatch="*",
-            )
+            blob = self.client.bucket(self.bucket).blob(key)
         except Exception as exc:
-            if not self._is_precondition_failed(exc):
-                raise SourceQuarantinePersistenceError(
-                    "conditional quarantine creation failed"
-                ) from exc
+            raise SourceQuarantinePersistenceError(
+                "quarantine object initialisation failed"
+            ) from exc
 
         try:
-            response = self.client.get_object(
-                Bucket=self.bucket,
-                Key=key,
+            blob.upload_from_string(
+                payload,
+                content_type="application/json",
+                if_generation_match=0,
             )
-            stored = self._read_body(response)
+        except PreconditionFailed:
+            # Existing object: verify identity and exact contents.
+            pass
+        except Exception as exc:
+            raise SourceQuarantinePersistenceError(
+                "conditional quarantine creation failed"
+            ) from exc
+
+        try:
+            stored = blob.download_as_bytes()
         except Exception as exc:
             raise SourceQuarantinePersistenceError(
                 "quarantine verification failed"
@@ -177,36 +187,9 @@ class S3SourceQuarantineStore:
 
         return key
 
-    @staticmethod
-    def _is_precondition_failed(exc):
-        response = getattr(exc, "response", None)
-        if not isinstance(response, dict):
-            return False
-
-        code = response.get("Error", {}).get("Code")
-        return code in {"412", "PreconditionFailed"}
-
-    @staticmethod
-    def _read_body(response):
-        try:
-            return response["Body"].read()
-        except Exception as exc:
-            raise SourceQuarantinePersistenceError(
-                "quarantine object read failed"
-            ) from exc
-
-    @staticmethod
-    def _is_missing(exc):
-        response = getattr(exc, "response", None)
-        if not isinstance(response, dict):
-            return False
-
-        code = response.get("Error", {}).get("Code")
-        return code in {"404", "NoSuchKey", "NotFound"}
-
 
 class QuarantineStore(Protocol):
-    """Durable adapter contract; implemented in a later increment."""
+    """Durable quarantine persistence adapter contract."""
 
     def persist(self, metadata: dict) -> str:
         """Persist idempotently and return a durable reference."""

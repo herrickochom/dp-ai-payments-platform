@@ -13,8 +13,9 @@ models:
     data_tests:
     - not_null
     - accepted_values:
-        values:
-        - agent.locations
+        arguments:
+          values:
+          - agent.locations
   - name: kafka_partition
     description: Source Kafka partition.
     data_tests:
@@ -44,8 +45,9 @@ models:
     data_tests:
     - not_null
     - accepted_values:
-        values:
-        - agent.profiles
+        arguments:
+          values:
+          - agent.profiles
   - name: kafka_partition
     description: Source Kafka partition.
     data_tests:
@@ -83,8 +85,9 @@ models:
     data_tests:
     - not_null
     - accepted_values:
-        values:
-        - agent.transactions
+        arguments:
+          values:
+          - agent.transactions
   - name: kafka_partition
     description: Source Kafka partition.
     data_tests:
@@ -162,8 +165,9 @@ models:
     description: Lifecycle event family discriminator.
     data_tests:
     - accepted_values:
-        values:
-        - TECHNICAL_PAYMENT_EVENT
+        arguments:
+          values:
+          - TECHNICAL_PAYMENT_EVENT
   - name: x_provider
     description: Mobile-money provider executing the credit.
   - name: x_provider_transaction_id
@@ -183,8 +187,9 @@ models:
     data_tests:
     - not_null
     - accepted_values:
-        values:
-        - cpo.psn.pain002
+        arguments:
+          values:
+          - cpo.psn.pain002
   - name: kafka_partition
     description: Source Kafka partition.
     data_tests:
@@ -214,8 +219,9 @@ models:
     description: Lifecycle event family discriminator.
     data_tests:
     - accepted_values:
-        values:
-        - TECHNICAL_PAYMENT_EVENT
+        arguments:
+          values:
+          - TECHNICAL_PAYMENT_EVENT
   - name: x_payment_route
     description: PDMIS-to-BOU-to-intermediary route.
   - name: x_route_decision
@@ -235,8 +241,9 @@ models:
     data_tests:
     - not_null
     - accepted_values:
-        values:
-        - icmn.vpm.pain001
+        arguments:
+          values:
+          - icmn.vpm.pain001
   - name: kafka_partition
     description: Source Kafka partition.
     data_tests:
@@ -266,8 +273,9 @@ models:
     data_tests:
     - not_null
     - accepted_values:
-        values:
-        - mobile.airtel.pacs002
+        arguments:
+          values:
+          - mobile.airtel.pacs002
   - name: kafka_partition
     description: Source Kafka partition.
     data_tests:
@@ -297,8 +305,9 @@ models:
     data_tests:
     - not_null
     - accepted_values:
-        values:
-        - mobile.airtel.pacs008
+        arguments:
+          values:
+          - mobile.airtel.pacs008
   - name: kafka_partition
     description: Source Kafka partition.
     data_tests:
@@ -328,8 +337,9 @@ models:
     data_tests:
     - not_null
     - accepted_values:
-        values:
-        - mobile.mtn.pacs002
+        arguments:
+          values:
+          - mobile.mtn.pacs002
   - name: kafka_partition
     description: Source Kafka partition.
     data_tests:
@@ -359,8 +369,9 @@ models:
     data_tests:
     - not_null
     - accepted_values:
-        values:
-        - mobile.mtn.pacs008
+        arguments:
+          values:
+          - mobile.mtn.pacs008
   - name: kafka_partition
     description: Source Kafka partition.
     data_tests:
@@ -390,8 +401,9 @@ models:
     data_tests:
     - not_null
     - accepted_values:
-        values:
-        - pdmis.beneficiaries
+        arguments:
+          values:
+          - pdmis.beneficiaries
   - name: kafka_partition
     description: Source Kafka partition.
     data_tests:
@@ -421,8 +433,9 @@ models:
     data_tests:
     - not_null
     - accepted_values:
-        values:
-        - pdmis.business_plans
+        arguments:
+          values:
+          - pdmis.business_plans
   - name: kafka_partition
     description: Source Kafka partition.
     data_tests:
@@ -452,8 +465,9 @@ models:
     data_tests:
     - not_null
     - accepted_values:
-        values:
-        - pdmis.households
+        arguments:
+          values:
+          - pdmis.households
   - name: kafka_partition
     description: Source Kafka partition.
     data_tests:
@@ -483,8 +497,9 @@ models:
     data_tests:
     - not_null
     - accepted_values:
-        values:
-        - pdmis.loans
+        arguments:
+          values:
+          - pdmis.loans
   - name: kafka_partition
     description: Source Kafka partition.
     data_tests:
@@ -514,8 +529,9 @@ models:
     data_tests:
     - not_null
     - accepted_values:
-        values:
-        - pdmis.saccos
+        arguments:
+          values:
+          - pdmis.saccos
   - name: kafka_partition
     description: Source Kafka partition.
     data_tests:
@@ -545,8 +561,9 @@ models:
     data_tests:
     - not_null
     - accepted_values:
-        values:
-        - pdmis.special_groups
+        arguments:
+          values:
+          - pdmis.special_groups
   - name: kafka_partition
     description: Source Kafka partition.
     data_tests:
@@ -576,8 +593,9 @@ models:
     data_tests:
     - not_null
     - accepted_values:
-        values:
-        - wendi.camt052
+        arguments:
+          values:
+          - wendi.camt052
   - name: kafka_partition
     description: Source Kafka partition.
     data_tests:
@@ -607,8 +625,9 @@ models:
     data_tests:
     - not_null
     - accepted_values:
-        values:
-        - wendi.camt053
+        arguments:
+          values:
+          - wendi.camt053
   - name: kafka_partition
     description: Source Kafka partition.
     data_tests:
@@ -638,8 +657,9 @@ models:
     data_tests:
     - not_null
     - accepted_values:
-        values:
-        - wendi.camt054
+        arguments:
+          values:
+          - wendi.camt054
   - name: kafka_partition
     description: Source Kafka partition.
     data_tests:
@@ -669,8 +689,9 @@ models:
     data_tests:
     - not_null
     - accepted_values:
-        values:
-        - wendi.pain001
+        arguments:
+          values:
+          - wendi.pain001
   - name: kafka_partition
     description: Source Kafka partition.
     data_tests:
@@ -700,8 +721,9 @@ models:
     data_tests:
     - not_null
     - accepted_values:
-        values:
-        - wendi.pain002
+        arguments:
+          values:
+          - wendi.pain002
   - name: kafka_partition
     description: Source Kafka partition.
     data_tests:
@@ -731,8 +753,9 @@ models:
     data_tests:
     - not_null
     - accepted_values:
-        values:
-        - wendi.transactions
+        arguments:
+          values:
+          - wendi.transactions
   - name: kafka_partition
     description: Source Kafka partition.
     data_tests:
@@ -765,8 +788,9 @@ models:
     description: Source Kafka topic.
     data_tests:
     - accepted_values:
-        values:
-        - pdmis.repayments
+        arguments:
+          values:
+          - pdmis.repayments
   - name: kafka_partition
     description: Source Kafka partition.
   - name: kafka_offset

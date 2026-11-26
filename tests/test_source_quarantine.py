@@ -116,34 +116,55 @@ class FakePreconditionFailed(Exception):
     response = {"Error": {"Code": "PreconditionFailed"}}
 
 
-class FakeS3Client:
+class FakeGCSClient:
     def __init__(self):
         self.objects = {}
         self.puts = 0
         self.fail_put = False
         self.corrupt_readback = False
+        self.fail_read = False
+        self.preconditions = []
 
-    def get_object(self, *, Bucket, Key):
-        if Key not in self.objects:
-            raise FakeMissingObject()
-        payload = self.objects[Key]
-        if self.corrupt_readback:
-            payload = b"corrupt"
+    def bucket(self, name):
+        assert name == "restricted"
+        return self
 
-        class Body:
-            def read(self):
-                return payload
+    def blob(self, key):
+        return FakeGCSBlob(self, key)
 
-        return {"Body": Body()}
 
-    def put_object(self, *, Bucket, Key, Body, ContentType, IfNoneMatch):
-        assert IfNoneMatch == "*"
-        if self.fail_put:
+class FakeGCSBlob:
+    def __init__(self, client, key):
+        self.client = client
+        self.key = key
+
+    def upload_from_string(
+        self, data, *, content_type, if_generation_match
+    ):
+        from google.api_core.exceptions import PreconditionFailed
+
+        assert content_type == "application/json"
+        assert if_generation_match == 0
+
+        self.client.preconditions.append(if_generation_match)
+
+        if self.client.fail_put:
             raise RuntimeError("simulated storage failure")
-        if Key in self.objects:
-            raise FakePreconditionFailed()
-        self.puts += 1
-        self.objects[Key] = Body
+
+        if self.key in self.client.objects:
+            raise PreconditionFailed("object already exists")
+
+        self.client.objects[self.key] = data
+        self.client.puts += 1
+
+    def download_as_bytes(self):
+        if self.client.fail_read:
+            raise RuntimeError("simulated read failure")
+
+        if self.client.corrupt_readback:
+            return b"corrupted readback"
+
+        return self.client.objects[self.key]
 
 
 def quarantine_metadata(tmp_path):
@@ -155,9 +176,9 @@ def quarantine_metadata(tmp_path):
     return module.failure_metadata(identity, "INVALID_JSON")
 
 
-def test_s3_quarantine_persists_and_verifies(tmp_path):
-    client = FakeS3Client()
-    store = module.S3SourceQuarantineStore(client, "restricted")
+def test_gcs_quarantine_persists_and_verifies(tmp_path):
+    client = FakeGCSClient()
+    store = module.GCSSourceQuarantineStore(client, "restricted")
 
     key = store.persist(quarantine_metadata(tmp_path))
 
@@ -166,9 +187,9 @@ def test_s3_quarantine_persists_and_verifies(tmp_path):
     assert key in client.objects
 
 
-def test_s3_quarantine_replay_is_idempotent(tmp_path):
-    client = FakeS3Client()
-    store = module.S3SourceQuarantineStore(client, "restricted")
+def test_gcs_quarantine_replay_is_idempotent(tmp_path):
+    client = FakeGCSClient()
+    store = module.GCSSourceQuarantineStore(client, "restricted")
     metadata = quarantine_metadata(tmp_path)
 
     first = store.persist(metadata)
@@ -178,9 +199,9 @@ def test_s3_quarantine_replay_is_idempotent(tmp_path):
     assert client.puts == 1
 
 
-def test_s3_quarantine_rejects_conflicting_existing_object(tmp_path):
-    client = FakeS3Client()
-    store = module.S3SourceQuarantineStore(client, "restricted")
+def test_gcs_quarantine_rejects_conflicting_existing_object(tmp_path):
+    client = FakeGCSClient()
+    store = module.GCSSourceQuarantineStore(client, "restricted")
     metadata = quarantine_metadata(tmp_path)
 
     key = store.persist(metadata)
@@ -190,27 +211,27 @@ def test_s3_quarantine_rejects_conflicting_existing_object(tmp_path):
         store.persist(metadata)
 
 
-def test_s3_quarantine_storage_failure_is_fail_closed(tmp_path):
-    client = FakeS3Client()
+def test_gcs_quarantine_storage_failure_is_fail_closed(tmp_path):
+    client = FakeGCSClient()
     client.fail_put = True
-    store = module.S3SourceQuarantineStore(client, "restricted")
+    store = module.GCSSourceQuarantineStore(client, "restricted")
 
     with pytest.raises(module.SourceQuarantinePersistenceError):
         store.persist(quarantine_metadata(tmp_path))
 
 
-def test_s3_quarantine_readback_mismatch_is_fail_closed(tmp_path):
-    client = FakeS3Client()
+def test_gcs_quarantine_readback_mismatch_is_fail_closed(tmp_path):
+    client = FakeGCSClient()
     client.corrupt_readback = True
-    store = module.S3SourceQuarantineStore(client, "restricted")
+    store = module.GCSSourceQuarantineStore(client, "restricted")
 
     with pytest.raises(module.SourceQuarantinePersistenceError):
         store.persist(quarantine_metadata(tmp_path))
 
 
-def test_s3_quarantine_rejects_unapproved_metadata(tmp_path):
-    client = FakeS3Client()
-    store = module.S3SourceQuarantineStore(client, "restricted")
+def test_gcs_quarantine_rejects_unapproved_metadata(tmp_path):
+    client = FakeGCSClient()
+    store = module.GCSSourceQuarantineStore(client, "restricted")
     metadata = quarantine_metadata(tmp_path)
     metadata["raw_content"] = "private"
 
@@ -220,18 +241,19 @@ def test_s3_quarantine_rejects_unapproved_metadata(tmp_path):
     assert client.puts == 0
 
 
-def test_s3_quarantine_conditional_creation_is_required(tmp_path):
-    client = FakeS3Client()
-    store = module.S3SourceQuarantineStore(client, "restricted")
+def test_gcs_quarantine_conditional_creation_is_required(tmp_path):
+    client = FakeGCSClient()
+    store = module.GCSSourceQuarantineStore(client, "restricted")
 
     store.persist(quarantine_metadata(tmp_path))
 
     assert client.puts == 1
+    assert client.preconditions == [0]
 
 
-def test_s3_quarantine_precondition_conflict_verifies_existing(tmp_path):
-    client = FakeS3Client()
-    store = module.S3SourceQuarantineStore(client, "restricted")
+def test_gcs_quarantine_precondition_conflict_verifies_existing(tmp_path):
+    client = FakeGCSClient()
+    store = module.GCSSourceQuarantineStore(client, "restricted")
     metadata = quarantine_metadata(tmp_path)
 
     first = store.persist(metadata)
@@ -239,3 +261,15 @@ def test_s3_quarantine_precondition_conflict_verifies_existing(tmp_path):
 
     assert first == second
     assert client.puts == 1
+
+
+def test_gcs_quarantine_read_failure_is_fail_closed(tmp_path):
+    client = FakeGCSClient()
+    client.fail_read = True
+
+    store = module.GCSSourceQuarantineStore(
+        client, "restricted"
+    )
+
+    with pytest.raises(module.SourceQuarantinePersistenceError):
+        store.persist(quarantine_metadata(tmp_path))

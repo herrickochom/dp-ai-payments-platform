@@ -3,9 +3,9 @@
 module "dataplex_payments" {
   source = "../../modules/dataplex_payments"
 
-  project_id       = "project-e48f194e-f44f-458d-b4f"
-  region           = "europe-west2"
-  bucket           = "dp-pdm-ai-platform-dev"
+  project_id       = var.project_id
+  region           = var.region
+  bucket           = var.canonical_data_bucket
   enable_discovery = false
   enable_scans     = false
 }

@@ -113,5 +113,5 @@ seeds:
 # ------------------------------------------------------------------------------
 
 vars:
-  s3_bucket: "{{ env_var('OBJECT_STORE_BUCKET', 'dp-pdm-ai-platform-dev') }}"
-  s3_path: "{{ env_var('RAW_ROOT', 'raw/v1') }}"
+  gcs_bucket: "{{ env_var('OBJECT_STORE_BUCKET') }}"
+  raw_root: "{{ env_var('RAW_ROOT', 'raw/v1') }}"

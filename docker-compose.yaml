@@ -259,7 +259,7 @@ services:
     command:
     - --address=0.0.0.0
     - --port=5432
-    - ${CLOUD_SQL_CONNECTION_NAME:-project-e48f194e-f44f-458d-b4f:europe-west2:pdm-dev-mdm-postgres}
+    - ${CLOUD_SQL_CONNECTION_NAME:-local-disabled}
     volumes:
     - ./certs:/certs:ro
     - ${HOME}/.config/gcloud/application_default_credentials.json:/adc.json:ro

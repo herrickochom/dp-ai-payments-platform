@@ -1,188 +1,189 @@
-# models/staging/_sources.yml
 version: 2
-
 sources:
-  - name: s3_raw
-    description: >
-      Raw payment events archived as Avro in MinIO/S3 bucket dp-ai-payment
-      by the payment-events consumer. The staging models project every leaf
-      field observed in the current source fixtures, including Wendi payment
-      messages and agent reference feeds.
+- name: gcs_raw
+  description: 'Raw payment events archived as immutable Avro in Google Cloud Storage
+    under raw/v1/ by the payment-events consumer. The staging models project every
+    leaf field observed in the current source fixtures, including Wendi payment messages
+    and agent reference feeds.
 
-    tables:
-      - name: icmn_vpm_pain001
-        description: >
-          ICMN VPM pain.001 business payment initiation.
-          Topic: icmn.vpm.pain001
-        meta:
-          fixture_path: data/icmn/vpm/pain001/*.xml
-          observed_leaf_fields: 24
+    '
+  tables:
+  - name: icmn_vpm_pain001
+    description: 'ICMN VPM pain.001 business payment initiation. Topic: icmn.vpm.pain001
 
-      - name: icmn_pmn_pain001
-        description: >
-          ICMN PMN standalone TechnicalPaymentEvent.
-          Topic name is retained for compatibility: icmn.pmn.pain001
-        meta:
-          fixture_path: data/icmn/pmn/pain001/*.xml
-          observed_leaf_fields: 112
+      '
+    config:
+      meta:
+        fixture_path: data/icmn/vpm/pain001/*.xml
+        observed_leaf_fields: 24
+  - name: icmn_pmn_pain001
+    description: 'ICMN PMN standalone TechnicalPaymentEvent. Topic name is retained
+      for compatibility: icmn.pmn.pain001
 
-      - name: cpo_psn_pain002
-        description: >
-          CPO PSN pain.002 business status reports.
-          Topic: cpo.psn.pain002
-        meta:
-          fixture_path: data/cpo/psn/pain002/*.xml
-          observed_leaf_fields: 15
+      '
+    config:
+      meta:
+        fixture_path: data/icmn/pmn/pain001/*.xml
+        observed_leaf_fields: 112
+  - name: cpo_psn_pain002
+    description: 'CPO PSN pain.002 business status reports. Topic: cpo.psn.pain002
 
-      - name: cpo_plm_pain002
-        description: >
-          CPO PLM standalone TechnicalPaymentEvent.
-          Topic name is retained for compatibility: cpo.plm.pain002
-        meta:
-          fixture_path: data/cpo/plm/pain002/*.xml
-          observed_leaf_fields: 113
+      '
+    config:
+      meta:
+        fixture_path: data/cpo/psn/pain002/*.xml
+        observed_leaf_fields: 15
+  - name: cpo_plm_pain002
+    description: 'CPO PLM standalone TechnicalPaymentEvent. Topic name is retained
+      for compatibility: cpo.plm.pain002
 
-      - name: wendi_camt053
-        description: >
-          Wendi CAMT.053 end-of-day bank statements.
-          Topic: wendi.camt053
-        meta:
-          fixture_path: data/wendi/camt053/*.xml
-          observed_leaf_fields: 37
+      '
+    config:
+      meta:
+        fixture_path: data/cpo/plm/pain002/*.xml
+        observed_leaf_fields: 113
+  - name: wendi_camt053
+    description: 'Wendi CAMT.053 end-of-day bank statements. Topic: wendi.camt053
 
-      - name: wendi_camt052
-        description: >
-          Wendi CAMT.052 intraday account reports.
-          Topic: wendi.camt052
-        meta:
-          fixture_path: data/wendi/camt052/*.xml
-          observed_leaf_fields: 9
+      '
+    config:
+      meta:
+        fixture_path: data/wendi/camt053/*.xml
+        observed_leaf_fields: 37
+  - name: wendi_camt052
+    description: 'Wendi CAMT.052 intraday account reports. Topic: wendi.camt052
 
-      - name: wendi_camt054
-        description: >
-          Wendi CAMT.054 transaction notifications.
-          Topic: wendi.camt054
-        meta:
-          fixture_path: data/wendi/camt054/*.xml
-          observed_leaf_fields: 17
+      '
+    config:
+      meta:
+        fixture_path: data/wendi/camt052/*.xml
+        observed_leaf_fields: 9
+  - name: wendi_camt054
+    description: 'Wendi CAMT.054 transaction notifications. Topic: wendi.camt054
 
-      - name: wendi_transactions
-        description: >
-          Wendi wallet transaction events.
-          Topic: wendi.transactions
-        meta:
-          fixture_path: data/wendi/wendi_transactions.json
-          observed_leaf_fields: 25
+      '
+    config:
+      meta:
+        fixture_path: data/wendi/camt054/*.xml
+        observed_leaf_fields: 17
+  - name: wendi_transactions
+    description: 'Wendi wallet transaction events. Topic: wendi.transactions
 
-      - name: mobile_mtn_pacs008
-        description: >
-          MTN PACS.008 interbank settlements.
-          Topic: mobile.mtn.pacs008
-        meta:
-          fixture_path: data/mobile_networks/mtn/pacs008/*.xml
-          observed_leaf_fields: 85
+      '
+    config:
+      meta:
+        fixture_path: data/wendi/wendi_transactions.json
+        observed_leaf_fields: 25
+  - name: mobile_mtn_pacs008
+    description: 'MTN PACS.008 interbank settlements. Topic: mobile.mtn.pacs008
 
-      - name: mobile_airtel_pacs008
-        description: >
-          Airtel PACS.008 interbank settlements.
-          Topic: mobile.airtel.pacs008
-        meta:
-          fixture_path: data/mobile_networks/airtel/pacs008/*.xml
-          observed_leaf_fields: 85
+      '
+    config:
+      meta:
+        fixture_path: data/mobile_networks/mtn/pacs008/*.xml
+        observed_leaf_fields: 85
+  - name: mobile_airtel_pacs008
+    description: 'Airtel PACS.008 interbank settlements. Topic: mobile.airtel.pacs008
 
-      - name: mobile_mtn_pacs002
-        description: >
-          MTN PACS.002 payment status reports.
-          Topic: mobile.mtn.pacs002
-        meta:
-          fixture_path: data/mobile_networks/mtn/pacs002/*.xml
-          observed_leaf_fields: 32
+      '
+    config:
+      meta:
+        fixture_path: data/mobile_networks/airtel/pacs008/*.xml
+        observed_leaf_fields: 85
+  - name: mobile_mtn_pacs002
+    description: 'MTN PACS.002 payment status reports. Topic: mobile.mtn.pacs002
 
-      - name: mobile_airtel_pacs002
-        description: >
-          Airtel PACS.002 payment status reports.
-          Topic: mobile.airtel.pacs002
-        meta:
-          fixture_path: data/mobile_networks/airtel/pacs002/*.xml
-          observed_leaf_fields: 32
+      '
+    config:
+      meta:
+        fixture_path: data/mobile_networks/mtn/pacs002/*.xml
+        observed_leaf_fields: 32
+  - name: mobile_airtel_pacs002
+    description: 'Airtel PACS.002 payment status reports. Topic: mobile.airtel.pacs002
 
-      - name: agent_transactions
-        description: >
-          Agent network cash-out transactions.
-          Topic: agent.transactions
-        meta:
-          fixture_paths:
-            - data/agent_network/agent_transactions/*.xml
-            - data/agent_network/agent_transactions.json
-          observed_xml_leaf_fields: 17
-          observed_json_leaf_fields: 17
+      '
+    config:
+      meta:
+        fixture_path: data/mobile_networks/airtel/pacs002/*.xml
+        observed_leaf_fields: 32
+  - name: agent_transactions
+    description: 'Agent network cash-out transactions. Topic: agent.transactions
 
-      - name: agent_profiles
-        description: Agent registration and operating profile records.
-        meta:
-          topic: agent.profiles
-          fixture_path: data/agent_network/agent_profiles.json
-          observed_leaf_fields: 16
-
-      - name: agent_locations
-        description: Agent geographic location records.
-        meta:
-          topic: agent.locations
-          fixture_path: data/agent_network/agent_locations.json
-          observed_leaf_fields: 6
-
-      - name: wendi_pain001
-        description: Wendi pain.001 payment initiation messages.
-        meta:
-          topic: wendi.pain001
-          fixture_path: data/wendi/pain001/*.xml
-          observed_leaf_fields: 88
-
-      - name: wendi_pain002
-        description: Wendi pain.002 payment status messages.
-        meta:
-          topic: wendi.pain002
-          fixture_path: data/wendi/pain002/*.xml
-          observed_leaf_fields: 66
-
-      - name: pdmis_beneficiaries
-        description: PDMIS beneficiary registration and identity records.
-        meta:
-          topic: pdmis.beneficiaries
-          fixture_path: data/pdmis/beneficiaries.json
-          observed_leaf_fields: 22
-
-      - name: pdmis_business_plans
-        description: PDMIS beneficiary business plans and approval records.
-        meta:
-          topic: pdmis.business_plans
-          fixture_path: data/pdmis/business_plans.json
-          observed_leaf_fields: 19
-
-      - name: pdmis_households
-        description: PDMIS household composition and economic profile records.
-        meta:
-          topic: pdmis.households
-          fixture_path: data/pdmis/households.json
-          observed_leaf_fields: 17
-
-      - name: pdmis_loans
-        description: PDMIS loan application, approval, disbursement and repayment records.
-        meta:
-          topic: pdmis.loans
-          fixture_path: data/pdmis/loans.json
-          observed_leaf_fields: 22
-
-      - name: pdmis_saccos
-        description: PDMIS SACCO registration, account and aggregate funding records.
-        meta:
-          topic: pdmis.saccos
-          fixture_path: data/pdmis/saccos.json
-          observed_leaf_fields: 22
-
-      - name: pdmis_special_groups
-        description: PDMIS special-group reference data and allocation quotas.
-        meta:
-          topic: pdmis.special_groups
-          fixture_path: data/pdmis/special_groups.json
-          observed_leaf_fields: 4
+      '
+    config:
+      meta:
+        fixture_paths:
+        - data/agent_network/agent_transactions/*.xml
+        - data/agent_network/agent_transactions.json
+        observed_xml_leaf_fields: 17
+        observed_json_leaf_fields: 17
+  - name: agent_profiles
+    description: Agent registration and operating profile records.
+    config:
+      meta:
+        topic: agent.profiles
+        fixture_path: data/agent_network/agent_profiles.json
+        observed_leaf_fields: 16
+  - name: agent_locations
+    description: Agent geographic location records.
+    config:
+      meta:
+        topic: agent.locations
+        fixture_path: data/agent_network/agent_locations.json
+        observed_leaf_fields: 6
+  - name: wendi_pain001
+    description: Wendi pain.001 payment initiation messages.
+    config:
+      meta:
+        topic: wendi.pain001
+        fixture_path: data/wendi/pain001/*.xml
+        observed_leaf_fields: 88
+  - name: wendi_pain002
+    description: Wendi pain.002 payment status messages.
+    config:
+      meta:
+        topic: wendi.pain002
+        fixture_path: data/wendi/pain002/*.xml
+        observed_leaf_fields: 66
+  - name: pdmis_beneficiaries
+    description: PDMIS beneficiary registration and identity records.
+    config:
+      meta:
+        topic: pdmis.beneficiaries
+        fixture_path: data/pdmis/beneficiaries.json
+        observed_leaf_fields: 22
+  - name: pdmis_business_plans
+    description: PDMIS beneficiary business plans and approval records.
+    config:
+      meta:
+        topic: pdmis.business_plans
+        fixture_path: data/pdmis/business_plans.json
+        observed_leaf_fields: 19
+  - name: pdmis_households
+    description: PDMIS household composition and economic profile records.
+    config:
+      meta:
+        topic: pdmis.households
+        fixture_path: data/pdmis/households.json
+        observed_leaf_fields: 17
+  - name: pdmis_loans
+    description: PDMIS loan application, approval, disbursement and repayment records.
+    config:
+      meta:
+        topic: pdmis.loans
+        fixture_path: data/pdmis/loans.json
+        observed_leaf_fields: 22
+  - name: pdmis_saccos
+    description: PDMIS SACCO registration, account and aggregate funding records.
+    config:
+      meta:
+        topic: pdmis.saccos
+        fixture_path: data/pdmis/saccos.json
+        observed_leaf_fields: 22
+  - name: pdmis_special_groups
+    description: PDMIS special-group reference data and allocation quotas.
+    config:
+      meta:
+        topic: pdmis.special_groups
+        fixture_path: data/pdmis/special_groups.json
+        observed_leaf_fields: 4

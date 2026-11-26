@@ -8,7 +8,7 @@ from bounded_watchdog import assess_job,inspect_jobs,cancel_expired,WatchdogBloc
 from launch_policy import evaluate_launch
 from submission_guard import SubmissionIdentity
 NOW=datetime(2026,10,29,12,tzinfo=timezone.utc)
-P='project-e48f194e-f44f-458d-b4f'; R='europe-west2'
+P='dp-pdm-ai-dev-0b4da804'; R='europe-west2'
 def job(**kw):
     return SimpleNamespace(id=kw.get('id','job-1'),name=kw.get('name','pdm-pilot-123'),
       labels=kw.get('labels',{'pdm_pilot':'stage10'}),

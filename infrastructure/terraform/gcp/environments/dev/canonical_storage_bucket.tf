@@ -2,7 +2,7 @@
 module "canonical_storage_bucket" {
   source              = "../../modules/governed_gcs_bucket"
   project_id          = var.project_id
-  bucket_name         = "dp-pdm-ai-platform-dev"
+  bucket_name         = var.canonical_data_bucket
   location            = var.region
   storage_class       = "STANDARD"
   versioning_enabled  = false

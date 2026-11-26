@@ -41,14 +41,22 @@ def _require_version(version: str | None) -> str:
     return str(version).strip()
 
 
-def canonical_token_for(beneficiary_id: str, *, version: str) -> str:
-    """Canonical token: HMAC-SHA256 over the fixed Gate 2 input domain."""
+
+def canonical_token_for(
+    beneficiary_id: str, *, version: str
+) -> str:
+    """Generate a token without permitting version relabelling."""
     token = keyed_token(beneficiary_id, context=TOKEN_CONTEXT)
-    if token is None:
-        raise ValueError("beneficiary_id must be a non-empty canonical identifier")
-    _require_version(version)
-    digest = token.split(":", 1)[1]
-    return f"{_require_version(version)}:{digest}"
+
+    actual_version, separator, digest = token.partition(":")
+
+    if not separator or not digest:
+        raise ValueError("Invalid token format")
+
+    if actual_version != version:
+        raise ValueError("Tokenisation key version mismatch")
+
+    return token
 
 
 def build_token_links(

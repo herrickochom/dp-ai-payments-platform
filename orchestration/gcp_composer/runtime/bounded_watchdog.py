@@ -13,7 +13,7 @@ class WatchdogBlocked(RuntimeError): pass
 
 @dataclass(frozen=True)
 class WatchdogScope:
-    project: str = 'project-e48f194e-f44f-458d-b4f'
+    project: str = 'dp-pdm-ai-dev-0b4da804'
     region: str = 'europe-west2'
     max_minutes: int = 30
     label_key: str = 'pdm_pilot'

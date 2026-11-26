@@ -5,7 +5,7 @@ variable "enable_biglake_iceberg_catalog" {
 }
 variable "project_id" {
   type    = string
-  default = "project-e48f194e-f44f-458d-b4f"
+  default = "dp-pdm-ai-dev-0b4da804"
 }
 variable "catalog_name" {
   type    = string

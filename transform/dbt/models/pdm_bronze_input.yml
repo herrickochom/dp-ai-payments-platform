@@ -1,0 +1,14 @@
+version: 2
+sources:
+- name: pdm_bronze_input
+  database: dp-pdm-ai-dev-0b4da804
+  schema: bronze
+  tables:
+  - name: payment_events
+    identifier: br_pdm_payment_events
+- name: pdm_ai_input
+  database: '{{ env_var(''DBT_GCP_PROJECT'') }}'
+  schema: staging
+  tables:
+  - name: default_risk_current_predictions
+    description: Proposed relation; no prediction dataset provisioned or verified

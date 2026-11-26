@@ -10,7 +10,7 @@ from decimal import Decimal,InvalidOperation
 from cost_guard import CostGateBlocked
 
 def validate_observation(*, project, currency, spend, observed_at, source,
-                         expected_project='project-e48f194e-f44f-458d-b4f',
+                         expected_project='dp-pdm-ai-dev-0b4da804',
                          now=None):
     now=now or datetime.now(timezone.utc)
     if project!=expected_project or currency!='GBP':

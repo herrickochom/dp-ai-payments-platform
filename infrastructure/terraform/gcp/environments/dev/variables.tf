@@ -39,3 +39,17 @@ variable "mdm_dev_public_ip" {
   type        = string
   default     = ""
 }
+
+
+variable "canonical_data_bucket" {
+  description = "Explicitly approved canonical GCS data bucket."
+  type        = string
+
+  validation {
+    condition = (
+      length(trimspace(var.canonical_data_bucket)) > 0 &&
+      var.canonical_data_bucket != "dp-pdm-ai-platform-dev"
+    )
+    error_message = "Provide a new approved canonical GCS bucket."
+  }
+}

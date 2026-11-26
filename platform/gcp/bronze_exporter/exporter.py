@@ -5,10 +5,11 @@ import datetime as dt
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import sys
 
-PROJECT = 'project-e48f194e-f44f-458d-b4f'
+PROJECT = 'dp-pdm-ai-dev-0b4da804'
 TABLE = f'{PROJECT}.bronze.payments_raw_v1'
 FIELDS = ('event_id message_id event_timestamp source_system message_type event_family '
           'payload_amount payload_currency payload_debtor payload_creditor payload_status '
@@ -68,11 +69,16 @@ def main(argv=None):
         return 0
     if args.output is None:
         p.error('--live requires --output')
+    output_text = str(args.output)
+
+    if "://" in output_text or re.match(
+        r"^[A-Za-z][A-Za-z0-9+.-]*:/", output_text
+    ):
+        p.error("remote output prohibited")
+
     dest = args.output.expanduser().resolve()
     if dest.exists() or dest.is_symlink():
         p.error('output directory exists; overwrite prohibited')
-    if str(dest).startswith(('gs://', 's3://')):
-        p.error('remote output prohibited')
     if os.environ.get('BRONZE_EXPORT_ALLOW_BQ_READ') != 'YES':
         p.error('live mode also requires BRONZE_EXPORT_ALLOW_BQ_READ=YES')
     from google.cloud import bigquery

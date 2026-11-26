@@ -91,25 +91,52 @@ def _business_key(topic, payload):
     p = payload or {}
     for f in ("loan_id","payment_id","transaction_id","beneficiary_id","agent_id",
               "sacco_id","household_id","business_plan_id","special_group","group_code",
-              "MsgId","EndToEndId","TxId"):
+              "EndToEndId","OrgnlEndToEndId","TxId","OrgnlTxId","MsgId"):
         v = p.get(f)
         if isinstance(v, str) and v.strip(): return v
     return ""
 
 def _extract_iso(xml):
-    try: root = ET.fromstring(xml)
-    except ET.ParseError: return {}
+    root = ET.fromstring(xml)
+
     def t(tag):
-        el = root.find(f".//{tag}")
-        return el.text.strip() if el is not None and el.text else None
-    grp = root.find(".//GrpHdr")
-    instd = root.find(".//InstdAmt"); intr = root.find(".//IntrBkSttlmAmt")
-    ccy = (instd or intr).attrib.get("Ccy") if (instd is not None or intr is not None) else None
-    return {
-        "MsgId": grp.findtext("MsgId") if grp is not None else None,
-        "EndToEndId": t("EndToEndId"), "TxId": t("TxId"), "UETR": t("UETR"),
-        "InstdAmt": t("InstdAmt") or t("IntrBkSttlmAmt"), "Ccy": ccy,
+        el = root.find(f".//{{*}}{tag}")
+        return el.text.strip() if (
+            el is not None and el.text
+        ) else None
+
+    grp = root.find(".//{*}GrpHdr")
+    amt = root.find(".//{*}InstdAmt")
+
+    if amt is None:
+        amt = root.find(".//{*}IntrBkSttlmAmt")
+
+    result = {
+        "MsgId": (
+            grp.findtext("{*}MsgId")
+            if grp is not None else None
+        ),
+        "InstdAmt": (
+            amt.text.strip()
+            if amt is not None and amt.text else None
+        ),
+        "Ccy": (
+            amt.attrib.get("Ccy")
+            if amt is not None else None
+        ),
     }
+
+    for tag in (
+        "InstrId", "EndToEndId", "TxId", "UETR",
+        "OrgnlMsgId", "OrgnlMsgNmId",
+        "OrgnlInstrId", "OrgnlEndToEndId",
+        "OrgnlTxId", "OrgnlUETR",
+        "TxSts", "GrpSts", "StsId", "StsReqId",
+        "OrgnlCtrlSum", "CreDtTm"
+    ):
+        result[tag] = t(tag)
+
+    return result
 
 TECH_XML_MAP = {
     "EventId":"event_id","MessageId":"message_id","EventFamily":"event_family",
@@ -266,7 +293,15 @@ def build_record(*, topic, source_path, record_index, payload, raw_bytes,
     amount = None
     for c in ("amount","InstdAmt","amount_disbursed","amount_approved","total"):
         v = extracted.get(c)
-        if isinstance(v, (int, float)): amount = float(v); break
+        if isinstance(v, (int, float, str)) and not isinstance(v, bool):
+            from decimal import Decimal
+            parsed = Decimal(str(v))
+            if not parsed.is_finite():
+                raise ValueError("Non-finite payment amount")
+            amount = float(parsed)
+            if not __import__("math").isfinite(amount):
+                raise ValueError("Amount exceeds Avro numeric range")
+            break
     currency = extracted.get("currency") or extracted.get("Ccy") or ("UGX" if amount is not None else None)
     bk = _business_key(topic, extracted)
     msg_id = extracted.get("MsgId") or bk or ev_id
@@ -434,9 +469,18 @@ def run_live(args) -> int:
             write_evidence(ev_path, ev); return 1
         published += 1
         ev.topics.setdefault(topic, {"attempted": 0})["attempted"] += 1
-        if published % 50 == 0: write_evidence(ev_path, ev)
+        if published % 50 == 0:
+            ev.message_ids = list(prior_records) + list(delivered)
+            ev.published = len(delivered)
+            write_evidence(ev_path, ev)
 
-    prod.flush(timeout=60)
+    outstanding = prod.flush(timeout=60)
+    if outstanding:
+        ev.status = "STOPPED_WITH_UNCONFIRMED_DELIVERIES"
+        ev.message_ids = list(prior_records) + list(delivered)
+        ev.published = len(delivered)
+        write_evidence(ev_path, ev)
+        return 1
     ev.published = len(delivered)
     ev.message_ids = list(delivered)
     # CANONICAL-MERGE-V3: append prior message_ids not seen this run

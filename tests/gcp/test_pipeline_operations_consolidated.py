@@ -6,7 +6,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'orchestration/gcp_com
 from submission_guard import SubmissionIdentity
 from safe_submission import LaunchConfig,SubmissionBlocked,build_launch_request,submit_one_attempt
 from output_attestation import attest,AttestationBlocked
-I=SubmissionIdentity('a'*64,1,'project-e48f194e-f44f-458d-b4f','europe-west2','pdm-test-123','b'*64)
+I=SubmissionIdentity('a'*64,1,'dp-pdm-ai-dev-0b4da804','europe-west2','pdm-test-123','b'*64)
 C=LaunchConfig('gs://approved/template.json',{'input':'gs://approved/input'},'pdm@proj.iam.gserviceaccount.com','regions/europe-west2/subnetworks/private','gs://approved/tmp')
 CLAIM={'state':'PREPARED','execution_id':I.execution_id,'attempt_number':1,'digest':I.spec_digest,'job_name':I.job_name,'project':I.project,'region':I.region,'token':'lease'}
 COST=dict(estimated_launch_gbp=1.0,reported_spend_gbp=0.0,spend_observed_at=datetime.now(timezone.utc),approval=True)

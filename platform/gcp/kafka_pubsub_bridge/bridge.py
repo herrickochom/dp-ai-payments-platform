@@ -109,7 +109,7 @@ def main() -> None:
     p.add_argument('--schema-registry-url', default=os.getenv('KP_SCHEMA_REGISTRY_URL', ''))
     p.add_argument('--source-topic', default=os.getenv('KP_SOURCE_TOPIC', ''))
     p.add_argument('--source-system', default=os.getenv('KP_SOURCE_SYSTEM', ''))
-    p.add_argument('--project', default='project-e48f194e-f44f-458d-b4f')
+    p.add_argument('--project', default='dp-pdm-ai-dev-0b4da804')
     p.add_argument('--topic', default='pdm-payments-poc-v1')
     p.add_argument('--group', default='gcp-kp001d-poc-v1')
     p.add_argument('--max-messages', type=int, default=1)

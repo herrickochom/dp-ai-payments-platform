@@ -39,7 +39,16 @@ from lxml import etree
 from pathlib import Path
 
 _SYNTHETIC_LEDGER = None
-_XSD_DIR = Path(__file__).resolve().parents[2] / 'contracts/iso20022/xsd'
+_XSD_DIR = next(
+    (
+        parent / "contracts/iso20022/xsd"
+        for parent in Path(__file__).resolve().parents
+        if (parent / "contracts/iso20022/xsd").is_dir()
+    ),
+    None,
+)
+if _XSD_DIR is None:
+    raise FileNotFoundError("ISO 20022 XSD directory unavailable")
 
 def _synthetic_camt(context, *, kind):
     if _SYNTHETIC_LEDGER is None:

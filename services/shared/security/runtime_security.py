@@ -142,32 +142,32 @@ def validate_object_store_security(
 
     endpoint = (endpoint or "").strip()
     if not endpoint:
-        raise ValueError("S3 endpoint is required")
+        raise ValueError("Object storage endpoint is required")
 
     parsed = urlparse(endpoint)
 
     if parsed.scheme not in {"http", "https"}:
-        raise ValueError("S3 endpoint must use http or https")
+        raise ValueError("Object storage endpoint must use http or https")
 
     if not parsed.hostname:
-        raise ValueError("S3 endpoint must include a valid hostname")
+        raise ValueError("Object storage endpoint must include a valid hostname")
 
     ssl_enabled = _parse_security_bool(
         use_ssl,
-        name="S3_USE_SSL",
+        name="OBJECT_STORE_USE_SSL",
     )
 
     endpoint_uses_tls = parsed.scheme == "https"
 
     if endpoint_uses_tls != ssl_enabled:
         raise ValueError(
-            "S3 endpoint scheme and S3_USE_SSL must agree"
+            "Object storage endpoint scheme and OBJECT_STORE_USE_SSL must agree"
         )
 
     if is_production_security_mode():
         if not endpoint_uses_tls or not ssl_enabled:
             raise ValueError(
-                "S3 must use HTTPS when DP_SECURITY_MODE=production"
+                "Object storage must use HTTPS when DP_SECURITY_MODE=production"
             )
 
     normalized_ca = (ca_bundle or "").strip() or None

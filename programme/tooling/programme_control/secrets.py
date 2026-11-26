@@ -132,7 +132,7 @@ def _is_safe_metadata(value: str) -> bool:
         return True
     if re.fullmatch(r"[A-Z][A-Z0-9_]{2,}", normalised):
         return True
-    if normalised.startswith(("s3://", "s3a://", "arn:", "file:", "./", "/")):
+    if normalised.startswith(("file:", "./", "/")):
         return True
     if "<" in normalised and ">" in normalised:
         return True

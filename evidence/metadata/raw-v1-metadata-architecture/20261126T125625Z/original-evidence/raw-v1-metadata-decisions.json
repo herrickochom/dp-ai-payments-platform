@@ -1,0 +1,46 @@
+{
+  "approval_date": "2026-11-26",
+  "approval_authority": "User",
+  "decisions": [
+    {
+      "id": "ADR-MD-001",
+      "decision": "Lossless Raw source preservation",
+      "status": "APPROVED"
+    },
+    {
+      "id": "ADR-MD-002",
+      "decision": "Reuse existing topic and routing contracts",
+      "status": "APPROVED"
+    },
+    {
+      "id": "ADR-MD-003",
+      "decision": "Enterprise business domain taxonomy",
+      "status": "APPROVED"
+    },
+    {
+      "id": "ADR-MD-004",
+      "decision": "Eleven mandatory custom metadata attributes",
+      "status": "APPROVED"
+    },
+    {
+      "id": "ADR-MD-005",
+      "decision": "Metadata creation and verification before acknowledgement",
+      "status": "APPROVED"
+    },
+    {
+      "id": "ADR-MD-006",
+      "decision": "Preserve existing source admission controls",
+      "status": "APPROVED"
+    },
+    {
+      "id": "ADR-MD-007",
+      "decision": "Defer Dataplex deployment to a separate governance workstream before Stage 8 closure",
+      "status": "APPROVED"
+    },
+    {
+      "id": "ADR-MD-008",
+      "decision": "Retain Kafka-to-Raw reconciliation as an operational acceptance requirement",
+      "status": "APPROVED"
+    }
+  ]
+}

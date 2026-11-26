@@ -22,7 +22,7 @@ with DAG(dag_id='pdm_gcp_cost_watchdog',
         from ledger_watchdog import inspect_ledger
         project=os.environ['PDM_GCP_PROJECT_ID']
         region=os.environ['PDM_GCP_REGION']
-        if project!='project-e48f194e-f44f-458d-b4f' or region!='europe-west2':
+        if project!='dp-pdm-ai-dev-0b4da804' or region!='europe-west2':
             raise RuntimeError('unexpected project or region')
         conn_id=os.environ.get('PDM_POSTGRES_CONN_ID','pdm_postgres')
         def connect():

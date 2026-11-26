@@ -1,0 +1,48 @@
+{
+  "capability": "raw_metadata_implementation_and_validation",
+  "timestamp_utc": "20261126T125806Z",
+  "repository_commit": "ca084191b8db148cdd0346e9f6c54081da43d76f",
+  "files": {
+    "existing_metadata_utility": {
+      "path": "scripts/metadata/raw_v1_metadata.py",
+      "sha256": "8b6c5bd75cd862b4ce3b304ccd4a04a5ebd9e08fadb446eee5f94f1ea33a3cda",
+      "size_bytes": 5186
+    },
+    "approved_metadata_contract": {
+      "path": "contracts/metadata/raw-v1/raw-v1-metadata-contract.json",
+      "sha256": "4ab88237b1efb3e4240ab860ac48b87fc14199abcbe690a508adeb1f09b34556",
+      "size_bytes": 4658
+    },
+    "topic_registry": {
+      "path": "platform/kafka/topics.yaml",
+      "sha256": "1ccd93670e102e24273854572d54017c7080120bfaa420b3b85a0b75c3843cae",
+      "size_bytes": 9940
+    },
+    "routing_contract": {
+      "path": "platform/gcp/kafka_pubsub_bridge/topic_routes_v1.json",
+      "sha256": "90ecdfa2d364f0bbee79c86800a03a549359796e0d18b16df732668086fad83a",
+      "size_bytes": 8451
+    },
+    "source_envelope": {
+      "path": "platform/gcp/kafka_pubsub_bridge/source_envelope_v1.py",
+      "sha256": "d32280da26ccf70987e8ff18eb01751df808fec6f1ef366ea228ec05a5d98ded",
+      "size_bytes": 3687
+    },
+    "governance_policy": {
+      "path": "platform/config/governance/governance_policies.yaml",
+      "sha256": "3f3c825ea703871d1651c1c9a8ea843ef1a434604d63c1d866325bc52fb1a57b",
+      "size_bytes": 2431
+    }
+  },
+  "dependencies": {
+    "google-cloud-storage": "3.17.2",
+    "google-cloud-pubsub": "NOT_INSTALLED",
+    "google-crc32c": "1.9.0",
+    "fastavro": "1.13.1",
+    "confluent-kafka": "2.16.2",
+    "PyYAML": "6.0.4",
+    "pytest": "9.1.1"
+  },
+  "cloud_operations": "NONE",
+  "existing_metadata_tests": []
+}

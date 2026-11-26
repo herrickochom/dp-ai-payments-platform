@@ -3,7 +3,7 @@ set -uo pipefail
 cd ~/projects/dp-ai-payments-platform-gcp
 source .venv-dbt/bin/activate
 
-export PROJECT=project-e48f194e-f44f-458d-b4f
+export PROJECT=dp-pdm-ai-dev-0b4da804
 export REGION=europe-west2
 export DBT_GCP_DIR=transform/dbt_gcp
 export ORIG_DBT_DIR=../dp-ai-payments-platform/transform/dbt
@@ -168,7 +168,7 @@ w "$DBT_GCP_DIR/models/staging/sources.yml" \
 
 sources:
   - name: bronze
-    database: 'project-e48f194e-f44f-458d-b4f'
+    database: 'dp-pdm-ai-dev-0b4da804'
     schema: bronze
     description: Raw-to-Bronze ingestion layer
     tables:
@@ -432,7 +432,7 @@ d["pdm_gcp"] = {
     "target": "dev",
     "outputs": {"dev": {
         "type": "bigquery", "method": "oauth",
-        "project": "project-e48f194e-f44f-458d-b4f",
+        "project": "dp-pdm-ai-dev-0b4da804",
         "dataset": "bronze", "location": "europe-west2",
         "threads": 2, "priority": "batch"
     }}

@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from orchestration.gcp_composer.runtime.cost_guard import CostGateBlocked, require_approval
 
 NOW=datetime(2026,10,29,12,tzinfo=timezone.utc)
-BASE=dict(project='project-e48f194e-f44f-458d-b4f',region='europe-west2',workers=1,
+BASE=dict(project='dp-pdm-ai-dev-0b4da804',region='europe-west2',workers=1,
           runtime_minutes=20,estimated_launch_gbp=1.0,reported_spend_gbp=2.0,
           spend_observed_at=NOW,approval=True,now=NOW)
 class CostGateTests(unittest.TestCase):

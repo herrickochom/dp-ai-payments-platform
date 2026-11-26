@@ -45,7 +45,7 @@ if not HAVE_FASTAVRO:
 DEFAULTS = {
     "repo_root": Path.cwd(),
     "bucket": "dp-pdm-ai-platform-dev",
-    "project": "project-e48f194e-f44f-458d-b4f",
+    "project": "dp-pdm-ai-dev-0b4da804",
     "bootstrap": os.environ.get("KAFKA_BOOTSTRAP", "localhost:9094"),
     "group": "source-target-full-audit-read-only",
     "topics_yaml": "platform/kafka/topics.yaml",

@@ -35,14 +35,10 @@ Known limits (this is a skeleton, not the state machine):
     flink_j1_terminal_state_events_total is registered but nothing
     increments it yet. Every accepted event currently overwrites state.
 
-Operational dependency:
-  - Checkpoints and savepoints are written to S3 via the Flink S3 filesystem
-    plugin. The flink-checkpoint MinIO identity is scoped to
-    flink/checkpoints/* and flink/savepoints/*, so flink-conf.yaml must set
-    fs.s3a.committer.name=directory. The default magic committer performs a
-    parent-prefix bulk delete that the policy denies, which stalls the task's
-    checkpoint listener and drags the Kafka consumer down with it. See
-    platform/flink/conf/flink-conf.yaml for the full note.
+Operational status:
+  Historical lifecycle reference implementation.
+  Legacy deployment configuration is archived.
+  Not an authorised GCP runtime entrypoint.
 """
 
 from __future__ import annotations
@@ -641,6 +637,10 @@ def extract_transition_payload(json_str: str):
 # Job wiring
 # ------------------------------------------------------------------------------
 def main() -> None:
+    raise RuntimeError("Legacy runtime execution is disabled")
+
+
+def _legacy_reference_main() -> None:
     env = StreamExecutionEnvironment.get_execution_environment()
     env.set_parallelism(PARALLELISM)
     env.enable_checkpointing(CHECKPOINT_INTERVAL_MS, CheckpointingMode.EXACTLY_ONCE)

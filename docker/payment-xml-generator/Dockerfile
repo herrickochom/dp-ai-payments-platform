@@ -22,3 +22,4 @@ ENV DATA_ROOT=/app/data
 
 ENTRYPOINT ["python3", "/app/generate_all_sources.py"]
 CMD ["--count", "1000", "--start-date", "2024-01-01", "--as-of-date", "2026-09-08", "--clean"]
+COPY contracts/iso20022/xsd/ /app/contracts/iso20022/xsd/

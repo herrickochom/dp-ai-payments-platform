@@ -17,7 +17,7 @@ from confluent_kafka import Consumer, TopicPartition
 from google.cloud import storage
 
 ROOT = Path.cwd()
-PROJECT = 'project-e48f194e-f44f-458d-b4f'
+PROJECT = 'dp-pdm-ai-dev-0b4da804'
 BUCKET = 'dp-pdm-ai-platform-dev'
 SOURCES = [
  'data/mdm/geography_master_sources.json',

@@ -1,0 +1,19 @@
+{
+  "project": "dp-pdm-ai-dev-0b4da804",
+  "project_number": "324778038883",
+  "bucket": "dp-pdm-ai-dev-0b4da804-data",
+  "bucket_owner": "324778038883",
+  "candidates": [
+    "raw/v1/streaming/category=agent_network/source_group=agent/source_system=agent/year=2026/month=11/day=25/topic=agent.locations/partition=0/offset=0/record.avro",
+    "raw/v1/streaming/category=agent_network/source_group=agent/source_system=agent/year=2026/month=11/day=25/topic=agent.locations/partition=0/offset=1/record.avro",
+    "raw/v1/streaming/category=agent_network/source_group=agent/source_system=agent/year=2026/month=11/day=25/topic=agent.locations/partition=0/offset=2/record.avro",
+    "raw/v1/streaming/category=agent_network/source_group=agent/source_system=agent/year=2026/month=11/day=25/topic=agent.locations/partition=0/offset=3/record.avro",
+    "raw/v1/streaming/category=agent_network/source_group=agent/source_system=agent/year=2026/month=11/day=25/topic=agent.locations/partition=0/offset=4/record.avro",
+    "raw/v1/streaming/category=agent_network/source_group=agent/source_system=agent/year=2026/month=11/day=25/topic=agent.locations/partition=0/offset=5/record.avro",
+    "raw/v1/streaming/category=agent_network/source_group=agent/source_system=agent/year=2026/month=11/day=25/topic=agent.locations/partition=0/offset=6/record.avro",
+    "raw/v1/streaming/category=agent_network/source_group=agent/source_system=agent/year=2026/month=11/day=25/topic=agent.locations/partition=0/offset=7/record.avro",
+    "raw/v1/streaming/category=agent_network/source_group=agent/source_system=agent/year=2026/month=11/day=25/topic=agent.locations/partition=0/offset=8/record.avro",
+    "raw/v1/streaming/category=agent_network/source_group=agent/source_system=agent/year=2026/month=11/day=25/topic=agent.locations/partition=0/offset=9/record.avro"
+  ],
+  "selected_object": "raw/v1/streaming/category=agent_network/source_group=agent/source_system=agent/year=2026/month=11/day=25/topic=agent.locations/partition=0/offset=0/record.avro"
+}

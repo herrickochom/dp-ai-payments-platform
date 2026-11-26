@@ -1,0 +1,62 @@
+{
+  "uri": "gs://dp-pdm-ai-dev-0b4da804-data/raw/v1/streaming/category=agent_network/source_group=agent/source_system=agent/year=2026/month=11/day=25/topic=agent.locations/partition=0/offset=0/record.avro",
+  "before": {
+    "generation": 1795631378673810,
+    "metageneration": 1,
+    "crc32c": "X1VRVg==",
+    "md5_hash": "pVr3knRvIjP8QRpB2hCfGA==",
+    "size": 1240,
+    "content_type": "application/avro",
+    "cache_control": null,
+    "content_encoding": null,
+    "content_disposition": null,
+    "content_language": null,
+    "custom_time": null,
+    "metadata": null
+  },
+  "after": {
+    "generation": 1795631378673810,
+    "metageneration": 2,
+    "crc32c": "X1VRVg==",
+    "md5_hash": "pVr3knRvIjP8QRpB2hCfGA==",
+    "size": 1240,
+    "content_type": "application/avro",
+    "cache_control": "no-store",
+    "content_encoding": null,
+    "content_disposition": null,
+    "content_language": null,
+    "custom_time": null,
+    "metadata": {
+      "category": "agent_network",
+      "storage-contract-version": "v1",
+      "data-layer": "raw",
+      "processing-mode": "streaming",
+      "data-domain": "payments",
+      "source-partition": "0",
+      "source-offset": "0",
+      "source-system": "agent",
+      "source-topic": "agent.locations",
+      "source-group": "agent"
+    }
+  },
+  "sha256_before": "4272c6a1a70263d221bbcd3936deb8e637e55f863b066b562b7000d0cb3b61c8",
+  "sha256_after": "4272c6a1a70263d221bbcd3936deb8e637e55f863b066b562b7000d0cb3b61c8",
+  "checks": {
+    "generation": true,
+    "crc32c": true,
+    "md5_hash": true,
+    "size": true,
+    "content_type": true,
+    "content_encoding": true,
+    "content_disposition": true,
+    "content_language": true,
+    "custom_time": true,
+    "sha256_unchanged": true,
+    "payload_bytes_unchanged": true,
+    "custom_metadata": true,
+    "cache_control": true,
+    "metageneration": true
+  },
+  "status": "PASS",
+  "idempotency": "PASS"
+}

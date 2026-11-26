@@ -6,7 +6,7 @@ ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'orchestration/gcp_composer/runtime'))
 from provider_enforcement import CancellationTarget, verify_target, cancel_exact_expired, WatchdogBlocked
 NOW=datetime(2026,10,29,12,tzinfo=timezone.utc)
-T=CancellationTarget('project-e48f194e-f44f-458d-b4f','europe-west2','job-123','pdm-pilot-123','a'*64,'b'*64)
+T=CancellationTarget('dp-pdm-ai-dev-0b4da804','europe-west2','job-123','pdm-pilot-123','a'*64,'b'*64)
 def job(**kw):
     return SimpleNamespace(id=kw.get('id',T.job_id),name=kw.get('name',T.job_name),
       labels=kw.get('labels',{'pdm_pilot':'stage10','pdm_execution':T.execution_id,'pdm_spec':T.spec_digest}),
