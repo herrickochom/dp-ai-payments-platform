@@ -1,0 +1,17 @@
+{
+  "capability": "raw_metadata_implementation_and_validation",
+  "approval_authority": "user",
+  "approval_status": "APPROVED",
+  "approval_scope": "OFFLINE_FUNCTIONAL_IMPLEMENTATION",
+  "approval_date": "2026-11-26",
+  "recorded_at_utc": "2026-11-26T13:58:14.208717+00:00",
+  "metadata_contract_version": "1.0.0",
+  "tests_passed": 177,
+  "implementation_manifest": "evidence/metadata/raw-v1-implementation-verification/20261126T134553847709Z/raw-v1-implementation-validation.json",
+  "implementation_manifest_sha256": "53e6eea1044cfa1ee6ae9c46a18754e4a7729b4095b436c3517344b1d4991892",
+  "checkpoint_regression_sha256": "3ebd3ed5de61a8d6f3294e805d0c2eaa89df0812f34a48a971804755d7309b3e",
+  "git_commit_and_push_authorised": true,
+  "formal_closure": "PENDING_RECOVERY_VERIFICATION",
+  "live_gcs_validation": "NOT_VERIFIED",
+  "cloud_operations": "NONE"
+}

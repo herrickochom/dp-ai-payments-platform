@@ -1,0 +1,39 @@
+{
+  "capability": "governed_source_admission_and_conditional_creation",
+  "status": "OFFLINE_REGRESSION_PASS",
+  "tests_passed": 157,
+  "previous_regression_baseline": 105,
+  "source_topics": 38,
+  "metadata_eligible_topics": 27,
+  "denied_topics": 11,
+  "approved_mdm_topics": [
+    "mdm.agent.golden",
+    "mdm.geography.golden",
+    "mdm.sacco.golden"
+  ],
+  "source_admission_authority": "platform/gcp/kafka_pubsub_bridge/source_delivery_v1.py",
+  "source_admission_sha256": "fd60213936ed098c81f88afcd60250e01f27a50cf66f9225970b4aa7f74e6973",
+  "conditional_creation": "OFFLINE_VALIDATED",
+  "subscriber_integration": "PENDING",
+  "lease_and_acknowledgement_integration": "PENDING",
+  "live_gcs_validation": "NOT_EXECUTED",
+  "cloud_operations": "NONE",
+  "files": [
+    {
+      "path": "scripts/metadata/raw_v1_metadata_contract.py",
+      "sha256": "ce64c51c9897db919990790ac0b9fa0677a4286ed09e94a46de81c2c6eda7aa2"
+    },
+    {
+      "path": "scripts/metadata/raw_v1_avro_decoder.py",
+      "sha256": "e1e68f0eba1c1d25812ab4f4131796b78dac47be30b4c8ad9e149880eccb9e80"
+    },
+    {
+      "path": "scripts/metadata/raw_v1_conditional_creation.py",
+      "sha256": "ff74b3af4a624a9f6a19ff2ad1180db14096d63293cdc8b29184890b33d2dfd7"
+    },
+    {
+      "path": "tests/metadata/test_raw_v1_governed_creation.py",
+      "sha256": "78867d9bfe0b545d12cca9ad757236d6111cbced10e3007cbdb84f584961d22d"
+    }
+  ]
+}

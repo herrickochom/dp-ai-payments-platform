@@ -1,0 +1,13 @@
+usage: raw_v1_metadata.py [-h] --project PROJECT --bucket BUCKET
+                          --object OBJECT [--apply]
+                          [--evidence-dir EVIDENCE_DIR]
+
+Governed single-object Raw v1 metadata utility.
+
+options:
+  -h, --help            show this help message and exit
+  --project PROJECT
+  --bucket BUCKET
+  --object OBJECT
+  --apply
+  --evidence-dir EVIDENCE_DIR

@@ -1,0 +1,22 @@
+{
+  "capability": "raw_metadata_utility_integration",
+  "status": "OFFLINE_REGRESSION_PASS",
+  "repository_baseline": "6d122f7e95c24b9d70a5fc903ea9f7a1ae59ecdf",
+  "tests_passed": 105,
+  "cli_options_preserved": true,
+  "dry_run_default": true,
+  "contract_only_admission": "PENDING",
+  "conditional_object_creation": "PENDING",
+  "live_gcs_validation": "NOT_EXECUTED",
+  "cloud_operations": "NONE",
+  "files": [
+    {
+      "path": "scripts/metadata/raw_v1_metadata.py",
+      "sha256": "0593468bdf598b57dde022d3ec2f772d852098e80d3429bde41323fff1667981"
+    },
+    {
+      "path": "tests/metadata/test_raw_v1_metadata_utility.py",
+      "sha256": "4a58332247508ebbc5ebd5fb275c31373a85122ba3ae25bef8d6032f6fb1197d"
+    }
+  ]
+}

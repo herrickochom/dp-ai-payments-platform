@@ -1,0 +1,100 @@
+{
+  "legacy_raw_envelope": {
+    "source": "platform/gcp/pubsub_raw_ingestion/raw_v1.py",
+    "source_sha256": "daed6d2d7877a01d5024c6f480785a8c0994028a74b0092d7055bdb5d467e87d",
+    "schema": {
+      "type": "record",
+      "name": "RawSourceEvent",
+      "namespace": "com.dp.ai.raw",
+      "fields": [
+        {
+          "name": "kafka_topic",
+          "type": "string"
+        },
+        {
+          "name": "kafka_partition",
+          "type": "int"
+        },
+        {
+          "name": "kafka_offset",
+          "type": "long"
+        },
+        {
+          "name": "kafka_timestamp_ms",
+          "type": "long"
+        },
+        {
+          "name": "schema_registry_id",
+          "type": "int"
+        },
+        {
+          "name": "payload_sha256",
+          "type": "string"
+        },
+        {
+          "name": "payload_wire",
+          "type": "bytes"
+        }
+      ]
+    }
+  },
+  "canonical_raw_envelope": {
+    "source": "platform/gcp/kafka_pubsub_bridge/source_runtime_adapter_v1.py",
+    "source_sha256": "b533cb492e0a32a9856664d25635bab83dd48b1022d846a5f745d22479a00258",
+    "schema": {
+      "type": "record",
+      "name": "CanonicalSourceEnvelopeV1",
+      "namespace": "dp.payments.raw",
+      "fields": [
+        {
+          "name": "kafka_topic",
+          "type": "string"
+        },
+        {
+          "name": "kafka_partition",
+          "type": "long"
+        },
+        {
+          "name": "kafka_offset",
+          "type": "long"
+        },
+        {
+          "name": "kafka_timestamp_ms",
+          "type": "long"
+        },
+        {
+          "name": "payload_bytes",
+          "type": "bytes"
+        },
+        {
+          "name": "payload_sha256",
+          "type": "string"
+        },
+        {
+          "name": "schema_registry_id",
+          "type": [
+            "null",
+            "long"
+          ],
+          "default": null
+        },
+        {
+          "name": "payload_format",
+          "type": "string"
+        },
+        {
+          "name": "processing_mode",
+          "type": "string"
+        },
+        {
+          "name": "value_is_null",
+          "type": "boolean"
+        },
+        {
+          "name": "is_tombstone",
+          "type": "boolean"
+        }
+      ]
+    }
+  }
+}

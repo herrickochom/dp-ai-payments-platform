@@ -1,0 +1,10 @@
+{
+  "capability": "raw_metadata_utility_integration",
+  "formal_closure": "CLOSED",
+  "closure_scope": "OFFLINE_FUNCTIONAL_ACCEPTANCE",
+  "approval_authority": "user",
+  "approval_date": "2026-11-26",
+  "tests_passed": 105,
+  "live_gcs_validation": "NOT_VERIFIED",
+  "cloud_operations": "NONE"
+}

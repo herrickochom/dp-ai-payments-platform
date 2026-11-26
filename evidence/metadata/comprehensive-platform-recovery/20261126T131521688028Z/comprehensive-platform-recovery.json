@@ -1,0 +1,15 @@
+{
+  "capability": "comprehensive_platform_recovery",
+  "timestamp_utc": "20261126T131521688028Z",
+  "working_branch": "snapshot/pre-v2-cleanup",
+  "verified_commit": "6d122f7e95c24b9d70a5fc903ea9f7a1ae59ecdf",
+  "remote_commit": "6d122f7e95c24b9d70a5fc903ea9f7a1ae59ecdf",
+  "metadata_recovery_commit": "54bd36185adb67c639f379dbdcd5b53be6617f14",
+  "files_committed": 202,
+  "remote_push": "PASS",
+  "remote_sha_verification": "PASS",
+  "working_tree_at_verification": "CLEAN",
+  "independent_full_restore": "PENDING",
+  "independent_environment_restore": "PENDING",
+  "cloud_operations": "NONE"
+}

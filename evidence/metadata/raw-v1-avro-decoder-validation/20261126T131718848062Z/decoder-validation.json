@@ -1,0 +1,24 @@
+{
+  "capability": "lossless_raw_avro_decoder",
+  "status": "OFFLINE_REGRESSION_PASS",
+  "repository_baseline": "6d122f7e95c24b9d70a5fc903ea9f7a1ae59ecdf",
+  "timestamp_utc": "20261126T131718848062Z",
+  "supported_envelopes": [
+    "RawSourceEvent",
+    "CanonicalSourceEnvelopeV1"
+  ],
+  "files": [
+    {
+      "path": "scripts/metadata/raw_v1_avro_decoder.py",
+      "sha256": "c57cb7ba3cb81726a7653d3e3b93a5fec33b32ff03ce8bc995b28e13d57a7017"
+    },
+    {
+      "path": "tests/metadata/test_raw_v1_avro_decoder.py",
+      "sha256": "45a52014030703096af5138ea67193774c4ede5222cd6e4bf239ea9af75a05d7"
+    }
+  ],
+  "legacy_source_admission": "PRESERVED",
+  "contract_only_admission": "PENDING_INTEGRATION",
+  "operational_cli_integration": "PENDING",
+  "cloud_operations": "NONE"
+}

@@ -1,0 +1,11 @@
+{
+  "capability": "lossless_raw_avro_decoder",
+  "formal_closure": "CLOSED",
+  "closure_scope": "OFFLINE_FUNCTIONAL_ACCEPTANCE",
+  "approval_authority": "user",
+  "approval_date": "2026-11-26",
+  "regression_tests_passed": 88,
+  "live_cloud_validation": "NOT_VERIFIED",
+  "contract_only_admission": "PENDING",
+  "cloud_operations": "NONE"
+}
